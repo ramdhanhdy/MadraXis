@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="#f8f8f8" />
+  <circle cx="256" cy="256" r="220" fill="#005e7a" />
+  <circle cx="256" cy="256" r="200" fill="#ffffff" />
+  
+  <!-- Decorative Border -->
+  <path d="M256 56C145.54 56 56 145.54 56 256C56 366.46 145.54 456 256 456C366.46 456 456 366.46 456 256C456 145.54 366.46 56 256 56ZM256 436C156.57 436 76 355.43 76 256C76 156.57 156.57 76 256 76C355.43 76 436 156.57 436 256C436 355.43 355.43 436 256 436Z" fill="#005e7a" />
+  
+  <!-- Ornamental Pattern -->
+  <path d="M256 96C167.63 96 96 167.63 96 256C96 344.37 167.63 416 256 416C344.37 416 416 344.37 416 256C416 167.63 344.37 96 256 96ZM256 396C178.65 396 116 333.35 116 256C116 178.65 178.65 116 256 116C333.35 116 396 178.65 396 256C396 333.35 333.35 396 256 396Z" fill="#f0c75e" />
+  
+  <!-- Open Book Symbol -->
+  <path d="M256 180C256 180 200 160 160 180V280C200 260 256 280 256 280V180Z" fill="#005e7a" />
+  <path d="M256 180C256 180 312 160 352 180V280C312 260 256 280 256 280V180Z" fill="#005e7a" />
+  <path d="M256 190C256 190 210 174 180 190V270C210 254 256 270 256 270V190Z" fill="#ffffff" />
+  <path d="M256 190C256 190 302 174 332 190V270C302 254 256 270 256 270V190Z" fill="#ffffff" />
+  
+  <!-- Calligraphic Text "Zaid Bin Tsabit" -->
+  <path d="M140 320C140 320 160 310 180 320C200 330 220 320 220 320" stroke="#005e7a" stroke-width="8" stroke-linecap="round" />
+  <path d="M230 300C230 300 240 330 250 340C260 350 270 330 270 330" stroke="#005e7a" stroke-width="8" stroke-linecap="round" />
+  <path d="M280 320C280 320 290 310 300 320C310 330 320 320 330 320" stroke="#005e7a" stroke-width="8" stroke-linecap="round" />
+  <path d="M340 310C340 310 350 330 360 320" stroke="#005e7a" stroke-width="8" stroke-linecap="round" />
+  
+  <!-- Decorative Pen -->
+  <path d="M170 230L190 210L210 230L190 250L170 230Z" fill="#f0c75e" />
+  <path d="M190 250L210 230L330 350L310 370L190 250Z" fill="#f0c75e" />
+  <path d="M310 370L330 350L340 360L320 380L310 370Z" fill="#f0c75e" />
+  
+  <!-- Arabic-inspired Decorative Element -->
+  <path d="M256 130C256 130 240 140 256 150C272 140 256 130 256 130Z" fill="#f0c75e" />
+  <path d="M216 140C216 140 200 150 216 160C232 150 216 140 216 140Z" fill="#f0c75e" />
+  <path d="M296 140C296 140 280 150 296 160C312 150 296 140 296 140Z" fill="#f0c75e" />
+</svg> 
