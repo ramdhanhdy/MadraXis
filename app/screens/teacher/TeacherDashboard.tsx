@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,8 +36,14 @@ export default function TeacherDashboard() {
     { id: 1, title: 'Siswa menyelesaikan hafalan baru', time: '10 menit yang lalu', read: false },
     { id: 2, title: 'Pengumuman rapat guru', time: '1 jam yang lalu', read: false },
     { id: 3, title: 'Jadwal ujian hafalan diperbarui', time: '2 jam yang lalu', read: true },
+    { id: 4, title: 'Laporan insiden baru diterima', time: '30 menit yang lalu', read: false },
   ]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState<{
+    title: string;
+    content: React.ReactNode;
+  }>({ title: '', content: null });
 
   const handleNotificationToggle = () => {
     setShowNotifications(!showNotifications);
@@ -73,6 +79,231 @@ export default function TeacherDashboard() {
   const handleBackToRoleSelection = () => {
     router.push('/screens/RoleSelectionScreen');
   };
+
+  const openModal = (title: string, content: React.ReactNode) => {
+    setModalContent({ title, content });
+    setModalVisible(true);
+  };
+
+  // Boarding Information Modal Content
+  const renderBoardingInfo = () => (
+    <View>
+      <View style={styles.modalSection}>
+        <Text style={styles.modalSectionTitle}>Informasi Asrama</Text>
+        <Text style={styles.modalDescription}>
+          Berikut adalah informasi asrama yang Anda kelola sebagai pembimbing asrama.
+        </Text>
+      </View>
+
+      <View style={styles.modalSection}>
+        <Text style={styles.modalSectionTitle}>Gedung & Kamar</Text>
+        <View style={styles.infoCard}>
+          <Text style={styles.infoLabel}>Gedung:</Text>
+          <Text style={styles.infoValue}>Al-Farabi</Text>
+        </View>
+        <View style={styles.infoCard}>
+          <Text style={styles.infoLabel}>Jumlah Kamar:</Text>
+          <Text style={styles.infoValue}>10</Text>
+        </View>
+        <View style={styles.infoCard}>
+          <Text style={styles.infoLabel}>Jumlah Siswa:</Text>
+          <Text style={styles.infoValue}>40</Text>
+        </View>
+      </View>
+
+      <View style={styles.modalSection}>
+        <Text style={styles.modalSectionTitle}>Jadwal Piket Asrama</Text>
+        <View style={styles.scheduleCard}>
+          <View style={styles.scheduleHeader}>
+            <View style={styles.scheduleDay}>
+              <Text style={styles.scheduleDayText}>Sen</Text>
+            </View>
+            <View style={styles.scheduleInfo}>
+              <Text style={styles.scheduleTime}>19:00 - 22:00</Text>
+              <Text style={styles.scheduleActivity}>Pengawasan Belajar Malam</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.scheduleCard}>
+          <View style={styles.scheduleHeader}>
+            <View style={styles.scheduleDay}>
+              <Text style={styles.scheduleDayText}>Rab</Text>
+            </View>
+            <View style={styles.scheduleInfo}>
+              <Text style={styles.scheduleTime}>19:00 - 22:00</Text>
+              <Text style={styles.scheduleActivity}>Pengawasan Belajar Malam</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.modalSection}>
+        <Text style={styles.modalSectionTitle}>Aktivitas Asrama Hari Ini</Text>
+        <View style={styles.activityCard}>
+          <Text style={styles.activityTime}>05:00 - 05:30</Text>
+          <Text style={styles.activityName}>Sholat Subuh Berjamaah</Text>
+        </View>
+        <View style={styles.activityCard}>
+          <Text style={styles.activityTime}>19:30 - 21:00</Text>
+          <Text style={styles.activityName}>Belajar Mandiri</Text>
+        </View>
+        <View style={styles.activityCard}>
+          <Text style={styles.activityTime}>21:00 - 21:30</Text>
+          <Text style={styles.activityName}>Persiapan Tidur</Text>
+        </View>
+      </View>
+
+      <TouchableOpacity style={styles.actionButton}>
+        <Text style={styles.actionButtonText}>Kelola Asrama</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  // Communication Modal Content
+  const renderCommunication = () => (
+    <View>
+      <View style={styles.modalSection}>
+        <Text style={styles.modalSectionTitle}>Komunikasi</Text>
+        <Text style={styles.modalDescription}>
+          Komunikasi dengan siswa dan orang tua untuk memantau perkembangan siswa.
+        </Text>
+      </View>
+
+      <View style={styles.modalSection}>
+        <Text style={styles.modalSectionTitle}>Siswa</Text>
+        <TouchableOpacity style={styles.contactCard}>
+          <View style={[styles.contactIcon, { backgroundColor: '#005e7a' }]}>
+            <Ionicons name="person" size={24} color="#ffffff" />
+          </View>
+          <View style={styles.contactInfo}>
+            <Text style={styles.contactName}>Ahmad Fauzi</Text>
+            <Text style={styles.contactRole}>Kelas 8A</Text>
+          </View>
+          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.contactCard}>
+          <View style={[styles.contactIcon, { backgroundColor: '#005e7a' }]}>
+            <Ionicons name="person" size={24} color="#ffffff" />
+          </View>
+          <View style={styles.contactInfo}>
+            <Text style={styles.contactName}>Muhammad Rizki</Text>
+            <Text style={styles.contactRole}>Kelas 8A</Text>
+          </View>
+          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.modalSection}>
+        <Text style={styles.modalSectionTitle}>Orang Tua</Text>
+        <TouchableOpacity style={styles.contactCard}>
+          <View style={[styles.contactIcon, { backgroundColor: '#f0c75e' }]}>
+            <Ionicons name="people" size={24} color="#ffffff" />
+          </View>
+          <View style={styles.contactInfo}>
+            <Text style={styles.contactName}>Orang Tua Ahmad</Text>
+            <Text style={styles.contactRole}>Wali dari Ahmad Fauzi</Text>
+          </View>
+          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.contactCard}>
+          <View style={[styles.contactIcon, { backgroundColor: '#f0c75e' }]}>
+            <Ionicons name="people" size={24} color="#ffffff" />
+          </View>
+          <View style={styles.contactInfo}>
+            <Text style={styles.contactName}>Orang Tua Rizki</Text>
+            <Text style={styles.contactRole}>Wali dari Muhammad Rizki</Text>
+          </View>
+          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.modalSection}>
+        <Text style={styles.modalSectionTitle}>Pesan Terbaru</Text>
+        <View style={styles.messageCard}>
+          <View style={styles.messageHeader}>
+            <Text style={styles.messageSender}>Orang Tua Ahmad</Text>
+            <Text style={styles.messageTime}>10:30</Text>
+          </View>
+          <Text style={styles.messageContent}>Bagaimana perkembangan hafalan Ahmad minggu ini?</Text>
+        </View>
+        <View style={styles.messageCard}>
+          <View style={styles.messageHeader}>
+            <Text style={styles.messageSender}>Muhammad Rizki</Text>
+            <Text style={styles.messageTime}>Kemarin</Text>
+          </View>
+          <Text style={styles.messageContent}>Ustadz, saya ingin konsultasi tentang hafalan saya</Text>
+        </View>
+      </View>
+
+      <TouchableOpacity style={styles.actionButton}>
+        <Text style={styles.actionButtonText}>Buka Semua Pesan</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  // Incident Report Modal Content
+  const renderIncidentReport = () => (
+    <View>
+      <View style={styles.modalSection}>
+        <Text style={styles.modalSectionTitle}>Manajemen Insiden</Text>
+        <Text style={styles.modalDescription}>
+          Kelola laporan insiden dari siswa dan orang tua terkait keamanan, kesejahteraan, atau perilaku yang mengkhawatirkan.
+        </Text>
+      </View>
+
+      <View style={styles.modalSection}>
+        <Text style={styles.modalSectionTitle}>Laporan Baru</Text>
+        <View style={styles.incidentCard}>
+          <View style={styles.incidentHeader}>
+            <View style={[styles.incidentTypeTag, { backgroundColor: '#e74c3c' }]}>
+              <Text style={styles.incidentTypeText}>Bullying</Text>
+            </View>
+            <Text style={styles.incidentTime}>30 menit yang lalu</Text>
+          </View>
+          <Text style={styles.incidentTitle}>Laporan dari Orang Tua Ahmad</Text>
+          <Text style={styles.incidentDescription}>
+            Ahmad melaporkan bahwa dia merasa tidak nyaman dengan perilaku beberapa teman di asrama...
+          </Text>
+          <View style={styles.incidentActions}>
+            <TouchableOpacity style={styles.incidentActionButton}>
+              <Text style={styles.incidentActionText}>Lihat Detail</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.incidentActionButton, styles.incidentActionButtonSecondary]}>
+              <Text style={styles.incidentActionTextSecondary}>Tandai Ditangani</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.modalSection}>
+        <Text style={styles.modalSectionTitle}>Dalam Proses</Text>
+        <View style={styles.incidentCard}>
+          <View style={styles.incidentHeader}>
+            <View style={[styles.incidentTypeTag, { backgroundColor: '#f39c12' }]}>
+              <Text style={styles.incidentTypeText}>Kesehatan</Text>
+            </View>
+            <Text style={styles.incidentTime}>2 hari yang lalu</Text>
+          </View>
+          <Text style={styles.incidentTitle}>Laporan dari Muhammad Rizki</Text>
+          <Text style={styles.incidentDescription}>
+            Rizki melaporkan bahwa dia mengalami sakit kepala yang berkelanjutan...
+          </Text>
+          <View style={styles.incidentActions}>
+            <TouchableOpacity style={styles.incidentActionButton}>
+              <Text style={styles.incidentActionText}>Lihat Detail</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.incidentActionButton, styles.incidentActionButtonSecondary]}>
+              <Text style={styles.incidentActionTextSecondary}>Perbarui Status</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
+      <TouchableOpacity style={styles.actionButton}>
+        <Text style={styles.actionButtonText}>Lihat Semua Laporan</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -186,12 +417,58 @@ export default function TeacherDashboard() {
             
             <TouchableOpacity 
               style={styles.quickActionButton}
-              onPress={handleNavigateToReports}
+              onPress={() => openModal('Komunikasi', renderCommunication())}
             >
               <View style={[styles.quickActionIcon, { backgroundColor: '#9c27b0' }]}>
+                <Ionicons name="chatbubbles" size={24} color="#ffffff" />
+              </View>
+              <Text style={styles.quickActionText}>Komunikasi</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        
+        {/* Additional Features */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Fitur Tambahan</Text>
+          <View style={styles.quickActionsContainer}>
+            <TouchableOpacity 
+              style={styles.quickActionButton}
+              onPress={() => openModal('Informasi Asrama', renderBoardingInfo())}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: '#3498db' }]}>
+                <Ionicons name="home" size={24} color="#ffffff" />
+              </View>
+              <Text style={styles.quickActionText}>Info Asrama</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.quickActionButton}
+              onPress={() => openModal('Manajemen Insiden', renderIncidentReport())}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: '#e74c3c' }]}>
+                <Ionicons name="warning" size={24} color="#ffffff" />
+              </View>
+              <Text style={styles.quickActionText}>Laporan Insiden</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.quickActionButton}
+              onPress={handleNavigateToReports}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: '#f39c12' }]}>
                 <Ionicons name="document-text" size={24} color="#ffffff" />
               </View>
               <Text style={styles.quickActionText}>Laporan</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.quickActionButton}
+              onPress={handleNavigateToProfile}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: '#1abc9c' }]}>
+                <Ionicons name="person" size={24} color="#ffffff" />
+              </View>
+              <Text style={styles.quickActionText}>Profil</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -207,6 +484,7 @@ export default function TeacherDashboard() {
               <View style={styles.activityContent}>
                 <Text style={styles.activityText}>Ahmad Fauzi telah menyelesaikan hafalan Al-Baqarah 255-257</Text>
                 <Text style={styles.activityTime}>10 menit yang lalu</Text>
+                <Text style={styles.activityName}>Al-Baqarah 255-257</Text>
               </View>
             </View>
             
@@ -217,6 +495,7 @@ export default function TeacherDashboard() {
               <View style={styles.activityContent}>
                 <Text style={styles.activityText}>Budi Santoso belum menyetorkan hafalan minggu ini</Text>
                 <Text style={styles.activityTime}>2 jam yang lalu</Text>
+                <Text style={styles.activityName}>Minggu ini</Text>
               </View>
             </View>
             
@@ -227,6 +506,7 @@ export default function TeacherDashboard() {
               <View style={styles.activityContent}>
                 <Text style={styles.activityText}>Jadwal kelas Tahfidz Al-Baqarah telah diperbarui</Text>
                 <Text style={styles.activityTime}>1 hari yang lalu</Text>
+                <Text style={styles.activityName}>Jadwal Tahfidz</Text>
               </View>
             </View>
           </View>
@@ -274,6 +554,28 @@ export default function TeacherDashboard() {
           <Text style={styles.navText}>Profil</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modal for detailed views */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{modalContent.title}</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#333333" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.modalBody}>
+              {modalContent.content}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -652,8 +954,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   activityTime: {
-    fontSize: 12,
-    color: '#888888',
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 5,
+  },
+  activityName: {
+    fontSize: 14,
+    color: '#555555',
   },
   scheduleCard: {
     backgroundColor: '#ffffff',
@@ -718,5 +1026,202 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#005e7a',
     marginTop: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eeeeee',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+  },
+  modalBody: {
+    padding: 20,
+  },
+  modalSection: {
+    marginBottom: 20,
+  },
+  modalSectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 10,
+  },
+  modalDescription: {
+    fontSize: 14,
+    color: '#555555',
+    marginBottom: 15,
+    lineHeight: 20,
+  },
+  infoCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#555555',
+  },
+  infoValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333333',
+  },
+  activityCard: {
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  actionButton: {
+    backgroundColor: '#005e7a',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  contactCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  contactIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  contactInfo: {
+    flex: 1,
+  },
+  contactName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333333',
+  },
+  contactRole: {
+    fontSize: 12,
+    color: '#888888',
+  },
+  messageCard: {
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  messageHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  messageSender: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333333',
+  },
+  messageTime: {
+    fontSize: 12,
+    color: '#888888',
+  },
+  messageContent: {
+    fontSize: 14,
+    color: '#555555',
+  },
+  incidentCard: {
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  incidentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  incidentTypeTag: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+  },
+  incidentTypeText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  incidentTime: {
+    fontSize: 12,
+    color: '#888888',
+  },
+  incidentTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 5,
+  },
+  incidentDescription: {
+    fontSize: 14,
+    color: '#555555',
+    marginBottom: 15,
+    lineHeight: 20,
+  },
+  incidentActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  incidentActionButton: {
+    backgroundColor: '#005e7a',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 5,
+    flex: 1,
+    marginRight: 10,
+    alignItems: 'center',
+  },
+  incidentActionButtonSecondary: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#005e7a',
+    marginRight: 0,
+  },
+  incidentActionText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  incidentActionTextSecondary: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#005e7a',
   },
 }); 
