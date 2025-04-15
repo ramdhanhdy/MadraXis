@@ -11,19 +11,31 @@ export default function RoleSelectionScreen() {
   const router = useRouter();
 
   const handleTeacherSelection = () => {
-    router.push('/screens/teacher/TeacherDashboard');
+    router.push({
+      pathname: "/screens/auth/login",
+      params: { role: "teacher" }
+    });
   };
 
   const handleStudentSelection = () => {
-    router.push('/student/dashboard');
+    router.push({
+      pathname: "/screens/auth/login",
+      params: { role: "student" }
+    });
   };
 
   const handleParentSelection = () => {
-    router.push('/parent/dashboard');
+    router.push({
+      pathname: "/screens/auth/login",
+      params: { role: "parent" }
+    });
   };
 
   const handleManagementSelection = () => {
-    router.push('/management/dashboard');
+    router.push({
+      pathname: "/screens/auth/login",
+      params: { role: "management" }
+    });
   };
 
   return (

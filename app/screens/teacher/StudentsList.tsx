@@ -50,7 +50,7 @@ export default function StudentsList() {
       }
       
       // Fetch students
-      const response = await axios.get('http://localhost:8000/api/v1/students', {
+      const response = await axios.get('http://192.168.0.105:8000/api/v1/students', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

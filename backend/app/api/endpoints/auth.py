@@ -1,5 +1,6 @@
 from datetime import timedelta
 from typing import Any
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -13,17 +14,23 @@ from app.models.user import User
 from app.schemas.token import Token
 from app.schemas.user import UserLogin
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 
 @router.post("/login", response_model=Token)
 async def login_access_token(
-    db: AsyncSession = Depends(get_db), form_data: UserLogin = Depends()
+    # Correct order: non-default args first, then default args
+    user_credentials: UserLogin,
+    db: AsyncSession = Depends(get_db) 
 ) -> Any:
     """
     OAuth2 compatible token login, get an access token for future requests
     """
+    logger.info(f"--- Login endpoint hit for email: {user_credentials.email} ---")
+    
     # Find user by email
-    result = await db.execute(select(User).where(User.email == form_data.email))
+    result = await db.execute(select(User).where(User.email == user_credentials.email))
     user = result.scalars().first()
     
     if not user:
@@ -33,7 +40,7 @@ async def login_access_token(
         )
     
     # Verify password
-    if not verify_password(form_data.password, user.hashed_password):
+    if not verify_password(user_credentials.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",

@@ -74,7 +74,7 @@ export default function StudentDetail() {
       }
       
       // Fetch student details
-      const response = await axios.get(`http://localhost:8000/api/v1/students/${id}`, {
+      const response = await axios.get(`http://192.168.0.105:8000/api/v1/students/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -139,7 +139,7 @@ export default function StudentDetail() {
       setNewMemoNote('');
       
       // Here you would call the API to update the student's memorization
-      // await axios.post(`http://localhost:8000/api/v1/students/${id}/memorizations`, newMemo, {
+      // await axios.post(`http://192.168.0.105:8000/api/v1/students/${id}/memorizations`, newMemo, {
       //   headers: {
       //     'Authorization': `Bearer ${token}`,
       //     'Content-Type': 'application/json'

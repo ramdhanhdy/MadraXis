@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
+import { authService } from '../../utils/api';
 
 // Import SVG as string
 const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
@@ -29,19 +30,93 @@ const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { role } = useLocalSearchParams<{ role: string }>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState('login'); // 'login' or 'register'
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  
+  // Check if already logged in
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const isLoggedIn = await authService.isLoggedIn();
+      if (isLoggedIn) {
+        const userRole = await authService.getUserRole();
+        navigateToRoleDashboard(userRole || '');
+      }
+    };
+    
+    checkLoginStatus();
+  }, []);
+  
+  // Function to navigate based on role
+  const navigateToRoleDashboard = (userRole: string) => {
+    switch(userRole) {
+      case 'teacher':
+        router.push('/screens/teacher/TeacherDashboard');
+        break;
+      case 'student':
+        router.push('/student/dashboard');
+        break;
+      case 'parent':
+        router.push('/parent/dashboard');
+        break;
+      case 'management':
+        router.push('/management/dashboard');
+        break;
+      default:
+        // If no valid role, stay on login page
+        break;
+    }
+  };
 
-  const handleLogin = () => {
-    // Validasi sederhana
+  const handleLogin = async () => {
+    // Basic validation
     if (!email || !password) {
-      alert('Mohon isi semua field');
+      setErrorMessage('Please enter both email and password');
       return;
     }
     
-    // Simulasi login berhasil
-    router.push('screens/auth/otp-verification' as any);
+    setIsLoading(true);
+    setErrorMessage('');
+    
+    try {
+      // Make the login request
+      console.log('Attempting login with email:', email, 'and role:', role);
+      const result = await authService.login(email, password, role || '');
+      
+      console.log('Login result:', result); // Log the result for debugging
+      
+      if (result && result.success) {
+        // Login successful, navigate to appropriate dashboard
+        console.log('Login successful, navigating to dashboard for role:', role);
+        navigateToRoleDashboard(role || '');
+      } else {
+        // Handle login error
+        console.log('LoginScreen: Login failed or error occurred.');
+        setErrorMessage('Login failed. Check console for details.');
+      }
+    } catch (error: any) {
+      if (error.response) {
+        // Server responded with a status code outside 2xx
+        console.error('Login error:', error.response.status, error.response.data);
+        setErrorMessage('Login failed: ' + (error.response.data?.message || error.response.data || error.response.status));
+        Alert.alert('Login Failed', error.response.data?.message || JSON.stringify(error.response.data) || 'Unknown error');
+      } else if (error.request) {
+        // No response received
+        console.error('Login error: No response received', error.request);
+        setErrorMessage('Login failed: No response from server');
+        Alert.alert('Network Error', 'No response from server. Please check your connection.');
+      } else {
+        // Other error
+        console.error('Login error:', error.message);
+        setErrorMessage('Login failed: ' + error.message);
+        Alert.alert('Error', error.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRegister = () => {
@@ -49,8 +124,8 @@ export default function LoginScreen() {
   };
 
   const handleForgotPassword = () => {
-    // Navigasi ke layar lupa password
-    alert('Fitur lupa password akan segera hadir');
+    // Navigate to forgot password screen
+    Alert.alert('Forgot Password', 'Password reset functionality will be available soon.');
   };
 
   return (
@@ -58,6 +133,16 @@ export default function LoginScreen() {
       <View style={styles.logoContainer}>
         <SvgXml xml={logoSvg} width={100} height={100} />
         <Text style={styles.appName}>Pondok Pesantren Tahfidz ZAID BIN TSAABIT</Text>
+        {role && (
+          <View style={styles.roleChip}>
+            <Text style={styles.roleText}>
+              Login as: {role === 'teacher' ? 'Guru' : 
+                role === 'management' ? 'Manajemen' : 
+                role === 'student' ? 'Siswa' : 
+                role === 'parent' ? 'Orang Tua' : 'User'}
+            </Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.tabContainer}>
@@ -78,6 +163,12 @@ export default function LoginScreen() {
 
       {activeTab === 'login' ? (
         <View style={styles.formContainer}>
+          {errorMessage ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            </View>
+          ) : null}
+          
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email</Text>
             <TextInput
@@ -87,6 +178,7 @@ export default function LoginScreen() {
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              editable={!isLoading}
             />
           </View>
 
@@ -98,15 +190,28 @@ export default function LoginScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
+              editable={!isLoading}
             />
           </View>
 
-          <TouchableOpacity style={styles.forgotPasswordContainer} onPress={handleForgotPassword}>
+          <TouchableOpacity 
+            style={styles.forgotPasswordContainer} 
+            onPress={handleForgotPassword}
+            disabled={isLoading}
+          >
             <Text style={styles.forgotPasswordText}>Lupa Password?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Login</Text>
+          <TouchableOpacity 
+            style={[styles.loginButton, isLoading && styles.disabledButton]} 
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#ffffff" size="small" />
+            ) : (
+              <Text style={styles.loginButtonText}>Login</Text>
+            )}
           </TouchableOpacity>
         </View>
       ) : (
@@ -114,7 +219,11 @@ export default function LoginScreen() {
           <Text style={styles.registerPromptText}>
             Untuk mendaftar sebagai sekolah, silakan klik tombol di bawah ini
           </Text>
-          <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+          <TouchableOpacity 
+            style={styles.registerButton} 
+            onPress={handleRegister}
+            disabled={isLoading}
+          >
             <Text style={styles.registerButtonText}>Daftar Sekolah</Text>
           </TouchableOpacity>
         </View>
@@ -145,6 +254,17 @@ const styles = StyleSheet.create({
     color: '#005e7a',
     textAlign: 'center',
   },
+  roleChip: {
+    backgroundColor: '#005e7a',
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    marginTop: 10,
+  },
+  roleText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
   tabContainer: {
     flexDirection: 'row',
     marginBottom: 30,
@@ -170,6 +290,16 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     paddingHorizontal: 10,
+  },
+  errorContainer: {
+    backgroundColor: '#ffebee',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+  errorText: {
+    color: '#d32f2f',
+    textAlign: 'center',
   },
   inputContainer: {
     marginBottom: 20,
@@ -200,6 +330,9 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#a0a0a0',
   },
   loginButtonText: {
     color: '#ffffff',

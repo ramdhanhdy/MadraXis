@@ -13,7 +13,7 @@ from sqlalchemy.orm import selectinload
 from app.core.deps import get_current_user, check_user_role
 from app.db.database import get_db
 from app.models.classes import SchoolClass as SchoolClassModel, ClassSchedule, class_students
-from app.db.models.student import Student
+from app.models.student import Student
 from app.models.user import User
 from app.schemas.classes import Class as ClassSchema, ClassCreate, ClassSimple, ClassUpdate
 

@@ -21,7 +21,7 @@ class User(Base):
     school = relationship("School", back_populates="users")
     
     # Relationships
-    classes = relationship("Class", secondary="class_teachers", back_populates="teachers")
+    classes = relationship("SchoolClass", secondary="class_teachers", back_populates="teachers")
     student_profile = relationship("Student", back_populates="user", uselist=False)
     
     # A user can submit multiple incident reports
@@ -42,4 +42,4 @@ class School(Base):
     
     # Relationships
     users = relationship("User", back_populates="school")
-    classes = relationship("Class", back_populates="school") 
+    classes = relationship("SchoolClass", back_populates="school") 

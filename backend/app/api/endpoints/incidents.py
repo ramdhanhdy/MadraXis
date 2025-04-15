@@ -8,7 +8,7 @@ from app.core.deps import get_current_user, check_user_role
 from app.db.database import get_db
 from app.models.incident import Incident, IncidentComment
 from app.models.user import User
-from app.db.models.student import Student
+from app.models.student import Student
 from app.schemas.incident import Incident as IncidentSchema, IncidentCreate, IncidentUpdate, IncidentComment as IncidentCommentSchema
 
 router = APIRouter()

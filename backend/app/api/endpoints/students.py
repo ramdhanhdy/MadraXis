@@ -13,7 +13,7 @@ from app.db.database import get_db
 
 router = APIRouter()
 
-@router.post("/", response_model=student_models.Student, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=student_models.StudentSchema, status_code=status.HTTP_201_CREATED)
 async def create_student_endpoint(
     student_in: student_models.StudentCreate,
     db: AsyncSession = Depends(get_db)
@@ -25,7 +25,7 @@ async def create_student_endpoint(
     created_student = await crud_student.create_student(db=db, student=student_in)
     return created_student # FastAPI will convert ORM model to Pydantic response_model
 
-@router.get("/", response_model=List[student_models.Student])
+@router.get("/", response_model=List[student_models.StudentSchema])
 async def read_students_endpoint(
     skip: int = 0,
     limit: int = 100,
@@ -37,7 +37,7 @@ async def read_students_endpoint(
     students = await crud_student.get_students(db=db, skip=skip, limit=limit)
     return students # FastAPI handles list of ORM models
 
-@router.get("/{student_id}", response_model=student_models.Student)
+@router.get("/{student_id}", response_model=student_models.StudentSchema)
 async def read_student_endpoint(
     student_id: uuid.UUID,
     db: AsyncSession = Depends(get_db)
@@ -50,7 +50,7 @@ async def read_student_endpoint(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
     return db_student
 
-@router.put("/{student_id}", response_model=student_models.Student)
+@router.put("/{student_id}", response_model=student_models.StudentSchema)
 async def update_student_endpoint(
     student_id: uuid.UUID,
     student_in: student_models.StudentUpdate,
@@ -69,7 +69,7 @@ async def update_student_endpoint(
     updated_student = await crud_student.update_student(db=db, student_id=student_id, student=student_in)
     return updated_student
 
-@router.delete("/{student_id}", response_model=student_models.Student)
+@router.delete("/{student_id}", response_model=student_models.StudentSchema)
 async def delete_student_endpoint(
     student_id: uuid.UUID,
     db: AsyncSession = Depends(get_db)

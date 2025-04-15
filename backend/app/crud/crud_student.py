@@ -6,7 +6,7 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Use the ORM model and Pydantic schemas
-from app.db.models.student import Student as StudentDBModel
+from app.models.student import Student as StudentDBModel
 from app.models.student import StudentCreate, StudentUpdate
 
 # Remove unused imports

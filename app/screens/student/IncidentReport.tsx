@@ -74,7 +74,7 @@ export default function IncidentReport() {
       
       // Send the incident data to the backend
       const response = await axios.post(
-        'http://localhost:8000/api/v1/incidents',
+        'http://192.168.0.105:8000/api/v1/incidents',
         incidentData,
         {
           headers: {

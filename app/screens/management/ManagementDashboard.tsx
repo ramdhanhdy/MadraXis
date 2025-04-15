@@ -78,7 +78,7 @@ export default function ManagementDashboard() {
       
       // Make API request to get incidents
       const response = await axios.get(
-        'http://localhost:8000/api/v1/incidents',
+        'http://192.168.0.105:8000/api/v1/incidents',
         {
           headers: {
             'Authorization': `Bearer ${token}`,
