@@ -4,6 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Mock component for date picker
 const DatePicker = ({ value, onChange }: any) => (
@@ -30,6 +32,7 @@ export default function IncidentReport() {
   const [description, setDescription] = useState('');
   const [anonymous, setAnonymous] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const incidentTypes: IncidentType[] = [
     { id: 'bullying', label: 'Perundungan', icon: 'user-injured' },
@@ -38,7 +41,7 @@ export default function IncidentReport() {
     { id: 'other', label: 'Lainnya', icon: 'question-circle' },
   ];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!incidentType || !location || !description) {
       Alert.alert(
         'Informasi Tidak Lengkap',
@@ -48,13 +51,61 @@ export default function IncidentReport() {
       return;
     }
 
-    // In a real app, this would send the report to the backend
-    setSubmitted(true);
-    
-    // Reset form after 3 seconds and navigate back
-    setTimeout(() => {
-      router.back();
-    }, 3000);
+    try {
+      setIsLoading(true);
+      
+      // Get authentication token from storage
+      const token = await AsyncStorage.getItem('auth_token');
+      
+      if (!token) {
+        Alert.alert('Error', 'Sesi Anda telah berakhir. Silakan login kembali.');
+        return;
+      }
+
+      // Create the incident data object
+      const incidentData = {
+        incident_type: incidentType,
+        description: description,
+        location: location,
+        incident_date: incidentDate.toISOString().split('T')[0],
+        is_anonymous: anonymous,
+        // student_id will be automatically determined by the backend based on the authenticated user
+      };
+      
+      // Send the incident data to the backend
+      const response = await axios.post(
+        'http://localhost:8000/api/v1/incidents',
+        incidentData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      // If successful, show success message
+      if (response.status === 200 || response.status === 201) {
+        setSubmitted(true);
+        
+        // Reset form after 3 seconds and navigate back
+        setTimeout(() => {
+          router.back();
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Error submitting incident report:', error);
+      let errorMessage = 'Terjadi kesalahan saat mengirim laporan. Silakan coba lagi.';
+      
+      if (axios.isAxiosError(error) && error.response) {
+        // Get more specific error message from the backend if available
+        errorMessage = error.response.data.detail || errorMessage;
+      }
+      
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

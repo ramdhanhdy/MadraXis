@@ -1,9 +1,23 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Image, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Types
+interface Student {
+  id: string;
+  name: string;
+  class?: string;
+  quran_progress?: {
+    memorized_verses: number;
+    total_verses: number;
+  };
+  image_url?: string;
+}
 
 export default function StudentsList() {
   const router = useRouter();
@@ -11,6 +25,54 @@ export default function StudentsList() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedClass, setSelectedClass] = useState('Semua');
   const [selectedSort, setSelectedSort] = useState('Nama (A-Z)');
+  const [students, setStudents] = useState<Student[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [classes, setClasses] = useState<string[]>(['Semua']);
+  
+  // Fetch students from API
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Get auth token
+      const token = await AsyncStorage.getItem('auth_token');
+      
+      if (!token) {
+        setError('Sesi anda telah berakhir. Silakan login kembali.');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Fetch students
+      const response = await axios.get('http://localhost:8000/api/v1/students', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.data) {
+        setStudents(response.data);
+        
+        // Extract unique classes for filtering
+        const uniqueClasses = ['Semua', ...new Set(response.data
+          .map((student: Student) => student.class)
+          .filter((cls: string | undefined) => cls !== undefined))] as string[];
+        
+        setClasses(uniqueClasses);
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      setError('Gagal memuat data siswa. Silakan coba lagi.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   // Filter students based on search query and selected class
   const filteredStudents = students.filter(student => {
@@ -27,24 +89,28 @@ export default function StudentsList() {
       case 'Nama (Z-A)':
         return b.name.localeCompare(a.name);
       case 'Kelas (Naik)':
-        return a.class.localeCompare(b.class);
+        return (a.class || '').localeCompare(b.class || '');
       case 'Kelas (Turun)':
-        return b.class.localeCompare(a.class);
+        return (b.class || '').localeCompare(a.class || '');
       case 'Hafalan (Terbanyak)':
-        return b.memorizedVerses - a.memorizedVerses;
+        return (b.quran_progress?.memorized_verses || 0) - (a.quran_progress?.memorized_verses || 0);
       case 'Hafalan (Tersedikit)':
-        return a.memorizedVerses - b.memorizedVerses;
+        return (a.quran_progress?.memorized_verses || 0) - (b.quran_progress?.memorized_verses || 0);
       default:
         return 0;
     }
   });
 
-  const handleStudentPress = (studentId: number) => {
+  const handleStudentPress = (studentId: string) => {
     router.push(`screens/teacher/student-detail?id=${studentId}` as any);
   };
 
   const handleAddStudent = () => {
     router.push('screens/teacher/add-student' as any);
+  };
+
+  const handleRetry = () => {
+    fetchStudents();
   };
 
   const renderStudentItem = ({ item }: { item: Student }) => (
@@ -53,8 +119,8 @@ export default function StudentsList() {
       onPress={() => handleStudentPress(item.id)}
     >
       <View style={styles.studentImageContainer}>
-        {item.image ? (
-          <Image source={{ uri: item.image }} style={styles.studentImage} />
+        {item.image_url ? (
+          <Image source={{ uri: item.image_url }} style={styles.studentImage} />
         ) : (
           <View style={styles.studentImagePlaceholder}>
             <Text style={styles.studentImagePlaceholderText}>
@@ -65,20 +131,24 @@ export default function StudentsList() {
       </View>
       <View style={styles.studentInfo}>
         <Text style={styles.studentName}>{item.name}</Text>
-        <Text style={styles.studentClass}>Kelas {item.class}</Text>
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View 
-              style={[
-                styles.progressFill, 
-                { width: `${(item.memorizedVerses / item.totalVerses) * 100}%` }
-              ]} 
-            />
+        <Text style={styles.studentClass}>Kelas {item.class || 'N/A'}</Text>
+        {item.quran_progress ? (
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBar}>
+              <View 
+                style={[
+                  styles.progressFill, 
+                  { width: `${(item.quran_progress.memorized_verses / (item.quran_progress.total_verses || 1)) * 100}%` }
+                ]} 
+              />
+            </View>
+            <Text style={styles.progressText}>
+              {item.quran_progress.memorized_verses}/{item.quran_progress.total_verses || 0} ayat
+            </Text>
           </View>
-          <Text style={styles.progressText}>
-            {item.memorizedVerses}/{item.totalVerses} ayat
-          </Text>
-        </View>
+        ) : (
+          <Text style={styles.progressText}>Tidak ada data hafalan</Text>
+        )}
       </View>
       <Ionicons name="chevron-forward" size={20} color="#888888" />
     </TouchableOpacity>
@@ -129,7 +199,7 @@ export default function StudentsList() {
           <View style={styles.filterSection}>
             <Text style={styles.filterTitle}>Kelas</Text>
             <View style={styles.filterOptions}>
-              {['Semua', '5A', '5B', '6A', '6B'].map(classOption => (
+              {classes.map(classOption => (
                 <TouchableOpacity
                   key={classOption}
                   style={[
@@ -185,92 +255,40 @@ export default function StudentsList() {
         </View>
       )}
       
-      {/* Students List */}
-      <FlatList
-        data={sortedStudents}
-        renderItem={renderStudentItem}
-        keyExtractor={item => item.id.toString()}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="search" size={50} color="#cccccc" />
-            <Text style={styles.emptyText}>Tidak ada siswa yang ditemukan</Text>
-          </View>
-        }
-      />
+      {/* Loading and Error States */}
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#005e7a" />
+          <Text style={styles.loadingText}>Memuat data siswa...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle" size={50} color="#e74c3c" />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+            <Text style={styles.retryButtonText}>Coba Lagi</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        /* Students List */
+        <FlatList
+          data={sortedStudents}
+          renderItem={renderStudentItem}
+          keyExtractor={item => item.id.toString()}
+          contentContainerStyle={styles.listContainer}
+          refreshing={isLoading}
+          onRefresh={fetchStudents}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Ionicons name="search" size={50} color="#cccccc" />
+              <Text style={styles.emptyText}>Tidak ada siswa yang ditemukan</Text>
+            </View>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
-
-// Types
-interface Student {
-  id: number;
-  name: string;
-  class: string;
-  image?: string;
-  memorizedVerses: number;
-  totalVerses: number;
-}
-
-// Sample Data
-const students: Student[] = [
-  {
-    id: 1,
-    name: 'Ahmad Fauzi',
-    class: '5A',
-    memorizedVerses: 120,
-    totalVerses: 200,
-  },
-  {
-    id: 2,
-    name: 'Budi Santoso',
-    class: '5A',
-    memorizedVerses: 150,
-    totalVerses: 200,
-  },
-  {
-    id: 3,
-    name: 'Siti Aminah',
-    class: '5B',
-    memorizedVerses: 180,
-    totalVerses: 200,
-  },
-  {
-    id: 4,
-    name: 'Dewi Putri',
-    class: '5B',
-    memorizedVerses: 90,
-    totalVerses: 200,
-  },
-  {
-    id: 5,
-    name: 'Rudi Hermawan',
-    class: '6A',
-    memorizedVerses: 220,
-    totalVerses: 300,
-  },
-  {
-    id: 6,
-    name: 'Andi Wijaya',
-    class: '6A',
-    memorizedVerses: 250,
-    totalVerses: 300,
-  },
-  {
-    id: 7,
-    name: 'Rina Marlina',
-    class: '6B',
-    memorizedVerses: 280,
-    totalVerses: 300,
-  },
-  {
-    id: 8,
-    name: 'Doni Kusuma',
-    class: '6B',
-    memorizedVerses: 200,
-    totalVerses: 300,
-  },
-];
 
 const styles = StyleSheet.create({
   container: {
@@ -433,6 +451,40 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888888',
     width: 70,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#666666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#e74c3c',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#005e7a',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
   },
   emptyContainer: {
     alignItems: 'center',

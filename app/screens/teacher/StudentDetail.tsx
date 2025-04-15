@@ -1,16 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Types
+interface Memorization {
+  id: number;
+  range: string;
+  date: string;
+  note?: string;
+  status: 'baik' | 'cukup' | 'kurang';
+}
+
+interface Note {
+  date: string;
+  content: string;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  class?: string;
+  image_url?: string;
+  quran_progress?: {
+    memorized_verses: number;
+    total_verses: number;
+  };
+  memorizations?: Memorization[];
+  notes?: Note[];
+  gender?: string;
+  birth_date?: string;
+  parent_name?: string;
+  phone?: string;
+  address?: string;
+}
 
 export default function StudentDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const studentId = parseInt(id || '0');
   
   const [student, setStudent] = useState<Student | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('hafalan'); // 'hafalan', 'catatan', 'info'
   const [showAddModal, setShowAddModal] = useState(false);
   const [newMemoRange, setNewMemoRange] = useState('');
@@ -19,12 +54,150 @@ export default function StudentDetail() {
   
   // Fetch student data
   useEffect(() => {
-    // In a real app, this would be an API call
-    const foundStudent = students.find(s => s.id === studentId);
-    if (foundStudent) {
-      setStudent(foundStudent);
+    fetchStudentData();
+  }, [id]);
+
+  const fetchStudentData = async () => {
+    if (!id) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Get auth token
+      const token = await AsyncStorage.getItem('auth_token');
+      
+      if (!token) {
+        setError('Sesi anda telah berakhir. Silakan login kembali.');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Fetch student details
+      const response = await axios.get(`http://localhost:8000/api/v1/students/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.data) {
+        // Initialize memorizations and notes if they don't exist
+        const studentData = {
+          ...response.data,
+          memorizations: response.data.memorizations || [],
+          notes: response.data.notes || []
+        };
+        setStudent(studentData);
+      }
+    } catch (error) {
+      console.error('Error fetching student data:', error);
+      setError('Gagal memuat data siswa. Silakan coba lagi.');
+    } finally {
+      setIsLoading(false);
     }
-  }, [studentId]);
+  };
+  
+  const handleAddMemorization = async () => {
+    if (!newMemoRange) {
+      Alert.alert('Error', 'Mohon isi rentang ayat');
+      return;
+    }
+    
+    if (!student) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // Get auth token
+      const token = await AsyncStorage.getItem('auth_token');
+      
+      if (!token) {
+        Alert.alert('Error', 'Sesi anda telah berakhir. Silakan login kembali.');
+        setIsLoading(false);
+        return;
+      }
+      
+      // In a real app, this would be an API call to update memorization
+      // For now, we'll just update the local state
+      const newMemo: Memorization = {
+        id: Date.now(), // Temporary ID
+        range: newMemoRange,
+        date: newMemoDate,
+        note: newMemoNote,
+        status: 'baik',
+      };
+      
+      // Update student data with new memorization
+      const updatedStudent = {
+        ...student,
+        memorizations: [newMemo, ...(student.memorizations || [])],
+      };
+      
+      setStudent(updatedStudent);
+      setShowAddModal(false);
+      setNewMemoRange('');
+      setNewMemoNote('');
+      
+      // Here you would call the API to update the student's memorization
+      // await axios.post(`http://localhost:8000/api/v1/students/${id}/memorizations`, newMemo, {
+      //   headers: {
+      //     'Authorization': `Bearer ${token}`,
+      //     'Content-Type': 'application/json'
+      //   }
+      // });
+      
+    } catch (error) {
+      console.error('Error adding memorization:', error);
+      Alert.alert('Error', 'Gagal menambahkan setoran hafalan. Silakan coba lagi.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRetry = () => {
+    fetchStudentData();
+  };
+  
+  if (isLoading && !student) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#333333" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Detail Siswa</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#005e7a" />
+          <Text style={styles.loadingText}>Memuat data siswa...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#333333" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Detail Siswa</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle" size={50} color="#e74c3c" />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+            <Text style={styles.retryButtonText}>Coba Lagi</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
   
   if (!student) {
     return (
@@ -37,38 +210,13 @@ export default function StudentDetail() {
           <Text style={styles.headerTitle}>Detail Siswa</Text>
           <View style={{ width: 24 }} />
         </View>
-        <View style={styles.loadingContainer}>
-          <Text>Memuat data siswa...</Text>
+        <View style={styles.emptyContainer}>
+          <Ionicons name="person-outline" size={50} color="#cccccc" />
+          <Text style={styles.emptyText}>Siswa tidak ditemukan</Text>
         </View>
       </SafeAreaView>
     );
   }
-  
-  const handleAddMemorization = () => {
-    if (!newMemoRange) {
-      alert('Mohon isi rentang ayat');
-      return;
-    }
-    
-    // In a real app, this would be an API call
-    const newMemo: Memorization = {
-      id: student.memorizations.length + 1,
-      range: newMemoRange,
-      date: newMemoDate,
-      note: newMemoNote,
-      status: 'baik',
-    };
-    
-    const updatedStudent = {
-      ...student,
-      memorizations: [newMemo, ...student.memorizations],
-    };
-    
-    setStudent(updatedStudent);
-    setShowAddModal(false);
-    setNewMemoRange('');
-    setNewMemoNote('');
-  };
   
   const renderHafalanTab = () => (
     <View style={styles.tabContent}>
@@ -76,19 +224,27 @@ export default function StudentDetail() {
         <View style={styles.progressHeader}>
           <Text style={styles.progressTitle}>Progress Hafalan</Text>
           <Text style={styles.progressPercentage}>
-            {Math.round((student.memorizedVerses / student.totalVerses) * 100)}%
+            {student.quran_progress 
+              ? Math.round((student.quran_progress.memorized_verses / (student.quran_progress.total_verses || 1)) * 100)
+              : 0}%
           </Text>
         </View>
         <View style={styles.progressBar}>
           <View 
             style={[
               styles.progressFill, 
-              { width: `${(student.memorizedVerses / student.totalVerses) * 100}%` }
+              { width: student.quran_progress 
+                ? `${(student.quran_progress.memorized_verses / (student.quran_progress.total_verses || 1)) * 100}%` 
+                : '0%' 
+              }
             ]} 
           />
         </View>
         <Text style={styles.progressDetail}>
-          {student.memorizedVerses} dari {student.totalVerses} ayat
+          {student.quran_progress 
+            ? `${student.quran_progress.memorized_verses} dari ${student.quran_progress.total_verses || 0} ayat`
+            : 'Belum ada data hafalan'
+          }
         </Text>
       </View>
       
@@ -103,7 +259,7 @@ export default function StudentDetail() {
         </TouchableOpacity>
       </View>
       
-      {student.memorizations.length > 0 ? (
+      {student.memorizations && student.memorizations.length > 0 ? (
         student.memorizations.map((memo) => (
           <View key={memo.id} style={styles.memorizationItem}>
             <View style={styles.memorizationHeader}>
@@ -172,7 +328,7 @@ export default function StudentDetail() {
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Kelas</Text>
-          <Text style={styles.infoValue}>{student.class}</Text>
+          <Text style={styles.infoValue}>{student.class || 'Tidak diketahui'}</Text>
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Jenis Kelamin</Text>
@@ -180,7 +336,7 @@ export default function StudentDetail() {
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Tanggal Lahir</Text>
-          <Text style={styles.infoValue}>{student.birthDate || 'Tidak diketahui'}</Text>
+          <Text style={styles.infoValue}>{student.birth_date || 'Tidak diketahui'}</Text>
         </View>
       </View>
       
@@ -188,7 +344,7 @@ export default function StudentDetail() {
         <Text style={styles.infoSectionTitle}>Informasi Kontak</Text>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Nama Orang Tua</Text>
-          <Text style={styles.infoValue}>{student.parentName || 'Tidak diketahui'}</Text>
+          <Text style={styles.infoValue}>{student.parent_name || 'Tidak diketahui'}</Text>
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Nomor Telepon</Text>
@@ -220,8 +376,8 @@ export default function StudentDetail() {
       {/* Student Profile */}
       <View style={styles.profileContainer}>
         <View style={styles.profileImageContainer}>
-          {student.image ? (
-            <Image source={{ uri: student.image }} style={styles.profileImage} />
+          {student.image_url ? (
+            <Image source={{ uri: student.image_url }} style={styles.profileImage} />
           ) : (
             <View style={styles.profileImagePlaceholder}>
               <Text style={styles.profileImagePlaceholderText}>
@@ -232,9 +388,16 @@ export default function StudentDetail() {
         </View>
         <View style={styles.profileInfo}>
           <Text style={styles.profileName}>{student.name}</Text>
-          <Text style={styles.profileClass}>Kelas {student.class}</Text>
+          <Text style={styles.profileClass}>Kelas {student.class || 'N/A'}</Text>
         </View>
       </View>
+      
+      {/* Loading Overlay */}
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#ffffff" />
+        </View>
+      )}
       
       {/* Tabs */}
       <View style={styles.tabsContainer}>
@@ -344,99 +507,6 @@ export default function StudentDetail() {
   );
 }
 
-// Types
-interface Memorization {
-  id: number;
-  range: string;
-  date: string;
-  note?: string;
-  status: 'baik' | 'cukup' | 'kurang';
-}
-
-interface Note {
-  date: string;
-  content: string;
-}
-
-interface Student {
-  id: number;
-  name: string;
-  class: string;
-  image?: string;
-  memorizedVerses: number;
-  totalVerses: number;
-  memorizations: Memorization[];
-  notes?: Note[];
-  gender?: string;
-  birthDate?: string;
-  parentName?: string;
-  phone?: string;
-  address?: string;
-}
-
-// Sample Data
-const students: Student[] = [
-  {
-    id: 1,
-    name: 'Ahmad Fauzi',
-    class: '5A',
-    memorizedVerses: 120,
-    totalVerses: 200,
-    gender: 'Laki-laki',
-    birthDate: '2015-05-10',
-    parentName: 'Budi Fauzi',
-    phone: '081234567890',
-    address: 'Jl. Mawar No. 10, Jakarta',
-    memorizations: [
-      {
-        id: 1,
-        range: 'Al-Baqarah 255-257',
-        date: '2025-03-07',
-        status: 'baik',
-      },
-      {
-        id: 2,
-        range: 'Al-Baqarah 250-254',
-        date: '2025-03-05',
-        status: 'cukup',
-        note: 'Perlu diulang lagi untuk ayat 252',
-      },
-      {
-        id: 3,
-        range: 'Al-Baqarah 245-249',
-        date: '2025-03-03',
-        status: 'baik',
-      },
-    ],
-    notes: [
-      {
-        date: '2025-03-07',
-        content: 'Ahmad menunjukkan kemajuan yang baik dalam hafalan. Pengucapan tajwid sudah lebih baik dari sebelumnya.',
-      },
-      {
-        date: '2025-02-20',
-        content: 'Perlu lebih fokus pada aturan tajwid, terutama pada hukum nun mati dan tanwin.',
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Budi Santoso',
-    class: '5A',
-    memorizedVerses: 150,
-    totalVerses: 200,
-    memorizations: [],
-  },
-  {
-    id: 3,
-    name: 'Siti Aminah',
-    class: '5B',
-    memorizedVerses: 180,
-    totalVerses: 200,
-    memorizations: [],
-  },
-];
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -461,6 +531,45 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#e74c3c',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#005e7a',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
   },
   profileContainer: {
     flexDirection: 'row',

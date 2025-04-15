@@ -1,14 +1,116 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+
+interface Incident {
+  id: number;
+  incident_type: string;
+  description: string;
+  location: string;
+  status: string;
+  reporter_name?: string;
+  student_name?: string;
+  created_at: string;
+  is_anonymous?: boolean;
+}
 
 export default function ManagementDashboard() {
+  const router = useRouter();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
   };
+
+  // Function to get incident priority color based on type
+  const getIncidentPriorityColor = (type: string) => {
+    switch(type) {
+      case 'bullying':
+        return '#e74c3c'; // Red for bullying
+      case 'safety':
+        return '#f39c12'; // Orange for safety issues
+      case 'property':
+        return '#3498db'; // Blue for property damage
+      default:
+        return '#9b59b6'; // Purple for other issues
+    }
+  };
+
+  // Function to format relative time (e.g. "2 hours ago")
+  const getRelativeTime = (dateString: string) => {
+    const now = new Date();
+    const past = new Date(dateString);
+    const diffMs = now.getTime() - past.getTime();
+    
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffMins < 60) {
+      return `${diffMins} menit yang lalu`;
+    } else if (diffHours < 24) {
+      return `${diffHours} jam yang lalu`;
+    } else {
+      return `${diffDays} hari yang lalu`;
+    }
+  };
+
+  // Fetch incidents from the backend
+  const fetchIncidents = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Get auth token from storage
+      const token = await AsyncStorage.getItem('auth_token');
+      
+      if (!token) {
+        setError('Sesi Anda telah berakhir. Silakan login kembali.');
+        return;
+      }
+      
+      // Make API request to get incidents
+      const response = await axios.get(
+        'http://localhost:8000/api/v1/incidents',
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          params: {
+            limit: 5, // Limit to most recent 5 incidents
+          }
+        }
+      );
+      
+      if (response.data) {
+        setIncidents(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching incidents:', error);
+      setError('Gagal memuat data insiden.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Navigate to incident detail
+  const navigateToIncidentDetail = (incidentId: number) => {
+    // TODO: Create incident detail page at app/management/incidents/[id].tsx
+    Alert.alert('Info', `Halaman detail insiden ${incidentId} akan segera tersedia.`);
+    // router.push("/management/incidents/" + incidentId);
+  };
+
+  // Fetch incidents when component mounts
+  useEffect(() => {
+    fetchIncidents();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -104,41 +206,58 @@ export default function ManagementDashboard() {
         {/* Recent Incidents */}
         <Text style={styles.sectionTitle}>Insiden Terbaru</Text>
         <View style={styles.incidentsContainer}>
-          <View style={styles.incidentItem}>
-            <View style={[styles.incidentPriority, { backgroundColor: '#e74c3c' }]} />
-            <View style={styles.incidentContent}>
-              <Text style={styles.incidentTitle}>Laporan Bullying</Text>
-              <Text style={styles.incidentDetails}>Kelas 8A - Dilaporkan oleh Guru BK</Text>
-              <Text style={styles.incidentTime}>2 jam yang lalu</Text>
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#005e7a" />
+              <Text style={styles.loadingText}>Memuat data insiden...</Text>
             </View>
-            <TouchableOpacity style={styles.incidentAction}>
-              <Ionicons name="arrow-forward" size={20} color="#005e7a" />
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.incidentItem}>
-            <View style={[styles.incidentPriority, { backgroundColor: '#f39c12' }]} />
-            <View style={styles.incidentContent}>
-              <Text style={styles.incidentTitle}>Kerusakan Fasilitas</Text>
-              <Text style={styles.incidentDetails}>Lab Komputer - Dilaporkan oleh Staff</Text>
-              <Text style={styles.incidentTime}>5 jam yang lalu</Text>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={40} color="#e74c3c" />
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity style={styles.retryButton} onPress={fetchIncidents}>
+                <Text style={styles.retryButtonText}>Coba Lagi</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.incidentAction}>
-              <Ionicons name="arrow-forward" size={20} color="#005e7a" />
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.incidentItem}>
-            <View style={[styles.incidentPriority, { backgroundColor: '#3498db' }]} />
-            <View style={styles.incidentContent}>
-              <Text style={styles.incidentTitle}>Permintaan Izin Khusus</Text>
-              <Text style={styles.incidentDetails}>Kelas 9B - Dilaporkan oleh Wali Kelas</Text>
-              <Text style={styles.incidentTime}>1 hari yang lalu</Text>
+          ) : incidents.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="document-text-outline" size={40} color="#cccccc" />
+              <Text style={styles.emptyText}>Tidak ada insiden yang dilaporkan</Text>
             </View>
-            <TouchableOpacity style={styles.incidentAction}>
-              <Ionicons name="arrow-forward" size={20} color="#005e7a" />
-            </TouchableOpacity>
-          </View>
+          ) : (
+            incidents.map((incident) => (
+              <TouchableOpacity 
+                key={incident.id} 
+                style={styles.incidentItem}
+                onPress={() => navigateToIncidentDetail(incident.id)}
+              >
+                <View 
+                  style={[
+                    styles.incidentPriority, 
+                    { backgroundColor: getIncidentPriorityColor(incident.incident_type) }
+                  ]} 
+                />
+                <View style={styles.incidentContent}>
+                  <Text style={styles.incidentTitle}>
+                    {incident.incident_type === 'bullying' 
+                      ? 'Laporan Perundungan' 
+                      : incident.incident_type === 'safety' 
+                        ? 'Masalah Keamanan' 
+                        : incident.incident_type === 'property' 
+                          ? 'Kerusakan Fasilitas' 
+                          : 'Masalah Lainnya'}
+                  </Text>
+                  <Text style={styles.incidentDetails}>
+                    {incident.location} - {incident.is_anonymous ? 'Laporan Anonim' : `Dilaporkan oleh ${incident.reporter_name || 'Siswa'}`}
+                  </Text>
+                  <Text style={styles.incidentTime}>{getRelativeTime(incident.created_at)}</Text>
+                </View>
+                <TouchableOpacity style={styles.incidentAction}>
+                  <Ionicons name="arrow-forward" size={20} color="#005e7a" />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            ))
+          )}
         </View>
         
         {/* Performance Overview */}
@@ -510,5 +629,49 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 4,
+  },
+  loadingContainer: {
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#666666',
+  },
+  errorContainer: {
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#e74c3c',
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#005e7a',
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  emptyContainer: {
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
   },
 }); 

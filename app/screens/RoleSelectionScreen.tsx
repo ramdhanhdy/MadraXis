@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
-import RadialMenu from '../components/RadialMenu';
 import BackgroundPattern from '../components/BackgroundPattern';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 export default function RoleSelectionScreen() {
   const router = useRouter();
@@ -15,50 +15,16 @@ export default function RoleSelectionScreen() {
   };
 
   const handleStudentSelection = () => {
-    // Navigate to the student dashboard
     router.push('/student/dashboard');
   };
 
   const handleParentSelection = () => {
-    // Navigate to the parent dashboard
     router.push('/parent/dashboard');
   };
 
   const handleManagementSelection = () => {
-    // Navigate to the management dashboard
     router.push('/management/dashboard');
   };
-
-  const menuItems = [
-    {
-      id: 'teacher',
-      label: 'Guru',
-      description: 'Kelola kelas, siswa, dan pantau perkembangan hafalan',
-      icon: teacherIconSvg,
-      onPress: handleTeacherSelection
-    },
-    {
-      id: 'student',
-      label: 'Siswa',
-      description: 'Lihat jadwal, setoran hafalan, dan capaian Anda',
-      icon: studentIconSvg,
-      onPress: handleStudentSelection
-    },
-    {
-      id: 'parent',
-      label: 'Orang Tua',
-      description: 'Pantau perkembangan anak, keamanan, dan komunikasi dengan guru',
-      icon: parentIconSvg,
-      onPress: handleParentSelection
-    },
-    {
-      id: 'management',
-      label: 'Manajemen',
-      description: 'Kelola operasional sekolah, laporan, dan pengawasan keseluruhan',
-      icon: managementIconSvg,
-      onPress: handleManagementSelection
-    }
-  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -81,10 +47,50 @@ export default function RoleSelectionScreen() {
           <View style={styles.contentContainer}>
             <Text style={styles.subtitle}>Silakan pilih peran Anda untuk melanjutkan</Text>
             
-            <RadialMenu items={menuItems} />
+            <View style={styles.roleButtonsContainer}>
+              <TouchableOpacity 
+                style={[styles.roleButton, styles.selectedRoleButton]} 
+                onPress={handleTeacherSelection}
+              >
+                <View style={styles.roleIconContainer}>
+                  <FontAwesome5 name="chalkboard-teacher" size={24} color="#005e7a" />
+                </View>
+                <Text style={styles.roleButtonText}>Guru</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.roleButton, styles.managementButton]} 
+                onPress={handleManagementSelection}
+              >
+                <View style={styles.roleIconContainer}>
+                  <FontAwesome5 name="building" size={24} color="#005e7a" />
+                </View>
+                <Text style={styles.roleButtonText}>Manajemen</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.roleButton, styles.studentButton]} 
+                onPress={handleStudentSelection}
+              >
+                <View style={styles.roleIconContainer}>
+                  <FontAwesome5 name="user-graduate" size={24} color="#005e7a" />
+                </View>
+                <Text style={styles.roleButtonText}>Siswa</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.roleButton, styles.parentButton]} 
+                onPress={handleParentSelection}
+              >
+                <View style={styles.roleIconContainer}>
+                  <FontAwesome5 name="user-friends" size={24} color="#005e7a" />
+                </View>
+                <Text style={styles.roleButtonText}>Orang Tua</Text>
+              </TouchableOpacity>
+            </View>
           </View>
           
-          <Text style={styles.footer}>© 2025 Zaid Bin Tsabit</Text>
+          <Text style={styles.footer}>Kelola kelas, siswa, dan pantau perkembangan</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -114,72 +120,6 @@ const logoSvg = `
   <circle cx="60" cy="85" r="5" fill="#f0c75e"/>
   <path d="M55 25 Q60 15 65 25" stroke="#f0c75e" stroke-width="2" fill="none"/>
   <path d="M50 28 Q60 15 70 28" stroke="#f0c75e" stroke-width="2" fill="none"/>
-</svg>
-`;
-
-// Teacher Icon SVG
-const teacherIconSvg = `
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Teacher with book icon -->
-  <circle cx="20" cy="12" r="8" fill="#005e7a"/>
-  <path d="M10 34C10 27.373 14.477 22 20 22C25.523 22 30 27.373 30 34" stroke="#005e7a" stroke-width="2"/>
-  <rect x="12" y="26" width="16" height="8" rx="1" fill="#005e7a"/>
-  <path d="M16 26 L16 34" stroke="#ffffff" stroke-width="1"/>
-  <path d="M24 26 L24 34" stroke="#ffffff" stroke-width="1"/>
-  <path d="M12 30 L28 30" stroke="#ffffff" stroke-width="1"/>
-</svg>
-`;
-
-// Student Icon SVG
-const studentIconSvg = `
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Student with graduation cap -->
-  <circle cx="20" cy="12" r="8" fill="#005e7a"/>
-  <path d="M10 34C10 27.373 14.477 22 20 22C25.523 22 30 27.373 30 34" stroke="#005e7a" stroke-width="2"/>
-  <path d="M10 18L20 14L30 18L20 22L10 18Z" fill="#005e7a"/>
-  <path d="M20 22L20 28" stroke="#005e7a" stroke-width="2"/>
-  <circle cx="20" cy="29" r="1" fill="#005e7a"/>
-</svg>
-`;
-
-// Parent Icon SVG
-const parentIconSvg = `
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Parent with child icon -->
-  <circle cx="15" cy="12" r="6" fill="#005e7a"/>
-  <circle cx="25" cy="14" r="4" fill="#005e7a"/>
-  <path d="M7 34C7 28.477 10.582 24 15 24C19.418 24 23 28.477 23 34" stroke="#005e7a" stroke-width="2"/>
-  <path d="M19 32C19 28.686 21.686 26 25 26C28.314 26 31 28.686 31 32" stroke="#005e7a" stroke-width="2"/>
-  <path d="M15 18L25 18" stroke="#005e7a" stroke-width="1.5"/>
-</svg>
-`;
-
-// Management Icon SVG
-const managementIconSvg = `
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Management icon with building and gear -->
-  <rect x="8" y="16" width="24" height="18" rx="2" fill="#005e7a"/>
-  
-  <!-- Windows -->
-  <rect x="12" y="20" width="4" height="4" fill="#ffffff"/>
-  <rect x="18" y="20" width="4" height="4" fill="#ffffff"/>
-  <rect x="24" y="20" width="4" height="4" fill="#ffffff"/>
-  <rect x="12" y="26" width="4" height="4" fill="#ffffff"/>
-  <rect x="18" y="26" width="4" height="4" fill="#ffffff"/>
-  <rect x="24" y="26" width="4" height="4" fill="#ffffff"/>
-  
-  <!-- Door -->
-  <rect x="18" y="30" width="4" height="4" rx="1" fill="#ffffff"/>
-  
-  <!-- Roof -->
-  <path d="M6 16L20 6L34 16" stroke="#005e7a" stroke-width="2"/>
-  
-  <!-- Gear -->
-  <circle cx="30" cy="10" r="6" fill="#005e7a" stroke="#ffffff" stroke-width="1"/>
-  <path d="M30 7L30 13" stroke="#ffffff" stroke-width="1"/>
-  <path d="M27 10L33 10" stroke="#ffffff" stroke-width="1"/>
-  <path d="M28 8L32 12" stroke="#ffffff" stroke-width="1"/>
-  <path d="M28 12L32 8" stroke="#ffffff" stroke-width="1"/>
 </svg>
 `;
 
@@ -236,9 +176,70 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     textAlign: 'center',
   },
+  roleButtonsContainer: {
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  roleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 50,
+    width: '100%',
+    marginVertical: 8,
+    paddingVertical: 18,
+    paddingHorizontal: 25,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 4,
+  },
+  selectedRoleButton: {
+    backgroundColor: '#FFCC33',
+  },
+  managementButton: {
+    backgroundColor: '#ffffff',
+  },
+  studentButton: {
+    backgroundColor: '#ffffff',
+  },
+  parentButton: {
+    backgroundColor: '#ffffff',
+  },
+  roleIconContainer: {
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 2,
+  },
+  roleButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#005e7a',
+  },
   footer: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#ffffff',
+    opacity: 0.8,
     marginTop: 20,
+    textAlign: 'center',
+    paddingHorizontal: 30,
   },
 }); 
