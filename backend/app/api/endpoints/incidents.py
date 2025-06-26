@@ -71,9 +71,6 @@ async def get_incidents(
         if incident.student_id:
             student_query = await db.execute(select(Student).filter(Student.id == incident.student_id))
             student = student_query.scalars().first()
-            if student:
-                user_query = await db.execute(select(User).filter(User.id == student.user_id))
-                student_user = user_query.scalars().first()
         
         # Create incident schema with additional info
         incident_schema = IncidentSchema.model_validate(incident)
@@ -83,8 +80,8 @@ async def get_incidents(
             incident_schema.reporter_name = reporter.full_name
         
         # Add student name
-        if student and student_user:
-            incident_schema.student_name = student_user.full_name
+        if student:
+            incident_schema.student_name = f"{student.first_name} {student.last_name}"
         
         # Add comment user names
         for comment in incident_schema.comments:
@@ -142,10 +139,7 @@ async def create_incident(
         student = await db.execute(select(Student).filter(Student.id == incident_in.student_id))
         student = student.scalars().first()
         if student:
-            user_query = await db.execute(select(User).filter(User.id == student.user_id))
-            student_user = user_query.scalars().first()
-            if student_user:
-                incident_schema.student_name = student_user.full_name
+            incident_schema.student_name = f"{student.first_name} {student.last_name}"
     
     return incident_schema
 
@@ -195,10 +189,7 @@ async def get_incident(
         student_query = await db.execute(select(Student).filter(Student.id == incident.student_id))
         student = student_query.scalars().first()
         if student:
-            user_query = await db.execute(select(User).filter(User.id == student.user_id))
-            student_user = user_query.scalars().first()
-            if student_user:
-                incident_schema.student_name = student_user.full_name
+            incident_schema.student_name = f"{student.first_name} {student.last_name}"
     
     # Add comment user names
     for comment in incident_schema.comments:
@@ -254,9 +245,6 @@ async def update_incident(
         student_query = await db.execute(select(Student).filter(Student.id == incident.student_id))
         student = student_query.scalars().first()
         if student:
-            user_query = await db.execute(select(User).filter(User.id == student.user_id))
-            student_user = user_query.scalars().first()
-            if student_user:
-                incident_schema.student_name = student_user.full_name
+            incident_schema.student_name = f"{student.first_name} {student.last_name}"
     
     return incident_schema 

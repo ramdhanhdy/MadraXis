@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 import { supabase } from '../../../src/utils/supabase';
 
@@ -20,9 +19,7 @@ const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
   <path d="M85 170V180H115V170" stroke="#005e7a" stroke-width="10" stroke-linecap="round" />
 </svg>`;
 
-export default function LoginScreen() {
-  const router = useRouter();
-  const { role } = useLocalSearchParams<{ role: string }>();
+export default function ManagementAuthScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -48,10 +45,6 @@ export default function LoginScreen() {
   }
 
   async function handleRegister() {
-    if (!role) {
-      setErrorMessage('Role is not selected. Please go back and select a role.');
-      return;
-    }
     if (!email || !password) {
       setErrorMessage('Please enter both email and password.');
       return;
@@ -62,7 +55,7 @@ export default function LoginScreen() {
       email: email,
       password: password,
       options: {
-        data: { role: role },
+        data: { role: 'management' }, // Hardcode role for management sign-up
       },
     });
 
@@ -96,13 +89,7 @@ export default function LoginScreen() {
       <View style={styles.logoContainer}>
         <SvgXml xml={logoSvg} width={100} height={100} />
         <Text style={styles.appName}>Pondok Pesantren Tahfidz ZAID BIN TSAABIT</Text>
-        {role && (
-          <View style={styles.roleChip}>
-            <Text style={styles.roleText}>
-              Login as: {role.charAt(0).toUpperCase() + role.slice(1)}
-            </Text>
-          </View>
-        )}
+        <Text style={styles.title}>Management Portal</Text>
       </View>
 
       {/* Combined Login/Register Form */}
@@ -177,27 +164,17 @@ const styles = StyleSheet.create({
     marginTop: 40,
     marginBottom: 40,
   },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 10,
-  },
   appName: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#005e7a',
     textAlign: 'center',
   },
-  roleChip: {
-    backgroundColor: '#005e7a',
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    borderRadius: 20,
-    marginTop: 10,
-  },
-  roleText: {
-    color: '#ffffff',
+  title: {
+    fontSize: 20,
     fontWeight: 'bold',
+    color: '#333333',
+    marginTop: 10,
   },
   formContainer: {
     paddingHorizontal: 10,
@@ -263,4 +240,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
- 

@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 from app.db.database import Base
 
@@ -22,7 +24,7 @@ class Incident(Base):
     reporter = relationship("User", back_populates="incidents_reported")
     
     # Student involved in the incident (if applicable)
-    student_id = Column(Integer, ForeignKey("students.id"), nullable=True)
+    student_id = Column(UUID(as_uuid=True), ForeignKey("students.id"), nullable=True)
     student = relationship("Student", back_populates="incidents")
     
     # School where the incident occurred

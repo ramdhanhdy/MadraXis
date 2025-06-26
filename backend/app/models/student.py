@@ -22,9 +22,6 @@ class Student(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False) 
-
-    user = relationship("User", back_populates="student_profile")
     classes = relationship("SchoolClass", secondary=class_students, back_populates="students")
     incidents = relationship("Incident", back_populates="student")
 

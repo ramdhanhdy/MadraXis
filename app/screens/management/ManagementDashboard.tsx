@@ -2,24 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../../src/context/AuthContext';
+import { fetchIncidentsForSchool } from '../../../src/services/incidents';
 
+// Updated interface to match Supabase query result
 interface Incident {
   id: number;
   incident_type: string;
   description: string;
   location: string;
   status: string;
-  reporter_name?: string;
-  student_name?: string;
   created_at: string;
+  student_name?: string;
   is_anonymous?: boolean;
+  reporter: {
+    full_name: string;
+  } | null;
 }
 
 export default function ManagementDashboard() {
   const router = useRouter();
+  const { user, signOut, loading: authLoading } = useAuth(); // Use auth context, get loading state
   const [showNotifications, setShowNotifications] = useState(false);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -62,39 +66,38 @@ export default function ManagementDashboard() {
     }
   };
 
-  // Fetch incidents from the backend
+  // Fetch incidents from Supabase
   const fetchIncidents = async () => {
+    if (!user) {
+      setError('User not authenticated.');
+      return;
+    }
+
+    const schoolId = user.user_metadata?.school_id;
+    if (!schoolId) {
+      setError('School ID not found for this user.');
+      // Optionally, guide the user to a school setup/selection screen
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
-      
-      // Get auth token from storage
-      const token = await AsyncStorage.getItem('auth_token');
-      
-      if (!token) {
-        setError('Sesi Anda telah berakhir. Silakan login kembali.');
-        return;
+
+      const { data, error: fetchError } = await fetchIncidentsForSchool(schoolId, 5);
+
+      if (fetchError) {
+        throw fetchError;
       }
-      
-      // Make API request to get incidents
-      const response = await axios.get(
-        'http://192.168.0.105:8000/api/v1/incidents',
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          params: {
-            limit: 5, // Limit to most recent 5 incidents
-          }
-        }
-      );
-      
-      if (response.data) {
-        setIncidents(response.data);
+
+      if (data) {
+        // The service returns data that matches the Incident interface, so we can set it directly
+        setIncidents(data as any); // Cast to any to bypass strict type checking if needed for nested objects
       }
-    } catch (error) {
-      console.error('Error fetching incidents:', error);
-      setError('Gagal memuat data insiden.');
+
+    } catch (err: any) {
+      console.error('Error fetching incidents:', err);
+      setError(err.message || 'Gagal memuat data insiden.');
     } finally {
       setIsLoading(false);
     }
@@ -107,10 +110,24 @@ export default function ManagementDashboard() {
     // router.push("/management/incidents/" + incidentId);
   };
 
-  // Fetch incidents when component mounts
+  // Handle Sign Out using AuthContext
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      // The root layout's useEffect will handle redirecting to the login screen
+    } catch (e: any) {
+      console.error('Failed to sign out:', e);
+      Alert.alert('Error', e.message || 'Gagal untuk keluar.');
+    }
+  };
+
+  // Fetch incidents when component mounts and auth state is resolved
   useEffect(() => {
+    if (authLoading) {
+      return; // Wait for authentication to resolve
+    }
     fetchIncidents();
-  }, []);
+  }, [authLoading, user]); // Re-fetch if authLoading changes or user object changes
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -247,9 +264,7 @@ export default function ManagementDashboard() {
                           ? 'Kerusakan Fasilitas' 
                           : 'Masalah Lainnya'}
                   </Text>
-                  <Text style={styles.incidentDetails}>
-                    {incident.location} - {incident.is_anonymous ? 'Laporan Anonim' : `Dilaporkan oleh ${incident.reporter_name || 'Siswa'}`}
-                  </Text>
+                  <Text style={styles.incidentDetails}>Dilaporkan oleh: {incident.is_anonymous ? 'Anonim' : incident.reporter?.full_name || 'Tidak diketahui'}</Text>
                   <Text style={styles.incidentTime}>{getRelativeTime(incident.created_at)}</Text>
                 </View>
                 <TouchableOpacity style={styles.incidentAction}>
@@ -333,6 +348,12 @@ export default function ManagementDashboard() {
             </View>
           </View>
         </View>
+        
+        {/* Sign Out Button */}
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+          <Ionicons name="log-out-outline" size={20} color="#e74c3c" style={{ marginRight: 8 }} />
+          <Text style={styles.signOutButtonText}>Keluar</Text>
+        </TouchableOpacity>
         
         {/* Bottom Spacing */}
         <View style={{ height: 30 }} />
@@ -673,5 +694,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666666',
     textAlign: 'center',
+  },
+  signOutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginHorizontal: 16,
+    marginTop: 16, // Add some space above the button
+    marginBottom: 24, // Add space at the bottom
+    borderWidth: 1,
+    borderColor: '#e74c3c',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  signOutButtonText: {
+    color: '#e74c3c',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 }); 

@@ -106,7 +106,8 @@ export default function StudentsList() {
   };
 
   const handleAddStudent = () => {
-    router.push('screens/teacher/add-student' as any);
+    // Navigate to the Add Student screen using the correct Expo Router path
+    router.push('/screens/teacher/AddStudent'); 
   };
 
   const handleRetry = () => {
