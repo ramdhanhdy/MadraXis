@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { SvgXml } from 'react-native-svg';
-import { supabase } from '../../../src/utils/supabase';
+import AuthForm from '../../components/auth/AuthForm';
 
 const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -20,70 +20,6 @@ const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
 </svg>`;
 
 export default function ManagementAuthScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-
-  async function handleLogin() {
-    if (!email || !password) {
-      setErrorMessage('Please enter both email and password.');
-      return;
-    }
-    setIsLoading(true);
-    setErrorMessage('');
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
-
-    if (error) {
-      setErrorMessage(error.message);
-    }
-    // On success, the AuthProvider will handle navigation.
-    setIsLoading(false);
-  }
-
-  async function handleRegister() {
-    if (!email || !password) {
-      setErrorMessage('Please enter both email and password.');
-      return;
-    }
-    setIsLoading(true);
-    setErrorMessage('');
-    const { error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-      options: {
-        data: { role: 'management' }, // Hardcode role for management sign-up
-      },
-    });
-
-    if (error) {
-      setErrorMessage(error.message);
-    } else {
-      Alert.alert('Success!', 'Please check your email for a confirmation link to complete your registration.');
-    }
-    setIsLoading(false);
-  }
-
-  async function handleForgotPassword() {
-    if (!email) {
-      setErrorMessage('Please enter your email address to reset your password.');
-      return;
-    }
-    setIsLoading(true);
-    setErrorMessage('');
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
-
-    if (error) {
-      setErrorMessage(error.message);
-    } else {
-      Alert.alert('Success!', 'Password reset link has been sent to your email.');
-    }
-    setIsLoading(false);
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
@@ -92,63 +28,7 @@ export default function ManagementAuthScreen() {
         <Text style={styles.title}>Management Portal</Text>
       </View>
 
-      {/* Combined Login/Register Form */}
-      <View style={styles.formContainer}>
-        {errorMessage ? (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{errorMessage}</Text>
-          </View>
-        ) : null}
-        
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Masukkan email Anda"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            editable={!isLoading}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Masukkan password Anda"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            editable={!isLoading}
-          />
-        </View>
-
-        <TouchableOpacity 
-          style={styles.forgotPasswordContainer} 
-          onPress={handleForgotPassword}
-          disabled={isLoading}
-        >
-          <Text style={styles.forgotPasswordText}>Lupa Password?</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.loginButton, isLoading && styles.disabledButton]} 
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          {isLoading ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.loginButtonText}>Login</Text>}
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.registerButton, {marginTop: 15}, isLoading && styles.disabledButton]} 
-          onPress={handleRegister}
-          disabled={isLoading}
-        >
-          {isLoading ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.registerButtonText}>Daftar Akun Baru</Text>}
-        </TouchableOpacity>
-      </View>
+      <AuthForm isManagementScreen={true} />
     </View>
   );
 }

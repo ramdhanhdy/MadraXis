@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '../utils/supabase';
+import { supabase } from '@/src/utils/supabase';
+import { useRouter } from 'expo-router';
 
 // Define the shape of the context
 interface AuthContextType {
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     // Get the initial session
@@ -38,17 +40,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     // Listen for changes in auth state
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      if (event === 'SIGNED_IN') {
+        const userRole = session?.user?.user_metadata?.role;
+        switch (userRole) {
+            case 'teacher':
+                router.replace('/screens/teacher/TeacherDashboard');
+                break;
+            case 'management':
+                if (session?.user?.user_metadata?.school_id) {
+                    router.replace('/management/dashboard');
+                } else {
+                    router.replace('/management/setup');
+                }
+                break;
+            default:
+                router.replace('/screens/auth/ManagementAuthScreen');
+                break;
+        }
+      } else if (event === 'SIGNED_OUT') {
+        router.replace('/screens/auth/ManagementAuthScreen');
+      }
     });
 
     // Cleanup the listener on component unmount
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [router]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
