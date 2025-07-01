@@ -105,11 +105,11 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
           )}
         </TouchableOpacity>
       ) : (
-        <TouchableOpacity
-          style={[styles.loginButton, isLoading && styles.disabledButton]}
+      <TouchableOpacity 
+        style={[styles.loginButton, isLoading && styles.disabledButton]} 
           onPress={handleSendReset}
-          disabled={isLoading}
-        >
+        disabled={isLoading}
+      >
           {isLoading ? (
             <ActivityIndicator color="#ffffff" />
           ) : (
@@ -131,7 +131,7 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
           onPress={() => setMode('login')}
         >
           <Text style={styles.forgotPasswordText}>Back to Login</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
       )}
     </View>
   );
