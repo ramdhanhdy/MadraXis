@@ -1,259 +1,213 @@
-# User Management Guide - Adding Users via Supabase
+# User Management Guide for MadraXis
 
-This guide provides step-by-step instructions for administrators to add new users to the MadraXis system using the Supabase dashboard.
+## Overview
+This guide explains how to manage users in the MadraXis school management system. The system uses an invite-only authentication flow where admins pre-create users with specific roles.
 
-## Prerequisites
-
-- Administrative access to the Supabase project dashboard
-- User information: email, full name, phone number (optional), and role
-- School ID (typically `1` for single-school setup)
-
-## Step-by-Step User Creation Process
-
-### 1. Access Supabase Dashboard
-
-1. Navigate to [supabase.com](https://supabase.com)
-2. Sign in to your account
-3. Select the **Madraxis** project
-4. Go to **Authentication** → **Users** in the left sidebar
-
-### 2. Create New User
-
-1. Click the **"Add user"** button (usually green, located in the top-right area)
-2. Choose **"Create new user"** from the dropdown options
-
-### 3. Fill User Information
-
-#### Basic Information
-- **Email**: Enter the user's email address (required)
-  - This will be their login username
-  - Must be a valid email format
-  - Will receive password reset emails
-
-- **Phone**: Enter phone number (optional)
-  - Format: `+62812345678` (include country code)
-  - Used for future SMS features
-
-- **Password**: **LEAVE BLANK**
-  - Do NOT set a password here
-  - Users will create their own via email reset link
-
-- **Email Confirm**: Leave unchecked (users will confirm via password reset)
-
-#### User Metadata
-In the **"User Metadata"** section, add the following JSON:
-
-```json
-{
-  "full_name": "User's Full Name",
-  "role": "teacher",
-  "school_id": "1"
-}
-```
-
-⚠️ **Important Notes:**
-- All values must be strings in JSON (use quotes around numbers like `"1"`)
-- The `role` field is required - do not omit it
-- If you don't set `full_name`, the email will be used as default
-
-**Role Options:**
-- `"teacher"` - For teaching staff
-- `"management"` - For school administrators
-- `"student"` - For students (if they have app access)
-- `"parent"` - For parents/guardians
-
-**School ID:**
-- Use `"1"` for the primary school (as string)
-- For multi-school setups, use appropriate school ID as string
-
-### 4. Complete User Creation
-
-1. Review all information for accuracy
-2. Click **"Create user"** button
-3. The user will appear in the users list with status "Unconfirmed"
-
-### 5. User Onboarding Process
-
-Once created, the user follows this process:
-
-1. **User receives notification** (via email or manual communication)
-2. **User opens the app** → sees login screen
-3. **User enters email** → clicks "Forgot password? Set/Reset Password"
-4. **User receives password reset email** from Supabase
-5. **User clicks email link** → app opens to password creation screen
-6. **User sets password** → automatically logged in and routed to appropriate dashboard
-
-## Example User Metadata Templates
-
-### Teacher Example
-```json
-{
-  "full_name": "Ahmad Fauzi",
-  "role": "teacher",
-  "school_id": "1"
-}
-```
-
-### Management Example
-```json
-{
-  "full_name": "Siti Nurhaliza",
-  "role": "management",
-  "school_id": "1"
-}
-```
-
-### Parent Example
-```json
-{
-  "full_name": "Budi Santoso",
-  "role": "parent",
-  "school_id": "1"
-}
-```
-
-### Student Example
-```json
-{
-  "full_name": "Fatimah Az-Zahra",
-  "role": "student",
-  "school_id": "1"
-}
-```
-
-## Alternative Method: Invite via Email
-
-If the direct user creation method doesn't work, try this approach:
-
-1. Click **"Add user"** → **"Invite via email"**
-2. Enter email address
-3. After the user is created, edit their metadata:
-   - Find the user in the list
-   - Click on their email
-   - Scroll to **"Raw User Meta Data"** section
-   - Add the required JSON metadata
-   - Click **"Update user"**
-
-## Troubleshooting User Creation Issues
-
-### Error: "null value in column role violates not-null constraint"
-
-This error has been fixed with the database trigger update. If you still encounter it:
-
-1. **Verify metadata format**: Ensure your JSON is properly formatted
-2. **Include required role**: Always include the `role` field in user metadata
-3. **Use string values**: Ensure `school_id` is quoted as a string: `"1"`
-
-### Error: "Failed to invite user"
-
-1. **Check email format**: Ensure the email is valid
-2. **Verify Supabase settings**: Confirm email provider is enabled
-3. **Try alternative method**: Use the "Invite via email" option instead
-
-### User created but no profile data
-
-1. Check if the database trigger is working properly
-2. Manually add the user to the profiles table if needed
-3. Verify the user metadata is properly formatted
-
-## Bulk User Import (Advanced)
-
-For adding multiple users at once:
-
-### Using CSV Import
-1. Prepare a CSV file with columns:
-   ```
-   email,phone,full_name,role,school_id
-   teacher1@school.com,+6281234567,Ahmad Fauzi,teacher,1
-   parent1@gmail.com,+6287654321,Siti Aminah,parent,1
-   ```
-
-2. In Supabase dashboard, look for **"Import users"** option
-3. Upload your CSV file
-4. Map columns to appropriate fields
-5. Ensure metadata is properly formatted
-
-### Using Supabase API (Developer Method)
-```javascript
-// Example API call for bulk creation
-const users = [
-  {
-    email: "teacher@school.com",
-    user_metadata: {
-      full_name: "Ahmad Fauzi",
-      role: "teacher",
-      school_id: "1"
-    }
-  }
-  // ... more users
-];
-
-// Use Supabase Admin API to create users
-```
-
-## User Status and Management
-
-### User Statuses
-- **Unconfirmed**: User created but hasn't set password
-- **Confirmed**: User has set password and can log in
-- **Disabled**: User account is suspended
-
-### Managing Existing Users
-
-#### Edit User Information
-1. Find user in the users list
-2. Click on the user email
-3. Edit metadata in the **"Raw User Meta Data"** section
-4. Save changes
-
-#### Reset User Password
-1. Select user from list
-2. Click **"Reset password"**
-3. User will receive reset email
-4. They can set a new password
-
-#### Disable/Enable User
-1. Select user from list
-2. Use toggle or menu option to disable/enable
-3. Disabled users cannot log in
-
-## Security Best Practices
-
-### Email Verification
-- Always use valid, verified email addresses
-- Users should confirm email ownership before account activation
-
-### Role Assignment
-- Double-check role assignments before creation
-- Use principle of least privilege
-- Regularly audit user roles and permissions
-
-### Password Policy
-- Users must create passwords of at least 6 characters
-- Encourage strong password practices
-- Consider implementing password complexity requirements
-
-## Monitoring and Maintenance
-
-### Regular Tasks
-- Review user list for inactive accounts
-- Update user information as needed
-- Monitor failed login attempts
-- Clean up disabled/unused accounts
-
-### Audit Trail
-- Keep records of user creation dates
-- Document role changes and reasons
-- Monitor user activity patterns
-
-## Support and Contact
-
-For technical issues with user creation:
-1. Check Supabase documentation
-2. Review error messages in dashboard
-3. Contact system administrator
-4. Escalate to development team if needed
+## User Roles
+- **management**: School administrators with full access
+- **teacher**: Teaching staff with class management access  
+- **parent**: Parents with access to their children's information
+- **student**: Students with limited access to their own data
 
 ---
 
-**Note**: This process ensures secure, invite-only access to the MadraXis system while maintaining proper user role segregation and school-specific data access. 
+## Step-by-Step User Creation
+
+### 1. Access Supabase Dashboard
+1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
+2. Select your project: `bsjbixlueqoxpxbeygoi` ("Madraxis")
+3. Navigate to **Authentication > Users**
+
+### 2. Create New User
+Click **"Add user"** and fill in:
+
+**Basic Information:**
+- **Email**: User's email address
+- **Password**: Leave empty (user will set via password reset)
+- **Email Confirm**: ✅ Check this box
+
+**CRITICAL: User Metadata Configuration**
+
+In the **"User Metadata"** section, add this JSON (replace values as needed):
+
+#### For Management User:
+```json
+{
+  "role": "management",
+  "school_id": "1",
+  "full_name": "John Smith"
+}
+```
+
+#### For Teacher User:
+```json
+{
+  "role": "teacher", 
+  "school_id": "1",
+  "full_name": "Jane Doe"
+}
+```
+
+#### For Parent User:
+```json
+{
+  "role": "parent",
+  "school_id": "1", 
+  "full_name": "Mike Johnson"
+}
+```
+
+#### For Student User:
+```json
+{
+  "role": "student",
+  "school_id": "1",
+  "full_name": "Sarah Wilson"
+}
+```
+
+### 3. Important Notes
+- **Always use string values**: `"school_id": "1"` not `"school_id": 1`
+- **Role is required**: Must be one of: `management`, `teacher`, `parent`, `student`
+- **Email confirmation**: Always check "Email Confirm" 
+- **No initial password**: Leave password empty so user sets it themselves
+
+---
+
+## User First Login Process
+
+### For New Users:
+1. **User receives email**: You manually share their email with them
+2. **User goes to app**: Opens MadraXis app 
+3. **User clicks "Forgot Password"**: On login screen
+4. **User enters email**: Their registered email address
+5. **User receives reset email**: From Supabase
+6. **User clicks link**: Opens app with reset token
+7. **User sets password**: Creates their first password
+8. **User gets logged in**: Automatically navigated to their role-specific dashboard
+
+### Navigation After Login:
+- **Management** → `/management/dashboard` (or `/management/setup` if no school_id)
+- **Teacher** → `/screens/teacher/TeacherDashboard`
+- **Parent** → `/screens/parent/ParentDashboard`  
+- **Student** → `/screens/student/StudentDashboard`
+
+---
+
+## Database Trigger Verification
+
+The system uses database triggers to automatically create profile records. To verify they're working:
+
+```sql
+-- Check if user was created properly
+SELECT 
+  u.id,
+  u.email,
+  u.raw_user_meta_data,
+  p.full_name,
+  p.role,
+  p.school_id
+FROM auth.users u
+LEFT JOIN public.profiles p ON u.id = p.id
+WHERE u.email = 'user@example.com';
+```
+
+Expected result:
+- User should exist in `auth.users` with proper `raw_user_meta_data`
+- Profile should exist in `public.profiles` with role and school_id populated
+
+---
+
+## Troubleshooting
+
+### Issue: User login doesn't navigate anywhere
+**Cause**: Missing or incorrect role metadata
+
+**Solution**: 
+1. Check user in Supabase Dashboard
+2. Verify "User Metadata" contains correct role
+3. If missing, edit user and add proper metadata JSON
+4. User needs to log out and log back in
+
+### Issue: "Role violates not-null constraint" 
+**Cause**: Database trigger failed due to malformed metadata
+
+**Solution**:
+1. Fix the user metadata in Supabase Dashboard
+2. Manually update the profile:
+```sql
+UPDATE public.profiles 
+SET role = 'teacher', school_id = 1 
+WHERE id = 'user-uuid-here';
+```
+
+### Issue: User gets "Unknown role" error
+**Cause**: Role value doesn't match expected values
+
+**Solution**: Ensure role is exactly one of: `management`, `teacher`, `parent`, `student`
+
+---
+
+## Testing Authentication Flow
+
+### Quick Test:
+1. Create a test user with proper metadata
+2. Open app and click "Forgot Password"  
+3. Enter test user email
+4. Check email for reset link
+5. Click link → should open app
+6. Set password → should navigate to role dashboard
+7. Log out and log back in → should work normally
+
+### Debug Mode:
+Check browser console or React Native logs for these messages:
+```
+User signed in with role: teacher
+User metadata: {...}
+Raw user metadata: {...}
+Navigating based on role: teacher
+```
+
+---
+
+## Best Practices
+
+1. **Always test new users** before sharing credentials
+2. **Use consistent school_id values** across all users in same school
+3. **Keep role values lowercase** and exact matches
+4. **Document user credentials securely** for school administrators
+5. **Regularly audit user access** and remove inactive accounts
+
+---
+
+## API Integration (For Developers)
+
+### Create User via API:
+```javascript
+const { data, error } = await supabase.auth.admin.createUser({
+  email: 'user@example.com',
+  email_confirm: true,
+  user_metadata: {
+    role: 'teacher',
+    school_id: '1',
+    full_name: 'Teacher Name'
+  }
+});
+```
+
+### Update User Role:
+```javascript
+const { data, error } = await supabase.auth.admin.updateUserById(
+  userId, 
+  { 
+    user_metadata: { 
+      role: 'management',
+      school_id: '1' 
+    } 
+  }
+);
+```
+
+---
+
+*Last updated: January 4, 2025* 

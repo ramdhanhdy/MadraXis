@@ -90,7 +90,7 @@ switch (userRole) {
 - RLS policies ensure users can only access their own data
 
 ### RLS Security
-```sql
+       ```sql
 -- Example policy for profiles table
 CREATE POLICY "Profiles are only accessible by owner"
   ON profiles FOR ALL 
