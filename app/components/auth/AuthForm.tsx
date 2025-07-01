@@ -10,11 +10,32 @@ interface AuthFormProps {
 
 export default function AuthForm({ role, isManagementScreen = false }: AuthFormProps) {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [mode, setMode] = useState<'login' | 'reset'>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
 
-  async function handleSendOtp() {
+  async function handleLogin() {
+    if (!email || !password) {
+      setErrorMessage('Please enter both email and password.');
+      return;
+    }
+    setIsLoading(true);
+    setErrorMessage('');
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setErrorMessage(error.message);
+    }
+    setIsLoading(false);
+  }
+
+  async function handleSendReset() {
     if (!email) {
       setErrorMessage('Please enter your email address.');
       return;
@@ -22,22 +43,17 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
     setIsLoading(true);
     setErrorMessage('');
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email,
-      options: {
-        // shouldCreateUser: true, // This is true by default
-        emailRedirectTo: 'madraxis://otp',
-      },
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'madraxis://reset-password',
     });
 
     if (error) {
       setErrorMessage(error.message);
-      setIsLoading(false);
     } else {
-      Alert.alert('Check your email', 'A magic link has been sent to your email address.');
-      router.push({ pathname: '/otp', params: { email: email } });
+      Alert.alert('Check your email', 'We\'ve sent you a link to set your password.');
+      setMode('login');
     }
-    // We don't set isLoading to false here, as the user is navigating away.
+    setIsLoading(false);
   }
 
   return (
@@ -52,7 +68,7 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
-          placeholder="Masukkan email Anda"
+          placeholder="Enter your email"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -61,13 +77,62 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
         />
       </View>
 
-      <TouchableOpacity 
-        style={[styles.loginButton, isLoading && styles.disabledButton]} 
-        onPress={handleSendOtp}
-        disabled={isLoading}
-      >
-        {isLoading ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.loginButtonText}>Send Magic Link</Text>}
-      </TouchableOpacity>
+      {mode === 'login' && (
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            editable={!isLoading}
+          />
+        </View>
+      )}
+
+      {mode === 'login' ? (
+        <TouchableOpacity
+          style={[styles.loginButton, isLoading && styles.disabledButton]}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text style={styles.loginButtonText}>Login</Text>
+          )}
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={[styles.loginButton, isLoading && styles.disabledButton]}
+          onPress={handleSendReset}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text style={styles.loginButtonText}>Send Reset Link</Text>
+          )}
+        </TouchableOpacity>
+      )}
+
+      {mode === 'login' ? (
+        <TouchableOpacity
+          style={styles.forgotPasswordContainer}
+          onPress={() => setMode('reset')}
+        >
+          <Text style={styles.forgotPasswordText}>Forgot password? Set/Reset Password</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={styles.forgotPasswordContainer}
+          onPress={() => setMode('login')}
+        >
+          <Text style={styles.forgotPasswordText}>Back to Login</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

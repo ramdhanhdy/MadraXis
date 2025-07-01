@@ -1,93 +1,178 @@
-# ZaidApp Authentication and Onboarding Flow Documentation
+# MadraXis Authentication Flow Documentation (Updated July 1, 2025)
 
-This document outlines the authentication flow, automatic role assignment for new users, and the initial setup process for management users.
+This document outlines the simplified invite-only authentication flow that replaces the previous magic-link/OTP system.
 
-## 1. User Sign-up and Role Assignment
+## Overview
 
-When a new user signs up through the application, their intended role (e.g., 'management', 'teacher', 'student') is captured during the registration process.
+The authentication system now uses an invite-only approach where:
+1. Users are pre-created in Supabase by administrators
+2. Users set their own passwords via email reset links
+3. Subsequent logins use email + password
 
-- **Client-Side (LoginScreen.tsx)**:
-  - During the `supabase.auth.signUp()` call, the selected role is passed in the `options.data` field:
-    ```javascript
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-      options: {
-        data: { role: selectedRole }, // e.g., { role: 'management' }
-      },
-    });
-    ```
-  - This `options.data` is initially stored in the new user's `raw_user_meta_data` in the `auth.users` table.
+## 1. User Provisioning (Administrative)
 
-- **Server-Side (Supabase Auth Hook - Edge Function: `set-default-role`)**:
-  - A Supabase Database Webhook is configured to trigger the `set-default-role` Edge Function on every `INSERT` into the `auth.users` table.
-  - **Webhook Configuration**:
-    - **Name**: `Set Management Role on Signup` (or similar)
-    - **Table**: `auth.users`
-    - **Events**: `INSERT`
-    - **HTTP Request Method**: `POST`
-    - **URL**: `https://<YOUR_PROJECT_REF>.supabase.co/functions/v1/set-default-role`
-  - **`set-default-role` Edge Function Logic**:
-    1. Receives the new user record from the webhook payload.
-    2. Reads the `role` from `record.raw_user_meta_data.role`.
-    3. If the `requestedRole` is `'management'` (or any other role that needs specific `app_metadata` setup):
-       - It uses the Supabase Admin client (with `SUPABASE_SERVICE_ROLE_KEY`) to update the new user's record.
-       - The primary action is to set `app_metadata.role` to the determined role (e.g., `'management'`).
-         ```javascript
-         // Inside the Edge Function
-         const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-           record.id,
-           { app_metadata: { ...record.app_metadata, role: 'management' } }
-         );
-         ```
-    4. This ensures that critical role information is stored securely in `app_metadata`, which can only be modified by server-side processes with admin privileges.
+### Supabase Dashboard Setup
+- **Auth Settings**: Email sign-ups are **disabled** to prevent unauthorized registrations
+- **Email Provider**: Enabled with email confirmation ON
+- **Reset Password URL**: Set to `madraxis://reset-password`
 
-## 2. Management User Initial School Setup
+### User Creation Process
+Administrators create users via Supabase Dashboard → Auth → Users:
 
-After a management user logs in for the first time, the system checks if they have completed their initial school setup.
+1. **Required Fields**:
+   - Email address
+   - Phone number (optional)
+   - Full name
 
-- **Redirection Logic (`app/_layout.tsx`)**:
-  - When a user with the 'management' role (determined from `session.user.user_metadata.role` or ideally from `session.user.app_metadata.role` after the auth hook runs and session is refreshed) logs in:
-  - The system checks if `session.user.user_metadata.school_id` exists.
-    - If `school_id` **exists**, the user is redirected to `/management/dashboard`.
-    - If `school_id` **is null/undefined**, the user is redirected to `/management/setup` (the School Setup Screen).
+2. **User Metadata**:
+   ```json
+   {
+     "role": "teacher" | "management" | "student" | "parent", 
+     "school_id": 1
+   }
+   ```
 
-- **School Setup Screen (`app/management/setup.tsx`)**:
-  - The management user provides basic information for their school (e.g., School Name, NPSN) and their own Full Name.
-  - **Form Submission Logic**:
-    1. An attempt is made to `INSERT` a new record into the `public.schools` table with the provided details.
-    2. **RLS Policy for `schools` Table (`allow_management_insert_schools_v3`)**: This policy ensures that only authenticated users with `app_metadata.role = 'management'` can insert new schools.
-       ```sql
-       CREATE POLICY allow_management_insert_schools_v3
-       ON public.schools
-       FOR INSERT
-       TO authenticated
-       WITH CHECK (
-         ((auth.jwt()->>'app_metadata')::jsonb->>'role' = 'management')
-       );
-       ```
-    3. If the school insertion is successful, the client then updates the current user's `user_metadata` to include the `school_id` of the newly created school and their `full_name`.
-       ```javascript
-       // In setup.tsx
-       const { error: userError } = await supabase.auth.updateUser({
-         data: {
-           school_id: schoolData.id, // ID from the newly inserted school
-           full_name: managerName,
-         }
-       });
-       ```
-    4. The user's session is refreshed (`supabase.auth.refreshSession()`) to ensure the client has the latest `user_metadata`.
-    5. The user is then typically redirected to the main dashboard, and the redirection logic in `_layout.tsx` will now grant access.
+3. **Important**: Do NOT set a password during creation - users will create their own.
 
-## 3. RLS Policies Summary for this Flow
+## 2. First-Time User Flow
 
-- **`public.schools` Table**:
-  - **INSERT**: `allow_management_insert_schools_v3` - Allows users with `app_metadata.role = 'management'` to insert.
-  - (Other SELECT, UPDATE, DELETE policies for schools will apply based on `school_id` and role).
+### Initial Login Attempt
+1. User opens app → redirected to `/screens/auth/login`
+2. User enters email (no password set yet)
+3. User clicks "Forgot password? Set/Reset Password"
+4. User receives password reset email with deep-link
 
-## Important Notes & Future Improvements:
+### Password Creation
+1. User clicks email link → opens `madraxis://reset-password` in app
+2. App extracts `access_token` and `refresh_token` from URL hash
+3. App calls `supabase.auth.setSession()` to establish session
+4. User sets new password via `supabase.auth.updateUser({ password })`
+5. User is redirected to appropriate dashboard based on role
 
-- **Security of `user_metadata`**: While `user_metadata.role` is used as an initial signal for the Auth Hook, the authoritative role for RLS and application logic should always come from `app_metadata.role`.
-- **Error Handling**: Robust error handling should be present in both client-side code and Edge Functions.
-- **Transaction for Setup**: The school creation and user metadata update in `setup.tsx` should ideally be moved to a single Edge Function to ensure atomicity (both operations succeed or fail together). This is currently a TODO.
-- **Role Management**: For more complex role systems or if roles can change, dedicated admin interfaces or Edge Functions would be needed to manage `app_metadata.role`.
+## 3. Subsequent Logins
+
+### Standard Login Flow
+1. User enters email + password
+2. App calls `supabase.auth.signInWithPassword({ email, password })`
+3. AuthProvider detects `SIGNED_IN` event
+4. User is routed to dashboard based on `user_metadata.role`:
+   - `teacher` → `/screens/teacher/TeacherDashboard`
+   - `management` → `/management/dashboard` (or `/management/setup` if no school_id)
+   - Other roles → default dashboard
+
+## 4. Role-Based Routing
+
+The AuthContext (`src/context/AuthContext.tsx`) handles automatic routing:
+
+```tsx
+switch (userRole) {
+  case 'teacher':
+    router.replace('/screens/teacher/TeacherDashboard');
+    break;
+  case 'management':
+    if (session?.user?.user_metadata?.school_id) {
+      router.replace('/management/dashboard');
+    } else {
+      router.replace('/management/setup');
+    }
+    break;
+  default:
+    router.replace('/screens/auth/login');
+    break;
+}
+```
+
+## 5. Database Integration
+
+### Profiles Table
+- Automatically maintained via trigger when `auth.users` is updated
+- Contains: `id`, `full_name`, `role`, `school_id`, `updated_at`
+- RLS policies ensure users can only access their own data
+
+### RLS Security
+```sql
+-- Example policy for profiles table
+CREATE POLICY "Profiles are only accessible by owner"
+  ON profiles FOR ALL 
+  USING (id = auth.uid());
+```
+
+## 6. Deep-Link Configuration
+
+### App Configuration (`app.json`)
+```json
+{
+  "expo": {
+    "scheme": "madraxis",
+    "deepLinking": {
+      "prefixes": ["madraxis://"]
+    }
+  }
+}
+```
+
+### Supported Deep-Links
+- `madraxis://reset-password` - Password reset/creation flow
+
+## 7. Security Features
+
+### Invite-Only Registration
+- Email sign-ups disabled in Supabase
+- Only pre-created users can authenticate
+- Prevents unauthorized access
+
+### Password Requirements
+- Minimum 6 characters (enforced in reset screen)
+- Users must create their own passwords
+- No default or temporary passwords
+
+### Session Management
+- Automatic token refresh
+- Persistent sessions via AsyncStorage
+- Proper logout handling
+
+## 8. Error Handling
+
+### Common Scenarios
+- **Unknown email**: "User not found" error (good - prevents email enumeration)
+- **Wrong password**: Standard authentication error
+- **Password too short**: Validation before API call
+- **Network issues**: Graceful error display
+
+## Implementation Notes
+
+### Files Modified
+- `app/components/auth/AuthForm.tsx` - Unified login/reset form
+- `app/(auth)/reset-password.tsx` - Deep-link password setting
+- `src/context/AuthContext.tsx` - Updated routing logic
+- `app/index.tsx` - Root redirect to login
+
+### Files Removed
+- `app/screens/auth/RoleSelectionScreen.tsx`
+- `app/screens/auth/OtpVerificationScreen.tsx`
+- `app/screens/auth/OtpVerifyScreen.tsx`
+- `app/otp.tsx`
+
+### Testing Checklist
+- [ ] App opens to login screen
+- [ ] Unknown email shows appropriate error
+- [ ] Password reset email received and deep-link works
+- [ ] Password creation successful
+- [ ] Role-based routing works correctly
+- [ ] Logout and re-login with password works
+- [ ] RLS policies prevent unauthorized data access
+
+## Future Enhancements
+
+### Potential Improvements
+- SMS-based authentication for phone verification
+- Multi-factor authentication
+- Password complexity requirements
+- Session timeout settings
+- Audit logging for authentication events
+
+### Administrative Features
+- Bulk user import from CSV
+- Role management interface
+- Password policy enforcement
+- User suspension/activation

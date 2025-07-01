@@ -1,12 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Alert, View, TextInput, Button, Text, StyleSheet } from 'react-native';
 import { supabase } from '../../src/utils/supabase';
 import { Stack, useRouter } from 'expo-router';
+import * as Linking from 'expo-linking';
 
 export default function ResetPasswordScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const establishSession = async () => {
+      const url = await Linking.getInitialURL();
+      if (url && url.includes('access_token=')) {
+        // Extract hash portion after '#'
+        const hashPart = url.split('#')[1];
+        if (hashPart) {
+          const params = new URLSearchParams(hashPart);
+          const access_token = params.get('access_token');
+          const refresh_token = params.get('refresh_token');
+          if (access_token && refresh_token) {
+            await supabase.auth.setSession({ access_token, refresh_token });
+          }
+        }
+      }
+    };
+    establishSession();
+  }, []);
 
   const handleResetPassword = async () => {
     if (password.length < 6) {
@@ -21,15 +41,15 @@ export default function ResetPasswordScreen() {
     if (error) {
       Alert.alert('Error', error.message);
     } else {
-      Alert.alert('Success', 'Your password has been reset successfully.', [
-        { text: 'OK', onPress: () => router.replace('/(auth)/sign-in') } // Redirect to sign-in after success
+      Alert.alert('Success', 'Your password has been set successfully.', [
+        { text: 'OK', onPress: () => router.replace('/') }
       ]);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: 'Reset Password' }} />
+      <Stack.Screen options={{ title: 'Set Password' }} />
       <Text style={styles.title}>
         Choose a New Password
       </Text>
@@ -42,7 +62,7 @@ export default function ResetPasswordScreen() {
         autoCapitalize="none"
       />
       <Button
-        title={loading ? 'Resetting...' : 'Set New Password'}
+        title={loading ? 'Setting...' : 'Set New Password'}
         onPress={handleResetPassword}
         disabled={loading}
       />

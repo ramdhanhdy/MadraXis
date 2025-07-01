@@ -59,11 +59,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 }
                 break;
             default:
-                router.replace('/screens/auth/ManagementAuthScreen');
+                router.replace('/screens/auth/login');
                 break;
         }
       } else if (event === 'SIGNED_OUT') {
-        router.replace('/screens/auth/ManagementAuthScreen');
+        router.replace('/screens/auth/login');
       }
     });
 

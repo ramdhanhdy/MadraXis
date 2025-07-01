@@ -77,7 +77,7 @@ export default function TeacherDashboard() {
   };
 
   const handleBackToRoleSelection = () => {
-    router.push('/screens/RoleSelectionScreen');
+    router.push('/screens/auth/login');
   };
 
   const openModal = (title: string, content: React.ReactNode) => {
