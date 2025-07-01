@@ -1,22 +1,15 @@
 const { getDefaultConfig } = require('expo/metro-config');
 
-module.exports = (() => {
   const config = getDefaultConfig(__dirname);
 
-  const { transformer, resolver } = config;
+// Fix for @supabase/supabase-js package exports issue with React Native 0.79+
+config.resolver.unstable_enableSymlinks = true;
+config.resolver.unstable_enablePackageExports = true;
+config.resolver.resolverMainFields = ['react-native', 'browser', 'main'];
 
-  // Use babel-preset-expo for SVG support
-  config.transformer = {
-    ...transformer,
-    babelTransformerPath: require.resolve('react-native-svg-transformer'),
-  };
-  
-  // Add svg to assetExts and include it in sourceExts
-  config.resolver = {
-    ...resolver,
-    assetExts: resolver.assetExts.filter((ext) => ext !== 'svg'),
-    sourceExts: [...resolver.sourceExts, 'svg'],
-  };
+// SVG support configuration
+config.transformer.babelTransformerPath = require.resolve('react-native-svg-transformer');
+config.resolver.assetExts = config.resolver.assetExts.filter((ext) => ext !== 'svg');
+config.resolver.sourceExts = [...config.resolver.sourceExts, 'svg'];
 
-  return config;
-})(); 
+module.exports = config; 
