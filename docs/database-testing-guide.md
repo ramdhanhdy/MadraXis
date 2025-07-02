@@ -95,12 +95,22 @@ SELECT full_name FROM profiles WHERE id = (
 -- Expected result: full_name should be 'Jane Doe'
 ```
 
+## ⚠️ SAFETY FIRST
+
+**CRITICAL**: Always run these tests on development/staging databases, never on production!
+
+**Before Testing**:
+- Verify you're connected to the correct database environment
+- Consider using a dedicated test database or branch
+- Always run cleanup queries after testing
+
 ## Running Tests
 
 ### Via Supabase Dashboard
 1. Navigate to SQL Editor
-2. Copy and paste each test case
-3. Execute and verify expected results
+2. **Verify database environment** (check project name/URL)
+3. Copy and paste each test case
+4. Execute and verify expected results
 
 ### Via MCP Tools
 ```javascript
@@ -115,11 +125,26 @@ await mcp_supabase_execute_sql({
 ## Cleanup After Testing
 
 ```sql
--- Remove any test data created during testing
-DELETE FROM auth.users WHERE email LIKE '%@example.com';
-DELETE FROM profiles WHERE full_name IN ('John Smith', 'Jane Doe') OR id IN (
-  SELECT id FROM auth.users WHERE email LIKE '%@example.com'
-);
+-- SAFE CLEANUP: Remove only test data created in the last 5 minutes
+-- This prevents accidental deletion of legitimate production data
+
+-- Option A: Time-based cleanup (recommended)
+DELETE FROM auth.users 
+WHERE email IN ('newuser@example.com', 'jane@example.com') 
+  AND created_at > NOW() - INTERVAL '5 minutes';
+
+DELETE FROM profiles 
+WHERE full_name IN ('John Smith', 'Jane Doe') 
+  AND updated_at > NOW() - INTERVAL '5 minutes';
+
+-- Option B: UUID-specific cleanup (if you saved the UUIDs)
+-- DELETE FROM auth.users WHERE id = 'specific-uuid-here';
+-- DELETE FROM profiles WHERE id = 'specific-uuid-here';
+
+-- Verify cleanup
+SELECT COUNT(*) as remaining_test_users 
+FROM auth.users 
+WHERE email IN ('newuser@example.com', 'jane@example.com');
 ```
 
 ## Success Criteria
