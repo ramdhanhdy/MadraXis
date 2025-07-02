@@ -12,16 +12,18 @@ export default function ResetPasswordScreen() {
   useEffect(() => {
     const establishSession = async () => {
       const url = await Linking.getInitialURL();
-      if (url && url.includes('access_token=')) {
-        // Extract hash portion after '#'
-        const hashPart = url.split('#')[1];
-        if (hashPart) {
-          const params = new URLSearchParams(hashPart);
-          const access_token = params.get('access_token');
-          const refresh_token = params.get('refresh_token');
+      if (url) {
+        try {
+          // Parse tokens from the query string (not hash fragment)
+          const urlObj = new URL(url);
+          const access_token = urlObj.searchParams.get('access_token');
+          const refresh_token = urlObj.searchParams.get('refresh_token');
+          
           if (access_token && refresh_token) {
             await supabase.auth.setSession({ access_token, refresh_token });
           }
+        } catch (error) {
+          console.error('Error parsing URL or setting session:', error);
         }
       }
     };
