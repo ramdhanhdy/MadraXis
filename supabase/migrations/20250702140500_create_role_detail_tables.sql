@@ -59,19 +59,4 @@ create table public.teacher_performance (
   created_at         timestamptz default now()
 );
 
--- 3️⃣ Compatibility Views (legacy)
-create or replace view public.students as
-  select p.id as id,
-         p.full_name,
-         sd.*
-    from public.profiles p
-    join public.student_details sd on sd.user_id = p.id;
-
-create or replace view public.teachers as
-  select p.id as id,
-         p.full_name,
-         td.*
-    from public.profiles p
-    join public.teacher_details td on td.user_id = p.id;
-
 comment on column public.student_details.nis is 'National Student Number (optional)'; 
