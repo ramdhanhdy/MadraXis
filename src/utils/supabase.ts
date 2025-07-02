@@ -1,6 +1,14 @@
 import 'react-native-url-polyfill/auto';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
+
+// Define a no-op storage adapter for server-side rendering.
+const noopStorage = {
+  getItem: (_key: string) => Promise.resolve(null),
+  setItem: (_key: string, _value: string) => Promise.resolve(),
+  removeItem: (_key: string) => Promise.resolve(),
+};
 
 // It's recommended to use environment variables for these
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -12,9 +20,15 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Supabase URL and Anon Key are not set. Please add them to your .env file.");
 }
 
+// Use the no-op storage on the server, and AsyncStorage elsewhere.
+const storage =
+  Platform.OS === 'web' && typeof window === 'undefined'
+    ? noopStorage
+    : AsyncStorage;
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: AsyncStorage, // Use AsyncStorage for session persistence in React Native
+    storage: storage, // Use AsyncStorage for session persistence in React Native
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false, // Required for React Native

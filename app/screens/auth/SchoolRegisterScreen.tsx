@@ -54,7 +54,7 @@ export default function SchoolRegisterScreen() {
     }
     
     // Simulasi pendaftaran berhasil
-    router.push('screens/auth/otp-verification' as any);
+    router.push('/screens/auth/login' as any);
   };
 
   const handleLogin = () => {

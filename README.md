@@ -7,7 +7,7 @@ A comprehensive school management application built with React Native and Expo, 
 - **Role-Based Access Control:** Separate interfaces and permissions for Management, Teachers, and Parents.
 - **Student & Class Management:** Tools for organizing student data, class schedules, and attendance.
 - **Incident Reporting:** A system for logging and tracking student-related incidents.
-- **Secure Authentication:** Powered by Supabase for secure user sign-up, login, and session management.
+- **Invite-Only Authentication:** Secure invite-only system where administrators pre-create users who then set their own passwords via email links.
 
 ## 🛠️ Tech Stack
 
@@ -44,11 +44,28 @@ A comprehensive school management application built with React Native and Expo, 
     EXPO_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
     ```
 
-4.  **Run the application:**
+4.  **Configure Supabase Authentication:**
+    - In your Supabase dashboard, go to Auth → Settings
+    - Disable "Enable email sign-ups" 
+    - Set reset password redirect URL to `madraxis://reset-password`
+    - Pre-create users in Auth → Users with appropriate role metadata
+
+5.  **Run the application:**
     ```bash
     npx expo start
     ```
     Follow the instructions in the terminal to open the app on an emulator, simulator, or physical device via the Expo Go app.
+
+## 🔐 Authentication Flow
+
+The app uses an invite-only authentication system:
+
+1. **User Creation**: Administrators pre-create users in Supabase Dashboard with email, role, and school_id metadata
+2. **First Login**: Users request password reset to set their initial password
+3. **Subsequent Logins**: Standard email + password authentication
+4. **Role Routing**: Users are automatically routed to appropriate dashboards based on their role
+
+See `docs/auth_flow.md` for detailed documentation.
 
 ## 📈 Future Development
 

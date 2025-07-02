@@ -73,10 +73,26 @@ export default function ManagementDashboard() {
       return;
     }
 
-    const schoolId = user.user_metadata?.school_id;
-    if (!schoolId) {
+    const rawSchoolId = user.user_metadata?.school_id;
+    if (rawSchoolId === undefined || rawSchoolId === null) {
       setError('School ID not found for this user.');
-      // Optionally, guide the user to a school setup/selection screen
+      return;
+    }
+
+    // Normalize school_id to ensure it's a number, handling all input types
+    let schoolId: number;
+    if (typeof rawSchoolId === 'string') {
+      schoolId = parseInt(rawSchoolId, 10);
+    } else if (typeof rawSchoolId === 'number') {
+      schoolId = rawSchoolId;
+    } else {
+      setError('Invalid School ID format for this user.');
+      return;
+    }
+
+    // Check if the conversion resulted in a valid number (including 0)
+    if (isNaN(schoolId) || schoolId < 0) {
+      setError('Invalid School ID for this user.');
       return;
     }
 
