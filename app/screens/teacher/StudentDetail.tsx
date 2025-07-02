@@ -4,8 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchStudentById } from '../../../src/services/users';
+import { Student as UnifiedStudent } from '../../../src/types';
 
 // Types
 interface Memorization {
@@ -64,28 +64,30 @@ export default function StudentDetail() {
     setError(null);
     
     try {
-      // Get auth token
-      const token = await AsyncStorage.getItem('auth_token');
+      const { data, error: serviceError } = await fetchStudentById(id);
       
-      if (!token) {
-        setError('Sesi anda telah berakhir. Silakan login kembali.');
+      if (serviceError) {
+        console.error('Error fetching student data:', serviceError);
+        setError('Gagal memuat data siswa. Silakan coba lagi.');
         setIsLoading(false);
         return;
       }
       
-      // Fetch student details
-      const response = await axios.get(`http://192.168.0.105:8000/api/v1/students/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.data) {
-        // Initialize memorizations and notes if they don't exist
-        const studentData = {
-          ...response.data,
-          memorizations: response.data.memorizations || [],
-          notes: response.data.notes || []
+      if (data) {
+        // Transform to match expected interface and initialize empty arrays
+        const studentData: Student = {
+          id: data.id,
+          name: data.full_name,
+          class: '', // TODO: Get from class_students relationship
+          image_url: '', // TODO: Add profile images
+          quran_progress: data.quran_progress,
+          memorizations: [], // TODO: Get from memorization tracking
+          notes: [], // TODO: Get from notes tracking
+          gender: data.details?.gender,
+          birth_date: data.details?.date_of_birth,
+          parent_name: '', // TODO: Get from parent relationship
+          phone: '', // TODO: Get from contacts
+          address: '' // TODO: Get from student_details
         };
         setStudent(studentData);
       }
@@ -108,17 +110,10 @@ export default function StudentDetail() {
     setIsLoading(true);
     
     try {
-      // Get auth token
-      const token = await AsyncStorage.getItem('auth_token');
+      // TODO: Implement memorization tracking in the new unified schema
+      // This would involve creating a new table like 'student_memorizations'
+      // and connecting it to student_details
       
-      if (!token) {
-        Alert.alert('Error', 'Sesi anda telah berakhir. Silakan login kembali.');
-        setIsLoading(false);
-        return;
-      }
-      
-      // In a real app, this would be an API call to update memorization
-      // For now, we'll just update the local state
       const newMemo: Memorization = {
         id: Date.now(), // Temporary ID
         range: newMemoRange,
@@ -127,7 +122,7 @@ export default function StudentDetail() {
         status: 'baik',
       };
       
-      // Update student data with new memorization
+      // Update student data with new memorization (local state only for now)
       const updatedStudent = {
         ...student,
         memorizations: [newMemo, ...(student.memorizations || [])],
@@ -138,12 +133,13 @@ export default function StudentDetail() {
       setNewMemoRange('');
       setNewMemoNote('');
       
-      // Here you would call the API to update the student's memorization
-      // await axios.post(`http://192.168.0.105:8000/api/v1/students/${id}/memorizations`, newMemo, {
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //     'Content-Type': 'application/json'
-      //   }
+      // TODO: Add API call to save memorization to Supabase
+      // await supabase.from('student_memorizations').insert({
+      //   student_id: student.id,
+      //   range: newMemoRange,
+      //   date: newMemoDate,
+      //   note: newMemoNote,
+      //   status: 'baik'
       // });
       
     } catch (error) {

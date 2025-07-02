@@ -3,6 +3,7 @@
 ## Current Active Tasks
 - 🔄 **Database Security Audit** - `docs/implementation-plan/database-security-audit.md` (Phase 1 - Dashboard config needed)
 - **Auth Role Navigation Fix** - User login authentication working
+- 🛠️ **Database Schema Polish** - `docs/implementation-plan/database-schema-polish.md` (planning stage)
 
 ## Project Status
 - ✅ Authentication simplification completed (July 2025)
@@ -18,6 +19,7 @@
 | Auth Simplification | `implementation-plan.md` | ✅ Complete |
 | Expo SDK 53 Upgrade | `docs/implementation-plan/expo-sdk-53-upgrade.md` | ✅ Complete |
 | **Database Security Audit** | `docs/implementation-plan/database-security-audit.md` | 🔄 Phase 1 |
+| **Database Schema Polish** | `docs/implementation-plan/database-schema-polish.md` | 🛠️ Planning |
 
 ## Lessons Learned
 
