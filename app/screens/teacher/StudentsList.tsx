@@ -4,8 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../../src/context/AuthContext';
+import { fetchStudentsLegacyFormat } from '../../../src/services/users';
 
 // Types
 interface Student {
@@ -21,6 +21,7 @@ interface Student {
 
 export default function StudentsList() {
   const router = useRouter();
+  const { profile } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedClass, setSelectedClass] = useState('Semua');
@@ -30,37 +31,38 @@ export default function StudentsList() {
   const [error, setError] = useState<string | null>(null);
   const [classes, setClasses] = useState<string[]>(['Semua']);
   
-  // Fetch students from API
+  // Fetch students from new unified schema
   useEffect(() => {
-    fetchStudents();
-  }, []);
+    if (profile?.school_id) {
+      fetchStudents();
+    }
+  }, [profile]);
 
   const fetchStudents = async () => {
+    if (!profile?.school_id) {
+      setError('Profil sekolah tidak ditemukan. Silakan login kembali.');
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     
     try {
-      // Get auth token
-      const token = await AsyncStorage.getItem('auth_token');
+      const { data, error: serviceError } = await fetchStudentsLegacyFormat(profile.school_id);
       
-      if (!token) {
-        setError('Sesi anda telah berakhir. Silakan login kembali.');
+      if (serviceError) {
+        console.error('Error fetching students:', serviceError);
+        setError('Gagal memuat data siswa. Silakan coba lagi.');
         setIsLoading(false);
         return;
       }
       
-      // Fetch students
-      const response = await axios.get('http://192.168.0.105:8000/api/v1/students', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.data) {
-        setStudents(response.data);
+      if (data) {
+        setStudents(data);
         
         // Extract unique classes for filtering
-        const uniqueClasses = ['Semua', ...new Set(response.data
+        const uniqueClasses = ['Semua', ...new Set(data
           .map((student: Student) => student.class)
           .filter((cls: string | undefined) => cls !== undefined))] as string[];
         

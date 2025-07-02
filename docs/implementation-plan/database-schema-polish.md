@@ -63,22 +63,73 @@ This split leads to inconsistent naming conventions and additional join complexi
     - *Success*: Squash-merge single semantic commit `refactor(db): unify user model & polish schema`.
 
 ## Project Status Board
-- [ ] (1) Create feature branch
-- [ ] (2) Stakeholder review & requirements  **(Completed 2025-07-02)**
-- [ ] (3) Schema draft & migration plan **(In progress – draft committed 2025-07-02)**
-- [ ] (4) Phase 1 migration implemented
-- [ ] (5) Client code updated
-- [ ] (6) RLS & functions updated
-- [ ] (7) Data migration & cleanup
-- [ ] (8) Automated tests added/updated
-- [ ] (9) Documentation updated
-- [ ] (10) PR review & merge
+- [x] (1) Create branch & PR **(Completed 2025-07-02)**
+- [x] (2) Stakeholder review & requirements **(Completed 2025-07-02)**
+- [x] (3) Schema draft & migration scripts **(Completed 2025-07-02)**
+- [x] (4) Phase-1 migration (structure & data) **(Completed 2025-07-02)**
+- [ ] (5) Client code update
+  - [x] 5.1 Static Code Scan **(Completed 2025-07-02)**
+  - [ ] 5.2 Type Definitions
+  - [ ] 5.3 Service Layer
+  - [ ] 5.4 AuthContext Update
+  - [ ] 5.5 UI Components 
+  - [ ] 5.6 Fallback Removal
+  - [ ] 5.7 Integration Test
+- [x] (6) RLS & functions updated **(Completed 2025-07-02)**
+- [x] (7) Data migration & cleanup **(Completed 2025-07-02)**
+- [ ] (8) Automated tests
+- [ ] (9) Documentation refresh  
+- [ ] (10) Final PR review & merge
+- [ ] (11) Production deployment
 
 ## Current Status / Progress Tracking
 > Planner drafted implementation plan – *2025-07-02*.
+> ✅ **Task 1 Complete** - Created branch `refactor/schema-polish` and opened draft PR #3. – *2025-07-02*
+> ✅ **Task 4 Complete** - Created and applied migrations for new detail/performance tables and compatibility views. Renamed `students` to `students_legacy`. – *2025-07-02*
+> ✅ **Task 8 Complete** - Migrated data from `students_legacy` to `student_details`, updated foreign keys, and dropped the legacy table. – *2025-07-02*
+> ✅ **Task 7 Complete** - Enabled RLS and applied basic policies to all new detail and performance tables. – *2025-07-02*
 
 ## Executor's Feedback or Assistance Requests
-*(empty – to be filled during execution)*
+
+*Updated: 2025-07-02*
+
+#### Sub-task 5.1 Completed: Static Code Scan Results
+
+✅ **Scan Complete** - Found **critical inconsistencies** between database schema and client code:
+
+**Database Queries:**
+- ✅ `src/services/incidents.ts` - Already using `profiles.full_name` correctly
+- ✅ `AuthContext.tsx` - Properly queries `profiles.role` and `profiles.school_id`
+- ❌ **No direct student table queries found** - All go through external API
+
+**Student Data Issues Found:**
+1. **API Dependency**: All student screens (`StudentsList.tsx`, `StudentDetail.tsx`) fetch from external REST API at `http://192.168.0.105:8000/api/v1/students` instead of Supabase
+2. **Interface Misalignment**: TypeScript interfaces use `name` field but expect single string, not split names
+3. **Mixed Data Sources**: Some screens read from Supabase (incidents, profiles) while others use external API
+
+**Type Interface Issues:**
+```typescript
+// Current Student interface (screens/teacher/StudentsList.tsx)
+interface Student {
+  id: string;
+  name: string;  // ✅ Expects single name
+  class?: string;
+  quran_progress?: {...};
+}
+```
+
+**Critical Discovery:** App appears to have **dual data architecture**:
+- Authentication & core entities (profiles, incidents) → Supabase
+- Student records & academic data → External API
+
+**Next Steps Required:**
+1. Determine if external API should be replaced with direct Supabase queries
+2. If keeping API, ensure API returns data from new schema (profiles + student_details)
+3. Update TypeScript interfaces to match new schema structure
+
+**Question for Human User:** Should we:
+A) Replace external API calls with direct Supabase queries, or
+B) Update external API to use new schema and keep current architecture?
 
 ## Lessons Learned
 - **[2025-07-02]** Cultural naming conventions should drive schema design; avoid rigid first/last name splits.
@@ -173,5 +224,49 @@ create or replace view public.teachers as
 5. **Deprecate old `students` table** after code refactor and data validation.
 
 *ETA for migration script draft*: 0.5 day.
+
+--- 
+
+## 📌 Detailed Plan for Remaining Tasks *(Planner Update: 2025-07-02)*
+
+### Task 5 – Client Code Update
+
+| Sub-Task ID | Description | Success Criteria |
+|-------------|-------------|------------------|
+| 5.1 | **Static Code Scan** – Identify all components/services that still read from legacy `students` table or assume `first_name`/`last_name`. | Checklist of file paths committed (`docs/scratchpad.md`). |
+| 5.2 | **Type Definitions** – Create/extend TypeScript interfaces for `Profile`, `StudentDetails`, `TeacherDetails`, etc. in `src/types/`. | `tsc` passes with no implicit `any`. |
+| 5.3 | **Service Layer** – Implement Supabase queries that select from the new compatibility views (`public.students`, `public.teachers`) OR join `profiles` + detail tables. | `fetchStudents()`, `fetchTeachers()` utilities return real data in dev DB. |
+| 5.4 | **AuthContext Update** – After sign-in, fetch `profiles.role` directly instead of `students.role`; store `Profile` in context. | Correct role-based routing verified manually. |
+| 5.5 | **UI Components** – Refactor Teacher & Management dashboards (and any Student components) to rely on the new service functions and `full_name`. Remove any broken references to `first_name`/`last_name`. | Screens render live data from dev DB with no console errors. |
+| 5.6 | **Fallback Removal** – Delete leftover mock data arrays once live queries work. | No TODO-mock markers remain. |
+| 5.7 | **Regression Pass** – Manual smoke test across all role dashboards. | No runtime crashes; names display correctly everywhere. |
+
+### Task 8 – Automated Tests
+
+1. **Unit tests** for new service functions using Supabase test harness.
+2. **Integration tests**: login flow + fetch student list.
+3. **RLS security tests**: ensure restricted rows are not accessible across roles.
+
+### Task 9 – Documentation
+
+* Update ERD image, add `profiles` + detail tables.
+* Update `docs/user_management.md` with new querying examples.
+
+---
+
+### Timeline & Estimates (remaining)
+
+| Task | Estimated Effort |
+|------|-----------------|
+| Task 5 | 1.5 days |
+| Task 8 | 0.5 day |
+| Task 9 | 0.5 day |
+
+---
+
+## 🔜 Next Steps
+
+1. **Executor**: Pick up sub-task **5.1** – run static scan and commit checklist.
+2. Planner will review once sub-task 5.1 checklist is posted.
 
 --- 

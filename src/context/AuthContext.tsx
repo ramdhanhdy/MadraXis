@@ -2,11 +2,13 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/src/utils/supabase';
 import { useRouter } from 'expo-router';
+import { Profile } from '../types';
 
 // Define the shape of the context
 interface AuthContextType {
   session: Session | null;
   user: User | null;
+  profile: Profile | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -15,6 +17,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({ 
   session: null, 
   user: null, 
+  profile: null,
   loading: true, 
   signOut: async () => {} 
 });
@@ -28,15 +31,16 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Function to fetch user role from profiles table
+  // Function to fetch user profile from unified profiles table
   const fetchUserRoleAndNavigate = async (userId: string) => {
     try {
-      const { data: profile, error } = await supabase
+      const { data: userProfile, error } = await supabase
         .from('profiles')
-        .select('role, school_id')
+        .select('*')
         .eq('id', userId)
         .single();
 
@@ -46,8 +50,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      if (profile?.role) {
-        navigateBasedOnRole(profile.role, profile.school_id);
+      if (userProfile?.role) {
+        setProfile(userProfile as Profile);
+        navigateBasedOnRole(userProfile.role, userProfile.school_id);
       } else {
         console.error('No role found for user');
         router.replace('/screens/auth/login');
@@ -113,6 +118,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         navigateBasedOnRole(userRole, rawMetadata.school_id || userMetadata.school_id);
       } else if (event === 'SIGNED_OUT') {
+        setProfile(null);
         router.replace('/screens/auth/login');
       }
     });
@@ -124,12 +130,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [router]);
 
   const signOut = async () => {
+    setProfile(null);
     await supabase.auth.signOut();
   };
 
   const value = {
     session,
     user,
+    profile,
     loading,
     signOut,
   };
