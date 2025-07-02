@@ -72,6 +72,10 @@ export interface Student extends Profile {
   role: 'student';
   details?: StudentDetails;
   performance?: StudentPerformance[];
+  class_name?: string;
+  parent_name?: string;
+  parent_phone?: string;
+  address?: string;
   // For backward compatibility with existing Quran progress tracking
   quran_progress?: {
     memorized_verses: number;

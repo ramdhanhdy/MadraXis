@@ -91,6 +91,20 @@ export async function fetchStudentById(studentId: string): Promise<{ data: Stude
           quran_score,
           attendance_pct,
           created_at
+        ),
+        class_students!left (
+          classes (
+            name
+          )
+        ),
+        student_parent!left (
+          parent_profile:profiles!inner (
+            full_name,
+            parent_details (
+              phone_number,
+              address
+            )
+          )
         )
       `)
       .eq('id', studentId)
@@ -111,6 +125,14 @@ export async function fetchStudentById(studentId: string): Promise<{ data: Stude
       ...data,
       details: data.student_details?.[0] || undefined,
       performance: data.student_performance || [],
+      // @ts-ignore
+      class_name: data.class_students?.[0]?.classes?.name,
+      // @ts-ignore
+      parent_name: data.student_parent?.[0]?.parent_profile?.full_name,
+      // @ts-ignore
+      parent_phone: data.student_parent?.[0]?.parent_profile?.parent_details?.[0]?.phone_number,
+      // @ts-ignore
+      address: data.student_parent?.[0]?.parent_profile?.parent_details?.[0]?.address,
       quran_progress: {
         memorized_verses: 0, // TODO: Get from actual progress tracking
         total_verses: 6236
