@@ -57,8 +57,8 @@ Leaving email addresses in `full_name` hurts UX, reporting, and future integrati
 - [x] (1) Create feature branch
 - [x] (2) Schema inventory & analysis
 - [x] (3) Data audit on dev DB *(skipped - test data only)*
-- [ ] (4) Migration script designed & tested
-- [ ] (5) Constraint/trigger added
+- [x] (4) Migration script designed & tested
+- [x] (5) Constraint/trigger added
 - [ ] (6) Client code updated
 - [ ] (7) Automated tests added
 - [ ] (8) Documentation updated
@@ -68,6 +68,8 @@ Leaving email addresses in `full_name` hurts UX, reporting, and future integrati
 > Planner created implementation plan – *2025-07-02*.
 > ✅ **Task 1 Complete** - Created feature branch `chore/database-data-tidy-up` off `master` and pushed to remote – *2025-07-02*.
 > ✅ **Task 2 Complete** - Schema inventory & analysis completed, comprehensive audit report created at `docs/database-audit-2025-07-02.md` – *2025-07-02*.
+> ✅ **Task 4 Complete** - Fixed database trigger `handle_new_user()` to remove email fallback behavior – *2025-07-02*.
+> ✅ **Task 5 Complete** - Added constraint `full_name_not_email` to prevent email storage in profiles.full_name – *2025-07-02*.
 
 ## Executor's Feedback or Assistance Requests
 - **Task 2 Results**: Confirmed critical data integrity issue in `profiles.full_name`

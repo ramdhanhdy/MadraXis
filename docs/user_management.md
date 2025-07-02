@@ -69,8 +69,15 @@ In the **"User Metadata"** section, add this JSON (replace values as needed):
 ### 3. Important Notes
 - **Always use string values**: `"school_id": "1"` not `"school_id": 1`
 - **Role is required**: Must be one of: `management`, `teacher`, `parent`, `student`
+- **full_name is CRITICAL**: Always include proper `full_name` in metadata to avoid data integrity issues
 - **Email confirmation**: Always check "Email Confirm" 
 - **No initial password**: Leave password empty so user sets it themselves
+
+### 4. Database Safety Features *(Updated July 2, 2025)*
+The database now includes safety measures to prevent data corruption:
+- **Email Protection**: Database constraint prevents email addresses from being stored as names
+- **Proper Fallback**: If `full_name` is missing from metadata, it will be set to `NULL` (not email)
+- **Data Validation**: All new user creation is validated to ensure clean data
 
 ---
 
@@ -210,4 +217,4 @@ const { data, error } = await supabase.auth.admin.updateUserById(
 
 ---
 
-*Last updated: January 4, 2025* 
+*Last updated: July 2, 2025 - Added database safety features and full_name validation* 
