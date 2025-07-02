@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { supabase } from '@/src/utils/supabase';
-import { useRouter } from 'expo-router';
 
 interface AuthFormProps {
   role?: string | null;
@@ -14,7 +13,6 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
   const [mode, setMode] = useState<'login' | 'reset'>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const router = useRouter();
 
   async function handleLogin() {
     if (!email || !password) {
@@ -105,11 +103,11 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
           )}
         </TouchableOpacity>
       ) : (
-      <TouchableOpacity 
-        style={[styles.loginButton, isLoading && styles.disabledButton]} 
+        <TouchableOpacity
+          style={[styles.loginButton, isLoading && styles.disabledButton]}
           onPress={handleSendReset}
-        disabled={isLoading}
-      >
+          disabled={isLoading}
+        >
           {isLoading ? (
             <ActivityIndicator color="#ffffff" />
           ) : (
@@ -131,7 +129,7 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
           onPress={() => setMode('login')}
         >
           <Text style={styles.forgotPasswordText}>Back to Login</Text>
-      </TouchableOpacity>
+        </TouchableOpacity>
       )}
     </View>
   );

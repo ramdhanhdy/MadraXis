@@ -71,8 +71,8 @@ npx expo-doctor
 
 ## Key Project Information
 - **Project Name**: MadraXis (School Management App)
-- **Current SDK**: Expo 52 (~52.0.47)
-- **Target SDK**: Expo 53
+- **Current SDK**: Expo 53
+- **Previous SDK**: Expo 52 (~52.0.47)
 - **React Native**: 0.76.9 → 0.79
 - **Supabase Project**: `bsjbixlueqoxpxbeygoi` ("Madraxis")
 - **Deep Linking**: `madraxis://` 

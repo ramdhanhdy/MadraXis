@@ -73,10 +73,16 @@ export default function ManagementDashboard() {
       return;
     }
 
-    const schoolId = user.user_metadata?.school_id;
-    if (!schoolId) {
+    const rawSchoolId = user.user_metadata?.school_id;
+    if (!rawSchoolId) {
       setError('School ID not found for this user.');
-      // Optionally, guide the user to a school setup/selection screen
+      return;
+    }
+
+    // Normalize school_id to ensure it's a number
+    const schoolId = typeof rawSchoolId === 'string' ? parseInt(rawSchoolId, 10) : rawSchoolId;
+    if (!schoolId || isNaN(schoolId)) {
+      setError('Invalid School ID for this user.');
       return;
     }
 

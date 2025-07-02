@@ -158,7 +158,7 @@ npm install
 **If Supabase imports fail:**
 ```javascript
 // Try alternative import in problematic files:
-import { createClient } from '@supabase/supabase-js/dist/main';
+import { createClient } from '@supabase/supabase-js';
 ```
 
 ---

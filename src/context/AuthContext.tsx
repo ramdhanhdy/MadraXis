@@ -47,7 +47,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (profile?.role) {
-        console.log('Role found in profiles:', profile.role);
         navigateBasedOnRole(profile.role, profile.school_id);
       } else {
         console.error('No role found for user');
@@ -61,8 +60,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Function to navigate based on user role
   const navigateBasedOnRole = (role: string, schoolId?: string | number) => {
-    console.log('Navigating based on role:', role, 'school_id:', schoolId);
-    
     switch (role) {
       case 'teacher':
         router.replace('/screens/teacher/TeacherDashboard');
@@ -104,19 +101,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (event === 'SIGNED_IN' && session?.user) {
         // Check role from user metadata and raw_user_meta_data
         const userMetadata = session.user.user_metadata || {};
-        const rawMetadata = (session.user as any).raw_user_meta_data || {};
+        // Define a more specific type for the user object with raw metadata
+        const rawMetadata = (session.user as { raw_user_meta_data?: Record<string, any> }).raw_user_meta_data || {};
         const userRole = userMetadata.role || rawMetadata.role;
-        
-        console.log('=== USER SIGN IN DEBUG ===');
-        console.log('User signed in with email:', session.user.email);
-        console.log('User metadata:', userMetadata);
-        console.log('Raw user metadata:', rawMetadata);
-        console.log('Detected role:', userRole);
-        console.log('========================');
         
         // If no role in auth metadata, fetch from profiles table
         if (!userRole) {
-          console.log('No role found in metadata, fetching from profiles...');
           await fetchUserRoleAndNavigate(session.user.id);
           return;
         }
