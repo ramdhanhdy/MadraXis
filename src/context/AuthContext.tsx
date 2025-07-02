@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
   // Function to fetch user profile from unified profiles table
-  const fetchUserRoleAndNavigate = async (userId: string) => {
+  const fetchUserProfileAndNavigate = async (userId: string) => {
     try {
       const { data: userProfile, error } = await supabase
         .from('profiles')
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         router.replace('/screens/auth/login');
       }
     } catch (error) {
-      console.error('Error in fetchUserRoleAndNavigate:', error);
+      console.error('Error in fetchUserProfileAndNavigate:', error);
       router.replace('/screens/auth/login');
     }
   };
@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // If no role in auth metadata, fetch from profiles table
         if (!userRole) {
-          await fetchUserRoleAndNavigate(session.user.id);
+          await fetchUserProfileAndNavigate(session.user.id);
           return;
         }
         

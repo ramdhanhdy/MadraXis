@@ -21,23 +21,11 @@ interface Note {
   content: string;
 }
 
-interface Student {
-  id: string;
-  name: string;
-  class?: string;
+type Student = UnifiedStudent & {
   image_url?: string;
-  quran_progress?: {
-    memorized_verses: number;
-    total_verses: number;
-  };
   memorizations?: Memorization[];
   notes?: Note[];
-  gender?: string;
-  birth_date?: string;
-  parent_name?: string;
-  phone?: string;
-  address?: string;
-}
+};
 
 export default function StudentDetail() {
   const router = useRouter();
@@ -76,18 +64,9 @@ export default function StudentDetail() {
       if (data) {
         // Transform to match expected interface and initialize empty arrays
         const studentData: Student = {
-          id: data.id,
-          name: data.full_name,
-          class: '', // TODO: Get from class_students relationship
-          image_url: '', // TODO: Add profile images
-          quran_progress: data.quran_progress,
+          ...data,
           memorizations: [], // TODO: Get from memorization tracking
           notes: [], // TODO: Get from notes tracking
-          gender: data.details?.gender,
-          birth_date: data.details?.date_of_birth,
-          parent_name: '', // TODO: Get from parent relationship
-          phone: '', // TODO: Get from contacts
-          address: '' // TODO: Get from student_details
         };
         setStudent(studentData);
       }
@@ -320,19 +299,19 @@ export default function StudentDetail() {
         <Text style={styles.infoSectionTitle}>Informasi Pribadi</Text>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Nama Lengkap</Text>
-          <Text style={styles.infoValue}>{student.name}</Text>
+          <Text style={styles.infoValue}>{student.full_name}</Text>
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Kelas</Text>
-          <Text style={styles.infoValue}>{student.class || 'Tidak diketahui'}</Text>
+          <Text style={styles.infoValue}>{student.class_name || 'Tidak diketahui'}</Text>
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Jenis Kelamin</Text>
-          <Text style={styles.infoValue}>{student.gender || 'Tidak diketahui'}</Text>
+          <Text style={styles.infoValue}>{student.details?.gender || 'Tidak diketahui'}</Text>
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Tanggal Lahir</Text>
-          <Text style={styles.infoValue}>{student.birth_date || 'Tidak diketahui'}</Text>
+          <Text style={styles.infoValue}>{student.details?.date_of_birth || 'Tidak diketahui'}</Text>
         </View>
       </View>
       
@@ -344,7 +323,7 @@ export default function StudentDetail() {
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Nomor Telepon</Text>
-          <Text style={styles.infoValue}>{student.phone || 'Tidak diketahui'}</Text>
+          <Text style={styles.infoValue}>{student.parent_phone || 'Tidak diketahui'}</Text>
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Alamat</Text>
@@ -377,14 +356,14 @@ export default function StudentDetail() {
           ) : (
             <View style={styles.profileImagePlaceholder}>
               <Text style={styles.profileImagePlaceholderText}>
-                {student.name.split(' ').map(n => n[0]).join('')}
+                {student.full_name.split(' ').map((n: string) => n[0]).join('')}
               </Text>
             </View>
           )}
         </View>
         <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>{student.name}</Text>
-          <Text style={styles.profileClass}>Kelas {student.class || 'N/A'}</Text>
+          <Text style={styles.profileName}>{student.full_name}</Text>
+          <Text style={styles.profileClass}>Kelas {student.class_name || 'N/A'}</Text>
         </View>
       </View>
       

@@ -4,6 +4,7 @@
 - 🔄 **Database Security Audit** - `docs/implementation-plan/database-security-audit.md` (Phase 1 - Dashboard config needed)
 - **Auth Role Navigation Fix** - User login authentication working
 - 🛠️ **Database Schema Polish** - `docs/implementation-plan/database-schema-polish.md` (planning stage)
+- 📝 **Student Detail Enhancement** - `docs/implementation-plan/student-detail-enhancement.md` (planning stage)
 
 ## Project Status
 - ✅ Authentication simplification completed (July 2025)
@@ -20,6 +21,7 @@
 | Expo SDK 53 Upgrade | `docs/implementation-plan/expo-sdk-53-upgrade.md` | ✅ Complete |
 | **Database Security Audit** | `docs/implementation-plan/database-security-audit.md` | 🔄 Phase 1 |
 | **Database Schema Polish** | `docs/implementation-plan/database-schema-polish.md` | 🛠️ Planning |
+| **Student Detail Enhancement** | `docs/implementation-plan/student-detail-enhancement.md` | 📝 Planning |
 
 ## Lessons Learned
 
@@ -99,5 +101,4 @@ npx expo-doctor
 - **Current SDK**: Expo 53
 - **Previous SDK**: Expo 52 (~52.0.47)
 - **React Native**: 0.76.9 → 0.79
-- **Supabase Project**: `bsjbixlueqoxpxbeygoi` ("Madraxis")
-- **Deep Linking**: `madraxis://` 
+- **Supabase Project**: `bsjbixlueqoxpxbeygoi`

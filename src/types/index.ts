@@ -72,6 +72,10 @@ export interface Student extends Profile {
   role: 'student';
   details?: StudentDetails;
   performance?: StudentPerformance[];
+  class_name?: string;
+  parent_name?: string;
+  parent_phone?: string;
+  address?: string;
   // For backward compatibility with existing Quran progress tracking
   quran_progress?: {
     memorized_verses: number;
@@ -114,6 +118,26 @@ export interface LegacyStudent {
   parent_name?: string;
   phone?: string;
   address?: string;
+}
+
+// Type for the raw Supabase query result in `fetchStudentById`
+export interface StudentWithRelations extends Profile {
+  student_details: StudentDetails[] | null;
+  student_performance: StudentPerformance[] | null;
+  class_students: {
+    classes: {
+      name: string;
+    } | null;
+  }[] | null;
+  student_parent: {
+    parent_profile: {
+      full_name: string;
+      parent_details: {
+        phone_number: string | null;
+        address: string | null;
+      }[] | null;
+    } | null;
+  }[] | null;
 }
 
 // Helper type for database query results
