@@ -1,5 +1,5 @@
 import { supabase } from '../utils/supabase';
-import { Student, Teacher, Profile, StudentWithDetails, LegacyStudent } from '../types';
+import { Student, Teacher, Profile, StudentWithDetails, LegacyStudent, StudentWithRelations } from '../types';
 
 /**
  * Fetch all students for a school using the new unified schema
@@ -109,7 +109,7 @@ export async function fetchStudentById(studentId: string): Promise<{ data: Stude
       `)
       .eq('id', studentId)
       .eq('role', 'student')
-      .single();
+      .single<StudentWithRelations>();
 
     if (error) {
       console.error('Error fetching student by ID:', error);
@@ -120,15 +120,23 @@ export async function fetchStudentById(studentId: string): Promise<{ data: Stude
       return { data: null, error: { message: 'Student not found' } };
     }
 
-    // Transform to Student interface
+    // Transform to Student interface by explicitly mapping fields
     const student: Student = {
-      ...data,
+      // Base profile fields
+      id: data.id,
+      full_name: data.full_name,
+      role: 'student',
+      school_id: data.school_id,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      
+      // Mapped-in fields for Student
       details: data.student_details?.[0] || undefined,
       performance: data.student_performance || [],
-      class_name: (data as StudentQueryResult).class_students?.[0]?.classes?.name,
-      parent_name: (data as StudentQueryResult).student_parent?.[0]?.parent_profile?.full_name,
-      parent_phone: (data as StudentQueryResult).student_parent?.[0]?.parent_profile?.parent_details?.[0]?.phone_number,
-      address: (data as StudentQueryResult).student_parent?.[0]?.parent_profile?.parent_details?.[0]?.address,
+      class_name: data.class_students?.[0]?.classes?.name,
+      parent_name: data.student_parent?.[0]?.parent_profile?.full_name,
+      parent_phone: data.student_parent?.[0]?.parent_profile?.parent_details?.[0]?.phone_number ?? undefined,
+      address: data.student_parent?.[0]?.parent_profile?.parent_details?.[0]?.address ?? undefined,
       quran_progress: {
         memorized_verses: 0, // TODO: Get from actual progress tracking
         total_verses: 6236
