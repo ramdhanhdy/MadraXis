@@ -21,6 +21,29 @@
 
 ## Lessons Learned
 
+### [2025-01-04] **CRITICAL: UI REGRESSION PREVENTION**
+- **NEVER MERGE OUTDATED BRANCHES**: Always rebase or update feature branches before merging
+- **UI REGRESSION ISSUE**: Database cleanup branch overwrote newer UI changes when merged
+- **ROOT CAUSE**: Feature branch was created from older master, merge brought back old UI code
+- **PREVENTION PROTOCOL**:
+  1. Always `git pull origin master` before creating feature branches
+  2. Before merging any PR, check that it doesn't revert recent UI changes
+  3. Use `git rebase master` on feature branches before creating PRs
+  4. Review merge commits carefully for file changes in UI directories
+  5. Test UI functionality after every merge - NEVER assume database-only changes are safe
+
+### [2025-01-04] **MANDATORY BRANCHING PROTOCOL**
+- **BRANCH CREATION**: Always create from latest master: `git checkout master && git pull origin master && git checkout -b feature/name`
+- **BEFORE PR MERGE**: 
+  1. `git checkout feature-branch`
+  2. `git rebase master` (resolve conflicts if any)
+  3. Test UI functionality locally
+  4. Check diff doesn't include unexpected UI file changes
+  5. Only then merge PR
+- **CRITICAL FILES TO MONITOR**: Any files in `app/screens/`, `app/components/`, `app/_layout.tsx`
+- **RED FLAGS**: If a "database-only" or "docs-only" PR shows changes to UI files, STOP and investigate
+- **UI TESTING**: After every merge, manually test key user flows (login, navigation, core features)
+
 ### [2025-01-04] Authentication Implementation
 - Database trigger `on_auth_user_created` requires proper COALESCE handling for metadata
 - User creation via Supabase requires string values in JSON: `"school_id": "1"` not `1`
