@@ -26,10 +26,11 @@ Leaving email addresses in `full_name` hurts UX, reporting, and future integrati
    - List tables: `profiles`, `students`, `teachers`, `parents`, etc.  
    - Identify columns affected by the new invite-only flow (e.g., `full_name`, optional profile fields).  
    - *Success*: Markdown report committed (`docs/database-audit-2025-07-02.md`).
-3. **Data audit on dev database**
+3. **Data audit on dev database** *(SKIPPED - test data only)*
    - Query `%@%` patterns in `full_name`, count rows.  
    - Export CSV snapshot for backup.  
    - *Success*: Counts & backup file stored in repo `/backups/2025-07-02/`.
+   - **Note**: Admin confirmed current data is test data, no backup needed.
 4. **Design & test migration script**
    - Strategy A: Derive display name from the part before `@` (Title-cased).  
    - Strategy B: Set to `NULL` and require admin fill later.  
@@ -54,8 +55,8 @@ Leaving email addresses in `full_name` hurts UX, reporting, and future integrati
 
 ## Project Status Board
 - [x] (1) Create feature branch
-- [ ] (2) Schema inventory & analysis
-- [ ] (3) Data audit on dev DB
+- [x] (2) Schema inventory & analysis
+- [x] (3) Data audit on dev DB *(skipped - test data only)*
 - [ ] (4) Migration script designed & tested
 - [ ] (5) Constraint/trigger added
 - [ ] (6) Client code updated
@@ -66,10 +67,33 @@ Leaving email addresses in `full_name` hurts UX, reporting, and future integrati
 ## Current Status / Progress Tracking
 > Planner created implementation plan – *2025-07-02*.
 > ✅ **Task 1 Complete** - Created feature branch `chore/database-data-tidy-up` off `master` and pushed to remote – *2025-07-02*.
+> ✅ **Task 2 Complete** - Schema inventory & analysis completed, comprehensive audit report created at `docs/database-audit-2025-07-02.md` – *2025-07-02*.
 
 ## Executor's Feedback or Assistance Requests
-- Successfully created branch and pushed to remote
-- Need to identify Supabase project ID to proceed with database schema analysis
+- **Task 2 Results**: Confirmed critical data integrity issue in `profiles.full_name`
+  - 2 out of 3 profiles contain email addresses instead of proper names
+  - Database schema is structurally sound, issue is isolated to this field
+  - **Migration strategy updated**: Admin will provide real names (most accurate approach)
+- **User Input**: 
+  - Admin has access to real names and will manually provide them
+  - Current database entries are test data (admin's test accounts), no backup needed
+- **Task 3**: Skipped - no backup required for test data
+
+- **🎯 ROOT CAUSE ANALYSIS COMPLETE**: 
+  1. **Database Trigger Issue**: Function `handle_new_user()` has fallback logic:
+     ```sql
+     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email)
+     ```
+     When users created without `full_name` in metadata → trigger uses email as fallback
+  
+  2. **Client Code Issues**: 
+     - `app/management/setup.tsx:68` updates user metadata with `full_name` correctly (this is good)
+     - But trigger fallback behavior means any user creation without proper metadata gets email as name
+
+- **EXPANDED SCOPE**: Need to fix both:
+  - Database trigger logic (remove email fallback)
+  - Any client-side user creation that doesn't provide `full_name` metadata
+  - Add proper constraints to prevent future regression
 
 ## Lessons Learned
 *(empty – append during execution)* 

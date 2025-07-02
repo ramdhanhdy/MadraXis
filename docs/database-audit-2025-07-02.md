@@ -112,7 +112,24 @@ Since moving to admin-only provisioning, the following fields may have different
 
 ## Data Migration Strategy
 
-### Option A: Derive Names from Email (Recommended)
+### Option A: Admin Manual Update (Recommended)
+Since the admin has access to the real names, this is the most accurate approach:
+
+1. **Clear email data**:
+```sql
+UPDATE profiles 
+SET full_name = NULL 
+WHERE full_name LIKE '%@%';
+```
+
+2. **Admin manually updates with real names**:
+```sql
+-- Admin provides real names for each user
+UPDATE profiles SET full_name = 'Real Name Here' WHERE id = '096a9f07-2b0d-4f39-bda7-9607a99c1410';
+UPDATE profiles SET full_name = 'Real Name Here' WHERE id = 'c23663c9-cf36-4dbb-b0b3-884528a58fc1';
+```
+
+### Option B: Derive Names from Email (Fallback)
 ```sql
 -- Extract name part before @ and format as Title Case
 UPDATE profiles 
@@ -122,14 +139,6 @@ WHERE full_name LIKE '%@%';
 **Result Preview:**
 - `ramdhanhdy.notebooks@gmail.com` → `Ramdhanhdy Notebooks`
 - `ramdhanhdy3@gmail.com` → `Ramdhanhdy3`
-
-### Option B: Set to NULL (Conservative)
-```sql
--- Clear email data, require admin to fill manually
-UPDATE profiles 
-SET full_name = NULL 
-WHERE full_name LIKE '%@%';
-```
 
 ## Constraint Recommendations
 
