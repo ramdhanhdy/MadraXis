@@ -74,7 +74,7 @@ Additional details:
 * Remove old `handleSendOtp` & OTP magic-link logic.
 
 3-C  **Update `app/(auth)/reset-password.tsx`**
-1. On mount parse hash fragment to extract `access_token` & `refresh_token`, then call `supabase.auth.setSession()`.
+1. On mount parse query parameters to extract `access_token` & `refresh_token`, then call `supabase.auth.setSession()`.
 2. Allow user to set a new password via `supabase.auth.updateUser({ password })`.
 3. On success: `router.replace('/')` (AuthProvider handles role-based routing).
 
