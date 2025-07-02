@@ -2,8 +2,13 @@ import { supabase } from '../utils/supabase';
 import { Student, Teacher, Profile, StudentWithDetails, LegacyStudent } from '../types';
 
 /**
- * Fetch all students for a school using the new unified schema
- * Uses the compatibility view or joins profiles + student_details
+ * Retrieves a list of student profiles for a specified school, including associated student details.
+ *
+ * Queries the unified schema to fetch students by school ID, joining profile data with related student details. Optionally limits the number of results. Each student object includes a placeholder Quran progress field.
+ *
+ * @param schoolId - The ID of the school to fetch students for
+ * @param limit - Optional maximum number of students to return
+ * @returns An object containing an array of `Student` objects on success, or `null` and an error on failure
  */
 export async function fetchStudents(schoolId: number, limit?: number): Promise<{ data: Student[] | null; error: any }> {
   try {
@@ -60,7 +65,10 @@ export async function fetchStudents(schoolId: number, limit?: number): Promise<{
 }
 
 /**
- * Fetch a single student by ID with all details
+ * Retrieves a single student profile by ID, including detailed student information and performance records.
+ *
+ * @param studentId - The unique identifier of the student to fetch
+ * @returns An object containing the student data with details and performance, or an error if not found
  */
 export async function fetchStudentById(studentId: string): Promise<{ data: Student | null; error: any }> {
   try {
@@ -125,7 +133,11 @@ export async function fetchStudentById(studentId: string): Promise<{ data: Stude
 }
 
 /**
- * Fetch all teachers for a school
+ * Retrieves teacher profiles for a specified school, including associated teacher details.
+ *
+ * @param schoolId - The ID of the school to fetch teachers from
+ * @param limit - Optional maximum number of teacher profiles to return
+ * @returns An object containing an array of `Teacher` objects with their details, or an error if the operation fails
  */
 export async function fetchTeachers(schoolId: number, limit?: number): Promise<{ data: Teacher[] | null; error: any }> {
   try {
@@ -176,8 +188,13 @@ export async function fetchTeachers(schoolId: number, limit?: number): Promise<{
 }
 
 /**
- * Legacy compatibility function that returns students in the old format
- * This helps ease the transition for existing components
+ * Retrieves students for a given school and returns them in a legacy-compatible format.
+ *
+ * Transforms student data into the `LegacyStudent` structure, providing placeholder values for fields not available in the current schema.
+ *
+ * @param schoolId - The ID of the school to fetch students from
+ * @param limit - Optional maximum number of students to return
+ * @returns An object containing an array of `LegacyStudent` objects or null if an error occurred, along with any error encountered
  */
 export async function fetchStudentsLegacyFormat(schoolId: number, limit?: number): Promise<{ data: LegacyStudent[] | null; error: any }> {
   const { data: students, error } = await fetchStudents(schoolId, limit);
@@ -204,7 +221,10 @@ export async function fetchStudentsLegacyFormat(schoolId: number, limit?: number
 }
 
 /**
- * Fetch user profile by ID (works for any role)
+ * Retrieves a user profile by user ID, regardless of role.
+ *
+ * @param userId - The unique identifier of the user to fetch
+ * @returns An object containing the user profile data or null if not found, and any error encountered
  */
 export async function fetchUserProfile(userId: string): Promise<{ data: Profile | null; error: any }> {
   try {
@@ -227,7 +247,14 @@ export async function fetchUserProfile(userId: string): Promise<{ data: Profile 
 }
 
 /**
- * Search students by name
+ * Searches for student profiles within a school by partial match on full name.
+ *
+ * Performs a case-insensitive search for students whose names contain the specified search term, limited to the given number of results. Returns an array of `Student` objects with associated details and a placeholder Quran progress structure.
+ *
+ * @param schoolId - The ID of the school to search within
+ * @param searchTerm - The partial name to search for
+ * @param limit - The maximum number of results to return (default is 10)
+ * @returns An object containing the array of matching students or null if an error occurred, along with any error information
  */
 export async function searchStudents(schoolId: number, searchTerm: string, limit: number = 10): Promise<{ data: Student[] | null; error: any }> {
   try {

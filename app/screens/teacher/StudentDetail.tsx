@@ -39,6 +39,13 @@ interface Student {
   address?: string;
 }
 
+/**
+ * Displays detailed information about a student, including memorization progress, notes, and personal/contact info, with tabbed navigation and the ability to add new memorization records.
+ *
+ * Fetches student data by ID, manages loading and error states, and provides a modal interface for adding new memorization entries. The UI includes tabs for memorization history, notes, and student information, with conditional rendering based on data availability and user actions.
+ *
+ * @returns The rendered student detail screen component.
+ */
 export default function StudentDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();

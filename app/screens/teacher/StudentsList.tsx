@@ -19,6 +19,13 @@ interface Student {
   image_url?: string;
 }
 
+/**
+ * Displays a searchable, filterable, and sortable list of students for the current school.
+ *
+ * Fetches student data based on the authenticated user's school, and provides UI controls for searching by name, filtering by class, and sorting by name, class, or Quran memorization progress. Handles loading and error states, and allows navigation to student detail and add student screens.
+ *
+ * @returns The rendered students list screen component.
+ */
 export default function StudentsList() {
   const router = useRouter();
   const { profile } = useAuth();
