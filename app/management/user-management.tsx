@@ -19,7 +19,7 @@ import { Student, Teacher } from '../../src/types';
 
 export default function UserManagementScreen() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   
   const [activeTab, setActiveTab] = useState<'students' | 'teachers'>('students');
   const [students, setStudents] = useState<Student[]>([]);
@@ -42,7 +42,12 @@ export default function UserManagementScreen() {
   const fetchData = async () => {
     if (!user) return;
 
-    const rawSchoolId = user.user_metadata?.school_id;
+    // Check both user metadata and profile for school_id
+    console.log('User metadata:', user.user_metadata);
+    console.log('Profile:', profile);
+    const rawSchoolId = user.user_metadata?.school_id || profile?.school_id;
+    console.log('Raw school ID found:', rawSchoolId);
+    
     if (!rawSchoolId) {
       setError('School ID not found for this user.');
       return;
@@ -97,7 +102,7 @@ export default function UserManagementScreen() {
     if (!authLoading && user) {
       fetchData();
     }
-  }, [authLoading, user]);
+  }, [authLoading, user, profile]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
