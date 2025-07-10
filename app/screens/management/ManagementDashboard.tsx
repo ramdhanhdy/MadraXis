@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../src/context/AuthContext';
 import { fetchIncidentsForSchool } from '../../../src/services/incidents';
+import { fetchDashboardMetrics, DashboardMetrics } from '../../../src/services/dashboard';
 
 // Updated interface to match Supabase query result
 interface Incident {
@@ -26,6 +27,7 @@ export default function ManagementDashboard() {
   const { user, signOut, loading: authLoading } = useAuth(); // Use auth context, get loading state
   const [showNotifications, setShowNotifications] = useState(false);
   const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -119,6 +121,22 @@ export default function ManagementDashboard() {
     }
   };
 
+  // Fetch dashboard metrics
+  const fetchMetrics = async (schoolId: number) => {
+    try {
+      const { data, error } = await fetchDashboardMetrics(schoolId);
+      if (error) {
+        throw error;
+      }
+      if (data) {
+        setDashboardMetrics(data);
+      }
+    } catch (err: any) {
+      console.error('Error fetching dashboard metrics:', err);
+      setError(err.message || 'Gagal memuat data metrik.');
+    }
+  };
+
   // Navigate to incident detail
   const navigateToIncidentDetail = (incidentId: number) => {
     // TODO: Create incident detail page at app/management/incidents/[id].tsx
@@ -142,7 +160,15 @@ export default function ManagementDashboard() {
     if (authLoading) {
       return; // Wait for authentication to resolve
     }
-    fetchIncidents();
+    if (user && user.user_metadata?.school_id) {
+      const schoolId = typeof user.user_metadata.school_id === 'string' ? parseInt(user.user_metadata.school_id, 10) : user.user_metadata.school_id;
+      if (!isNaN(schoolId) && schoolId >= 0) {
+        fetchIncidents();
+        fetchMetrics(schoolId);
+      } else {
+        setError('Invalid School ID for this user.');
+      }
+    }
   }, [authLoading, user]); // Re-fetch if authLoading changes or user object changes
 
   return (
@@ -191,16 +217,37 @@ export default function ManagementDashboard() {
         {/* Stats Overview */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>1,250</Text>
+            <Text style={styles.statNumber}>{dashboardMetrics?.studentEnrollment || 'N/A'}</Text>
             <Text style={styles.statLabel}>Total Siswa</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>85</Text>
+            <Text style={styles.statNumber}>{dashboardMetrics?.teacherCount || 'N/A'}</Text>
             <Text style={styles.statLabel}>Guru</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>42</Text>
-            <Text style={styles.statLabel}>Kelas</Text>
+            <Text style={styles.statNumber}>{dashboardMetrics?.teacherToStudentRatio || 'N/A'}</Text>
+            <Text style={styles.statLabel}>Rasio Guru:Siswa</Text>
+          </View>
+        </View>
+        
+        {/* Performance Metrics */}
+        <Text style={styles.sectionTitle}>Metrik Kinerja</Text>
+        <View style={styles.performanceContainer}>
+          <View style={styles.performanceCard}>
+            <Text style={styles.performanceValue}>{dashboardMetrics?.academicPerformance.averageScore || 'N/A'}</Text>
+            <Text style={styles.performanceLabel}>Skor Akademik Rata-rata</Text>
+          </View>
+          <View style={styles.performanceCard}>
+            <Text style={styles.performanceValue}>{dashboardMetrics?.studentAttendance.averagePercentage || 'N/A'}%</Text>
+            <Text style={styles.performanceLabel}>Kehadiran Siswa</Text>
+          </View>
+          <View style={styles.performanceCard}>
+            <Text style={styles.performanceValue}>{dashboardMetrics?.teacherPerformance.averageScore || 'N/A'}</Text>
+            <Text style={styles.performanceLabel}>Kinerja Guru</Text>
+          </View>
+          <View style={styles.performanceCard}>
+            <Text style={styles.performanceValue}>{dashboardMetrics?.parentEngagement.meetingsHeld || 'N/A'}</Text>
+            <Text style={styles.performanceLabel}>Pertemuan Orang Tua</Text>
           </View>
         </View>
         
@@ -289,80 +336,6 @@ export default function ManagementDashboard() {
               </TouchableOpacity>
             ))
           )}
-        </View>
-        
-        {/* Performance Overview */}
-        <Text style={styles.sectionTitle}>Performa Akademik</Text>
-        <View style={styles.performanceContainer}>
-          <View style={styles.performanceCard}>
-            <View style={styles.performanceHeader}>
-              <Text style={styles.performanceTitle}>Rata-rata Hafalan</Text>
-              <Text style={styles.performanceValue}>7.8</Text>
-            </View>
-            <View style={styles.performanceBarContainer}>
-              <View style={[styles.performanceBar, { width: '78%', backgroundColor: '#27ae60' }]} />
-            </View>
-            <Text style={styles.performanceSubtext}>Naik 0.3 dari bulan lalu</Text>
-          </View>
-          
-          <View style={styles.performanceCard}>
-            <View style={styles.performanceHeader}>
-              <Text style={styles.performanceTitle}>Kehadiran Siswa</Text>
-              <Text style={styles.performanceValue}>92%</Text>
-            </View>
-            <View style={styles.performanceBarContainer}>
-              <View style={[styles.performanceBar, { width: '92%', backgroundColor: '#3498db' }]} />
-            </View>
-            <Text style={styles.performanceSubtext}>Stabil dari bulan lalu</Text>
-          </View>
-          
-          <View style={styles.performanceCard}>
-            <View style={styles.performanceHeader}>
-              <Text style={styles.performanceTitle}>Keterlibatan Orang Tua</Text>
-              <Text style={styles.performanceValue}>65%</Text>
-            </View>
-            <View style={styles.performanceBarContainer}>
-              <View style={[styles.performanceBar, { width: '65%', backgroundColor: '#f39c12' }]} />
-            </View>
-            <Text style={styles.performanceSubtext}>Naik 5% dari bulan lalu</Text>
-          </View>
-        </View>
-        
-        {/* Upcoming Events */}
-        <Text style={styles.sectionTitle}>Agenda Mendatang</Text>
-        <View style={styles.eventsContainer}>
-          <View style={styles.eventItem}>
-            <View style={styles.eventDate}>
-              <Text style={styles.eventDay}>15</Text>
-              <Text style={styles.eventMonth}>JUN</Text>
-            </View>
-            <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>Rapat Dewan Guru</Text>
-              <Text style={styles.eventDetails}>09:00 - 12:00 • Ruang Rapat Utama</Text>
-            </View>
-          </View>
-          
-          <View style={styles.eventItem}>
-            <View style={styles.eventDate}>
-              <Text style={styles.eventDay}>22</Text>
-              <Text style={styles.eventMonth}>JUN</Text>
-            </View>
-            <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>Evaluasi Kurikulum</Text>
-              <Text style={styles.eventDetails}>13:00 - 15:00 • Ruang Multimedia</Text>
-            </View>
-          </View>
-          
-          <View style={styles.eventItem}>
-            <View style={styles.eventDate}>
-              <Text style={styles.eventDay}>30</Text>
-              <Text style={styles.eventMonth}>JUN</Text>
-            </View>
-            <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>Pertemuan Orang Tua</Text>
-              <Text style={styles.eventDetails}>08:00 - 14:00 • Aula Sekolah</Text>
-            </View>
-          </View>
         </View>
         
         {/* Sign Out Button */}
@@ -586,86 +559,15 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  performanceHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  performanceTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
   performanceValue: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#005e7a',
   },
-  performanceBarContainer: {
-    height: 8,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  performanceBar: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  performanceSubtext: {
+  performanceLabel: {
     fontSize: 12,
     color: '#666',
     marginTop: 8,
-  },
-  eventsContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    margin: 16,
-    marginTop: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    overflow: 'hidden',
-  },
-  eventItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    padding: 16,
-  },
-  eventDate: {
-    width: 50,
-    height: 50,
-    borderRadius: 8,
-    backgroundColor: '#005e7a',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  eventDay: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  eventMonth: {
-    fontSize: 12,
-    color: '#f0c75e',
-  },
-  eventContent: {
-    flex: 1,
-  },
-  eventTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  eventDetails: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
   },
   loadingContainer: {
     padding: 24,

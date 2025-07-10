@@ -1,0 +1,141 @@
+import { supabase } from '../utils/supabase';
+import { fetchStudents, fetchTeachers } from './users';
+
+/**
+ * Interface for dashboard metrics
+ */
+export interface DashboardMetrics {
+  studentEnrollment: number;
+  teacherCount: number;
+  teacherToStudentRatio: number;
+  incidentSummary: {
+    total: number;
+    pending: number;
+    resolved: number;
+  };
+  academicPerformance: {
+    averageScore: number;
+  };
+  teacherPerformance: {
+    averageScore: number;
+  };
+  studentAttendance: {
+    averagePercentage: number;
+  };
+  parentEngagement: {
+    meetingsHeld: number;
+  };
+}
+
+/**
+ * Fetch dashboard metrics for a specific school
+ * @param schoolId The ID of the school to fetch metrics for
+ * @returns Dashboard metrics data
+ */
+export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: DashboardMetrics | null; error: any }> {
+  try {
+    // Fetch student count
+    const studentsResponse = await fetchStudents(schoolId);
+    if (studentsResponse.error) {
+      throw new Error(`Failed to fetch students: ${studentsResponse.error.message}`);
+    }
+    const studentCount = studentsResponse.data?.length || 0;
+
+    // Fetch teacher count
+    const teachersResponse = await fetchTeachers(schoolId);
+    if (teachersResponse.error) {
+      throw new Error(`Failed to fetch teachers: ${teachersResponse.error.message}`);
+    }
+    const teacherCount = teachersResponse.data?.length || 0;
+
+    // Calculate teacher-to-student ratio
+    const teacherToStudentRatio = teacherCount > 0 ? parseFloat((teacherCount / studentCount).toFixed(2)) : 0;
+
+    // Fetch incident summary
+    const incidentsResponse = await supabase
+      .from('incidents')
+      .select('id, status')
+      .eq('school_id', schoolId);
+    if (incidentsResponse.error) {
+      throw new Error(`Failed to fetch incidents: ${incidentsResponse.error.message}`);
+    }
+    const incidents = incidentsResponse.data || [];
+    const totalIncidents = incidents.length;
+    const pendingIncidents = incidents.filter(i => i.status === 'pending').length;
+    const resolvedIncidents = incidents.filter(i => i.status !== 'pending').length;
+
+    // Fetch academic performance (average across student_performance)
+    const academicResponse = await supabase
+      .from('student_performance')
+      .select('academic_score')
+      .eq('school_id', schoolId);
+    if (academicResponse.error) {
+      throw new Error(`Failed to fetch academic performance: ${academicResponse.error.message}`);
+    }
+    const academicScores = academicResponse.data?.map(p => p.academic_score).filter(score => score !== null) || [];
+    const averageAcademicScore = academicScores.length > 0 
+      ? parseFloat((academicScores.reduce((a, b) => a + b, 0) / academicScores.length).toFixed(2)) 
+      : 0;
+
+    // Fetch teacher performance (average across teacher_performance)
+    const teacherPerfResponse = await supabase
+      .from('teacher_performance')
+      .select('class_observation, punctuality_score')
+      .eq('school_id', schoolId);
+    if (teacherPerfResponse.error) {
+      throw new Error(`Failed to fetch teacher performance: ${teacherPerfResponse.error.message}`);
+    }
+    const teacherScores = teacherPerfResponse.data?.map(p => {
+      const obs = p.class_observation || 0;
+      const punct = p.punctuality_score || 0;
+      return (obs + punct) / 2; // Simple average of the two metrics
+    }).filter(score => score > 0) || [];
+    const averageTeacherScore = teacherScores.length > 0 
+      ? parseFloat((teacherScores.reduce((a, b) => a + b, 0) / teacherScores.length).toFixed(2)) 
+      : 0;
+
+    // Fetch student attendance (average across student_performance)
+    const attendanceResponse = await supabase
+      .from('student_performance')
+      .select('attendance_pct')
+      .eq('school_id', schoolId);
+    if (attendanceResponse.error) {
+      throw new Error(`Failed to fetch attendance data: ${attendanceResponse.error.message}`);
+    }
+    const attendanceRates = attendanceResponse.data?.map(p => p.attendance_pct).filter(rate => rate !== null) || [];
+    const averageAttendance = attendanceRates.length > 0 
+      ? parseFloat((attendanceRates.reduce((a, b) => a + b, 0) / attendanceRates.length).toFixed(2)) 
+      : 0;
+
+    // Placeholder for parent engagement (mock data until real data source is available)
+    const parentEngagement = {
+      meetingsHeld: 0 // TODO: Implement actual data source for parent meetings or communications
+    };
+
+    const metrics: DashboardMetrics = {
+      studentEnrollment: studentCount,
+      teacherCount: teacherCount,
+      teacherToStudentRatio: teacherToStudentRatio,
+      incidentSummary: {
+        total: totalIncidents,
+        pending: pendingIncidents,
+        resolved: resolvedIncidents
+      },
+      academicPerformance: {
+        averageScore: averageAcademicScore
+      },
+      teacherPerformance: {
+        averageScore: averageTeacherScore
+      },
+      studentAttendance: {
+        averagePercentage: averageAttendance
+      },
+      parentEngagement: parentEngagement
+    };
+
+    return { data: metrics, error: null };
+  } catch (err) {
+    console.error('Service error fetching dashboard metrics:', err);
+    return { data: null, error: err };
+  }
+} 
