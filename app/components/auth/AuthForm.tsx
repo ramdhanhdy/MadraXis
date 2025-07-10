@@ -116,13 +116,13 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, mode === 'otp-verify' && styles.disabledInput]}
           placeholder="Enter your email"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
-          editable={!isLoading}
+          editable={!isLoading && mode !== 'otp-verify'}
         />
       </View>
 
@@ -137,21 +137,6 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
             secureTextEntry
             autoCapitalize="none"
             editable={!isLoading}
-          />
-        </View>
-      )}
-
-      {(mode === 'otp' || mode === 'otp-verify') && (
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={[styles.input, mode === 'otp-verify' && styles.disabledInput]}
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            editable={!isLoading && mode !== 'otp-verify'}
           />
         </View>
       )}
