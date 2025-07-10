@@ -276,7 +276,10 @@ export default function ManagementDashboard() {
         {/* Quick Actions */}
         <Text style={styles.sectionTitle}>Aksi Cepat</Text>
         <View style={styles.quickActionsContainer}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => router.push('/management/user-management')}
+          >
             <View style={styles.actionIconContainer}>
               <Ionicons name="people" size={24} color="#005e7a" />
             </View>
