@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../src/utils/supabase';
+import { saveSchool, School } from '../../src/services/schools';
 
 export default function SchoolSetupScreen() {
   const router = useRouter();
@@ -52,20 +53,23 @@ export default function SchoolSetupScreen() {
     // to ensure atomicity (all steps succeed or none do) and to avoid granting broad
     // table permissions to the client.
     try {
-      // 1. Create the school
-      const { data: schoolData, error: schoolError } = await supabase
-        .from('schools')
-        .insert([{ name: schoolName, npsn }])
-        .select()
-        .single();
+      // 1. Create the school using the service
+      const schoolData: School = {
+        name: schoolName,
+        npsn: npsn,
+        address: '', // Placeholder as it's not collected in the form yet
+        phone: '',   // Placeholder as it's not collected in the form yet
+        email: ''    // Placeholder as it's not collected in the form yet
+      };
+      const { data: savedSchool, error: schoolError } = await saveSchool(schoolData);
 
       if (schoolError) throw schoolError;
-      if (!schoolData) throw new Error("Gagal membuat data sekolah.");
+      if (!savedSchool) throw new Error("Gagal membuat data sekolah.");
 
       // 2. Update the current user's metadata with the new school_id and full_name
       const { error: userError } = await supabase.auth.updateUser({
         data: {
-          school_id: schoolData.id,
+          school_id: savedSchool.id,
           full_name: managerName,
         }
       });
