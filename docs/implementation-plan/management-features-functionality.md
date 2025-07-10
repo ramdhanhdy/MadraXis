@@ -141,7 +141,61 @@ Based on the review of the files in `app/management/`, the following functionali
 **Testing Status**: Awaiting manual testing by the user or development team. Please follow the steps outlined above and update the 'Actual Result' fields with the outcomes.
 
 ## Executor's Feedback or Assistance Requests
-*(To be filled by Executor during implementation)*
+**Date**: 10 July 2025
+
+**Issue Identified**: Backend-UI connection showing "N/A" values for all metrics.
+
+**Root Cause**: The dashboard service had several critical issues:
+1. Syntax error in the import statement (`aimport` instead of `import`)
+2. Incorrect database queries - `student_performance` and `teacher_performance` tables do not have `school_id` fields, they need to be joined through the `profiles` table.
+
+**Resolution**: 
+- Fixed the import syntax error
+- Updated database queries to properly join with `profiles` table using `profiles!inner(school_id)` syntax
+- Added better error handling and logging to the dashboard component
+- Improved loading states and error display in the UI
+
+**Status**: Issue resolved and committed. Backend and UI should now be properly connected.
+
+**New Feature Added**: User Management Screen
+
+**Date**: 10 July 2025
+
+**Feature**: Created a comprehensive user management screen (`app/management/user-management.tsx`) that allows management users to:
+- View and manage students and teachers in their school
+- Search through users by name
+- Switch between student and teacher tabs with count indicators
+- Navigate to user details (placeholder functionality)
+- Add new users (placeholder modal for future implementation)
+
+**Integration**: 
+- Connected the "Manajemen Pengguna" button in the dashboard's "Aksi Cepat" section to navigate to `/management/user-management`
+- Uses existing user services (`fetchStudents`, `fetchTeachers`) for data retrieval
+- Follows the same design patterns and authentication logic as other management screens
+
+**Features Include**:
+- Responsive design with proper loading states and error handling
+- Search functionality for filtering users
+- Tab-based navigation between students and teachers
+- Proper RBAC integration (uses school_id from authenticated user)
+- Empty states for when no users are found
+- Back navigation to return to dashboard
+
+**Bug Fix**: School ID Access Issue
+
+**Date**: 10 July 2025
+
+**Issue**: User management screen showed "School ID not found for this user" error even when school_id existed in the database.
+
+**Root Cause**: The user management screen was only checking `user.user_metadata?.school_id` but not using `profile.school_id` as a fallback. The AuthContext loads user profile data from the `profiles` table, and the school_id might be stored there instead of in the auth user metadata.
+
+**Resolution**: 
+- Updated user management screen to use the same pattern as other working screens: `user.user_metadata?.school_id || profile?.school_id`
+- Added `profile` to the useAuth hook destructuring
+- Updated useEffect dependencies to include `profile` so data re-fetches when profile loads
+- Added debug logging to help troubleshoot similar issues in the future
+
+**Status**: Fixed and committed. User management screen should now properly access school_id from either source.
 
 ## Lessons Learned
 *(To be updated as lessons are learned during the project)* 

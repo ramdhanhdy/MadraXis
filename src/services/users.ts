@@ -7,6 +7,7 @@ import { Student, Teacher, Profile, StudentWithDetails, LegacyStudent, StudentWi
  */
 export async function fetchStudents(schoolId: number, limit?: number): Promise<{ data: Student[] | null; error: any }> {
   try {
+    console.log('fetchStudents called with schoolId:', schoolId, 'limit:', limit);
     let query = supabase
       .from('profiles')
       .select(`
@@ -34,7 +35,9 @@ export async function fetchStudents(schoolId: number, limit?: number): Promise<{
       query = query.limit(limit);
     }
 
+    console.log('About to execute supabase query...');
     const { data, error } = await query;
+    console.log('Raw supabase response - data:', data, 'error:', error);
 
     if (error) {
       console.error('Error fetching students:', error);

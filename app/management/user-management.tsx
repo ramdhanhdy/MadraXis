@@ -64,10 +64,14 @@ export default function UserManagementScreen() {
       setError(null);
 
       // Fetch students and teachers
+      console.log('Fetching data for school ID:', schoolId);
       const [studentsResponse, teachersResponse] = await Promise.all([
         fetchStudents(schoolId),
         fetchTeachers(schoolId)
       ]);
+
+      console.log('Students response:', studentsResponse);
+      console.log('Teachers response:', teachersResponse);
 
       if (studentsResponse.error) {
         throw new Error(`Failed to fetch students: ${studentsResponse.error.message}`);
@@ -76,6 +80,8 @@ export default function UserManagementScreen() {
         throw new Error(`Failed to fetch teachers: ${teachersResponse.error.message}`);
       }
 
+      console.log('Students data:', studentsResponse.data);
+      console.log('Teachers data:', teachersResponse.data);
       setStudents(studentsResponse.data || []);
       setTeachers(teachersResponse.data || []);
 
