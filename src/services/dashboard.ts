@@ -64,11 +64,14 @@ export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: D
     const pendingIncidents = incidents.filter(i => i.status === 'pending').length;
     const resolvedIncidents = incidents.filter(i => i.status !== 'pending').length;
 
-    // Fetch academic performance (average across student_performance)
+    // Fetch academic performance (average across student_performance joined with profiles)
     const academicResponse = await supabase
       .from('student_performance')
-      .select('academic_score')
-      .eq('school_id', schoolId);
+      .select(`
+        academic_score,
+        profiles!inner(school_id)
+      `)
+      .eq('profiles.school_id', schoolId);
     if (academicResponse.error) {
       throw new Error(`Failed to fetch academic performance: ${academicResponse.error.message}`);
     }
@@ -77,11 +80,15 @@ export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: D
       ? parseFloat((academicScores.reduce((a, b) => a + b, 0) / academicScores.length).toFixed(2)) 
       : 0;
 
-    // Fetch teacher performance (average across teacher_performance)
+    // Fetch teacher performance (average across teacher_performance joined with profiles)
     const teacherPerfResponse = await supabase
       .from('teacher_performance')
-      .select('class_observation, punctuality_score')
-      .eq('school_id', schoolId);
+      .select(`
+        class_observation,
+        punctuality_score,
+        profiles!inner(school_id)
+      `)
+      .eq('profiles.school_id', schoolId);
     if (teacherPerfResponse.error) {
       throw new Error(`Failed to fetch teacher performance: ${teacherPerfResponse.error.message}`);
     }
@@ -94,11 +101,14 @@ export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: D
       ? parseFloat((teacherScores.reduce((a, b) => a + b, 0) / teacherScores.length).toFixed(2)) 
       : 0;
 
-    // Fetch student attendance (average across student_performance)
+    // Fetch student attendance (average across student_performance joined with profiles)
     const attendanceResponse = await supabase
       .from('student_performance')
-      .select('attendance_pct')
-      .eq('school_id', schoolId);
+      .select(`
+        attendance_pct,
+        profiles!inner(school_id)
+      `)
+      .eq('profiles.school_id', schoolId);
     if (attendanceResponse.error) {
       throw new Error(`Failed to fetch attendance data: ${attendanceResponse.error.message}`);
     }

@@ -124,16 +124,24 @@ export default function ManagementDashboard() {
   // Fetch dashboard metrics
   const fetchMetrics = async (schoolId: number) => {
     try {
+      setIsLoading(true);
+      console.log('Fetching dashboard metrics for school ID:', schoolId);
       const { data, error } = await fetchDashboardMetrics(schoolId);
       if (error) {
+        console.error('Dashboard metrics error:', error);
         throw error;
       }
       if (data) {
+        console.log('Dashboard metrics received:', data);
         setDashboardMetrics(data);
+      } else {
+        console.warn('No dashboard metrics data received');
       }
     } catch (err: any) {
       console.error('Error fetching dashboard metrics:', err);
       setError(err.message || 'Gagal memuat data metrik.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -217,15 +225,21 @@ export default function ManagementDashboard() {
         {/* Stats Overview */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{dashboardMetrics?.studentEnrollment || 'N/A'}</Text>
+            <Text style={styles.statNumber}>
+              {isLoading ? '...' : (dashboardMetrics?.studentEnrollment !== undefined ? dashboardMetrics.studentEnrollment : 'N/A')}
+            </Text>
             <Text style={styles.statLabel}>Total Siswa</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{dashboardMetrics?.teacherCount || 'N/A'}</Text>
+            <Text style={styles.statNumber}>
+              {isLoading ? '...' : (dashboardMetrics?.teacherCount !== undefined ? dashboardMetrics.teacherCount : 'N/A')}
+            </Text>
             <Text style={styles.statLabel}>Guru</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{dashboardMetrics?.teacherToStudentRatio || 'N/A'}</Text>
+            <Text style={styles.statNumber}>
+              {isLoading ? '...' : (dashboardMetrics?.teacherToStudentRatio !== undefined ? dashboardMetrics.teacherToStudentRatio : 'N/A')}
+            </Text>
             <Text style={styles.statLabel}>Rasio Guru:Siswa</Text>
           </View>
         </View>
@@ -234,19 +248,27 @@ export default function ManagementDashboard() {
         <Text style={styles.sectionTitle}>Metrik Kinerja</Text>
         <View style={styles.performanceContainer}>
           <View style={styles.performanceCard}>
-            <Text style={styles.performanceValue}>{dashboardMetrics?.academicPerformance.averageScore || 'N/A'}</Text>
+            <Text style={styles.performanceValue}>
+              {isLoading ? '...' : (dashboardMetrics?.academicPerformance?.averageScore !== undefined ? dashboardMetrics.academicPerformance.averageScore : 'N/A')}
+            </Text>
             <Text style={styles.performanceLabel}>Skor Akademik Rata-rata</Text>
           </View>
           <View style={styles.performanceCard}>
-            <Text style={styles.performanceValue}>{dashboardMetrics?.studentAttendance.averagePercentage || 'N/A'}%</Text>
+            <Text style={styles.performanceValue}>
+              {isLoading ? '...' : (dashboardMetrics?.studentAttendance?.averagePercentage !== undefined ? `${dashboardMetrics.studentAttendance.averagePercentage}%` : 'N/A')}
+            </Text>
             <Text style={styles.performanceLabel}>Kehadiran Siswa</Text>
           </View>
           <View style={styles.performanceCard}>
-            <Text style={styles.performanceValue}>{dashboardMetrics?.teacherPerformance.averageScore || 'N/A'}</Text>
+            <Text style={styles.performanceValue}>
+              {isLoading ? '...' : (dashboardMetrics?.teacherPerformance?.averageScore !== undefined ? dashboardMetrics.teacherPerformance.averageScore : 'N/A')}
+            </Text>
             <Text style={styles.performanceLabel}>Kinerja Guru</Text>
           </View>
           <View style={styles.performanceCard}>
-            <Text style={styles.performanceValue}>{dashboardMetrics?.parentEngagement.meetingsHeld || 'N/A'}</Text>
+            <Text style={styles.performanceValue}>
+              {isLoading ? '...' : (dashboardMetrics?.parentEngagement?.meetingsHeld !== undefined ? dashboardMetrics.parentEngagement.meetingsHeld : 'N/A')}
+            </Text>
             <Text style={styles.performanceLabel}>Pertemuan Orang Tua</Text>
           </View>
         </View>
