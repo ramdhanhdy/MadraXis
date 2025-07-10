@@ -20,8 +20,8 @@ The current authentication uses invite-only email + password flow (docs/auth_flo
 1. **Create feature branch and draft PR** ✅
 2. **Import raw user data** (Paused - focusing on existing users first)
 3. **Configure Supabase for OTP** ← COMPLETED
-4. **Refactor UI components for hybrid auth** ← CURRENT TASK
-5. **Update AuthContext logic for OTP**
+4. **Refactor UI components for hybrid auth** ← COMPLETED
+5. **Update AuthContext logic for OTP** ← CURRENT TASK
 6. **Review RLS policies for OTP compatibility**
 7. **Testing and documentation**
 8. **Final merge and cleanup**
@@ -30,34 +30,35 @@ The current authentication uses invite-only email + password flow (docs/auth_flo
 - [x] Task 1: Create branch and PR
 - [⏸️] Task 2: Import raw data (paused)
 - [x] Task 3: Configure Supabase OTP ← COMPLETED
-- [ ] Task 4: Refactor UI components ← CURRENT TASK
-- [ ] Task 5: Update AuthContext logic
+- [x] Task 4: Refactor UI components ← COMPLETED
+- [ ] Task 5: Update AuthContext logic ← CURRENT TASK
 - [ ] Task 6: RLS policy review
 - [ ] Task 7: Testing and docs
 - [ ] Task 8: Final merge
 
-## Current Task Details: Refactor UI Components for Hybrid Auth
+## Current Task Details: Update AuthContext Logic for OTP
 
 **Success Criteria:**
-- Add "Send Code" button/toggle to login screen
-- Create OTP input component (6-digit code entry)
-- Update existing AuthForm to support both password and OTP flows
-- Maintain existing password login functionality
-- Clean, intuitive UX for switching between modes
+- AuthContext handles OTP authentication flow
+- Session persistence works for OTP login
+- User profile fetching works after OTP verification
+- Error handling for OTP failures
+- Navigation works correctly after OTP login
 
 **Actions:**
-1. Analyze current AuthForm component
-2. Add OTP mode toggle/button
-3. Create OTP code input component
-4. Update form validation and state management
-5. Test UI switches between password/OTP modes
+1. Test current OTP UI implementation
+2. Verify AuthContext handles OTP session creation
+3. Check profile fetching after OTP login
+4. Test navigation to dashboard after OTP auth
+5. Add any missing error handling
 
 ## Executor's Feedback or Assistance Requests  
 - **Task 1 completed**: Branch `feat/otp-auth-hybrid` created and pushed. Draft PR opened: [PR #6](https://github.com/ramdhanhdy/MadraXis/pull/6)
 - **Task 2 paused**: Per user request to focus on existing users first. CSV templates created (docs/mock-*-users.csv) for future use
 - **Blockers resolved**: Fixed bundling error (RN version conflicts with Expo SDK 53) and RLS infinite recursion on profiles table
-- **Task 3 COMPLETED**: ✅ OTP configuration verified! Email OTP works for existing users (B2B model preserved). Test script confirms: signInWithOtp() sends 6-digit codes to existing users, signup protection active. Ready for UI implementation.
-- **Task 4 starting**: Will analyze AuthForm component and add hybrid OTP/password UI
+- **Task 3 COMPLETED**: ✅ OTP configuration verified! Email OTP works for existing users (B2B model preserved). Test script confirms: signInWithOtp() sends 6-digit codes to existing users, signup protection active.
+- **Task 4 COMPLETED**: ✅ Hybrid OTP/password UI implemented! AuthForm extended with OTP modes (otp, otp-verify), 6-digit code input, mode toggles, proper validation. Cherry-picked successfully from management branch to OTP branch.
+- **Task 5 starting**: Will test OTP flow end-to-end and verify AuthContext integration
 
 ## Lessons Learned
 - [2025-07-10] Avoid overriding Expo-managed React Native versions in package.json - causes bundling syntax errors
@@ -65,6 +66,7 @@ The current authentication uses invite-only email + password flow (docs/auth_flo
 - [2025-07-10] Use Bun for dependency management - resolves peer dependency conflicts better than npm/yarn
 - [2025-07-10] Supabase auth.users table requires proper signup flow - can't directly INSERT; use dashboard for manual password resets during development
 - [2025-07-10] OTP configuration: For B2B apps, use signInWithOtp() without shouldCreateUser option to allow existing users only. Signup restrictions prevent unwanted registrations while enabling passwordless login.
+- [2025-07-10] Git parallel development: Use cherry-pick to move feature-specific changes to correct branch. Maintains clean separation and avoids merge conflicts between unrelated features.
 
 ## Project Status Board  
 - [x] Task 1: Create branch  
