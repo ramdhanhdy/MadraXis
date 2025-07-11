@@ -1,5 +1,5 @@
 import { supabase } from '../utils/supabase';
-import { fetchStudents, fetchTeachers } from './users';
+import { getStudentCount, getTeacherCount } from './users';
 
 /**
  * Interface for dashboard metrics
@@ -34,19 +34,19 @@ export interface DashboardMetrics {
  */
 export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: DashboardMetrics | null; error: any }> {
   try {
-    // Fetch student count
-    const studentsResponse = await fetchStudents(schoolId);
-    if (studentsResponse.error) {
-      throw new Error(`Failed to fetch students: ${studentsResponse.error.message}`);
+    // Fetch student count (optimized - count only, no full records)
+    const studentCountResponse = await getStudentCount(schoolId);
+    if (studentCountResponse.error) {
+      throw new Error(`Failed to fetch student count: ${studentCountResponse.error.message}`);
     }
-    const studentCount = studentsResponse.data?.length || 0;
+    const studentCount = studentCountResponse.data || 0;
 
-    // Fetch teacher count
-    const teachersResponse = await fetchTeachers(schoolId);
-    if (teachersResponse.error) {
-      throw new Error(`Failed to fetch teachers: ${teachersResponse.error.message}`);
+    // Fetch teacher count (optimized - count only, no full records)
+    const teacherCountResponse = await getTeacherCount(schoolId);
+    if (teacherCountResponse.error) {
+      throw new Error(`Failed to fetch teacher count: ${teacherCountResponse.error.message}`);
     }
-    const teacherCount = teachersResponse.data?.length || 0;
+    const teacherCount = teacherCountResponse.data || 0;
 
     // Calculate teacher-to-student ratio (students per teacher)
     const teacherToStudentRatio = teacherCount > 0
