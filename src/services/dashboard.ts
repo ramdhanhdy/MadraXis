@@ -48,8 +48,10 @@ export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: D
     }
     const teacherCount = teachersResponse.data?.length || 0;
 
-    // Calculate teacher-to-student ratio
-    const teacherToStudentRatio = teacherCount > 0 ? parseFloat((teacherCount / studentCount).toFixed(2)) : 0;
+    // Calculate teacher-to-student ratio (students per teacher)
+    const teacherToStudentRatio = teacherCount > 0
+      ? parseFloat((studentCount / teacherCount).toFixed(2))
+      : 0;
 
     // Fetch incident summary
     const incidentsResponse = await supabase
