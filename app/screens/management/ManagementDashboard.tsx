@@ -24,7 +24,7 @@ interface Incident {
 
 export default function ManagementDashboard() {
   const router = useRouter();
-  const { user, signOut, loading: authLoading } = useAuth(); // Use auth context, get loading state
+  const { user, profile, signOut, loading: authLoading } = useAuth(); // Use auth context, get loading state
   const [showNotifications, setShowNotifications] = useState(false);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
@@ -68,14 +68,15 @@ export default function ManagementDashboard() {
     }
   };
 
-  // Fetch incidents from Supabase
-  const fetchIncidents = async () => {
+  // Unified data fetching function to prevent loading state race conditions
+  const fetchDashboardData = async () => {
     if (!user) {
       setError('User not authenticated.');
       return;
     }
 
-    const rawSchoolId = user.user_metadata?.school_id;
+    // Check both user metadata and profile for school_id
+    const rawSchoolId = user.user_metadata?.school_id || profile?.school_id;
     if (rawSchoolId === undefined || rawSchoolId === null) {
       setError('School ID not found for this user.');
       return;
@@ -102,44 +103,36 @@ export default function ManagementDashboard() {
       setIsLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await fetchIncidentsForSchool(schoolId, 5);
+      console.log('Fetching dashboard data for school ID:', schoolId);
 
-      if (fetchError) {
-        throw fetchError;
+      // Fetch both incidents and metrics concurrently using Promise.all
+      const [incidentsResponse, metricsResponse] = await Promise.all([
+        fetchIncidentsForSchool(schoolId, 5),
+        fetchDashboardMetrics(schoolId)
+      ]);
+
+      // Handle incidents response
+      if (incidentsResponse.error) {
+        throw new Error(`Failed to fetch incidents: ${incidentsResponse.error.message}`);
+      }
+      if (incidentsResponse.data) {
+        setIncidents(incidentsResponse.data as any);
       }
 
-      if (data) {
-        // The service returns data that matches the Incident interface, so we can set it directly
-        setIncidents(data as any); // Cast to any to bypass strict type checking if needed for nested objects
+      // Handle metrics response
+      if (metricsResponse.error) {
+        throw new Error(`Failed to fetch metrics: ${metricsResponse.error.message}`);
       }
-
-    } catch (err: any) {
-      console.error('Error fetching incidents:', err);
-      setError(err.message || 'Gagal memuat data insiden.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch dashboard metrics
-  const fetchMetrics = async (schoolId: number) => {
-    try {
-      setIsLoading(true);
-      console.log('Fetching dashboard metrics for school ID:', schoolId);
-      const { data, error } = await fetchDashboardMetrics(schoolId);
-      if (error) {
-        console.error('Dashboard metrics error:', error);
-        throw error;
-      }
-      if (data) {
-        console.log('Dashboard metrics received:', data);
-        setDashboardMetrics(data);
+      if (metricsResponse.data) {
+        console.log('Dashboard metrics received:', metricsResponse.data);
+        setDashboardMetrics(metricsResponse.data);
       } else {
         console.warn('No dashboard metrics data received');
       }
+
     } catch (err: any) {
-      console.error('Error fetching dashboard metrics:', err);
-      setError(err.message || 'Gagal memuat data metrik.');
+      console.error('Error fetching dashboard data:', err);
+      setError(err.message || 'Gagal memuat data dashboard.');
     } finally {
       setIsLoading(false);
     }
@@ -163,21 +156,15 @@ export default function ManagementDashboard() {
     }
   };
 
-  // Fetch incidents when component mounts and auth state is resolved
+  // Fetch dashboard data when component mounts and auth state is resolved
   useEffect(() => {
     if (authLoading) {
       return; // Wait for authentication to resolve
     }
-    if (user && user.user_metadata?.school_id) {
-      const schoolId = typeof user.user_metadata.school_id === 'string' ? parseInt(user.user_metadata.school_id, 10) : user.user_metadata.school_id;
-      if (!isNaN(schoolId) && schoolId >= 0) {
-        fetchIncidents();
-        fetchMetrics(schoolId);
-      } else {
-        setError('Invalid School ID for this user.');
-      }
+    if (user && (user.user_metadata?.school_id || profile?.school_id)) {
+      fetchDashboardData();
     }
-  }, [authLoading, user]); // Re-fetch if authLoading changes or user object changes
+  }, [authLoading, user, profile]); // Re-fetch if authLoading, user, or profile changes
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -320,7 +307,7 @@ export default function ManagementDashboard() {
             <View style={styles.errorContainer}>
               <Ionicons name="alert-circle" size={40} color="#e74c3c" />
               <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity style={styles.retryButton} onPress={fetchIncidents}>
+              <TouchableOpacity style={styles.retryButton} onPress={fetchDashboardData}>
                 <Text style={styles.retryButtonText}>Coba Lagi</Text>
               </TouchableOpacity>
             </View>
