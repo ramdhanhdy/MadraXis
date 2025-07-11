@@ -11,34 +11,36 @@ export default function ManagementIndex() {
     if (!loading) {
       if (!user) {
         router.replace('/screens/auth/login');
-      } else if (profile && profile.role !== 'management') {
-        // Redirect based on role or to login if role doesn't match
-        switch (profile.role) {
-          case 'teacher':
-            router.replace('/screens/teacher/TeacherDashboard');
-            break;
-          case 'parent':
-            router.replace('/screens/parent/ParentDashboard');
-            break;
-          case 'student':
-            router.replace('/screens/student/StudentDashboard');
-            break;
-          default:
-            router.replace('/screens/auth/login');
-        }
-      } else if (user && !profile) {
-        // If user is logged in but profile isn't loaded yet, wait or fetch profile
-        // For now, we'll assume AuthContext will handle this
-        router.replace('/screens/auth/login');
-      } else if (user && profile && profile.role === 'management') {
-        // Check if school_id exists to decide between dashboard and setup
-        const schoolId = user.user_metadata?.school_id || profile.school_id;
-        if (schoolId) {
-          router.replace('/management/dashboard');
-        } else {
-          router.replace('/management/setup');
+      } else if (user && profile) {
+        // User is authenticated and profile is loaded
+        if (profile.role !== 'management') {
+          // Redirect based on role or to login if role doesn't match
+          switch (profile.role) {
+            case 'teacher':
+              router.replace('/screens/teacher/TeacherDashboard');
+              break;
+            case 'parent':
+              router.replace('/screens/parent/ParentDashboard');
+              break;
+            case 'student':
+              router.replace('/screens/student/StudentDashboard');
+              break;
+            default:
+              router.replace('/screens/auth/login');
+          }
+        } else if (profile.role === 'management') {
+          // Check if school_id exists to decide between dashboard and setup
+          const schoolId = user.user_metadata?.school_id || profile.school_id;
+          if (schoolId) {
+            router.replace('/management/dashboard');
+          } else {
+            router.replace('/management/setup');
+          }
         }
       }
+      // If user exists but profile is null, we wait for the profile to load
+      // The AuthContext will handle fetching the profile data
+      // Do not redirect to login in this case to avoid race conditions
     }
   }, [user, profile, loading, router]);
 
