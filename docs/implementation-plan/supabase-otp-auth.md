@@ -74,7 +74,3 @@ The current authentication uses invite-only email + password flow (docs/auth_flo
 - [2025-07-10] Branch dependency management: When creating feature branches, ensure they include dependencies (e.g., OTP needs management features for proper navigation). Use merge or rebase to combine related work before testing end-to-end flows.
 
 <!-- (Lines 76–85 removed to eliminate the duplicate “Project Status Board” section) -->
-## Executor's Feedback or Assistance Requests  
-- Task 1 completed: Branch `feat/otp-auth-hybrid` created and pushed. Draft PR opened: [PR #6](https://github.com/ramdhanhdy/MadraXis/pull/6). No issues encountered. Ready for verification.  
-- Task 2 in progress: Proposed CSV template: Columns - email (required), full_name (string [[memory:941290]]), role (student/teacher/parent/management), school_id (integer, likely 1), and role-specific: For students - nis (text), date_of_birth (YYYY-MM-DD), gender (M/F), boarding (true/false); For teachers - employee_id (text), hire_date (YYYY-MM-DD), specialty (text); For parents - phone_number (text), address (text), occupation (text); For management - position (text), hire_date (YYYY-MM-DD). If students have parent links, include parent_email to create/link. Please provide CSV in this format (or note changes). Will use admin API script for import. [[memory:941311]]
-(TBD for other tasks) 
