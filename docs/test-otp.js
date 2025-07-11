@@ -18,7 +18,7 @@ async function testOTPLogin() {
   console.log('🧪 Testing OTP LOGIN functionality (B2B - existing users only)...\n');
   
   // Test with existing user email (from previous queries)
-  const testEmail = 'ramdhanhdy3@gmail.com';
+  const testEmail = process.env.TEST_EMAIL || 'test@example.com';
   
   try {
     console.log(`📧 Sending OTP LOGIN code to existing user: ${testEmail}`);
