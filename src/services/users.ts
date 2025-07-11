@@ -7,6 +7,10 @@ import { Student, Teacher, Profile, StudentWithDetails, LegacyStudent, StudentWi
  */
 export async function fetchStudents(schoolId: number, limit?: number): Promise<{ data: Student[] | null; error: any }> {
   try {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('fetchStudents called with schoolId:', schoolId, 'limit:', limit);
+    }
+    
     let query = supabase
       .from('profiles')
       .select(`
@@ -34,7 +38,13 @@ export async function fetchStudents(schoolId: number, limit?: number): Promise<{
       query = query.limit(limit);
     }
 
+    if (process.env.NODE_ENV === 'development') {
+      console.log('About to execute supabase query...');
+    }
     const { data, error } = await query;
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Raw supabase response - data:', data, 'error:', error);
+    }
 
     if (error) {
       console.error('Error fetching students:', error);
@@ -300,6 +310,56 @@ export async function searchStudents(schoolId: number, searchTerm: string, limit
     return { data: students, error: null };
   } catch (err) {
     console.error('Service error searching students:', err);
+    return { data: null, error: err };
+  }
+}
+
+/**
+ * Get count of students for a school (optimized for dashboard metrics)
+ * @param schoolId The school ID to count students for
+ * @returns Promise with student count
+ */
+export async function getStudentCount(schoolId: number): Promise<{ data: number | null; error: any }> {
+  try {
+    const { count, error } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'student')
+      .eq('school_id', schoolId);
+
+    if (error) {
+      console.error('Error counting students:', error);
+      return { data: null, error };
+    }
+
+    return { data: count || 0, error: null };
+  } catch (err) {
+    console.error('Service error counting students:', err);
+    return { data: null, error: err };
+  }
+}
+
+/**
+ * Get count of teachers for a school (optimized for dashboard metrics)
+ * @param schoolId The school ID to count teachers for
+ * @returns Promise with teacher count
+ */
+export async function getTeacherCount(schoolId: number): Promise<{ data: number | null; error: any }> {
+  try {
+    const { count, error } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'teacher')
+      .eq('school_id', schoolId);
+
+    if (error) {
+      console.error('Error counting teachers:', error);
+      return { data: null, error };
+    }
+
+    return { data: count || 0, error: null };
+  } catch (err) {
+    console.error('Service error counting teachers:', err);
     return { data: null, error: err };
   }
 } 

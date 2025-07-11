@@ -1,8 +1,8 @@
 # MadraXis Project Scratchpad
 
 ## Current Active Tasks
+- ✅ **OTP Authentication Implementation** - `docs/implementation-plan/supabase-otp-auth.md` (COMPLETED - PR #7 submitted)
 - 🔄 **Database Security Audit** - `docs/implementation-plan/database-security-audit.md` (Phase 1 - Dashboard config needed)
-- **Auth Role Navigation Fix** - User login authentication working
 - 🛠️ **Database Schema Polish** - `docs/implementation-plan/database-schema-polish.md` (planning stage)
 - 📝 **Student Detail Enhancement** - `docs/implementation-plan/student-detail-enhancement.md` (planning stage)
 
@@ -19,6 +19,7 @@
 |------|-------------------|--------|
 | Auth Simplification | `implementation-plan.md` | ✅ Complete |
 | Expo SDK 53 Upgrade | `docs/implementation-plan/expo-sdk-53-upgrade.md` | ✅ Complete |
+| **OTP Authentication** | `docs/implementation-plan/supabase-otp-auth.md` | ✅ **Complete - PR #7** |
 | **Database Security Audit** | `docs/implementation-plan/database-security-audit.md` | 🔄 Phase 1 |
 | **Database Schema Polish** | `docs/implementation-plan/database-schema-polish.md` | 🛠️ Planning |
 | **Student Detail Enhancement** | `docs/implementation-plan/student-detail-enhancement.md` | 📝 Planning |
@@ -57,6 +58,14 @@
 - ✅ **FIXED**: `@supabase/supabase-js` compatibility with React Native 0.79+ via Metro config
 - ✅ **Metro config**: Added resolver workarounds for package exports
 - ✅ **App bundling**: Successfully building and running
+
+### [2025-01-10] OTP Authentication Implementation
+- ✅ **COMPLETED**: Hybrid OTP/password authentication system implemented and tested
+- **Key Features**: 6-digit email OTP codes, seamless UI toggle between password/OTP modes
+- **B2B Model Preserved**: OTP only works for existing invited users, prevents unwanted signups
+- **Navigation Fixed**: Resolved issue where OTP login went to deprecated setup screen
+- **Technical Solution**: Used `signInWithOtp()` without `shouldCreateUser` for existing users only
+- **PR Submitted**: [PR #7](https://github.com/ramdhanhdy/MadraXis/pull/7) ready for review and merge
 
 ### [2025-01-04] Authentication Issue Resolution
 - **Problem**: User login refreshes screen instead of navigating to dashboard

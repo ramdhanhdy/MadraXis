@@ -1,0 +1,2 @@
+email,full_name,role,school_id,nis,date_of_birth,gender,boarding,parent_email
+student@example.com,Student Rina,student,1,12345,2010-06-15,F,true,parent@example.com 

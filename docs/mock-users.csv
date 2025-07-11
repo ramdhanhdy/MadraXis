@@ -1,0 +1,5 @@
+email,full_name,role,school_id,nis,date_of_birth,gender,boarding,employee_id,hire_date,specialty,phone_number,address,occupation,position,parent_email
+management@example.com,Manager Ahmad,management,1,,,,,,,,,,,,Director,
+teacher@example.com,Teacher Siti,teacher,1,,,true,EMP001,2023-01-15,Mathematics,,,,,,
+parent@example.com,Parent Budi,parent,1,,,,,,,,,08123456789,Jl. Merdeka 10,Engineer,,
+student@example.com,Student Rina,student,1,12345,2010-06-15,F,true,,,,,,,,,parent@example.com 

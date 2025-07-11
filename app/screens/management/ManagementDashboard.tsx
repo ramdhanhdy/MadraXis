@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../src/context/AuthContext';
 import { fetchIncidentsForSchool } from '../../../src/services/incidents';
+import { fetchDashboardMetrics, DashboardMetrics } from '../../../src/services/dashboard';
 
 // Updated interface to match Supabase query result
 interface Incident {
@@ -23,9 +24,10 @@ interface Incident {
 
 export default function ManagementDashboard() {
   const router = useRouter();
-  const { user, signOut, loading: authLoading } = useAuth(); // Use auth context, get loading state
+  const { user, profile, signOut, loading: authLoading } = useAuth(); // Use auth context, get loading state
   const [showNotifications, setShowNotifications] = useState(false);
   const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -66,14 +68,15 @@ export default function ManagementDashboard() {
     }
   };
 
-  // Fetch incidents from Supabase
-  const fetchIncidents = async () => {
+  // Unified data fetching function to prevent loading state race conditions
+  const fetchDashboardData = async () => {
     if (!user) {
       setError('User not authenticated.');
       return;
     }
 
-    const rawSchoolId = user.user_metadata?.school_id;
+    // Check both user metadata and profile for school_id
+    const rawSchoolId = user.user_metadata?.school_id || profile?.school_id;
     if (rawSchoolId === undefined || rawSchoolId === null) {
       setError('School ID not found for this user.');
       return;
@@ -100,20 +103,36 @@ export default function ManagementDashboard() {
       setIsLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await fetchIncidentsForSchool(schoolId, 5);
+      console.log('Fetching dashboard data for school ID:', schoolId);
 
-      if (fetchError) {
-        throw fetchError;
+      // Fetch both incidents and metrics concurrently using Promise.all
+      const [incidentsResponse, metricsResponse] = await Promise.all([
+        fetchIncidentsForSchool(schoolId, 5),
+        fetchDashboardMetrics(schoolId)
+      ]);
+
+      // Handle incidents response
+      if (incidentsResponse.error) {
+        throw new Error(`Failed to fetch incidents: ${incidentsResponse.error.message}`);
+      }
+      if (incidentsResponse.data) {
+        setIncidents(incidentsResponse.data as any);
       }
 
-      if (data) {
-        // The service returns data that matches the Incident interface, so we can set it directly
-        setIncidents(data as any); // Cast to any to bypass strict type checking if needed for nested objects
+      // Handle metrics response
+      if (metricsResponse.error) {
+        throw new Error(`Failed to fetch metrics: ${metricsResponse.error.message}`);
+      }
+      if (metricsResponse.data) {
+        console.log('Dashboard metrics received:', metricsResponse.data);
+        setDashboardMetrics(metricsResponse.data);
+      } else {
+        console.warn('No dashboard metrics data received');
       }
 
     } catch (err: any) {
-      console.error('Error fetching incidents:', err);
-      setError(err.message || 'Gagal memuat data insiden.');
+      console.error('Error fetching dashboard data:', err);
+      setError(err.message || 'Gagal memuat data dashboard.');
     } finally {
       setIsLoading(false);
     }
@@ -137,13 +156,15 @@ export default function ManagementDashboard() {
     }
   };
 
-  // Fetch incidents when component mounts and auth state is resolved
+  // Fetch dashboard data when component mounts and auth state is resolved
   useEffect(() => {
     if (authLoading) {
       return; // Wait for authentication to resolve
     }
-    fetchIncidents();
-  }, [authLoading, user]); // Re-fetch if authLoading changes or user object changes
+    if (user && (user.user_metadata?.school_id || profile?.school_id)) {
+      fetchDashboardData();
+    }
+  }, [authLoading, user, profile]); // Re-fetch if authLoading, user, or profile changes
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -191,23 +212,61 @@ export default function ManagementDashboard() {
         {/* Stats Overview */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>1,250</Text>
+            <Text style={styles.statNumber}>
+              {isLoading ? '...' : (dashboardMetrics?.studentEnrollment !== undefined ? dashboardMetrics.studentEnrollment : 'N/A')}
+            </Text>
             <Text style={styles.statLabel}>Total Siswa</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>85</Text>
+            <Text style={styles.statNumber}>
+              {isLoading ? '...' : (dashboardMetrics?.teacherCount !== undefined ? dashboardMetrics.teacherCount : 'N/A')}
+            </Text>
             <Text style={styles.statLabel}>Guru</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>42</Text>
-            <Text style={styles.statLabel}>Kelas</Text>
+            <Text style={styles.statNumber}>
+              {isLoading ? '...' : (dashboardMetrics?.teacherToStudentRatio !== undefined ? dashboardMetrics.teacherToStudentRatio : 'N/A')}
+            </Text>
+            <Text style={styles.statLabel}>Rasio Guru:Siswa</Text>
+          </View>
+        </View>
+        
+        {/* Performance Metrics */}
+        <Text style={styles.sectionTitle}>Metrik Kinerja</Text>
+        <View style={styles.performanceContainer}>
+          <View style={styles.performanceCard}>
+            <Text style={styles.performanceValue}>
+              {isLoading ? '...' : (dashboardMetrics?.academicPerformance?.averageScore !== undefined ? dashboardMetrics.academicPerformance.averageScore : 'N/A')}
+            </Text>
+            <Text style={styles.performanceLabel}>Skor Akademik Rata-rata</Text>
+          </View>
+          <View style={styles.performanceCard}>
+            <Text style={styles.performanceValue}>
+              {isLoading ? '...' : (dashboardMetrics?.studentAttendance?.averagePercentage !== undefined ? `${dashboardMetrics.studentAttendance.averagePercentage}%` : 'N/A')}
+            </Text>
+            <Text style={styles.performanceLabel}>Kehadiran Siswa</Text>
+          </View>
+          <View style={styles.performanceCard}>
+            <Text style={styles.performanceValue}>
+              {isLoading ? '...' : (dashboardMetrics?.teacherPerformance?.averageScore !== undefined ? dashboardMetrics.teacherPerformance.averageScore : 'N/A')}
+            </Text>
+            <Text style={styles.performanceLabel}>Kinerja Guru</Text>
+          </View>
+          <View style={styles.performanceCard}>
+            <Text style={styles.performanceValue}>
+              {isLoading ? '...' : (dashboardMetrics?.parentEngagement?.meetingsHeld !== undefined ? dashboardMetrics.parentEngagement.meetingsHeld : 'N/A')}
+            </Text>
+            <Text style={styles.performanceLabel}>Pertemuan Orang Tua</Text>
           </View>
         </View>
         
         {/* Quick Actions */}
         <Text style={styles.sectionTitle}>Aksi Cepat</Text>
         <View style={styles.quickActionsContainer}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => router.push('/management/user-management')}
+          >
             <View style={styles.actionIconContainer}>
               <Ionicons name="people" size={24} color="#005e7a" />
             </View>
@@ -248,7 +307,7 @@ export default function ManagementDashboard() {
             <View style={styles.errorContainer}>
               <Ionicons name="alert-circle" size={40} color="#e74c3c" />
               <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity style={styles.retryButton} onPress={fetchIncidents}>
+              <TouchableOpacity style={styles.retryButton} onPress={fetchDashboardData}>
                 <Text style={styles.retryButtonText}>Coba Lagi</Text>
               </TouchableOpacity>
             </View>
@@ -289,80 +348,6 @@ export default function ManagementDashboard() {
               </TouchableOpacity>
             ))
           )}
-        </View>
-        
-        {/* Performance Overview */}
-        <Text style={styles.sectionTitle}>Performa Akademik</Text>
-        <View style={styles.performanceContainer}>
-          <View style={styles.performanceCard}>
-            <View style={styles.performanceHeader}>
-              <Text style={styles.performanceTitle}>Rata-rata Hafalan</Text>
-              <Text style={styles.performanceValue}>7.8</Text>
-            </View>
-            <View style={styles.performanceBarContainer}>
-              <View style={[styles.performanceBar, { width: '78%', backgroundColor: '#27ae60' }]} />
-            </View>
-            <Text style={styles.performanceSubtext}>Naik 0.3 dari bulan lalu</Text>
-          </View>
-          
-          <View style={styles.performanceCard}>
-            <View style={styles.performanceHeader}>
-              <Text style={styles.performanceTitle}>Kehadiran Siswa</Text>
-              <Text style={styles.performanceValue}>92%</Text>
-            </View>
-            <View style={styles.performanceBarContainer}>
-              <View style={[styles.performanceBar, { width: '92%', backgroundColor: '#3498db' }]} />
-            </View>
-            <Text style={styles.performanceSubtext}>Stabil dari bulan lalu</Text>
-          </View>
-          
-          <View style={styles.performanceCard}>
-            <View style={styles.performanceHeader}>
-              <Text style={styles.performanceTitle}>Keterlibatan Orang Tua</Text>
-              <Text style={styles.performanceValue}>65%</Text>
-            </View>
-            <View style={styles.performanceBarContainer}>
-              <View style={[styles.performanceBar, { width: '65%', backgroundColor: '#f39c12' }]} />
-            </View>
-            <Text style={styles.performanceSubtext}>Naik 5% dari bulan lalu</Text>
-          </View>
-        </View>
-        
-        {/* Upcoming Events */}
-        <Text style={styles.sectionTitle}>Agenda Mendatang</Text>
-        <View style={styles.eventsContainer}>
-          <View style={styles.eventItem}>
-            <View style={styles.eventDate}>
-              <Text style={styles.eventDay}>15</Text>
-              <Text style={styles.eventMonth}>JUN</Text>
-            </View>
-            <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>Rapat Dewan Guru</Text>
-              <Text style={styles.eventDetails}>09:00 - 12:00 • Ruang Rapat Utama</Text>
-            </View>
-          </View>
-          
-          <View style={styles.eventItem}>
-            <View style={styles.eventDate}>
-              <Text style={styles.eventDay}>22</Text>
-              <Text style={styles.eventMonth}>JUN</Text>
-            </View>
-            <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>Evaluasi Kurikulum</Text>
-              <Text style={styles.eventDetails}>13:00 - 15:00 • Ruang Multimedia</Text>
-            </View>
-          </View>
-          
-          <View style={styles.eventItem}>
-            <View style={styles.eventDate}>
-              <Text style={styles.eventDay}>30</Text>
-              <Text style={styles.eventMonth}>JUN</Text>
-            </View>
-            <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>Pertemuan Orang Tua</Text>
-              <Text style={styles.eventDetails}>08:00 - 14:00 • Aula Sekolah</Text>
-            </View>
-          </View>
         </View>
         
         {/* Sign Out Button */}
@@ -586,86 +571,15 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  performanceHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  performanceTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
   performanceValue: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#005e7a',
   },
-  performanceBarContainer: {
-    height: 8,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  performanceBar: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  performanceSubtext: {
+  performanceLabel: {
     fontSize: 12,
     color: '#666',
     marginTop: 8,
-  },
-  eventsContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    margin: 16,
-    marginTop: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    overflow: 'hidden',
-  },
-  eventItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    padding: 16,
-  },
-  eventDate: {
-    width: 50,
-    height: 50,
-    borderRadius: 8,
-    backgroundColor: '#005e7a',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  eventDay: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  eventMonth: {
-    fontSize: 12,
-    color: '#f0c75e',
-  },
-  eventContent: {
-    flex: 1,
-  },
-  eventTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  eventDetails: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
   },
   loadingContainer: {
     padding: 24,
