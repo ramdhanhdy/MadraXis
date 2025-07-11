@@ -57,8 +57,9 @@ The current authentication uses invite-only email + password flow (docs/auth_flo
 - **Task 2 paused**: Per user request to focus on existing users first. CSV templates created (docs/mock-*-users.csv) for future use
 - **Blockers resolved**: Fixed bundling error (RN version conflicts with Expo SDK 53) and RLS infinite recursion on profiles table
 - **Task 3 COMPLETED**: ✅ OTP configuration verified! Email OTP works for existing users (B2B model preserved). Test script confirms: signInWithOtp() sends 6-digit codes to existing users, signup protection active.
-- **Task 4 COMPLETED**: ✅ Hybrid OTP/password UI implemented! AuthForm extended with OTP modes (otp, otp-verify), 6-digit code input, mode toggles, proper validation. Cherry-picked successfully from management branch to OTP branch.
-- **Task 5 starting**: Will test OTP flow end-to-end and verify AuthContext integration
+- **Task 4 COMPLETED**: ✅ Hybrid OTP/password UI implemented! AuthForm extended with OTP modes (otp, otp-verify), 6-digit code input, mode toggles, proper validation. Fixed duplicate email input issue.
+- **Task 5 CRITICAL FIX**: ✅ Navigation issue resolved! OTP branch was missing management features, causing navigation to old setup screen. Merged feat/management-features-functionality into new branch feat/otp-auth-with-management. OTP login now navigates to proper management dashboard.
+- **Task 5 continuing**: Ready to test complete OTP flow with proper navigation
 
 ## Lessons Learned
 - [2025-07-10] Avoid overriding Expo-managed React Native versions in package.json - causes bundling syntax errors
@@ -67,6 +68,7 @@ The current authentication uses invite-only email + password flow (docs/auth_flo
 - [2025-07-10] Supabase auth.users table requires proper signup flow - can't directly INSERT; use dashboard for manual password resets during development
 - [2025-07-10] OTP configuration: For B2B apps, use signInWithOtp() without shouldCreateUser option to allow existing users only. Signup restrictions prevent unwanted registrations while enabling passwordless login.
 - [2025-07-10] Git parallel development: Use cherry-pick to move feature-specific changes to correct branch. Maintains clean separation and avoids merge conflicts between unrelated features.
+- [2025-07-10] Branch dependency management: When creating feature branches, ensure they include dependencies (e.g., OTP needs management features for proper navigation). Use merge or rebase to combine related work before testing end-to-end flows.
 
 ## Project Status Board  
 - [x] Task 1: Create branch  
