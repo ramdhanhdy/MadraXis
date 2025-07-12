@@ -5,6 +5,7 @@
 - 🔄 **Database Security Audit** - `docs/implementation-plan/database-security-audit.md` (Phase 1 - Dashboard config needed)
 - 🛠️ **Database Schema Polish** - `docs/implementation-plan/database-schema-polish.md` (planning stage)
 - 📝 **Student Detail Enhancement** - `docs/implementation-plan/student-detail-enhancement.md` (planning stage)
+- 🆕 **Fix Hermes Require Error** - `docs/implementation-plan/fix-hermes-require-error.md` (planning stage)
 
 ## Project Status
 - ✅ Authentication simplification completed (July 2025)
@@ -23,6 +24,7 @@
 | **Database Security Audit** | `docs/implementation-plan/database-security-audit.md` | 🔄 Phase 1 |
 | **Database Schema Polish** | `docs/implementation-plan/database-schema-polish.md` | 🛠️ Planning |
 | **Student Detail Enhancement** | `docs/implementation-plan/student-detail-enhancement.md` | 📝 Planning |
+| **Fix Hermes Require Error** | `docs/implementation-plan/fix-hermes-require-error.md` | 🆕 Planning |
 
 ## Lessons Learned
 
