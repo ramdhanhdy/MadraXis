@@ -11,6 +11,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  clearSession: () => Promise<void>;
 }
 
 // Create the context with a default value
@@ -19,7 +20,8 @@ const AuthContext = createContext<AuthContextType>({
   user: null, 
   profile: null,
   loading: true, 
-  signOut: async () => {} 
+  signOut: async () => {},
+  clearSession: async () => {}
 });
 
 // Custom hook to use the AuthContext
@@ -65,6 +67,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Function to navigate based on user role
   const navigateBasedOnRole = (role: string, schoolId?: string | number) => {
+    console.log('🔐 Navigating based on role:', role, 'school_id:', schoolId);
     switch (role) {
       case 'teacher':
         router.replace('/screens/teacher/TeacherDashboard');
@@ -89,9 +92,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Function to clear session and force logout
+  const clearSession = async () => {
+    console.log('🚨 Clearing session and forcing logout');
+    setLoading(true);
+    
+    try {
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      await supabase.auth.signOut();
+      // Navigation handled by onAuthStateChange listener
+    } catch (error) {
+      console.error('🚨 Error during session clearing:', error);
+      // Force redirect to login if signOut fails
+      router.replace('/screens/auth/login');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Get the initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('🔐 Initial session check:', session ? 'AUTHENTICATED' : 'NOT AUTHENTICATED');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -99,6 +123,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Listen for changes in auth state
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔐 Auth state change:', event, session ? 'AUTHENTICATED' : 'NOT AUTHENTICATED');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -110,6 +135,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const rawMetadata = (session.user as { raw_user_meta_data?: Record<string, any> }).raw_user_meta_data || {};
         const userRole = userMetadata.role || rawMetadata.role;
         
+        console.log('🔐 User role from metadata:', userRole);
+        
         // If no role in auth metadata, fetch from profiles table
         if (!userRole) {
           await fetchUserProfileAndNavigate(session.user.id);
@@ -118,6 +145,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         navigateBasedOnRole(userRole, rawMetadata.school_id || userMetadata.school_id);
       } else if (event === 'SIGNED_OUT') {
+        console.log('🔐 User signed out - redirecting to login');
         setProfile(null);
         router.replace('/screens/auth/login');
       }
@@ -130,6 +158,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [router]);
 
   const signOut = async () => {
+    console.log('🔐 User signing out');
     setProfile(null);
     await supabase.auth.signOut();
   };
@@ -140,6 +169,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     profile,
     loading,
     signOut,
+    clearSession,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

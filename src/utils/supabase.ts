@@ -2,6 +2,7 @@ import 'react-native-url-polyfill/auto';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
+import Constants from 'expo-constants';
 
 // Define a no-op storage adapter for server-side rendering.
 const noopStorage = {
@@ -11,8 +12,8 @@ const noopStorage = {
 };
 
 // It's recommended to use environment variables for these
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl;
+const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   // You can show a message to the user or handle this error appropriately.

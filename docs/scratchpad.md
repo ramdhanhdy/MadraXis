@@ -5,6 +5,8 @@
 - 🔄 **Database Security Audit** - `docs/implementation-plan/database-security-audit.md` (Phase 1 - Dashboard config needed)
 - 🛠️ **Database Schema Polish** - `docs/implementation-plan/database-schema-polish.md` (planning stage)
 - 📝 **Student Detail Enhancement** - `docs/implementation-plan/student-detail-enhancement.md` (planning stage)
+- ✅ **AnimatedSplashScreen Bug Fix** - `docs/implementation-plan/animated-splash-screen-fix.md` (COMPLETED)
+- 🆕 **Fix Hermes Require Error** - `docs/implementation-plan/fix-hermes-require-error.md` (planning stage)
 
 ## Project Status
 - ✅ Authentication simplification completed (July 2025)
@@ -23,6 +25,8 @@
 | **Database Security Audit** | `docs/implementation-plan/database-security-audit.md` | 🔄 Phase 1 |
 | **Database Schema Polish** | `docs/implementation-plan/database-schema-polish.md` | 🛠️ Planning |
 | **Student Detail Enhancement** | `docs/implementation-plan/student-detail-enhancement.md` | 📝 Planning |
+| **AnimatedSplashScreen Bug Fix** | `docs/implementation-plan/animated-splash-screen-fix.md` | ✅ **Complete** |
+| **Fix Hermes Require Error** | `docs/implementation-plan/fix-hermes-require-error.md` | 🆕 Planning |
 
 ## Lessons Learned
 
@@ -84,6 +88,26 @@
 - ✅ **RLS Vulnerability**: Fixed schools table policy using insecure user_metadata
 - ✅ **Function Security**: Secured 6 database functions with search_path protection
 - 🔄 **Phase 1**: Manual dashboard configuration needed for OTP expiry and leaked password protection
+
+### [2025-01-13] Redundant Navigation in SignOut Functions Bug Fix
+- ✅ **BUG FIXED**: Fixed redundant navigation calls in signOut functions causing double redirects
+- ✅ **ROOT CAUSE**: Both `clearSession` and `handleSignOut` functions explicitly called `router.replace('/screens/auth/login')` when `onAuthStateChange` listener already handles navigation on 'SIGNED_OUT' event
+- ✅ **SOLUTION**: Removed redundant navigation calls, relying on auth state change listener for consistent navigation
+- ✅ **LESSON**: When using auth state change listeners, avoid explicit navigation in auth functions to prevent double redirects
+- ✅ **IMPLEMENTATION**: Quick fix with fallback protection for error scenarios
+
+### [2025-01-13] AnimatedSplashScreen Infinite Restart Bug Fix
+- ✅ **BUG FIXED**: Fixed infinite animation restart in AnimatedSplashScreen component
+- ✅ **ROOT CAUSE**: useEffect dependency array included `onAnimationFinish` callback, causing infinite re-runs when parent component re-rendered
+- ✅ **SOLUTION**: Removed `onAnimationFinish` from useEffect dependencies - animation should only run once on mount
+- ✅ **LESSON**: For one-time animations, avoid including callback functions in useEffect dependency arrays
+- ✅ **IMPLEMENTATION**: Quick 45-minute fix with proper documentation and testing
+
+### [2025-01-12] Metro Configuration Fix for Supabase and SVG Support
+- ✅ **BUG FIXED**: Restored critical Metro configuration settings that were removed
+- ✅ **Supabase Support**: Added `unstable_enableSymlinks`, `unstable_enablePackageExports`, and `resolverMainFields` for React Native 0.79+ compatibility
+- ✅ **SVG Support**: Configured asset/source extensions to support react-native-svg usage and SVG file imports
+- ✅ **Issue Resolved**: Fixed build errors related to Supabase imports and SVG file handling
 
 ## Branch Management
 - Main development on `main` branch

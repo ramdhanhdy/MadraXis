@@ -1,10 +1,9 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import * as SplashScreen from 'expo-splash-screen';
 import AnimatedSplashScreen from './components/AnimatedSplashScreen';
-import { supabase } from '../src/utils/supabase';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -13,31 +12,37 @@ const RootLayoutNav = () => {
     const { loading: authLoading } = useAuth();
     const [splashAnimationComplete, setSplashAnimationComplete] = useState(false);
 
+    const handleAnimationFinish = () => {
+        requestAnimationFrame(() => {
+            setSplashAnimationComplete(true);
+        });
+    };
+
     const onLayoutRootView = useCallback(async () => {
-        if (!authLoading) {
+        if (!authLoading && splashAnimationComplete) {
             await SplashScreen.hideAsync();
         }
-    }, [authLoading]);
+    }, [authLoading, splashAnimationComplete]);
 
     useEffect(() => {
         onLayoutRootView();
     }, [onLayoutRootView]);
 
-    if (!splashAnimationComplete || authLoading) {
-        return (
-            <AnimatedSplashScreen
-                onAnimationFinish={() => setSplashAnimationComplete(true)}
-            />
-        );
+    // Show animated splash screen until both auth loading and animation are complete
+    if (authLoading || !splashAnimationComplete) {
+        return <AnimatedSplashScreen onAnimationFinish={handleAnimationFinish} />;
     }
 
     return (
         <>
             <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
+                <Stack.Screen name="debug-auth" />
+                <Stack.Screen name="screens/auth/login" />
                 <Stack.Screen name="screens/auth/ManagementAuthScreen" />
                 <Stack.Screen name="screens/teacher/TeacherDashboard" />
                 <Stack.Screen name="screens/student/StudentDashboard" />
+                <Stack.Screen name="screens/parent/ParentDashboard" />
                 <Stack.Screen name="teacher/index" />
                 <Stack.Screen name="student/index" />
                 <Stack.Screen name="student/dashboard" />
@@ -52,6 +57,13 @@ const RootLayoutNav = () => {
                 <Stack.Screen name="teacher/class/[id]/schedule/index" />
                 <Stack.Screen name="teacher/class/[id]/reports/index" />
                 <Stack.Screen name="management/dashboard" />
+                <Stack.Screen name="management/setup" />
+                <Stack.Screen name="management/user-management" />
+                <Stack.Screen name="parent/dashboard" />
+                <Stack.Screen name="parent/incident-report" />
+                <Stack.Screen name="parent/anti-bullying" />
+                <Stack.Screen name="parent/cctv-request" />
+                <Stack.Screen name="(auth)/reset-password" />
             </Stack>
             <StatusBar style="light" />
         </>
