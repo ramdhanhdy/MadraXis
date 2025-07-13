@@ -29,7 +29,7 @@ const RootLayoutNav = () => {
     }, [onLayoutRootView]);
 
     // Show animated splash screen until both auth loading and animation are complete
-    if (authLoading && !splashAnimationComplete) {
+    if (authLoading || !splashAnimationComplete) {
         return <AnimatedSplashScreen onAnimationFinish={handleAnimationFinish} />;
     }
 
