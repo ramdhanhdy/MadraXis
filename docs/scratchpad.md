@@ -5,6 +5,7 @@
 - 🔄 **Database Security Audit** - `docs/implementation-plan/database-security-audit.md` (Phase 1 - Dashboard config needed)
 - 🛠️ **Database Schema Polish** - `docs/implementation-plan/database-schema-polish.md` (planning stage)
 - 📝 **Student Detail Enhancement** - `docs/implementation-plan/student-detail-enhancement.md` (planning stage)
+- 🆕 **AnimatedSplashScreen Bug Fix** - `docs/implementation-plan/animated-splash-screen-fix.md` (planning stage)
 - 🆕 **Fix Hermes Require Error** - `docs/implementation-plan/fix-hermes-require-error.md` (planning stage)
 
 ## Project Status
@@ -24,6 +25,7 @@
 | **Database Security Audit** | `docs/implementation-plan/database-security-audit.md` | 🔄 Phase 1 |
 | **Database Schema Polish** | `docs/implementation-plan/database-schema-polish.md` | 🛠️ Planning |
 | **Student Detail Enhancement** | `docs/implementation-plan/student-detail-enhancement.md` | 📝 Planning |
+| **AnimatedSplashScreen Bug Fix** | `docs/implementation-plan/animated-splash-screen-fix.md` | 🆕 Planning |
 | **Fix Hermes Require Error** | `docs/implementation-plan/fix-hermes-require-error.md` | 🆕 Planning |
 
 ## Lessons Learned
@@ -86,6 +88,12 @@
 - ✅ **RLS Vulnerability**: Fixed schools table policy using insecure user_metadata
 - ✅ **Function Security**: Secured 6 database functions with search_path protection
 - 🔄 **Phase 1**: Manual dashboard configuration needed for OTP expiry and leaked password protection
+
+### [2025-01-12] Metro Configuration Fix for Supabase and SVG Support
+- ✅ **BUG FIXED**: Restored critical Metro configuration settings that were removed
+- ✅ **Supabase Support**: Added `unstable_enableSymlinks`, `unstable_enablePackageExports`, and `resolverMainFields` for React Native 0.79+ compatibility
+- ✅ **SVG Support**: Configured asset/source extensions to support react-native-svg usage and SVG file imports
+- ✅ **Issue Resolved**: Fixed build errors related to Supabase imports and SVG file handling
 
 ## Branch Management
 - Main development on `main` branch
