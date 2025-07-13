@@ -95,11 +95,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Function to clear session and force logout
   const clearSession = async () => {
     console.log('🚨 Clearing session and forcing logout');
-    setSession(null);
-    setUser(null);
-    setProfile(null);
-    await supabase.auth.signOut();
-    router.replace('/screens/auth/login');
+    setLoading(true);
+    
+    try {
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      await supabase.auth.signOut();
+      router.replace('/screens/auth/login');
+    } catch (error) {
+      console.error('🚨 Error during session clearing:', error);
+      // Still redirect to login even if signOut fails
+      router.replace('/screens/auth/login');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
