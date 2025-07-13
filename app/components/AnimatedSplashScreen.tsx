@@ -23,7 +23,7 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
     return () => {
       animation.stop();
     };
-  }, [scale, onAnimationFinish]);
+  }, [scale]); // Removed onAnimationFinish to prevent infinite restart
 
   return (
     <View style={styles.container}>
