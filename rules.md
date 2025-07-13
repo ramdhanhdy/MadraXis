@@ -1,1 +1,0 @@
-- understand the database structure before making suggestion/edits to the database
