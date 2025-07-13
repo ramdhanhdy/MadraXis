@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../../src/context/AuthContext';
 import { fetchIncidentsForSchool } from '../../../src/services/incidents';
 import { fetchDashboardMetrics, DashboardMetrics } from '../../../src/services/dashboard';
+import LogoutButton from '../../components/auth/LogoutButton';
 
 // Updated interface to match Supabase query result
 interface Incident {
@@ -145,16 +146,7 @@ export default function ManagementDashboard() {
     // router.push("/management/incidents/" + incidentId);
   };
 
-  // Handle Sign Out using AuthContext
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      // The root layout's useEffect will handle redirecting to the login screen
-    } catch (e: any) {
-      console.error('Failed to sign out:', e);
-      Alert.alert('Error', e.message || 'Gagal untuk keluar.');
-    }
-  };
+
 
   // Fetch dashboard data when component mounts and auth state is resolved
   useEffect(() => {
@@ -351,10 +343,9 @@ export default function ManagementDashboard() {
         </View>
         
         {/* Sign Out Button */}
-        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-          <Ionicons name="log-out-outline" size={20} color="#e74c3c" style={{ marginRight: 8 }} />
-          <Text style={styles.signOutButtonText}>Keluar</Text>
-        </TouchableOpacity>
+        <View style={styles.signOutContainer}>
+          <LogoutButton variant="button" style={styles.logoutButton} />
+        </View>
         
         {/* Bottom Spacing */}
         <View style={{ height: 30 }} />
@@ -625,17 +616,16 @@ const styles = StyleSheet.create({
     color: '#666666',
     textAlign: 'center',
   },
-  signOutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  signOutContainer: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  logoutButton: {
     backgroundColor: '#ffffff',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    marginHorizontal: 16,
-    marginTop: 16, // Add some space above the button
-    marginBottom: 24, // Add space at the bottom
     borderWidth: 1,
     borderColor: '#e74c3c',
     shadowColor: '#000',
@@ -643,10 +633,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
-  },
-  signOutButtonText: {
-    color: '#e74c3c',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 }); 

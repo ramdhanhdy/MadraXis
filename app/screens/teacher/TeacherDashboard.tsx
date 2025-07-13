@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
+import LogoutButton from '../../components/auth/LogoutButton';
 
 // Import SVG as string
 const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
@@ -320,14 +321,17 @@ export default function TeacherDashboard() {
           <Ionicons name="arrow-back" size={24} color="#333333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Dashboard Guru</Text>
-        <TouchableOpacity onPress={handleNotificationToggle}>
-          <View style={styles.notificationIconContainer}>
-            <Ionicons name="notifications-outline" size={24} color="#333333" />
-            {notifications.some(n => !n.read) && (
-              <View style={styles.notificationBadge} />
-            )}
-          </View>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity onPress={handleNotificationToggle} style={styles.headerAction}>
+            <View style={styles.notificationIconContainer}>
+              <Ionicons name="notifications-outline" size={24} color="#333333" />
+              {notifications.some(n => !n.read) && (
+                <View style={styles.notificationBadge} />
+              )}
+            </View>
+          </TouchableOpacity>
+          <LogoutButton variant="icon" style={styles.logoutButton} />
+        </View>
       </View>
       
       {/* Notifications Panel */}
@@ -765,6 +769,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333333',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerAction: {
+    marginRight: 12,
+  },
+  logoutButton: {
+    padding: 4,
   },
   notificationIconContainer: {
     position: 'relative',
@@ -1224,4 +1238,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#005e7a',
   },
-}); 
+});
