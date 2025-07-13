@@ -24,9 +24,25 @@ Currently the MadraXis application implements login (OTP, password) but no expli
   - Define navigation reset strategy.
   - Success: updated wireframe/description added here.
 - [ ] **Implement Auth Context `logout()` helper**
-  - Call `supabase.auth.signOut()`.
-  - Clear local caches/state.
-  - Success: function returns without error and session null.
+  - Call `supabase.auth.signOut()` with comprehensive error handling.
+  - **Error Classification**: Distinguish between network errors (connectivity issues) and server errors (auth service failures).
+  - **Retry Mechanism**: Implement retry logic for network errors when connectivity is restored:
+    - Queue logout request in local state if network unavailable
+    - Monitor network connectivity changes
+    - Retry signOut() when connection restored
+    - Maximum 3 retry attempts with exponential backoff
+  - **Feedback Interface**: Return structured response to caller:
+    - Success: `{ success: true, error: null }`
+    - Network error: `{ success: false, error: { type: 'network', message: 'No internet connection', retryable: true } }`
+    - Server error: `{ success: false, error: { type: 'server', message: 'Auth service error', retryable: false } }`
+  - **Graceful Degradation**: Always clear local caches/state even if signOut() fails
+  - **Logging**: Add detailed error logging for debugging and monitoring
+  - **Success Criteria**: 
+    - Function handles all error scenarios without throwing
+    - Local state always cleared regardless of signOut() success
+    - Caller receives clear feedback about operation result
+    - Network errors trigger retry mechanism
+    - Server errors are logged and reported appropriately
 - [ ] **Add UI Trigger(s)**
   - Insert Logout item in existing Settings/Profile screens.
   - If such screen doesn’t exist for a mode, add simple modal/menu from header.
@@ -39,12 +55,24 @@ Currently the MadraXis application implements login (OTP, password) but no expli
   - Clear any AsyncStorage items storing user data.
   - Success: no residual user data after logout (verified via console).
 - [ ] **Offline Handling**
-  - If `signOut` fails due to network, still clear local state and show toast.
-  - Success: manual network toggle test passes.
+  - Validate retry mechanism works when network connectivity is restored
+  - Test queue persistence across app restarts/crashes
+  - Verify user receives appropriate feedback for offline logout attempts
+  - Ensure graceful degradation when signOut() fails due to network issues
+  - Success: manual network toggle test passes, retry mechanism functions correctly, user experience remains smooth during connectivity issues.
 - [ ] **E2E Testing**
   - Manual test each role: login → some action → logout → ensure redirect.
-  - Add Jest/unit tests for Auth context logout.
-  - Success: tests green.
+  - Add Jest/unit tests for Auth context logout covering all error scenarios.
+  - **Error Handling Tests**:
+    - Test network error scenarios and retry mechanism
+    - Test server error scenarios and appropriate failure handling
+    - Test offline logout with queue persistence
+    - Test structured error response format
+  - **Integration Tests**:
+    - Test logout with network connectivity changes
+    - Test logout retry mechanism timing and backoff
+    - Test UI feedback for different error types
+  - Success: all tests green, error scenarios properly handled, user experience validated.
 - [ ] **Documentation**
   - Update `docs/auth_flow.md` with logout sequence diagram.
   - Success: Docs merged.
