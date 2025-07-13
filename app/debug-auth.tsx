@@ -26,7 +26,7 @@ export default function DebugAuthScreen() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.replace('/screens/auth/login');
+    // Navigation handled by onAuthStateChange listener
   };
 
   return (

@@ -102,10 +102,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
       setProfile(null);
       await supabase.auth.signOut();
-      router.replace('/screens/auth/login');
+      // Navigation handled by onAuthStateChange listener
     } catch (error) {
       console.error('🚨 Error during session clearing:', error);
-      // Still redirect to login even if signOut fails
+      // Force redirect to login if signOut fails
       router.replace('/screens/auth/login');
     } finally {
       setLoading(false);
