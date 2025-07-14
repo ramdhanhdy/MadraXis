@@ -412,25 +412,37 @@ export default function StudentDashboard() {
       <View style={styles.profileSection}>
         <Text style={styles.sectionTitle}>Pengaturan Akun</Text>
         
-        <TouchableOpacity style={styles.profileItem}>
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur edit profil akan segera hadir!')}
+        >
           <Ionicons name="person" size={24} color="#005e7a" />
           <Text style={styles.profileItemText}>Edit Profil</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.profileItem}>
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur ubah password akan segera hadir!')}
+        >
           <Ionicons name="lock-closed" size={24} color="#005e7a" />
           <Text style={styles.profileItemText}>Ubah Password</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.profileItem}>
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur pengaturan notifikasi akan segera hadir!')}
+        >
           <Ionicons name="notifications" size={24} color="#005e7a" />
           <Text style={styles.profileItemText}>Pengaturan Notifikasi</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.profileItem}>
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur pengaturan bahasa akan segera hadir!')}
+        >
           <Ionicons name="language" size={24} color="#005e7a" />
           <Text style={styles.profileItemText}>Bahasa</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
@@ -440,19 +452,28 @@ export default function StudentDashboard() {
       <View style={styles.profileSection}>
         <Text style={styles.sectionTitle}>Bantuan</Text>
         
-        <TouchableOpacity style={styles.profileItem}>
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur pusat bantuan akan segera hadir!')}
+        >
           <Ionicons name="help-circle" size={24} color="#005e7a" />
           <Text style={styles.profileItemText}>Pusat Bantuan</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.profileItem}>
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur syarat & ketentuan akan segera hadir!')}
+        >
           <Ionicons name="document-text" size={24} color="#005e7a" />
           <Text style={styles.profileItemText}>Syarat & Ketentuan</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.profileItem}>
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur kebijakan privasi akan segera hadir!')}
+        >
           <Ionicons name="shield-checkmark" size={24} color="#005e7a" />
           <Text style={styles.profileItemText}>Kebijakan Privasi</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
