@@ -55,6 +55,7 @@ export default function DashboardHomeScreen() {
   ];
 
   useEffect(() => {
+    let isMounted = true;
     const fetchNotifications = async () => {
       setLoadingNotifications(true);
       try {
@@ -65,16 +66,27 @@ export default function DashboardHomeScreen() {
           { id: 2, title: 'New grade report available', time: '2 hours ago', read: false },
           { id: 3, title: 'System maintenance scheduled', time: '1 day ago', read: true },
         ];
-        setNotifications(dynamicNotifications);
+        if (isMounted) {
+          setNotifications(dynamicNotifications);
+        }
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
-        // In a real app, you might set an error state here to show a message
+        // Consider showing user-friendly error message
+        if (isMounted) {
+          // setError(true); // Add error state
+        }
       } finally {
-        setLoadingNotifications(false);
+        if (isMounted) {
+          setLoadingNotifications(false);
+        }
       }
     };
 
     fetchNotifications();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleNotificationToggle = () => {
