@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import LogoutButton from '../../components/auth/LogoutButton';
+import { Stack, useRouter } from 'expo-router';
+import LogoutButton from '../components/auth/LogoutButton';
 
 export default function ParentDashboard() {
   const router = useRouter();
@@ -257,6 +257,10 @@ export default function ParentDashboard() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Stack.Screen options={{ 
+        headerShown: false,
+        title: "Dashboard Orang Tua" 
+      }} />
       <StatusBar style="light" />
       <View style={styles.header}>
         <View style={{ width: 24 }} />

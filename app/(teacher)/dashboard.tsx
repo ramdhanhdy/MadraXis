@@ -1,40 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
-import LogoutButton from '../../components/auth/LogoutButton';
-import { useAuth } from '@/src/context/AuthContext';
-
-// Import SVG as string
-const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background Circle -->
-  <circle cx="100" cy="100" r="95" fill="#005e7a" />
-  <circle cx="100" cy="100" r="85" fill="#ffffff" />
-  
-  <!-- Open Book Symbol -->
-  <path d="M100 60C100 60 70 50 50 60V140C70 130 100 140 100 140V60Z" fill="#005e7a" />
-  <path d="M100 60C100 60 130 50 150 60V140C130 130 100 140 100 140V60Z" fill="#005e7a" />
-  <path d="M100 70C100 70 75 62 60 70V130C75 122 100 130 100 130V70Z" fill="#ffffff" />
-  <path d="M100 70C100 70 125 62 140 70V130C125 122 100 130 100 130V70Z" fill="#ffffff" />
-  
-  <!-- Arabic-inspired Decorative Element -->
-  <path d="M100 40C100 40 90 45 100 50C110 45 100 40 100 40Z" fill="#f0c75e" />
-  <path d="M80 45C80 45 70 50 80 55C90 50 80 45 80 45Z" fill="#f0c75e" />
-  <path d="M120 45C120 45 110 50 120 55C130 50 120 45 120 45Z" fill="#f0c75e" />
-  
-  <!-- Text "ZBT" -->
-  <path d="M70 160H130V170H70V160Z" fill="#005e7a" />
-  <path d="M70 160L130 160L100 145L70 160Z" fill="#005e7a" />
-  <path d="M85 170V180H115V170" stroke="#005e7a" stroke-width="10" stroke-linecap="round" />
-</svg>`;
+import LogoutButton from '../components/auth/LogoutButton';
+import ProfileView from '../components/teacher/ProfileView';
+import BoardingInfoModal from '../components/teacher/BoardingInfoModal';
+import CommunicationModal from '../components/teacher/CommunicationModal';
+import IncidentReportModal from '../components/teacher/IncidentReportModal';
+import { useAuth } from '../../src/context/AuthContext';
+import { supabase } from '../../src/utils/supabase';
+import { logoSvg, generateBackgroundPatternSvg } from '../../src/utils/svgPatterns';
 
 export default function TeacherDashboard() {
   const router = useRouter();
   const { profile, loading } = useAuth();
+  const [schoolName, setSchoolName] = useState('Zaid Bin Tsabit');
   const [notifications, setNotifications] = useState([
     { id: 1, title: 'Siswa menyelesaikan hafalan baru', time: '10 menit yang lalu', read: false },
     { id: 2, title: 'Pengumuman rapat guru', time: '1 jam yang lalu', read: false },
@@ -49,6 +32,29 @@ export default function TeacherDashboard() {
   }>({ title: '', content: null });
   const [activeTab, setActiveTab] = useState('dashboard');
 
+  // Fetch school name from database
+  useEffect(() => {
+    const fetchSchoolName = async () => {
+      if (profile?.school_id) {
+        try {
+          const { data, error } = await supabase
+            .from('schools')
+            .select('name')
+            .eq('id', profile.school_id)
+            .single();
+          
+          if (data && !error) {
+            setSchoolName(data.name);
+          }
+        } catch (error) {
+          console.error('Error fetching school name:', error);
+        }
+      }
+    };
+
+    fetchSchoolName();
+  }, [profile?.school_id]);
+
   const handleNotificationToggle = () => {
     setShowNotifications(!showNotifications);
   };
@@ -59,12 +65,12 @@ export default function TeacherDashboard() {
 
   const handleNavigateToStudents = () => {
     setActiveTab('students');
-    router.push('/screens/teacher/StudentsList');
+    router.push('/students');
   };
 
   const handleNavigateToClasses = () => {
     setActiveTab('classes');
-    router.push('/screens/teacher/ClassesList');
+    router.push('/classes');
   };
 
   const handleNavigateToHafalan = () => {
@@ -83,7 +89,7 @@ export default function TeacherDashboard() {
   };
 
   const handleBackToRoleSelection = () => {
-    router.push('/screens/auth/login');
+    router.replace('/login');
   };
 
   const openModal = (title: string, content: React.ReactNode) => {
@@ -93,313 +99,16 @@ export default function TeacherDashboard() {
 
   // Render profile section
   const renderProfile = () => {
-    if (loading) {
-      return (
-        <ScrollView style={styles.contentContainer}>
-          <View style={styles.profileHeader}>
-            <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
-            <Text style={styles.profileName}>Loading...</Text>
-            <Text style={styles.profileRole}>Loading...</Text>
-            <Text style={styles.profileSchool}>Loading...</Text>
-          </View>
-        </ScrollView>
-      );
-    }
-
-    return (
-      <ScrollView style={styles.contentContainer}>
-        <View style={styles.profileHeader}>
-          <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
-          <Text style={styles.profileName}>{profile?.full_name || 'Nama Pengguna'}</Text>
-          <Text style={styles.profileRole}>
-            {profile?.role === 'teacher' ? 'Guru Tahfidz' : profile?.role || 'Role tidak diketahui'}
-          </Text>
-          <Text style={styles.profileSchool}>Zaid Bin Tsabit</Text>
-        </View>
-      
-      <View style={styles.profileSection}>
-        <Text style={styles.sectionTitle}>Pengaturan Akun</Text>
-        
-        <TouchableOpacity style={styles.profileItem}>
-          <Ionicons name="person" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Edit Profil</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.profileItem}>
-          <Ionicons name="lock-closed" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Ubah Password</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.profileItem}>
-          <Ionicons name="notifications" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Pengaturan Notifikasi</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.profileItem}>
-          <Ionicons name="language" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Bahasa</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.profileSection}>
-        <Text style={styles.sectionTitle}>Bantuan</Text>
-        
-        <TouchableOpacity style={styles.profileItem}>
-          <Ionicons name="help-circle" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Pusat Bantuan</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.profileItem}>
-          <Ionicons name="document-text" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Syarat & Ketentuan</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.profileItem}>
-          <Ionicons name="shield-checkmark" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Kebijakan Privasi</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.profileSection}>
-        <LogoutButton variant="button" style={styles.profileLogoutButton} />
-      </View>
-      
-        {/* Bottom Spacing */}
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    );
+    return <ProfileView profile={profile || undefined} loading={loading} schoolName={schoolName} />;
   };
 
-  // Boarding Information Modal Content
-  const renderBoardingInfo = () => (
-    <View>
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Informasi Asrama</Text>
-        <Text style={styles.modalDescription}>
-          Berikut adalah informasi asrama yang Anda kelola sebagai pembimbing asrama.
-        </Text>
-      </View>
+  // Boarding Information Modal Content - now using BoardingInfoModal component
 
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Gedung & Kamar</Text>
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Gedung:</Text>
-          <Text style={styles.infoValue}>Al-Farabi</Text>
-        </View>
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Jumlah Kamar:</Text>
-          <Text style={styles.infoValue}>10</Text>
-        </View>
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Jumlah Siswa:</Text>
-          <Text style={styles.infoValue}>40</Text>
-        </View>
-      </View>
-
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Jadwal Piket Asrama</Text>
-        <View style={styles.scheduleCard}>
-          <View style={styles.scheduleHeader}>
-            <View style={styles.scheduleDay}>
-              <Text style={styles.scheduleDayText}>Sen</Text>
-            </View>
-            <View style={styles.scheduleInfo}>
-              <Text style={styles.scheduleTime}>19:00 - 22:00</Text>
-              <Text style={styles.scheduleActivity}>Pengawasan Belajar Malam</Text>
-            </View>
-          </View>
-        </View>
-        <View style={styles.scheduleCard}>
-          <View style={styles.scheduleHeader}>
-            <View style={styles.scheduleDay}>
-              <Text style={styles.scheduleDayText}>Rab</Text>
-            </View>
-            <View style={styles.scheduleInfo}>
-              <Text style={styles.scheduleTime}>19:00 - 22:00</Text>
-              <Text style={styles.scheduleActivity}>Pengawasan Belajar Malam</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Aktivitas Asrama Hari Ini</Text>
-        <View style={styles.activityCard}>
-          <Text style={styles.activityTime}>05:00 - 05:30</Text>
-          <Text style={styles.activityName}>Sholat Subuh Berjamaah</Text>
-        </View>
-        <View style={styles.activityCard}>
-          <Text style={styles.activityTime}>19:30 - 21:00</Text>
-          <Text style={styles.activityName}>Belajar Mandiri</Text>
-        </View>
-        <View style={styles.activityCard}>
-          <Text style={styles.activityTime}>21:00 - 21:30</Text>
-          <Text style={styles.activityName}>Persiapan Tidur</Text>
-        </View>
-      </View>
-
-      <TouchableOpacity style={styles.actionButton}>
-        <Text style={styles.actionButtonText}>Kelola Asrama</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  // Communication Modal Content
-  const renderCommunication = () => (
-    <View>
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Komunikasi</Text>
-        <Text style={styles.modalDescription}>
-          Komunikasi dengan siswa dan orang tua untuk memantau perkembangan siswa.
-        </Text>
-      </View>
-
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Siswa</Text>
-        <TouchableOpacity style={styles.contactCard}>
-          <View style={[styles.contactIcon, { backgroundColor: '#005e7a' }]}>
-            <Ionicons name="person" size={24} color="#ffffff" />
-          </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactName}>Ahmad Fauzi</Text>
-            <Text style={styles.contactRole}>Kelas 8A</Text>
-          </View>
-          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.contactCard}>
-          <View style={[styles.contactIcon, { backgroundColor: '#005e7a' }]}>
-            <Ionicons name="person" size={24} color="#ffffff" />
-          </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactName}>Muhammad Rizki</Text>
-            <Text style={styles.contactRole}>Kelas 8A</Text>
-          </View>
-          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Orang Tua</Text>
-        <TouchableOpacity style={styles.contactCard}>
-          <View style={[styles.contactIcon, { backgroundColor: '#f0c75e' }]}>
-            <Ionicons name="people" size={24} color="#ffffff" />
-          </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactName}>Orang Tua Ahmad</Text>
-            <Text style={styles.contactRole}>Wali dari Ahmad Fauzi</Text>
-          </View>
-          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.contactCard}>
-          <View style={[styles.contactIcon, { backgroundColor: '#f0c75e' }]}>
-            <Ionicons name="people" size={24} color="#ffffff" />
-          </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactName}>Orang Tua Rizki</Text>
-            <Text style={styles.contactRole}>Wali dari Muhammad Rizki</Text>
-          </View>
-          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Pesan Terbaru</Text>
-        <View style={styles.messageCard}>
-          <View style={styles.messageHeader}>
-            <Text style={styles.messageSender}>Orang Tua Ahmad</Text>
-            <Text style={styles.messageTime}>10:30</Text>
-          </View>
-          <Text style={styles.messageContent}>Bagaimana perkembangan hafalan Ahmad minggu ini?</Text>
-        </View>
-        <View style={styles.messageCard}>
-          <View style={styles.messageHeader}>
-            <Text style={styles.messageSender}>Muhammad Rizki</Text>
-            <Text style={styles.messageTime}>Kemarin</Text>
-          </View>
-          <Text style={styles.messageContent}>Ustadz, saya ingin konsultasi tentang hafalan saya</Text>
-        </View>
-      </View>
-
-      <TouchableOpacity style={styles.actionButton}>
-        <Text style={styles.actionButtonText}>Buka Semua Pesan</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  // Incident Report Modal Content
-  const renderIncidentReport = () => (
-    <View>
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Manajemen Insiden</Text>
-        <Text style={styles.modalDescription}>
-          Kelola laporan insiden dari siswa dan orang tua terkait keamanan, kesejahteraan, atau perilaku yang mengkhawatirkan.
-        </Text>
-      </View>
-
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Laporan Baru</Text>
-        <View style={styles.incidentCard}>
-          <View style={styles.incidentHeader}>
-            <View style={[styles.incidentTypeTag, { backgroundColor: '#e74c3c' }]}>
-              <Text style={styles.incidentTypeText}>Bullying</Text>
-            </View>
-            <Text style={styles.incidentTime}>30 menit yang lalu</Text>
-          </View>
-          <Text style={styles.incidentTitle}>Laporan dari Orang Tua Ahmad</Text>
-          <Text style={styles.incidentDescription}>
-            Ahmad melaporkan bahwa dia merasa tidak nyaman dengan perilaku beberapa teman di asrama...
-          </Text>
-          <View style={styles.incidentActions}>
-            <TouchableOpacity style={styles.incidentActionButton}>
-              <Text style={styles.incidentActionText}>Lihat Detail</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.incidentActionButton, styles.incidentActionButtonSecondary]}>
-              <Text style={styles.incidentActionTextSecondary}>Tandai Ditangani</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Dalam Proses</Text>
-        <View style={styles.incidentCard}>
-          <View style={styles.incidentHeader}>
-            <View style={[styles.incidentTypeTag, { backgroundColor: '#f39c12' }]}>
-              <Text style={styles.incidentTypeText}>Kesehatan</Text>
-            </View>
-            <Text style={styles.incidentTime}>2 hari yang lalu</Text>
-          </View>
-          <Text style={styles.incidentTitle}>Laporan dari Muhammad Rizki</Text>
-          <Text style={styles.incidentDescription}>
-            Rizki melaporkan bahwa dia mengalami sakit kepala yang berkelanjutan...
-          </Text>
-          <View style={styles.incidentActions}>
-            <TouchableOpacity style={styles.incidentActionButton}>
-              <Text style={styles.incidentActionText}>Lihat Detail</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.incidentActionButton, styles.incidentActionButtonSecondary]}>
-              <Text style={styles.incidentActionTextSecondary}>Perbarui Status</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-      <TouchableOpacity style={styles.actionButton}>
-        <Text style={styles.actionButtonText}>Lihat Semua Laporan</Text>
-      </TouchableOpacity>
-    </View>
-  );
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
+      <Stack.Screen options={{ headerShown: false }} />
       
       {/* Background Pattern */}
       <View style={styles.backgroundContainer}>
@@ -512,7 +221,7 @@ export default function TeacherDashboard() {
             
             <TouchableOpacity 
               style={styles.quickActionButton}
-              onPress={() => openModal('Komunikasi', renderCommunication())}
+              onPress={() => openModal('Komunikasi', <CommunicationModal />)}
             >
               <View style={[styles.quickActionIcon, { backgroundColor: '#9c27b0' }]}>
                 <Ionicons name="chatbubbles" size={24} color="#ffffff" />
@@ -528,7 +237,7 @@ export default function TeacherDashboard() {
           <View style={styles.quickActionsContainer}>
             <TouchableOpacity 
               style={styles.quickActionButton}
-              onPress={() => openModal('Informasi Asrama', renderBoardingInfo())}
+              onPress={() => openModal('Informasi Asrama', <BoardingInfoModal />)}
             >
               <View style={[styles.quickActionIcon, { backgroundColor: '#3498db' }]}>
                 <Ionicons name="home" size={24} color="#ffffff" />
@@ -538,7 +247,7 @@ export default function TeacherDashboard() {
             
             <TouchableOpacity 
               style={styles.quickActionButton}
-              onPress={() => openModal('Manajemen Insiden', renderIncidentReport())}
+              onPress={() => openModal('Manajemen Insiden', <IncidentReportModal />)}
             >
               <View style={[styles.quickActionIcon, { backgroundColor: '#e74c3c' }]}>
                 <Ionicons name="warning" size={24} color="#ffffff" />
@@ -706,163 +415,7 @@ export default function TeacherDashboard() {
   );
 }
 
-// Background Pattern SVG
-const backgroundPatternSvg = `
-<svg width="100%" height="100%" viewBox="0 0 800 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="800" height="1600" fill="#f5f5f5"/>
-  
-  <!-- Islamic Geometric Pattern -->
-  <!-- Pattern 1: Top section - Hexagonal pattern -->
-  <g opacity="0.05">
-    <g transform="translate(0, 0)">
-      ${generateHexagonalPattern(10, 6, 60)}
-    </g>
-  </g>
-  
-  <!-- Pattern 2: Middle section - Interlaced pattern -->
-  <g opacity="0.05">
-    <g transform="translate(0, 800)">
-      ${generateInterlacedPattern(6, 3, 100)}
-    </g>
-  </g>
-  
-  <!-- Pattern 3: Bottom section - Floral pattern -->
-  <g opacity="0.05">
-    <g transform="translate(0, 1200)">
-      ${generateFloralPattern(6, 3, 100)}
-    </g>
-  </g>
-</svg>
-`;
-
-// Helper function to generate hexagonal pattern
-function generateHexagonalPattern(rows: number, cols: number, size: number): string {
-  let pattern = '';
-  const h = size * Math.sqrt(3) / 2;
-  
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      const offsetX = j * size * 1.5;
-      const offsetY = i * h * 2 + (j % 2 === 0 ? 0 : h);
-      
-      // Hexagon
-      pattern += `
-        <path d="
-          M${offsetX} ${offsetY + h}
-          L${offsetX + size/2} ${offsetY}
-          L${offsetX + size*1.5} ${offsetY}
-          L${offsetX + size*2} ${offsetY + h}
-          L${offsetX + size*1.5} ${offsetY + h*2}
-          L${offsetX + size/2} ${offsetY + h*2}
-          Z
-        " stroke="#005e7a" stroke-width="1" fill="none"/>
-      `;
-      
-      // Inner decoration
-      pattern += `
-        <circle cx="${offsetX + size}" cy="${offsetY + h}" r="${size/4}" stroke="#005e7a" stroke-width="0.5" fill="none"/>
-        <path d="
-          M${offsetX + size - size/4} ${offsetY + h}
-          L${offsetX + size} ${offsetY + h - size/4}
-          L${offsetX + size + size/4} ${offsetY + h}
-          L${offsetX + size} ${offsetY + h + size/4}
-          Z
-        " stroke="#005e7a" stroke-width="0.5" fill="none"/>
-      `;
-    }
-  }
-  
-  return pattern;
-}
-
-// Helper function to generate interlaced pattern
-function generateInterlacedPattern(rows: number, cols: number, size: number): string {
-  let pattern = '';
-  
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      const x = j * size * 2;
-      const y = i * size * 2;
-      
-      // Circles
-      pattern += `
-        <circle cx="${x + size}" cy="${y + size}" r="${size * 0.8}" stroke="#005e7a" stroke-width="1" fill="none"/>
-      `;
-      
-      // Interlaced lines
-      pattern += `
-        <path d="
-          M${x} ${y}
-          C${x + size/2} ${y + size}, ${x + size*1.5} ${y + size}, ${x + size*2} ${y}
-        " stroke="#005e7a" stroke-width="1" fill="none"/>
-        
-        <path d="
-          M${x} ${y + size*2}
-          C${x + size/2} ${y + size}, ${x + size*1.5} ${y + size}, ${x + size*2} ${y + size*2}
-        " stroke="#005e7a" stroke-width="1" fill="none"/>
-        
-        <path d="
-          M${x} ${y + size}
-          C${x + size/2} ${y}, ${x + size*1.5} ${y + size*2}, ${x + size*2} ${y + size}
-        " stroke="#005e7a" stroke-width="1" fill="none"/>
-      `;
-    }
-  }
-  
-  return pattern;
-}
-
-// Helper function to generate floral pattern
-function generateFloralPattern(rows: number, cols: number, size: number): string {
-  let pattern = '';
-  
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      const x = j * size * 2;
-      const y = i * size * 2;
-      const centerX = x + size;
-      const centerY = y + size;
-      
-      // Center flower
-      pattern += `
-        <circle cx="${centerX}" cy="${centerY}" r="${size/10}" fill="#005e7a"/>
-      `;
-      
-      // Petals
-      for (let angle = 0; angle < 360; angle += 45) {
-        const radians = angle * Math.PI / 180;
-        const petalX = centerX + Math.cos(radians) * size/2;
-        const petalY = centerY + Math.sin(radians) * size/2;
-        
-        pattern += `
-          <path d="
-            M${centerX} ${centerY}
-            Q${centerX + Math.cos(radians + Math.PI/4) * size/3} ${centerY + Math.sin(radians + Math.PI/4) * size/3},
-             ${petalX} ${petalY}
-            Q${centerX + Math.cos(radians - Math.PI/4) * size/3} ${centerY + Math.sin(radians - Math.PI/4) * size/3},
-             ${centerX} ${centerY}
-          " stroke="#005e7a" stroke-width="0.5" fill="none"/>
-        `;
-      }
-      
-      // Connecting lines
-      if (j < cols - 1) {
-        pattern += `
-          <path d="M${centerX + size/2} ${centerY} L${centerX + size*1.5} ${centerY}" stroke="#005e7a" stroke-width="0.5" stroke-dasharray="5,5" fill="none"/>
-        `;
-      }
-      
-      if (i < rows - 1) {
-        pattern += `
-          <path d="M${centerX} ${centerY + size/2} L${centerX} ${centerY + size*1.5}" stroke="#005e7a" stroke-width="0.5" stroke-dasharray="5,5" fill="none"/>
-        `;
-      }
-    }
-  }
-  
-  return pattern;
-}
+const backgroundPatternSvg = generateBackgroundPatternSvg();
 
 const styles = StyleSheet.create({
   container: {
@@ -1399,7 +952,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 2,
     overflow: 'hidden',
   },
   profileItem: {

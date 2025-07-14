@@ -6,18 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../src/context/AuthContext';
 import { fetchStudentsLegacyFormat } from '../../../src/services/users';
-
-// Types
-interface Student {
-  id: string;
-  name: string;
-  class?: string;
-  quran_progress?: {
-    memorized_verses: number;
-    total_verses: number;
-  };
-  image_url?: string;
-}
+import { LegacyStudent } from '../../../src/types';
 
 export default function StudentsList() {
   const router = useRouter();
@@ -26,7 +15,7 @@ export default function StudentsList() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedClass, setSelectedClass] = useState('Semua');
   const [selectedSort, setSelectedSort] = useState('Nama (A-Z)');
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<LegacyStudent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [classes, setClasses] = useState<string[]>(['Semua']);
@@ -63,7 +52,7 @@ export default function StudentsList() {
         
         // Extract unique classes for filtering
         const uniqueClasses = ['Semua', ...new Set(data
-          .map((student: Student) => student.class)
+          .map((student: LegacyStudent) => student.class)
           .filter((cls: string | undefined) => cls !== undefined))] as string[];
         
         setClasses(uniqueClasses);
@@ -104,19 +93,19 @@ export default function StudentsList() {
   });
 
   const handleStudentPress = (studentId: string) => {
-    router.push(`screens/teacher/student-detail?id=${studentId}` as any);
+    router.push({ pathname: '/screens/teacher/StudentDetail', params: { id: studentId } });
   };
 
   const handleAddStudent = () => {
-    // Navigate to the Add Student screen using the correct Expo Router path
-    router.push('/screens/teacher/AddStudent'); 
+    // Navigate to the Add Student screen using type-safe route
+    router.push('/screens/teacher/AddStudent');
   };
 
   const handleRetry = () => {
     fetchStudents();
   };
 
-  const renderStudentItem = ({ item }: { item: Student }) => (
+  const renderStudentItem = ({ item }: { item: LegacyStudent }) => (
     <TouchableOpacity 
       style={styles.studentCard}
       onPress={() => handleStudentPress(item.id)}
@@ -127,7 +116,7 @@ export default function StudentsList() {
         ) : (
           <View style={styles.studentImagePlaceholder}>
             <Text style={styles.studentImagePlaceholderText}>
-              {item.name.split(' ').map(n => n[0]).join('')}
+              {item.name.split(' ').map((n: string) => n[0]).join('')}
             </Text>
           </View>
         )}

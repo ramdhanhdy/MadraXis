@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator, View } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator, View, ViewStyle, StyleProp } from 'react-native';
 import { useAuth } from '@/src/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-
-import { TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator, View, ViewStyle, StyleProp } from 'react-native';
 
 interface LogoutButtonProps {
   style?: StyleProp<ViewStyle>;

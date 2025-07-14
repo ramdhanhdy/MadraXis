@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, Stack } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
-import AuthForm from '../../components/auth/AuthForm';
+import AuthForm from '../components/auth/AuthForm';
 
 const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,6 +25,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.logoContainer}>
         <SvgXml xml={logoSvg} width={100} height={100} />
         <Text style={styles.appName}>Pondok Pesantren Tahfidz ZAID BIN TSAABIT</Text>
@@ -139,4 +140,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
- 
