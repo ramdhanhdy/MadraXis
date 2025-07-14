@@ -6,9 +6,11 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 import LogoutButton from '../../components/auth/LogoutButton';
+import { useAuth } from '@/src/context/AuthContext';
 
 export default function StudentDashboard() {
   const router = useRouter();
+  const { profile, loading } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState<{
     title: string;
@@ -384,13 +386,28 @@ export default function StudentDashboard() {
     </View>
   );
 
-  const renderProfile = () => (
-    <ScrollView style={styles.contentContainer}>
-      <View style={styles.profileHeader}>
-        <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
-        <Text style={styles.profileName}>Ahmad Fauzi</Text>
-        <Text style={styles.profileRole}>Siswa Kelas 8A</Text>
-      </View>
+  const renderProfile = () => {
+    if (loading) {
+      return (
+        <ScrollView style={styles.contentContainer}>
+          <View style={styles.profileHeader}>
+            <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
+            <Text style={styles.profileName}>Loading...</Text>
+            <Text style={styles.profileRole}>Loading...</Text>
+          </View>
+        </ScrollView>
+      );
+    }
+
+    return (
+      <ScrollView style={styles.contentContainer}>
+        <View style={styles.profileHeader}>
+          <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
+          <Text style={styles.profileName}>{profile?.full_name || 'Nama Siswa'}</Text>
+          <Text style={styles.profileRole}>
+            {profile?.role === 'student' ? 'Siswa' : profile?.role || 'Role tidak diketahui'}
+          </Text>
+        </View>
       
       <View style={styles.profileSection}>
         <Text style={styles.sectionTitle}>Pengaturan Akun</Text>
@@ -442,11 +459,12 @@ export default function StudentDashboard() {
         </TouchableOpacity>
       </View>
       
-      <View style={styles.profileSection}>
-        <LogoutButton variant="button" style={styles.logoutButton} />
-      </View>
-    </ScrollView>
-  );
+        <View style={styles.profileSection}>
+          <LogoutButton variant="button" style={styles.logoutButton} />
+        </View>
+      </ScrollView>
+    );
+  };
   
   return (
     <SafeAreaView style={styles.container}>
