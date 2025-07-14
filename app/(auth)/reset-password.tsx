@@ -26,14 +26,13 @@ export default function ResetPasswordScreen() {
         refresh_token,
       });
 
-      router.replace('/(auth)/reset-password');
-
       if (error) {
         Alert.alert(
           'Error',
           'Failed to process password reset link. It may have expired. Please try again.'
         );
         console.error('Error setting session:', error.message);
+        router.replace('/(auth)/login');
       }
     };
 
