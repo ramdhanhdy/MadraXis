@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 import LogoutButton from '../../components/auth/LogoutButton';
+import { useAuth } from '@/src/context/AuthContext';
 
 // Import SVG as string
 const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
@@ -33,6 +34,7 @@ const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
 
 export default function TeacherDashboard() {
   const router = useRouter();
+  const { profile, loading } = useAuth();
   const [notifications, setNotifications] = useState([
     { id: 1, title: 'Siswa menyelesaikan hafalan baru', time: '10 menit yang lalu', read: false },
     { id: 2, title: 'Pengumuman rapat guru', time: '1 jam yang lalu', read: false },
@@ -90,14 +92,30 @@ export default function TeacherDashboard() {
   };
 
   // Render profile section
-  const renderProfile = () => (
-    <ScrollView style={styles.contentContainer}>
-      <View style={styles.profileHeader}>
-        <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
-        <Text style={styles.profileName}>Ustadz Ahmad</Text>
-        <Text style={styles.profileRole}>Guru Tahfidz</Text>
-        <Text style={styles.profileSchool}>Zaid Bin Tsabit</Text>
-      </View>
+  const renderProfile = () => {
+    if (loading) {
+      return (
+        <ScrollView style={styles.contentContainer}>
+          <View style={styles.profileHeader}>
+            <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
+            <Text style={styles.profileName}>Loading...</Text>
+            <Text style={styles.profileRole}>Loading...</Text>
+            <Text style={styles.profileSchool}>Loading...</Text>
+          </View>
+        </ScrollView>
+      );
+    }
+
+    return (
+      <ScrollView style={styles.contentContainer}>
+        <View style={styles.profileHeader}>
+          <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
+          <Text style={styles.profileName}>{profile?.full_name || 'Nama Pengguna'}</Text>
+          <Text style={styles.profileRole}>
+            {profile?.role === 'teacher' ? 'Guru Tahfidz' : profile?.role || 'Role tidak diketahui'}
+          </Text>
+          <Text style={styles.profileSchool}>Zaid Bin Tsabit</Text>
+        </View>
       
       <View style={styles.profileSection}>
         <Text style={styles.sectionTitle}>Pengaturan Akun</Text>
@@ -153,10 +171,11 @@ export default function TeacherDashboard() {
         <LogoutButton variant="button" style={styles.profileLogoutButton} />
       </View>
       
-      {/* Bottom Spacing */}
-      <View style={{ height: 100 }} />
-    </ScrollView>
-  );
+        {/* Bottom Spacing */}
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    );
+  };
 
   // Boarding Information Modal Content
   const renderBoardingInfo = () => (
