@@ -6,18 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../src/context/AuthContext';
 import { fetchStudentsLegacyFormat } from '../../../src/services/users';
-
-// Types
-interface Student {
-  id: string;
-  name: string;
-  class?: string;
-  quran_progress?: {
-    memorized_verses: number;
-    total_verses: number;
-  };
-  image_url?: string;
-}
+import { Student } from '../../../src/types';
 
 export default function StudentsList() {
   const router = useRouter();
@@ -63,7 +52,7 @@ export default function StudentsList() {
         
         // Extract unique classes for filtering
         const uniqueClasses = ['Semua', ...new Set(data
-          .map((student: Student) => student.class)
+          .map((student: Student) => student.class_name)
           .filter((cls: string | undefined) => cls !== undefined))] as string[];
         
         setClasses(uniqueClasses);
@@ -78,8 +67,8 @@ export default function StudentsList() {
   
   // Filter students based on search query and selected class
   const filteredStudents = students.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesClass = selectedClass === 'Semua' || student.class === selectedClass;
+    const matchesSearch = student.full_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesClass = selectedClass === 'Semua' || student.class_name === selectedClass;
     return matchesSearch && matchesClass;
   });
   
@@ -87,13 +76,13 @@ export default function StudentsList() {
   const sortedStudents = [...filteredStudents].sort((a, b) => {
     switch (selectedSort) {
       case 'Nama (A-Z)':
-        return a.name.localeCompare(b.name);
+        return a.full_name.localeCompare(b.full_name);
       case 'Nama (Z-A)':
-        return b.name.localeCompare(a.name);
+        return b.full_name.localeCompare(a.full_name);
       case 'Kelas (Naik)':
-        return (a.class || '').localeCompare(b.class || '');
+        return (a.class_name || '').localeCompare(b.class_name || '');
       case 'Kelas (Turun)':
-        return (b.class || '').localeCompare(a.class || '');
+        return (b.class_name || '').localeCompare(a.class_name || '');
       case 'Hafalan (Terbanyak)':
         return (b.quran_progress?.memorized_verses || 0) - (a.quran_progress?.memorized_verses || 0);
       case 'Hafalan (Tersedikit)':
@@ -104,12 +93,12 @@ export default function StudentsList() {
   });
 
   const handleStudentPress = (studentId: string) => {
-    router.push(`screens/teacher/student-detail?id=${studentId}` as any);
+    router.push({ pathname: '/screens/teacher/student-detail', params: { id: studentId } });
   };
 
   const handleAddStudent = () => {
-    // Navigate to the Add Student screen using the correct Expo Router path
-    router.push('/screens/teacher/AddStudent'); 
+    // Navigate to the Add Student screen using type-safe route
+    router.push('/screens/teacher/AddStudent');
   };
 
   const handleRetry = () => {
@@ -127,14 +116,14 @@ export default function StudentsList() {
         ) : (
           <View style={styles.studentImagePlaceholder}>
             <Text style={styles.studentImagePlaceholderText}>
-              {item.name.split(' ').map(n => n[0]).join('')}
+              {item.full_name.split(' ').map(n => n[0]).join('')}
             </Text>
           </View>
         )}
       </View>
       <View style={styles.studentInfo}>
-        <Text style={styles.studentName}>{item.name}</Text>
-        <Text style={styles.studentClass}>Kelas {item.class || 'N/A'}</Text>
+        <Text style={styles.studentName}>{item.full_name}</Text>
+        <Text style={styles.studentClass}>Kelas {item.class_name || 'N/A'}</Text>
         {item.quran_progress ? (
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
