@@ -52,7 +52,18 @@ export function generateHexagonalPattern(rows: number, cols: number, size: numbe
 }
 
 // Helper function to generate interlaced pattern
+/**
+ * Generates SVG markup for an interlaced pattern
+ * @param rows - Number of rows in the pattern
+ * @param cols - Number of columns in the pattern  
+ * @param size - Size of each pattern element
+ * @returns SVG path string for the interlaced pattern
+ */
 export function generateInterlacedPattern(rows: number, cols: number, size: number): string {
+  if (rows <= 0 || cols <= 0 || size <= 0) {
+    throw new Error('Pattern parameters must be positive numbers');
+  }
+
   let pattern = '';
   
   for (let i = 0; i < rows; i++) {
