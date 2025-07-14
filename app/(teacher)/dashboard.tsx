@@ -6,12 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 import LogoutButton from '../components/auth/LogoutButton';
-      {showNotifications && (
-        <NotificationPanel
-          notifications={notifications}
-          onMarkAllAsRead={handleMarkAllAsRead}
-        />
-      )}
 import ProfileView from '../components/teacher/ProfileView';
 import BoardingInfoModal from '../components/teacher/BoardingInfoModal';
 import CommunicationModal from '../components/teacher/CommunicationModal';
@@ -105,7 +99,7 @@ export default function TeacherDashboard() {
 
   // Render profile section
   const renderProfile = () => {
-    return <ProfileView profile={profile} loading={loading} schoolName={schoolName} />;
+    return <ProfileView profile={profile || undefined} loading={loading} schoolName={schoolName} />;
   };
 
   // Boarding Information Modal Content - now using BoardingInfoModal component
