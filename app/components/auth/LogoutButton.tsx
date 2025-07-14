@@ -3,8 +3,10 @@ import { TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator, View } fr
 import { useAuth } from '@/src/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 
+import { TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator, View, ViewStyle, StyleProp } from 'react-native';
+
 interface LogoutButtonProps {
-  style?: any;
+  style?: StyleProp<ViewStyle>;
   showIcon?: boolean;
   variant?: 'button' | 'text' | 'icon';
   onLogout?: () => void;
