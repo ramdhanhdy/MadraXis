@@ -1,7 +1,18 @@
 // SVG pattern generation utilities for background decorations
 
 // Helper function to generate hexagonal pattern
+/**
+ * Generates SVG markup for a hexagonal pattern
+ * @param rows - Number of rows in the pattern
+ * @param cols - Number of columns in the pattern
+ * @param size - Size of each hexagon
+ * @returns SVG path string for the hexagonal pattern
+ */
 export function generateHexagonalPattern(rows: number, cols: number, size: number): string {
+  if (rows <= 0 || cols <= 0 || size <= 0) {
+    throw new Error('Pattern parameters must be positive numbers');
+  }
+
   let pattern = '';
   const h = size * Math.sqrt(3) / 2;
   
