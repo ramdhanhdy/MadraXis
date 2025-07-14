@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import LogoutButton from '../components/auth/LogoutButton';
+import LogoutButton from '../auth/LogoutButton';
 
 interface Profile {
   full_name?: string;
