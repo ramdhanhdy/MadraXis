@@ -16,7 +16,7 @@ export default function ResetPasswordScreen() {
 
     if (typeof access_token !== 'string' || typeof refresh_token !== 'string') {
       Alert.alert('Error', 'Invalid password reset link format.');
-      router.replace('/(auth)/reset-password');
+      router.replace('/(auth)/login');
       return;
     }
 
