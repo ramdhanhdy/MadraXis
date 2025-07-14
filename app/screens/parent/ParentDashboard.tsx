@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import LogoutButton from '../../components/auth/LogoutButton';
 
 export default function ParentDashboard() {
   const router = useRouter();
@@ -162,13 +163,73 @@ export default function ParentDashboard() {
   );
 
   const renderSettings = () => (
-    <View style={styles.centeredContainer}>
-      <Ionicons name="settings-outline" size={80} color="#cccccc" />
-      <Text style={styles.placeholderText}>Pengaturan Segera Hadir</Text>
-      <Text style={styles.placeholderSubtext}>
-        Anda akan dapat mengelola akun dan preferensi Anda di sini.
-      </Text>
-    </View>
+    <ScrollView style={styles.contentContainer}>
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionTitle}>Pengaturan Akun</Text>
+        
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur edit profil akan segera hadir!')}
+        >
+          <Ionicons name="person" size={24} color="#005e7a" />
+          <Text style={styles.settingItemText}>Edit Profil</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur pengaturan notifikasi akan segera hadir!')}
+        >
+          <Ionicons name="notifications" size={24} color="#005e7a" />
+          <Text style={styles.settingItemText}>Pengaturan Notifikasi</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur pengaturan bahasa akan segera hadir!')}
+        >
+          <Ionicons name="language" size={24} color="#005e7a" />
+          <Text style={styles.settingItemText}>Bahasa</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+      </View>
+      
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionTitle}>Bantuan</Text>
+        
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur pusat bantuan akan segera hadir!')}
+        >
+          <Ionicons name="help-circle" size={24} color="#005e7a" />
+          <Text style={styles.settingItemText}>Pusat Bantuan</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur syarat & ketentuan akan segera hadir!')}
+        >
+          <Ionicons name="document-text" size={24} color="#005e7a" />
+          <Text style={styles.settingItemText}>Syarat & Ketentuan</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur kebijakan privasi akan segera hadir!')}
+        >
+          <Ionicons name="shield-checkmark" size={24} color="#005e7a" />
+          <Text style={styles.settingItemText}>Kebijakan Privasi</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+      </View>
+      
+      <View style={styles.sectionContainer}>
+        <LogoutButton variant="button" style={styles.logoutButton} />
+      </View>
+    </ScrollView>
   );
 
   // Helper functions
@@ -506,5 +567,35 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
     paddingHorizontal: 40,
+  },
+  settingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  settingItemText: {
+    fontSize: 16,
+    color: '#333333',
+    marginLeft: 12,
+    flex: 1,
+  },
+  logoutButton: {
+    backgroundColor: '#ff4444',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
 }); 

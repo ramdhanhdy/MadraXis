@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../../src/context/AuthContext';
 import { fetchIncidentsForSchool } from '../../../src/services/incidents';
 import { fetchDashboardMetrics, DashboardMetrics } from '../../../src/services/dashboard';
+import LogoutButton from '../../components/auth/LogoutButton';
 
 // Updated interface to match Supabase query result
 interface Incident {
@@ -30,6 +31,7 @@ export default function ManagementDashboard() {
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
   
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
@@ -145,16 +147,78 @@ export default function ManagementDashboard() {
     // router.push("/management/incidents/" + incidentId);
   };
 
-  // Handle Sign Out using AuthContext
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      // The root layout's useEffect will handle redirecting to the login screen
-    } catch (e: any) {
-      console.error('Failed to sign out:', e);
-      Alert.alert('Error', e.message || 'Gagal untuk keluar.');
-    }
-  };
+
+
+  // Render profile section
+  const renderProfile = () => (
+    <ScrollView style={styles.scrollView}>
+      <View style={styles.profileHeader}>
+        <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
+        <Text style={styles.profileName}>{profile?.full_name || user?.user_metadata?.full_name || 'Admin'}</Text>
+        <Text style={styles.profileRole}>Manajemen Sekolah</Text>
+        <Text style={styles.profileSchool}>
+          {user?.user_metadata?.school_name || 'Sekolah'}
+        </Text>
+      </View>
+      
+      <View style={styles.profileSection}>
+        <Text style={styles.sectionTitle}>Pengaturan Akun</Text>
+        
+        <TouchableOpacity style={styles.profileItem}>
+          <Ionicons name="person" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Edit Profil</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.profileItem}>
+          <Ionicons name="lock-closed" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Ubah Password</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.profileItem}>
+          <Ionicons name="notifications" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Pengaturan Notifikasi</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.profileItem}>
+          <Ionicons name="settings" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Pengaturan Sistem</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+      </View>
+      
+      <View style={styles.profileSection}>
+        <Text style={styles.sectionTitle}>Bantuan</Text>
+        
+        <TouchableOpacity style={styles.profileItem}>
+          <Ionicons name="help-circle" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Pusat Bantuan</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.profileItem}>
+          <Ionicons name="document-text" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Syarat & Ketentuan</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.profileItem}>
+          <Ionicons name="shield-checkmark" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Kebijakan Privasi</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+      </View>
+      
+      <View style={styles.profileSection}>
+        <LogoutButton variant="button" style={styles.profileLogoutButton} />
+      </View>
+      
+      {/* Bottom Spacing */}
+      <View style={{ height: 30 }} />
+    </ScrollView>
+  );
 
   // Fetch dashboard data when component mounts and auth state is resolved
   useEffect(() => {
@@ -196,18 +260,19 @@ export default function ManagementDashboard() {
         </View>
       )}
       
-      <ScrollView style={styles.scrollView}>
-        {/* Welcome Section */}
-        <View style={styles.welcomeSection}>
-          <View style={styles.welcomeContent}>
-            <Text style={styles.welcomeTitle}>Selamat Datang, Admin</Text>
-            <Text style={styles.welcomeSubtitle}>Pantau dan kelola operasional sekolah</Text>
+      {activeTab === 'dashboard' ? (
+        <ScrollView style={styles.scrollView}>
+          {/* Welcome Section */}
+          <View style={styles.welcomeSection}>
+            <View style={styles.welcomeContent}>
+              <Text style={styles.welcomeTitle}>Selamat Datang, Admin</Text>
+              <Text style={styles.welcomeSubtitle}>Pantau dan kelola operasional sekolah</Text>
+            </View>
+            <Image 
+              source={{ uri: 'https://via.placeholder.com/60' }} 
+              style={styles.profileImage} 
+            />
           </View>
-          <Image 
-            source={{ uri: 'https://via.placeholder.com/60' }} 
-            style={styles.profileImage} 
-          />
-        </View>
         
         {/* Stats Overview */}
         <View style={styles.statsContainer}>
@@ -350,15 +415,43 @@ export default function ManagementDashboard() {
           )}
         </View>
         
-        {/* Sign Out Button */}
-        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-          <Ionicons name="log-out-outline" size={20} color="#e74c3c" style={{ marginRight: 8 }} />
-          <Text style={styles.signOutButtonText}>Keluar</Text>
+          {/* Bottom Spacing */}
+          <View style={{ height: 30 }} />
+        </ScrollView>
+      ) : (
+        renderProfile()
+      )}
+
+      {/* Bottom Tab Bar */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tabItem, activeTab === 'dashboard' && styles.activeTabItem]}
+          onPress={() => setActiveTab('dashboard')}
+        >
+          <Ionicons
+            name={activeTab === 'dashboard' ? 'home' : 'home-outline'}
+            size={24}
+            color={activeTab === 'dashboard' ? '#005e7a' : '#666666'}
+          />
+          <Text style={[styles.tabLabel, activeTab === 'dashboard' && styles.activeTabLabel]}>
+            Dashboard
+          </Text>
         </TouchableOpacity>
-        
-        {/* Bottom Spacing */}
-        <View style={{ height: 30 }} />
-      </ScrollView>
+
+        <TouchableOpacity
+          style={[styles.tabItem, activeTab === 'profile' && styles.activeTabItem]}
+          onPress={() => setActiveTab('profile')}
+        >
+          <Ionicons
+            name={activeTab === 'profile' ? 'person' : 'person-outline'}
+            size={24}
+            color={activeTab === 'profile' ? '#005e7a' : '#666666'}
+          />
+          <Text style={[styles.tabLabel, activeTab === 'profile' && styles.activeTabLabel]}>
+            Profil
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -625,28 +718,88 @@ const styles = StyleSheet.create({
     color: '#666666',
     textAlign: 'center',
   },
-  signOutButton: {
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: '#eeeeee',
+    height: 60,
+  },
+  tabItem: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  activeTabItem: {
+    borderTopWidth: 2,
+    borderTopColor: '#005e7a',
+  },
+  tabLabel: {
+    fontSize: 12,
+    color: '#666666',
+    marginTop: 4,
+  },
+  activeTabLabel: {
+    color: '#005e7a',
+    fontWeight: '600',
+  },
+  profileHeader: {
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#ffffff',
+    marginBottom: 16,
+  },
+  profileName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#005e7a',
+    marginTop: 12,
+  },
+  profileRole: {
+    fontSize: 16,
+    color: '#666666',
+    marginTop: 4,
+  },
+  profileSchool: {
+    fontSize: 14,
+    color: '#888888',
+    marginTop: 4,
+  },
+  profileSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    margin: 16,
+    marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  profileItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffffff',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  profileItemText: {
+    fontSize: 16,
+    color: '#333333',
+    marginLeft: 12,
+    flex: 1,
+  },
+  profileLogoutButton: {
+    backgroundColor: '#ff4444',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    marginHorizontal: 16,
-    marginTop: 16, // Add some space above the button
-    marginBottom: 24, // Add space at the bottom
-    borderWidth: 1,
-    borderColor: '#e74c3c',
+    margin: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: 4,
     elevation: 2,
-  },
-  signOutButtonText: {
-    color: '#e74c3c',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 }); 

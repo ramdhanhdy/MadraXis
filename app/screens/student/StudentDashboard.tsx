@@ -5,9 +5,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
+import LogoutButton from '../../components/auth/LogoutButton';
+import { useAuth } from '@/src/context/AuthContext';
 
 export default function StudentDashboard() {
   const router = useRouter();
+  const { profile, loading } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState<{
     title: string;
@@ -383,15 +386,106 @@ export default function StudentDashboard() {
     </View>
   );
 
-  const renderProfile = () => (
-    <View style={styles.centeredContainer}>
-      <Ionicons name="person-circle-outline" size={80} color="#cccccc" />
-      <Text style={styles.placeholderText}>Profil Segera Hadir</Text>
-      <Text style={styles.placeholderSubtext}>
-        Anda akan dapat melihat dan mengelola profil Anda di sini.
-      </Text>
-    </View>
-  );
+  const renderProfile = () => {
+    if (loading) {
+      return (
+        <ScrollView style={styles.contentContainer}>
+          <View style={styles.profileHeader}>
+            <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
+            <Text style={styles.profileName}>Loading...</Text>
+            <Text style={styles.profileRole}>Loading...</Text>
+          </View>
+        </ScrollView>
+      );
+    }
+
+    return (
+      <ScrollView style={styles.contentContainer}>
+        <View style={styles.profileHeader}>
+          <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
+          <Text style={styles.profileName}>{profile?.full_name || 'Nama Siswa'}</Text>
+          <Text style={styles.profileRole}>
+            {profile?.role === 'student' ? 'Siswa' : profile?.role || 'Role tidak diketahui'}
+          </Text>
+        </View>
+      
+      <View style={styles.profileSection}>
+        <Text style={styles.sectionTitle}>Pengaturan Akun</Text>
+        
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur edit profil akan segera hadir!')}
+        >
+          <Ionicons name="person" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Edit Profil</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur ubah password akan segera hadir!')}
+        >
+          <Ionicons name="lock-closed" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Ubah Password</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur pengaturan notifikasi akan segera hadir!')}
+        >
+          <Ionicons name="notifications" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Pengaturan Notifikasi</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur pengaturan bahasa akan segera hadir!')}
+        >
+          <Ionicons name="language" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Bahasa</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+      </View>
+      
+      <View style={styles.profileSection}>
+        <Text style={styles.sectionTitle}>Bantuan</Text>
+        
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur pusat bantuan akan segera hadir!')}
+        >
+          <Ionicons name="help-circle" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Pusat Bantuan</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur syarat & ketentuan akan segera hadir!')}
+        >
+          <Ionicons name="document-text" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Syarat & Ketentuan</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.profileItem}
+          onPress={() => alert('Fitur kebijakan privasi akan segera hadir!')}
+        >
+          <Ionicons name="shield-checkmark" size={24} color="#005e7a" />
+          <Text style={styles.profileItemText}>Kebijakan Privasi</Text>
+          <Ionicons name="chevron-forward" size={24} color="#666666" />
+        </TouchableOpacity>
+      </View>
+      
+        <View style={styles.profileSection}>
+          <LogoutButton variant="button" style={styles.logoutButton} />
+        </View>
+      </ScrollView>
+    );
+  };
   
   return (
     <SafeAreaView style={styles.container}>
@@ -1067,4 +1161,55 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingHorizontal: 40,
   },
-}); 
+  logoutButton: {
+    backgroundColor: '#ff4444',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  profileHeader: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  profileName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#005e7a',
+    marginTop: 12,
+  },
+  profileRole: {
+    fontSize: 16,
+    color: '#666666',
+    marginTop: 4,
+  },
+  profileSection: {
+    marginBottom: 24,
+  },
+  profileItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  profileItemText: {
+    fontSize: 16,
+    color: '#333333',
+    marginLeft: 12,
+    flex: 1,
+  },
+});
