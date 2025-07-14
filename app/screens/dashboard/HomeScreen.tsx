@@ -1,25 +1,89 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import ActivityList, { Activity } from './ActivityList';
+
+interface Notification {
+  id: number;
+  title: string;
+  time: string;
+  read: boolean;
+}
 
 export default function DashboardHomeScreen() {
   const router = useRouter();
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'Guru baru ditambahkan', time: '10 menit yang lalu', read: false },
-    { id: 2, title: 'Laporan hafalan baru', time: '1 jam yang lalu', read: false },
-    { id: 3, title: 'Sertifikat baru diterbitkan', time: '2 jam yang lalu', read: true },
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [loadingNotifications, setLoadingNotifications] = useState(true);
+
+  const formattedDate = new Date().toLocaleDateString('id-ID', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  // This data would typically come from a state management solution or be fetched with other screen data
+  const activities: Activity[] = [
+    {
+      id: '1',
+      iconName: 'document-text-outline',
+      iconContainerBg: '#005e7a',
+      title: 'Guru menambahkan sertifikat',
+      description: 'Ahmad Fauzi menambahkan sertifikat untuk siswa Budi Santoso',
+      time: '10 menit yang lalu',
+    },
+    {
+      id: '2',
+      iconName: 'create-outline',
+      iconContainerBg: '#f0c75e',
+      title: 'Guru mengunggah laporan',
+      description: 'Siti Aminah mengunggah laporan hafalan untuk kelas 5A',
+      time: '1 jam yang lalu',
+    },
+    {
+      id: '3',
+      iconName: 'person-add-outline',
+      iconContainerBg: '#4caf50',
+      title: 'Admin menambahkan guru baru',
+      description: 'Admin menambahkan Rudi Hermawan sebagai guru baru',
+      time: '2 jam yang lalu',
+    },
+  ];
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setLoadingNotifications(true);
+      try {
+        // Simulate API call to fetch dynamic notification data
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const dynamicNotifications: Notification[] = [
+          { id: 1, title: 'New teacher account created', time: '15 minutes ago', read: false },
+          { id: 2, title: 'New grade report available', time: '2 hours ago', read: false },
+          { id: 3, title: 'System maintenance scheduled', time: '1 day ago', read: true },
+        ];
+        setNotifications(dynamicNotifications);
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+        // In a real app, you might set an error state here to show a message
+      } finally {
+        setLoadingNotifications(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
 
   const handleNotificationToggle = () => {
     setShowNotifications(!showNotifications);
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map(notif => ({ ...notif, read: true })));
+    // In a real app, this would also be an API call to update the backend
+    setNotifications(notifications.map((notif) => ({ ...notif, read: true })));
   };
 
   const handleNavigateToTeachers = () => {
@@ -50,7 +114,7 @@ export default function DashboardHomeScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Pagi, Admin Sekolah</Text>
-          <Text style={styles.date}>Senin, 8 Maret 2025</Text>
+          <Text style={styles.date}>{formattedDate}</Text>
         </View>
         <TouchableOpacity style={styles.notificationButton} onPress={handleNotificationToggle}>
           <Ionicons name="notifications-outline" size={24} color="#005e7a" />
@@ -70,8 +134,10 @@ export default function DashboardHomeScreen() {
             </TouchableOpacity>
           </View>
           
-          {notifications.length > 0 ? (
-            notifications.map(notification => (
+          {loadingNotifications ? (
+            <ActivityIndicator style={{ marginVertical: 20 }} size="large" color="#005e7a" />
+          ) : notifications.length > 0 ? (
+            notifications.map((notification) => (
               <View 
                 key={notification.id} 
                 style={[
@@ -89,7 +155,7 @@ export default function DashboardHomeScreen() {
               </View>
             ))
           ) : (
-            <Text style={styles.noNotifications}>Tidak ada notifikasi</Text>
+            <Text style={styles.noNotifications}>Tidak ada notifikasi baru</Text>
           )}
         </View>
       )}
@@ -122,55 +188,7 @@ export default function DashboardHomeScreen() {
         </View>
         
         {/* Activity Log */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Log Aktivitas</Text>
-            <TouchableOpacity onPress={handleViewAllActivities}>
-              <Text style={styles.viewAllLink}>Lihat Semua</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.activityList}>
-            <View style={styles.activityItem}>
-              <View style={styles.activityIconContainer}>
-                <Ionicons name="document-text-outline" size={20} color="#ffffff" />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Guru menambahkan sertifikat</Text>
-                <Text style={styles.activityDescription}>
-                  Ahmad Fauzi menambahkan sertifikat untuk siswa Budi Santoso
-                </Text>
-                <Text style={styles.activityTime}>10 menit yang lalu</Text>
-              </View>
-            </View>
-            
-            <View style={styles.activityItem}>
-              <View style={[styles.activityIconContainer, { backgroundColor: '#f0c75e' }]}>
-                <Ionicons name="create-outline" size={20} color="#ffffff" />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Guru mengunggah laporan</Text>
-                <Text style={styles.activityDescription}>
-                  Siti Aminah mengunggah laporan hafalan untuk kelas 5A
-                </Text>
-                <Text style={styles.activityTime}>1 jam yang lalu</Text>
-              </View>
-            </View>
-            
-            <View style={styles.activityItem}>
-              <View style={[styles.activityIconContainer, { backgroundColor: '#4caf50' }]}>
-                <Ionicons name="person-add-outline" size={20} color="#ffffff" />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Admin menambahkan guru baru</Text>
-                <Text style={styles.activityDescription}>
-                  Admin menambahkan Rudi Hermawan sebagai guru baru
-                </Text>
-                <Text style={styles.activityTime}>2 jam yang lalu</Text>
-              </View>
-            </View>
-          </View>
-        </View>
+        <ActivityList activities={activities} onViewAll={handleViewAllActivities} />
       </ScrollView>
       
       {/* Bottom Navigation */}
@@ -337,68 +355,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333333',
-  },
-  sectionContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 20,
-    margin: 20,
-    marginTop: 0,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  viewAllLink: {
-    fontSize: 14,
-    color: '#005e7a',
-  },
-  activityList: {
-    
-  },
-  activityItem: {
-    flexDirection: 'row',
-    marginBottom: 15,
-  },
-  activityIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#005e7a',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 4,
-  },
-  activityDescription: {
-    fontSize: 13,
-    color: '#555555',
-    marginBottom: 4,
-    lineHeight: 18,
-  },
-  activityTime: {
-    fontSize: 12,
-    color: '#888888',
   },
   bottomNav: {
     flexDirection: 'row',
