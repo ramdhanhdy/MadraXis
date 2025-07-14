@@ -106,6 +106,7 @@ const getPlatformShadow = (shadow: ShadowStyle): ShadowStyle => {
 
 // Export shadows with platform adjustments
 export const shadows = {
+  // Base shadows
   none: getPlatformShadow(baseShadows.none),
   xs: getPlatformShadow(baseShadows.xs),
   sm: getPlatformShadow(baseShadows.sm),
@@ -113,26 +114,35 @@ export const shadows = {
   lg: getPlatformShadow(baseShadows.lg),
   xl: getPlatformShadow(baseShadows.xl),
   
-  // Semantic shadows
-  ...Object.fromEntries(
-    Object.entries(semanticShadows).map(([key, value]) => [
-      key,
-      typeof value === 'object' && 'shadowColor' in value
-        ? getPlatformShadow(value)
-        : typeof value === 'object'
-        ? Object.fromEntries(
-            Object.entries(value).map(([subKey, subValue]) => [
-              subKey,
-              getPlatformShadow(subValue),
-            ])
-          )
-        : value,
-    ])
-  ),
+  // Component-specific shadows
+  card: getPlatformShadow(semanticShadows.card),
+  cardHover: getPlatformShadow(semanticShadows.cardHover),
+  button: getPlatformShadow(semanticShadows.button),
+  buttonPressed: getPlatformShadow(semanticShadows.buttonPressed),
+  modal: getPlatformShadow(semanticShadows.modal),
+  header: getPlatformShadow(semanticShadows.header),
+  tabBar: getPlatformShadow(semanticShadows.tabBar),
+  
+  // Interactive shadows
+  interactive: {
+    rest: getPlatformShadow(semanticShadows.interactive.rest),
+    hover: getPlatformShadow(semanticShadows.interactive.hover),
+    pressed: getPlatformShadow(semanticShadows.interactive.pressed),
+    focus: getPlatformShadow(semanticShadows.interactive.focus),
+  },
+  
+  // Notification shadows
+  notification: getPlatformShadow(semanticShadows.notification),
+  toast: getPlatformShadow(semanticShadows.toast),
+  
+  // Overlay shadows
+  overlay: getPlatformShadow(semanticShadows.overlay),
+  dropdown: getPlatformShadow(semanticShadows.dropdown),
+  tooltip: getPlatformShadow(semanticShadows.tooltip),
 } as const;
 
 // Type definitions
-export type ShadowKey = keyof typeof baseShadows;
+export type ShadowKey = keyof typeof shadows;
 export type SemanticShadowKey = keyof typeof semanticShadows;
 
 // Helper functions
