@@ -6,7 +6,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 import LogoutButton from '../components/auth/LogoutButton';
-import NotificationPanel from '../components/teacher/NotificationPanel';
+      {showNotifications && (
+        <NotificationPanel
+          notifications={notifications}
+          onMarkAllAsRead={handleMarkAllAsRead}
+        />
+      )}
 import ProfileView from '../components/teacher/ProfileView';
 import BoardingInfoModal from '../components/teacher/BoardingInfoModal';
 import CommunicationModal from '../components/teacher/CommunicationModal';
