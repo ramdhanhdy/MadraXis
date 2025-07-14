@@ -1,38 +1,54 @@
 import { useState, useEffect } from 'react';
 import { Alert, View, TextInput, Button, Text, StyleSheet } from 'react-native';
 import { supabase } from '../../src/utils/supabase';
-import { Stack, useRouter } from 'expo-router';
-import * as Linking from 'expo-linking';
+import { Stack, useRouter, useGlobalSearchParams } from 'expo-router';
 
 export default function ResetPasswordScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { access_token, refresh_token } = useGlobalSearchParams();
 
   useEffect(() => {
+    if (!access_token || !refresh_token) {
+      return;
+    }
+
+    if (typeof access_token !== 'string' || typeof refresh_token !== 'string') {
+      Alert.alert('Error', 'Invalid password reset link format.');
+      router.replace('/(auth)/reset-password');
+      return;
+    }
+
     const establishSession = async () => {
-      const url = await Linking.getInitialURL();
-      if (url) {
-        try {
-          // Parse tokens from the query string (not hash fragment)
-          const urlObj = new URL(url);
-          const access_token = urlObj.searchParams.get('access_token');
-          const refresh_token = urlObj.searchParams.get('refresh_token');
-          
-          if (access_token && refresh_token) {
-            await supabase.auth.setSession({ access_token, refresh_token });
-          }
-        } catch (error) {
-          console.error('Error parsing URL or setting session:', error);
-        }
+      const { error } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+
+      router.replace('/(auth)/reset-password');
+
+      if (error) {
+        Alert.alert(
+          'Error',
+          'Failed to process password reset link. It may have expired. Please try again.'
+        );
+        console.error('Error setting session:', error.message);
       }
     };
+
     establishSession();
-  }, []);
+  }, [access_token, refresh_token, router]);
 
   const handleResetPassword = async () => {
-    if (password.length < 6) {
-      Alert.alert('Password too short', 'Please enter a password that is at least 6 characters long.');
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      Alert.alert(
+        'Password Not Strong Enough',
+        'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
+      );
       return;
     }
 
@@ -43,8 +59,9 @@ export default function ResetPasswordScreen() {
     if (error) {
       Alert.alert('Error', error.message);
     } else {
+      setPassword(''); // Clear password from state
       Alert.alert('Success', 'Your password has been set successfully.', [
-        { text: 'OK', onPress: () => router.replace('/') }
+        { text: 'OK', onPress: () => router.replace('/') },
       ]);
     }
   };
