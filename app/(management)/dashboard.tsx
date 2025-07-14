@@ -109,7 +109,7 @@ export default function ManagementDashboard() {
 
       // Fetch both incidents and metrics concurrently using Promise.all
       const [incidentsResponse, metricsResponse] = await Promise.all([
-        fetchIncidentsForSchool(schoolId),
+        fetchIncidentsForSchool(schoolId, 5),
         fetchDashboardMetrics(schoolId)
       ]);
 
