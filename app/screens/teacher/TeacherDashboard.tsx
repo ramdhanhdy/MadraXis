@@ -611,39 +611,39 @@ export default function TeacherDashboard() {
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity 
-          style={[styles.navItem, activeTab === 'dashboard' && styles.activeNavItem]} 
-          onPress={() => setActiveTab('dashboard')}
+          style={styles.navItem} 
+          onPress={handleNavigateToStudents}
         >
           <Ionicons 
             name="people" 
             size={24} 
-            color={activeTab === 'dashboard' ? "#005e7a" : "#666666"} 
+            color="#666666" 
           />
-          <Text style={[styles.navText, activeTab === 'dashboard' && styles.activeNavText]}>Siswa</Text>
+          <Text style={styles.navText}>Siswa</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={[styles.navItem, activeTab === 'dashboard' && styles.activeNavItem]} 
+          style={styles.navItem} 
           onPress={handleNavigateToClasses}
         >
           <Ionicons 
             name="school" 
             size={24} 
-            color={activeTab === 'dashboard' ? "#005e7a" : "#666666"} 
+            color="#666666" 
           />
-          <Text style={[styles.navText, activeTab === 'dashboard' && styles.activeNavText]}>Kelas</Text>
+          <Text style={styles.navText}>Kelas</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={[styles.navItem, activeTab === 'dashboard' && styles.activeNavItem]} 
+          style={styles.navItem} 
           onPress={handleNavigateToHafalan}
         >
           <Ionicons 
             name="book" 
             size={24} 
-            color={activeTab === 'dashboard' ? "#005e7a" : "#666666"} 
+            color="#666666" 
           />
-          <Text style={[styles.navText, activeTab === 'dashboard' && styles.activeNavText]}>Hafalan</Text>
+          <Text style={styles.navText}>Hafalan</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
