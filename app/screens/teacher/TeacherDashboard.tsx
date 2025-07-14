@@ -56,14 +56,17 @@ export default function TeacherDashboard() {
   };
 
   const handleNavigateToStudents = () => {
+    setActiveTab('students');
     router.push('/screens/teacher/StudentsList');
   };
 
   const handleNavigateToClasses = () => {
+    setActiveTab('classes');
     router.push('/screens/teacher/ClassesList');
   };
 
   const handleNavigateToHafalan = () => {
+    setActiveTab('hafalan');
     // This would navigate to the hafalan management screen
     alert('Fitur manajemen hafalan akan segera hadir!');
   };
@@ -611,39 +614,39 @@ export default function TeacherDashboard() {
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity 
-          style={styles.navItem} 
+          style={[styles.navItem, activeTab === 'students' && styles.activeNavItem]} 
           onPress={handleNavigateToStudents}
         >
           <Ionicons 
-            name="people" 
+            name={activeTab === 'students' ? 'people' : 'people-outline'} 
             size={24} 
-            color="#666666" 
+            color={activeTab === 'students' ? "#005e7a" : "#666666"} 
           />
-          <Text style={styles.navText}>Siswa</Text>
+          <Text style={[styles.navText, activeTab === 'students' && styles.activeNavText]}>Siswa</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={styles.navItem} 
+          style={[styles.navItem, activeTab === 'classes' && styles.activeNavItem]} 
           onPress={handleNavigateToClasses}
         >
           <Ionicons 
-            name="school" 
+            name={activeTab === 'classes' ? 'school' : 'school-outline'} 
             size={24} 
-            color="#666666" 
+            color={activeTab === 'classes' ? "#005e7a" : "#666666"} 
           />
-          <Text style={styles.navText}>Kelas</Text>
+          <Text style={[styles.navText, activeTab === 'classes' && styles.activeNavText]}>Kelas</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={styles.navItem} 
+          style={[styles.navItem, activeTab === 'hafalan' && styles.activeNavItem]} 
           onPress={handleNavigateToHafalan}
         >
           <Ionicons 
-            name="book" 
+            name={activeTab === 'hafalan' ? 'book' : 'book-outline'} 
             size={24} 
-            color="#666666" 
+            color={activeTab === 'hafalan' ? "#005e7a" : "#666666"} 
           />
-          <Text style={styles.navText}>Hafalan</Text>
+          <Text style={[styles.navText, activeTab === 'hafalan' && styles.activeNavText]}>Hafalan</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
