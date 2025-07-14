@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../src/context/AuthContext';
 import { fetchStudentsLegacyFormat } from '../../../src/services/users';
-import { Student } from '../../../src/types';
+import { LegacyStudent } from '../../../src/types';
 
 export default function StudentsList() {
   const router = useRouter();
@@ -15,7 +15,7 @@ export default function StudentsList() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedClass, setSelectedClass] = useState('Semua');
   const [selectedSort, setSelectedSort] = useState('Nama (A-Z)');
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<LegacyStudent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [classes, setClasses] = useState<string[]>(['Semua']);
@@ -52,7 +52,7 @@ export default function StudentsList() {
         
         // Extract unique classes for filtering
         const uniqueClasses = ['Semua', ...new Set(data
-          .map((student: Student) => student.class_name)
+          .map((student: LegacyStudent) => student.class)
           .filter((cls: string | undefined) => cls !== undefined))] as string[];
         
         setClasses(uniqueClasses);
@@ -67,8 +67,8 @@ export default function StudentsList() {
   
   // Filter students based on search query and selected class
   const filteredStudents = students.filter(student => {
-    const matchesSearch = student.full_name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesClass = selectedClass === 'Semua' || student.class_name === selectedClass;
+    const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesClass = selectedClass === 'Semua' || student.class === selectedClass;
     return matchesSearch && matchesClass;
   });
   
@@ -76,13 +76,13 @@ export default function StudentsList() {
   const sortedStudents = [...filteredStudents].sort((a, b) => {
     switch (selectedSort) {
       case 'Nama (A-Z)':
-        return a.full_name.localeCompare(b.full_name);
+        return a.name.localeCompare(b.name);
       case 'Nama (Z-A)':
-        return b.full_name.localeCompare(a.full_name);
+        return b.name.localeCompare(a.name);
       case 'Kelas (Naik)':
-        return (a.class_name || '').localeCompare(b.class_name || '');
+        return (a.class || '').localeCompare(b.class || '');
       case 'Kelas (Turun)':
-        return (b.class_name || '').localeCompare(a.class_name || '');
+        return (b.class || '').localeCompare(a.class || '');
       case 'Hafalan (Terbanyak)':
         return (b.quran_progress?.memorized_verses || 0) - (a.quran_progress?.memorized_verses || 0);
       case 'Hafalan (Tersedikit)':
@@ -93,7 +93,7 @@ export default function StudentsList() {
   });
 
   const handleStudentPress = (studentId: string) => {
-    router.push({ pathname: '/screens/teacher/student-detail', params: { id: studentId } });
+    router.push({ pathname: '/screens/teacher/StudentDetail', params: { id: studentId } });
   };
 
   const handleAddStudent = () => {
@@ -105,7 +105,7 @@ export default function StudentsList() {
     fetchStudents();
   };
 
-  const renderStudentItem = ({ item }: { item: Student }) => (
+  const renderStudentItem = ({ item }: { item: LegacyStudent }) => (
     <TouchableOpacity 
       style={styles.studentCard}
       onPress={() => handleStudentPress(item.id)}
@@ -116,14 +116,14 @@ export default function StudentsList() {
         ) : (
           <View style={styles.studentImagePlaceholder}>
             <Text style={styles.studentImagePlaceholderText}>
-              {item.full_name.split(' ').map(n => n[0]).join('')}
+              {item.name.split(' ').map((n: string) => n[0]).join('')}
             </Text>
           </View>
         )}
       </View>
       <View style={styles.studentInfo}>
-        <Text style={styles.studentName}>{item.full_name}</Text>
-        <Text style={styles.studentClass}>Kelas {item.class_name || 'N/A'}</Text>
+        <Text style={styles.studentName}>{item.name}</Text>
+        <Text style={styles.studentClass}>Kelas {item.class || 'N/A'}</Text>
         {item.quran_progress ? (
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
