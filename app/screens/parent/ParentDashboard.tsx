@@ -167,19 +167,28 @@ export default function ParentDashboard() {
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Pengaturan Akun</Text>
         
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur edit profil akan segera hadir!')}
+        >
           <Ionicons name="person" size={24} color="#005e7a" />
           <Text style={styles.settingItemText}>Edit Profil</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur pengaturan notifikasi akan segera hadir!')}
+        >
           <Ionicons name="notifications" size={24} color="#005e7a" />
           <Text style={styles.settingItemText}>Pengaturan Notifikasi</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur pengaturan bahasa akan segera hadir!')}
+        >
           <Ionicons name="language" size={24} color="#005e7a" />
           <Text style={styles.settingItemText}>Bahasa</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
@@ -189,19 +198,28 @@ export default function ParentDashboard() {
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Bantuan</Text>
         
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur pusat bantuan akan segera hadir!')}
+        >
           <Ionicons name="help-circle" size={24} color="#005e7a" />
           <Text style={styles.settingItemText}>Pusat Bantuan</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur syarat & ketentuan akan segera hadir!')}
+        >
           <Ionicons name="document-text" size={24} color="#005e7a" />
           <Text style={styles.settingItemText}>Syarat & Ketentuan</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => alert('Fitur kebijakan privasi akan segera hadir!')}
+        >
           <Ionicons name="shield-checkmark" size={24} color="#005e7a" />
           <Text style={styles.settingItemText}>Kebijakan Privasi</Text>
           <Ionicons name="chevron-forward" size={24} color="#666666" />
