@@ -40,3 +40,8 @@ app-example
 
 /docs/codebase_audit_14july.md
 /docs/project_definition_14july.md
+
+# Kiro IDE - ignore settings but keep specs
+.kiro/settings/
+.kiro/steering/
+!.kiro/specs/
