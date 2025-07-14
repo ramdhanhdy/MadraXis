@@ -6,6 +6,9 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 import LogoutButton from '../components/auth/LogoutButton';
+import BoardingInfoModal from '../components/student/BoardingInfoModal';
+import CommunicationModal from '../components/student/CommunicationModal';
+import IncidentReportModal from '../components/student/IncidentReportModal';
 import { useAuth } from '../../src/context/AuthContext';
 
 export default function StudentDashboard() {
@@ -43,192 +46,7 @@ export default function StudentDashboard() {
     setModalVisible(true);
   };
   
-  // Boarding Information Modal Content
-  const renderBoardingInfo = () => (
-    <View>
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Informasi Asrama</Text>
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Gedung:</Text>
-          <Text style={styles.infoValue}>Al-Farabi</Text>
-        </View>
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Kamar:</Text>
-          <Text style={styles.infoValue}>203</Text>
-        </View>
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Pembimbing Asrama:</Text>
-          <Text style={styles.infoValue}>Ustadz Hasan</Text>
-        </View>
-      </View>
-
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Jadwal Makan</Text>
-        <View style={styles.mealScheduleCard}>
-          <View style={styles.mealRow}>
-            <Text style={styles.mealType}>Sarapan</Text>
-            <Text style={styles.mealTime}>06:00 - 07:00</Text>
-          </View>
-          <Text style={styles.mealMenu}>Menu: Nasi, telur dadar, sayur sop</Text>
-        </View>
-        <View style={styles.mealScheduleCard}>
-          <View style={styles.mealRow}>
-            <Text style={styles.mealType}>Makan Siang</Text>
-            <Text style={styles.mealTime}>12:30 - 13:30</Text>
-          </View>
-          <Text style={styles.mealMenu}>Menu: Nasi, ayam goreng, sayur asem</Text>
-        </View>
-        <View style={styles.mealScheduleCard}>
-          <View style={styles.mealRow}>
-            <Text style={styles.mealType}>Makan Malam</Text>
-            <Text style={styles.mealTime}>18:30 - 19:30</Text>
-          </View>
-          <Text style={styles.mealMenu}>Menu: Nasi, ikan bakar, sayur capcay</Text>
-        </View>
-      </View>
-
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Aktivitas Asrama</Text>
-        <View style={styles.activityCard}>
-          <Text style={styles.activityTime}>05:00 - 05:30</Text>
-          <Text style={styles.activityName}>Sholat Subuh Berjamaah</Text>
-        </View>
-        <View style={styles.activityCard}>
-          <Text style={styles.activityTime}>19:30 - 21:00</Text>
-          <Text style={styles.activityName}>Belajar Mandiri</Text>
-        </View>
-        <View style={styles.activityCard}>
-          <Text style={styles.activityTime}>21:00 - 21:30</Text>
-          <Text style={styles.activityName}>Persiapan Tidur</Text>
-        </View>
-      </View>
-    </View>
-  );
-
-  // Communication Modal Content
-  const renderCommunication = () => (
-    <View>
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Guru</Text>
-        <TouchableOpacity style={styles.contactCard}>
-          <View style={[styles.contactIcon, { backgroundColor: '#005e7a' }]}>
-            <Ionicons name="person" size={24} color="#ffffff" />
-          </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactName}>Ustadz Ahmad</Text>
-            <Text style={styles.contactRole}>Guru Tahfidz</Text>
-          </View>
-          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.contactCard}>
-          <View style={[styles.contactIcon, { backgroundColor: '#005e7a' }]}>
-            <Ionicons name="person" size={24} color="#ffffff" />
-          </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactName}>Ustadzah Fatimah</Text>
-            <Text style={styles.contactRole}>Guru Bahasa Arab</Text>
-          </View>
-          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Orang Tua</Text>
-        <TouchableOpacity style={styles.contactCard}>
-          <View style={[styles.contactIcon, { backgroundColor: '#f0c75e' }]}>
-            <Ionicons name="people" size={24} color="#ffffff" />
-          </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactName}>Orang Tua</Text>
-            <Text style={styles.contactRole}>Ayah & Ibu</Text>
-          </View>
-          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Pesan Terbaru</Text>
-        <View style={styles.messageCard}>
-          <View style={styles.messageHeader}>
-            <Text style={styles.messageSender}>Ustadz Ahmad</Text>
-            <Text style={styles.messageTime}>10:30</Text>
-          </View>
-          <Text style={styles.messageContent}>Jangan lupa persiapkan hafalan untuk besok ya</Text>
-        </View>
-        <View style={styles.messageCard}>
-          <View style={styles.messageHeader}>
-            <Text style={styles.messageSender}>Ibu</Text>
-            <Text style={styles.messageTime}>Kemarin</Text>
-          </View>
-          <Text style={styles.messageContent}>Bagaimana kabarmu hari ini, nak?</Text>
-        </View>
-      </View>
-    </View>
-  );
-
-  // Incident Report Modal Content
-  const renderIncidentReport = () => (
-    <View>
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Laporkan Masalah</Text>
-        <Text style={styles.incidentDescription}>
-          Gunakan fitur ini untuk melaporkan masalah keamanan, kesejahteraan, atau perilaku yang mengkhawatirkan.
-          Semua laporan akan ditangani dengan serius dan dijaga kerahasiaannya.
-        </Text>
-      </View>
-
-      <TouchableOpacity style={styles.incidentTypeCard}>
-        <View style={[styles.incidentIcon, { backgroundColor: '#e74c3c' }]}>
-          <Ionicons name="warning" size={24} color="#ffffff" />
-        </View>
-        <View style={styles.incidentInfo}>
-          <Text style={styles.incidentTitle}>Perilaku Bullying</Text>
-          <Text style={styles.incidentSubtitle}>Laporkan intimidasi atau pelecehan</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={24} color="#333333" />
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.incidentTypeCard}>
-        <View style={[styles.incidentIcon, { backgroundColor: '#f39c12' }]}>
-          <Ionicons name="medkit" size={24} color="#ffffff" />
-        </View>
-        <View style={styles.incidentInfo}>
-          <Text style={styles.incidentTitle}>Masalah Kesehatan</Text>
-          <Text style={styles.incidentSubtitle}>Laporkan masalah kesehatan atau cedera</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={24} color="#333333" />
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.incidentTypeCard}>
-        <View style={[styles.incidentIcon, { backgroundColor: '#3498db' }]}>
-          <Ionicons name="build" size={24} color="#ffffff" />
-        </View>
-        <View style={styles.incidentInfo}>
-          <Text style={styles.incidentTitle}>Fasilitas & Infrastruktur</Text>
-          <Text style={styles.incidentSubtitle}>Laporkan kerusakan atau masalah fasilitas</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={24} color="#333333" />
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.incidentTypeCard}>
-        <View style={[styles.incidentIcon, { backgroundColor: '#9b59b6' }]}>
-          <Ionicons name="chatbubbles" size={24} color="#ffffff" />
-        </View>
-        <View style={styles.incidentInfo}>
-          <Text style={styles.incidentTitle}>Masalah Lainnya</Text>
-          <Text style={styles.incidentSubtitle}>Laporkan masalah lain yang perlu perhatian</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={24} color="#333333" />
-      </TouchableOpacity>
-
-      <View style={styles.emergencyContact}>
-        <Ionicons name="call" size={20} color="#e74c3c" />
-        <Text style={styles.emergencyText}>
-          Untuk keadaan darurat, hubungi Pembimbing Asrama di ext. 123
-        </Text>
-      </View>
-    </View>
-  );
+  // Components are now imported from separate files
   
   const renderDashboard = () => (
     <ScrollView style={styles.contentContainer}>
@@ -285,7 +103,7 @@ export default function StudentDashboard() {
           
           <TouchableOpacity 
             style={styles.quickActionButton}
-            onPress={() => openModal('Komunikasi', renderCommunication())}
+            onPress={() => openModal('Komunikasi', <CommunicationModal />)}
           >
             <View style={[styles.quickActionIcon, { backgroundColor: '#4caf50' }]}>
               <Ionicons name="chatbubbles" size={24} color="#ffffff" />
