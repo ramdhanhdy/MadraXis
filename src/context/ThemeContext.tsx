@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { theme, Theme, UserRole, roleThemes } from '../styles/theme';
+import { theme, Theme, UserRole, roleThemes, ComponentThemeKey } from '../styles/theme';
 
 // Theme Context Interface
 interface ThemeContextType {
@@ -103,84 +103,9 @@ export const useBorderRadius = () => {
 };
 
 // Utility hooks for common styling patterns
-export const useComponentTheme = (component: 'button' | 'card' | 'input' | 'modal' | 'header' | 'tabBar') => {
+export const useComponentTheme = (component: ComponentThemeKey) => {
   const { theme } = useTheme();
-  const componentThemes = {
-    button: {
-      borderRadius: theme.borderRadius.md,
-      minHeight: {
-        small: 32,
-        medium: 40,
-        large: 48,
-      },
-      padding: {
-        small: { horizontal: 12, vertical: 6 },
-        medium: { horizontal: 16, vertical: 8 },
-        large: { horizontal: 20, vertical: 12 },
-      },
-      typography: {
-        small: theme.typography.variants.buttonSmall,
-        medium: theme.typography.variants.button,
-        large: theme.typography.variants.buttonLarge,
-      },
-    },
-    card: {
-      borderRadius: theme.borderRadius.lg,
-      padding: {
-        none: 0,
-        small: theme.spacing.base.sm,
-        medium: theme.spacing.base.md,
-        large: theme.spacing.base.lg,
-      },
-      backgroundColor: theme.colors.surface.primary,
-      shadow: theme.shadows.card,
-    },
-    input: {
-      borderRadius: theme.borderRadius.md,
-      padding: {
-        horizontal: theme.spacing.base.md,
-        vertical: theme.spacing.base.sm,
-      },
-      minHeight: 40,
-      borderWidth: 1,
-      borderColor: theme.colors.border.primary,
-      focusBorderColor: theme.colors.border.focus,
-      errorBorderColor: theme.colors.border.error,
-      backgroundColor: theme.colors.surface.primary,
-    },
-    modal: {
-      borderRadius: theme.borderRadius['2xl'],
-      padding: theme.spacing.base.lg,
-      backgroundColor: theme.colors.surface.primary,
-      shadow: theme.shadows.modal,
-      backdropColor: 'rgba(0, 0, 0, 0.5)',
-      maxHeight: '80%',
-    },
-    header: {
-      height: theme.spacing.component.header.height,
-      padding: {
-        horizontal: theme.spacing.component.header.horizontal,
-        vertical: theme.spacing.component.header.vertical,
-      },
-      backgroundColor: theme.colors.surface.primary,
-      shadow: theme.shadows.header,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border.primary,
-    },
-    tabBar: {
-      height: theme.spacing.component.tabBar.height,
-      padding: {
-        horizontal: theme.spacing.component.tabBar.horizontal,
-        vertical: theme.spacing.component.tabBar.vertical,
-      },
-      backgroundColor: theme.colors.surface.primary,
-      shadow: theme.shadows.tabBar,
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.border.primary,
-    },
-  };
-  
-  return componentThemes[component];
+  return theme.componentThemes[component];
 };
 
 // Hook for responsive values (for future implementation)
