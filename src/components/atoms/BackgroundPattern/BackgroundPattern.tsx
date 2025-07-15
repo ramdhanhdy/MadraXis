@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { View, ViewStyle, StyleSheet, Text } from 'react-native';
+import { View, ViewStyle, StyleSheet, Text, DimensionValue } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { useTheme, useColors } from '../../../context/ThemeContext';
 
@@ -300,7 +300,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
       console.warn('Failed to generate pattern SVG:', error);
       return '';
     }
-  }, [variant, getPatternColor(), getPatternOpacity()]);
+  }, [variant, color, opacity, intensity, colors.primary.main]);
 
   if (variant === 'none' || !patternSvg) {
     return null;
@@ -310,8 +310,8 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
     <View
       style={[
         {
-          width,
-          height,
+          width: width as DimensionValue,
+          height: height as DimensionValue,
           position: 'absolute',
           top: 0,
           left: 0,

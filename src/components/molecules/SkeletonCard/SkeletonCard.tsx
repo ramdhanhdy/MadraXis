@@ -3,7 +3,7 @@
  * Content placeholder for cards with consistent loading states
  */
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { View, ViewStyle, StyleSheet } from 'react-native';
 import { useTheme, useColors } from '../../../context/ThemeContext';
 
@@ -40,8 +40,8 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({
   const { theme } = useTheme();
   const colors = useColors();
 
-  // Get container styles based on variant
-  const getContainerStyles = (): ViewStyle => {
+  // Get container styles based on variant - memoized
+  const getContainerStyles = useMemo((): ViewStyle => {
     const baseStyle: ViewStyle = {
       backgroundColor: colors.surface.primary,
       borderRadius: theme.borderRadius.md,
@@ -82,10 +82,10 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({
           minHeight: 120,
         };
     }
-  };
+  }, [variant, colors.surface.primary, colors.border.primary, theme.borderRadius.md, theme.spacing.base]);
 
-  // Get layout styles
-  const getLayoutStyles = (): ViewStyle => {
+  // Get layout styles - memoized
+  const getLayoutStyles = useMemo((): ViewStyle => {
     if (horizontal) {
       return {
         flexDirection: 'row',
@@ -95,7 +95,7 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({
     return {
       flexDirection: 'column',
     };
-  };
+  }, [horizontal]);
 
   // Get skeleton styles
   const getSkeletonStyles = (type: 'avatar' | 'title' | 'line' | 'action'): ViewStyle => {
@@ -159,8 +159,8 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({
   return (
     <View
       style={[
-        getContainerStyles(),
-        getLayoutStyles(),
+        getContainerStyles,
+        getLayoutStyles,
         style,
       ]}
       testID={testID}
