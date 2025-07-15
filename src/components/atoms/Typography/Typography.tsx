@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Text, TextProps, TextStyle } from 'react-native';
-import { useTheme, useColors, useTypography } from '../../context/ThemeContext';
+import { useTheme, useColors, useTypography } from '../../../context/ThemeContext';
 
 // Typography Props Interface
 export interface TypographyProps extends Omit<TextProps, 'style'> {
@@ -81,7 +81,7 @@ export const Typography: React.FC<TypographyProps> = ({
       fontWeight: weight ? theme.typography.fontWeight[weight] as TextStyle['fontWeight'] : variantStyle.fontWeight as TextStyle['fontWeight'],
       lineHeight: getLineHeight(variantStyle),
       letterSpacing: variantStyle.letterSpacing,
-      ...(variantStyle.textTransform && { textTransform: variantStyle.textTransform as TextStyle['textTransform'] }),
+      ...((variantStyle as any).textTransform && { textTransform: (variantStyle as any).textTransform as TextStyle['textTransform'] }),
     };
   };
 

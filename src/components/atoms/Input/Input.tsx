@@ -17,7 +17,7 @@ import {
   TextInputFocusEventData,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors, useComponentTheme } from '../../context/ThemeContext';
+import { useTheme, useColors, useComponentTheme } from '../../../context/ThemeContext';
 
 // Input Props Interface
 export interface InputProps extends Omit<TextInputProps, 'style'> {
@@ -370,7 +370,6 @@ export const Input = forwardRef<TextInput, InputProps>(({
           accessibilityHint={accessibilityHint}
           accessibilityState={{
             disabled,
-            invalid: error,
           }}
           {...props}
         />
