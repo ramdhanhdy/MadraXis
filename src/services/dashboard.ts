@@ -34,18 +34,75 @@ export interface DashboardMetrics {
  */
 export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: DashboardMetrics | null; error: any }> {
   try {
-    // Fetch student count (optimized - count only, no full records)
-    const studentCountResponse = await getStudentCount(schoolId);
+    const [
+      studentCountResponse,
+      teacherCountResponse,
+      incidentsResponse,
+      academicResponse,
+      teacherPerfResponse,
+      attendanceResponse
+    ] = await Promise.all([
+      // Fetch student count (optimized - count only, no full records)
+      getStudentCount(schoolId),
+      
+      // Fetch teacher count (optimized - count only, no full records)
+      getTeacherCount(schoolId),
+      
+      // Fetch incident summary
+      supabase
+        .from('incidents')
+        .select('id, status')
+        .eq('school_id', schoolId),
+      
+      // Fetch academic performance (average across student_performance joined with profiles)
+      supabase
+        .from('student_performance')
+        .select(`
+          academic_score,
+          profiles!inner(school_id)
+        `)
+        .eq('profiles.school_id', schoolId),
+      
+      // Fetch teacher performance (average across teacher_performance joined with profiles)
+      supabase
+        .from('teacher_performance')
+        .select(`
+          class_observation,
+          punctuality_score,
+          profiles!inner(school_id)
+        `)
+        .eq('profiles.school_id', schoolId),
+      
+      // Fetch student attendance (average across student_performance joined with profiles)
+      supabase
+        .from('student_performance')
+        .select(`
+          attendance_pct,
+          profiles!inner(school_id)
+        `)
+        .eq('profiles.school_id', schoolId)
+    ]);
+
     if (studentCountResponse.error) {
       throw new Error(`Failed to fetch student count: ${studentCountResponse.error.message}`);
     }
-    const studentCount = studentCountResponse.data || 0;
-
-    // Fetch teacher count (optimized - count only, no full records)
-    const teacherCountResponse = await getTeacherCount(schoolId);
     if (teacherCountResponse.error) {
       throw new Error(`Failed to fetch teacher count: ${teacherCountResponse.error.message}`);
     }
+    if (incidentsResponse.error) {
+      throw new Error(`Failed to fetch incidents: ${incidentsResponse.error.message}`);
+    }
+    if (academicResponse.error) {
+      throw new Error(`Failed to fetch academic performance: ${academicResponse.error.message}`);
+    }
+    if (teacherPerfResponse.error) {
+      throw new Error(`Failed to fetch teacher performance: ${teacherPerfResponse.error.message}`);
+    }
+    if (attendanceResponse.error) {
+      throw new Error(`Failed to fetch attendance data: ${attendanceResponse.error.message}`);
+    }
+
+    const studentCount = studentCountResponse.data || 0;
     const teacherCount = teacherCountResponse.data || 0;
 
     // Calculate teacher-to-student ratio (students per teacher)
@@ -53,47 +110,16 @@ export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: D
       ? parseFloat((studentCount / teacherCount).toFixed(2))
       : 0;
 
-    // Fetch incident summary
-    const incidentsResponse = await supabase
-      .from('incidents')
-      .select('id, status')
-      .eq('school_id', schoolId);
-    if (incidentsResponse.error) {
-      throw new Error(`Failed to fetch incidents: ${incidentsResponse.error.message}`);
-    }
     const incidents = incidentsResponse.data || [];
     const totalIncidents = incidents.length;
     const pendingIncidents = incidents.filter(i => i.status === 'pending').length;
     const resolvedIncidents = incidents.filter(i => i.status !== 'pending').length;
 
-    // Fetch academic performance (average across student_performance joined with profiles)
-    const academicResponse = await supabase
-      .from('student_performance')
-      .select(`
-        academic_score,
-        profiles!inner(school_id)
-      `)
-      .eq('profiles.school_id', schoolId);
-    if (academicResponse.error) {
-      throw new Error(`Failed to fetch academic performance: ${academicResponse.error.message}`);
-    }
     const academicScores = academicResponse.data?.map(p => p.academic_score).filter(score => score !== null) || [];
     const averageAcademicScore = academicScores.length > 0 
       ? parseFloat((academicScores.reduce((a, b) => a + b, 0) / academicScores.length).toFixed(2)) 
       : 0;
 
-    // Fetch teacher performance (average across teacher_performance joined with profiles)
-    const teacherPerfResponse = await supabase
-      .from('teacher_performance')
-      .select(`
-        class_observation,
-        punctuality_score,
-        profiles!inner(school_id)
-      `)
-      .eq('profiles.school_id', schoolId);
-    if (teacherPerfResponse.error) {
-      throw new Error(`Failed to fetch teacher performance: ${teacherPerfResponse.error.message}`);
-    }
     const teacherScores = teacherPerfResponse.data?.map(p => {
       const obs = p.class_observation || 0;
       const punct = p.punctuality_score || 0;
@@ -103,17 +129,6 @@ export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: D
       ? parseFloat((teacherScores.reduce((a, b) => a + b, 0) / teacherScores.length).toFixed(2)) 
       : 0;
 
-    // Fetch student attendance (average across student_performance joined with profiles)
-    const attendanceResponse = await supabase
-      .from('student_performance')
-      .select(`
-        attendance_pct,
-        profiles!inner(school_id)
-      `)
-      .eq('profiles.school_id', schoolId);
-    if (attendanceResponse.error) {
-      throw new Error(`Failed to fetch attendance data: ${attendanceResponse.error.message}`);
-    }
     const attendanceRates = attendanceResponse.data?.map(p => p.attendance_pct).filter(rate => rate !== null) || [];
     const averageAttendance = attendanceRates.length > 0 
       ? parseFloat((attendanceRates.reduce((a, b) => a + b, 0) / attendanceRates.length).toFixed(2)) 
@@ -150,4 +165,4 @@ export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: D
     console.error('Service error fetching dashboard metrics:', err);
     return { data: null, error: err };
   }
-} 
+}   
