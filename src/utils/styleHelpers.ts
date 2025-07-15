@@ -75,7 +75,7 @@ export const createTypographyStyle = (
     letterSpacing: baseStyle.letterSpacing,
     ...(color && { color }),
     ...(align && { textAlign: align }),
-    ...(baseStyle.textTransform && { textTransform: baseStyle.textTransform as TextStyle['textTransform'] }),
+    ...((baseStyle as any).textTransform && { textTransform: (baseStyle as any).textTransform as TextStyle['textTransform'] }),
   };
 };
 
@@ -264,7 +264,7 @@ export const createModalStyle = (size: 'small' | 'medium' | 'large' | 'fullscree
     ...theme.shadows.modal,
   };
 
-  const sizeStyles = {
+  const sizeStyles: Record<'small' | 'medium' | 'large' | 'fullscreen', ViewStyle> = {
     small: { maxHeight: '40%' },
     medium: { maxHeight: '60%' },
     large: { maxHeight: '80%' },
@@ -279,7 +279,9 @@ export const createModalStyle = (size: 'small' | 'medium' | 'large' | 'fullscree
 
 // Helper function to combine multiple styles
 export const combineStyles = (...styles: (Style | undefined | null | false)[]): Style => {
-  return styles.filter(Boolean).reduce((acc, style) => ({ ...acc, ...style }), {});
+  return styles
+    .filter((s): s is Style => !!s)
+    .reduce<Style>((acc, style) => ({ ...acc, ...style } as Style), {} as Style);
 };
 
 // Helper function to create responsive styles (for future implementation)

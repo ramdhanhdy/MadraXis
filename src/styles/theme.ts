@@ -184,32 +184,72 @@ export const roleThemes = {
     ...theme,
     colors: {
       ...colors,
-      primary: roleColors.student.primary,
-      accent: roleColors.student.accent,
+      primary: {
+        main: roleColors.student.primary,
+        light: baseColors.teal[400],
+        dark: baseColors.teal[600],
+        contrast: baseColors.white,
+      },
+      secondary: {
+        main: roleColors.student.accent,
+        light: baseColors.gold[300],
+        dark: baseColors.gold[500],
+        contrast: baseColors.white,
+      },
     },
   },
   teacher: {
     ...theme,
     colors: {
       ...colors,
-      primary: roleColors.teacher.primary,
-      accent: roleColors.teacher.accent,
+      primary: {
+        main: roleColors.teacher.primary,
+        light: baseColors.teal[400],
+        dark: baseColors.teal[600],
+        contrast: baseColors.white,
+      },
+      secondary: {
+        main: roleColors.teacher.accent,
+        light: baseColors.gold[300],
+        dark: baseColors.gold[500],
+        contrast: baseColors.white,
+      },
     },
   },
   parent: {
     ...theme,
     colors: {
       ...colors,
-      primary: roleColors.parent.primary,
-      accent: roleColors.parent.accent,
+      primary: {
+        main: roleColors.parent.primary,
+        light: baseColors.teal[400],
+        dark: baseColors.teal[600],
+        contrast: baseColors.white,
+      },
+      secondary: {
+        main: roleColors.parent.accent,
+        light: baseColors.gold[300],
+        dark: baseColors.gold[500],
+        contrast: baseColors.white,
+      },
     },
   },
   management: {
     ...theme,
     colors: {
       ...colors,
-      primary: roleColors.management.primary,
-      accent: roleColors.management.accent,
+      primary: {
+        main: roleColors.management.primary,
+        light: baseColors.teal[400],
+        dark: baseColors.teal[600],
+        contrast: baseColors.white,
+      },
+      secondary: {
+        main: roleColors.management.accent,
+        light: baseColors.gold[300],
+        dark: baseColors.gold[500],
+        contrast: baseColors.white,
+      },
     },
   },
 } as const;

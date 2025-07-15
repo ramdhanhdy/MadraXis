@@ -184,13 +184,13 @@ export const useComponentTheme = (component: 'button' | 'card' | 'input' | 'moda
 };
 
 // Hook for responsive values (for future implementation)
-export const useResponsiveValue = <T>(values: {
+export const useResponsiveValue = <T,>(values: {
   xs?: T;
   sm?: T;
   md?: T;
   lg?: T;
   xl?: T;
-}) => {
+}): T | undefined => {
   // For now, return the base value (xs)
   // In the future, this could use screen dimensions to return appropriate value
   return values.xs || values.sm || values.md || values.lg || values.xl;
