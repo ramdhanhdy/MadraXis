@@ -4,7 +4,8 @@
  */
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { theme, Theme, UserRole, roleThemes, ComponentThemeKey } from '../styles/theme';
+import { theme, Theme, roleThemes, ComponentThemeKey } from '../styles/theme';
+import { UserRole } from '../styles/colors';
 
 // Theme Context Interface
 interface ThemeContextType {
@@ -36,7 +37,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   // Get theme based on current role
   const getCurrentTheme = useCallback((): Theme => {
-    if (currentRole && roleThemes[currentRole]) {
+    if (currentRole && currentRole in roleThemes) {
       return roleThemes[currentRole];
     }
     return theme;

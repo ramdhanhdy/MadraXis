@@ -3,7 +3,7 @@
  * Complete design token system combining colors, typography, spacing, and shadows
  */
 
-import { colors, semanticColors, baseColors, roleColors } from './colors';
+import { colors, semanticColors, baseColors, roleColors, UserRole } from './colors';
 import { typography, typographyVariants, fontFamily, fontWeight, fontSize, lineHeight } from './typography';
 import { spacingTokens, spacing, semanticSpacing, componentSpacing } from './spacing';
 import { shadows, semanticShadows, elevationLevels } from './shadows';
@@ -175,9 +175,7 @@ export const theme: Theme = {
   componentThemes,
 } as const;
 
-// Define user roles to break circular dependency
-const roles = ['student', 'teacher', 'parent', 'management'] as const;
-export type UserRole = typeof roles[number];
+
 
 // Role-specific theme variations
 const createRoleTheme = (role: UserRole): Theme => {
