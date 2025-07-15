@@ -439,16 +439,14 @@ describe('BackgroundPattern Component', () => {
     it('renders consistently across multiple instances', () => {
       const { getAllByTestId } = render(
         <TestWrapper>
-          <>
-            {[1, 2, 3, 4, 5].map((id) => (
-              <BackgroundPattern 
-                key={id}
-                variant="geometric" 
-                intensity="light" 
-                testID={`performance-pattern-${id}`} 
-              />
-            ))}
-          </>
+          {[1, 2, 3, 4, 5].map((id) => (
+            <BackgroundPattern 
+              key={id}
+              variant="geometric" 
+              intensity="light" 
+              testID={`performance-pattern-${id}`} 
+            />
+          ))}
         </TestWrapper>
       );
 
