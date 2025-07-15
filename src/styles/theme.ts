@@ -3,6 +3,7 @@
  * Complete design token system combining colors, typography, spacing, and shadows
  */
 
+import { Easing } from 'react-native';
 import { colors, semanticColors, baseColors, roleColors, UserRole } from './colors';
 import { typography, typographyVariants, fontFamily, fontWeight, fontSize, lineHeight } from './typography';
 import { spacingTokens, spacing, semanticSpacing, componentSpacing } from './spacing';
@@ -28,13 +29,22 @@ export const duration = {
   slow: 500,
 } as const;
 
-// Animation Easing
+// Animation Easing (CSS values for web)
 export const easing = {
   linear: 'linear',
   ease: 'ease',
   easeIn: 'ease-in',
   easeOut: 'ease-out',
   easeInOut: 'ease-in-out',
+} as const;
+
+// Native Animation Easing (React Native Easing functions)
+export const nativeEasing = {
+  linear: Easing.linear,
+  ease: Easing.ease,
+  easeIn: Easing.in(Easing.ease),
+  easeOut: Easing.out(Easing.ease),
+  easeInOut: Easing.inOut(Easing.ease),
 } as const;
 
 // Breakpoints for responsive design
@@ -147,6 +157,7 @@ const baseTheme = {
   borderRadius,
   duration,
   easing,
+  nativeEasing,
   breakpoints,
   zIndex,
   elevationLevels,
@@ -163,6 +174,7 @@ export interface Theme {
   borderRadius: typeof borderRadius;
   duration: typeof duration;
   easing: typeof easing;
+  nativeEasing: typeof nativeEasing;
   breakpoints: typeof breakpoints;
   zIndex: typeof zIndex;
   elevationLevels: typeof elevationLevels;
