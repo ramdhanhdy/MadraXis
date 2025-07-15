@@ -280,9 +280,7 @@ export const createModalStyle = (size: 'small' | 'medium' | 'large' | 'fullscree
 
 // Helper function to combine multiple styles
 export const combineStyles = (...styles: (Style | undefined | null | false)[]): Style => {
-  return styles
-    .filter((s): s is Style => !!s)
-    .reduce<Style>((acc, style) => ({ ...acc, ...style } as Style), {} as Style);
+  return Object.assign({}, ...styles.filter((s): s is Style => !!s));
 };
 
 // Helper function to create responsive styles
