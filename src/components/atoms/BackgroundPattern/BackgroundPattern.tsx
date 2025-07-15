@@ -39,22 +39,31 @@ export interface BackgroundPatternProps {
 }
 
 // Error boundary component for SVG rendering
-const SvgErrorBoundary: React.FC<{ children: React.ReactNode; fallback?: React.ReactNode }> = ({ 
-  children, 
-  fallback = null 
-}) => {
-  const [hasError, setHasError] = useState(false);
-
-  React.useEffect(() => {
-    setHasError(false);
-  }, [children]);
-
-  if (hasError) {
-    return <>{fallback}</>;
+class SvgErrorBoundary extends React.Component<{ 
+  children: React.ReactNode; 
+  fallback?: React.ReactNode 
+}, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
   }
 
-  return <>{children}</>;
-};
+  static getDerivedStateFromError(error: Error): { hasError: boolean } {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    console.warn('SVG rendering error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <>{this.props.fallback}</>;
+    }
+
+    return <>{this.props.children}</>;
+  }
+}
 
 // BackgroundPattern Component - Memoized for performance
 export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
@@ -264,23 +273,6 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
     `;
   };
 
-  // Get pattern SVG based on variant
-  const getPatternSvg = (): string => {
-    switch (variant) {
-      case 'geometric':
-        return generateGeometricPattern();
-      case 'minimal':
-        return generateMinimalPattern();
-      case 'dots':
-        return generateDotsPattern();
-      case 'waves':
-        return generateWavesPattern();
-      case 'none':
-        return '';
-      default:
-        return generateGeometricPattern();
-    }
-  };
 
   // Don't render anything for 'none' variant
   if (variant === 'none') {

@@ -280,14 +280,11 @@ describe('BackgroundPattern Component', () => {
       expect(getByTestId('undefined-variant')).toBeTruthy();
     });
 
-    it('handles invalid intensity gracefully by falling back to default', () => {
-      // Test that the component uses default intensity when invalid value is provided
+    it('handles missing intensity gracefully by falling back to default', () => {
+      // Test that the component uses default intensity when intensity prop is missing
       const { getByTestId } = render(
         <TestWrapper>
-          <BackgroundPattern 
-            intensity="medium" 
-            testID="default-intensity-fallback" 
-          />
+          <BackgroundPattern testID="default-intensity-fallback" />
         </TestWrapper>
       );
 
