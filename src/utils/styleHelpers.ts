@@ -5,6 +5,7 @@
 
 import { ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import { theme } from '../styles/theme';
+import { getResponsiveValue } from './responsive';
 import type { ShadowStyle } from '../styles/shadows';
 
 // Type for all possible style objects
@@ -284,7 +285,7 @@ export const combineStyles = (...styles: (Style | undefined | null | false)[]): 
     .reduce<Style>((acc, style) => ({ ...acc, ...style } as Style), {} as Style);
 };
 
-// Helper function to create responsive styles (for future implementation)
+// Helper function to create responsive styles
 export const createResponsiveStyle = <T extends Style>(styles: {
   xs?: T;
   sm?: T;
@@ -292,9 +293,7 @@ export const createResponsiveStyle = <T extends Style>(styles: {
   lg?: T;
   xl?: T;
 }): T => {
-  // For now, return the base style (xs)
-  // In the future, this could use screen dimensions to return appropriate style
-  return styles.xs || styles.sm || styles.md || styles.lg || styles.xl || ({} as T);
+  return getResponsiveValue(styles) || ({} as T);
 };
 
 // Utility object with all helper functions
