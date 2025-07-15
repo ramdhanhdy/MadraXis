@@ -160,11 +160,11 @@ export type ComponentSpacingKey = keyof typeof componentSpacing;
 // Helper functions
 export const getSpacing = (size: SpacingKey): number => spacing[size];
 
-export const getSemanticSpacing = (
-  category: SemanticSpacingCategory,
-  size: keyof typeof semanticSpacing[SemanticSpacingCategory]
+export const getSemanticSpacing = <T extends SemanticSpacingCategory>(
+  category: T,
+  size: keyof (typeof semanticSpacing)[T]
 ): number => {
-  return semanticSpacing[category][size as keyof typeof semanticSpacing[typeof category]];
+  return semanticSpacing[category][size] as number;
 };
 
 // Spacing utilities for common patterns
