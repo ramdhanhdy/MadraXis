@@ -34,6 +34,7 @@ export interface ModalAction {
   disabled?: boolean;
   loading?: boolean;
   testID?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
 }
 
 // Modal Props Interface

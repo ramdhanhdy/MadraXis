@@ -10,11 +10,11 @@ import {
   ViewStyle,
   StyleSheet,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useColors } from '../../../context/ThemeContext';
 import { Modal } from '../../organisms/Modal';
 import { Typography } from '../../atoms/Typography';
 import { Button } from '../../atoms/Button';
-import { Icon } from '../../atoms/Icon';
 
 // Action button interface
 export interface ModalAction {
@@ -23,7 +23,7 @@ export interface ModalAction {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   loading?: boolean;
   disabled?: boolean;
-  icon?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
 }
 
 // ModalTemplate Props Interface
@@ -160,7 +160,9 @@ export const ModalTemplate: React.FC<ModalTemplateProps> = ({
               onPress={onClose}
               accessibilityLabel="Close modal"
               testID={testID ? `${testID}-close-button` : 'modal-close-button'}
-            />
+            >
+              Close
+            </Button>
           )}
         </View>
       </View>

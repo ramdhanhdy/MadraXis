@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useColors } from '../../../context/ThemeContext';
 import { Typography } from '../../atoms/Typography';
 import { Button } from '../../atoms/Button';
@@ -32,7 +33,7 @@ export interface FormAction {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   loading?: boolean;
   disabled?: boolean;
-  icon?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
   fullWidth?: boolean;
 }
 
