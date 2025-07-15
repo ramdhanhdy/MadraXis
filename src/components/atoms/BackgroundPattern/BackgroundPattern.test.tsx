@@ -270,14 +270,14 @@ describe('BackgroundPattern Component', () => {
 
   // Edge cases
   describe('Edge Cases', () => {
-    it('handles undefined variant gracefully', () => {
+    it('handles default variant behavior', () => {
       const { getByTestId } = render(
         <TestWrapper>
-          <BackgroundPattern variant={undefined} testID="undefined-variant" />
+          <BackgroundPattern testID="default-variant" />
         </TestWrapper>
       );
 
-      expect(getByTestId('undefined-variant')).toBeTruthy();
+      expect(getByTestId('default-variant')).toBeTruthy();
     });
 
     it('handles missing intensity gracefully by falling back to default', () => {
@@ -311,18 +311,18 @@ describe('BackgroundPattern Component', () => {
       expect(getByTestId('max-opacity')).toBeTruthy();
     });
 
-    it('handles edge case intensity values by using default', () => {
-      // Test edge case: empty string should use default
+    it('handles valid intensity values correctly', () => {
+      // Test valid intensity: subtle
       const { getByTestId } = render(
         <TestWrapper>
           <BackgroundPattern 
             intensity="subtle" 
-            testID="edge-case-intensity" 
+            testID="valid-intensity" 
           />
         </TestWrapper>
       );
 
-      expect(getByTestId('edge-case-intensity')).toBeTruthy();
+      expect(getByTestId('valid-intensity')).toBeTruthy();
     });
   });
 
