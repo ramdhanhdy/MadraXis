@@ -9,6 +9,7 @@ import type { Meta, StoryObj } from '@storybook/react-native';
 import { BackgroundPattern } from './BackgroundPattern';
 import { Typography } from '../Typography';
 import { Card } from '../../molecules/Card';
+import { ThemeProvider } from '../../../context/ThemeContext';
 
 const meta: Meta<typeof BackgroundPattern> = {
   title: 'Atoms/BackgroundPattern',
@@ -427,38 +428,39 @@ export const StudentTheme: Story = {
   args: {
     variant: 'geometric',
     intensity: 'subtle',
-    color: '#005e7a',
   },
   decorators: [
     (Story) => (
-      <View style={{ 
-        height: 400, 
-        backgroundColor: '#f8f9fa',
-        position: 'relative',
-        padding: 20,
-      }}>
-        <Story />
+      <ThemeProvider initialRole="student">
         <View style={{ 
-          position: 'absolute', 
-          top: 20, 
-          left: 20, 
-          right: 20,
-          zIndex: 1,
+          height: 400, 
+          backgroundColor: '#f8f9fa',
+          position: 'relative',
+          padding: 20,
         }}>
-          <Typography variant="h3" style={{ marginBottom: 8 }}>
-            Student Portal
-          </Typography>
-          <Typography variant="body1" color="secondary">
-            Subtle geometric pattern for student dashboard
-          </Typography>
+          <Story />
+          <View style={{ 
+            position: 'absolute', 
+            top: 20, 
+            left: 20, 
+            right: 20,
+            zIndex: 1,
+          }}>
+            <Typography variant="h3" style={{ marginBottom: 8 }}>
+              Student Portal
+            </Typography>
+            <Typography variant="body1" color="secondary">
+              Subtle geometric pattern for student dashboard
+            </Typography>
+          </View>
         </View>
-      </View>
+      </ThemeProvider>
     ),
   ],
   parameters: {
     docs: {
       description: {
-        story: 'Background pattern themed for student portal.',
+        story: 'Background pattern themed for student portal using theme context.',
       },
     },
   },
@@ -468,38 +470,39 @@ export const TeacherTheme: Story = {
   args: {
     variant: 'minimal',
     intensity: 'light',
-    color: '#2e7d32',
   },
   decorators: [
     (Story) => (
-      <View style={{ 
-        height: 400, 
-        backgroundColor: '#f1f8e9',
-        position: 'relative',
-        padding: 20,
-      }}>
-        <Story />
+      <ThemeProvider initialRole="teacher">
         <View style={{ 
-          position: 'absolute', 
-          top: 20, 
-          left: 20, 
-          right: 20,
-          zIndex: 1,
+          height: 400, 
+          backgroundColor: '#f1f8e9',
+          position: 'relative',
+          padding: 20,
         }}>
-          <Typography variant="h3" style={{ marginBottom: 8 }}>
-            Teacher Portal
-          </Typography>
-          <Typography variant="body1" color="secondary">
-            Clean minimal pattern for teacher dashboard
-          </Typography>
+          <Story />
+          <View style={{ 
+            position: 'absolute', 
+            top: 20, 
+            left: 20, 
+            right: 20,
+            zIndex: 1,
+          }}>
+            <Typography variant="h3" style={{ marginBottom: 8 }}>
+              Teacher Portal
+            </Typography>
+            <Typography variant="body1" color="secondary">
+              Clean minimal pattern for teacher dashboard
+            </Typography>
+          </View>
         </View>
-      </View>
+      </ThemeProvider>
     ),
   ],
   parameters: {
     docs: {
       description: {
-        story: 'Background pattern themed for teacher portal.',
+        story: 'Background pattern themed for teacher portal using theme context.',
       },
     },
   },
@@ -509,38 +512,39 @@ export const ParentTheme: Story = {
   args: {
     variant: 'waves',
     intensity: 'subtle',
-    color: '#1976d2',
   },
   decorators: [
     (Story) => (
-      <View style={{ 
-        height: 400, 
-        backgroundColor: '#e3f2fd',
-        position: 'relative',
-        padding: 20,
-      }}>
-        <Story />
+      <ThemeProvider initialRole="parent">
         <View style={{ 
-          position: 'absolute', 
-          top: 20, 
-          left: 20, 
-          right: 20,
-          zIndex: 1,
+          height: 400, 
+          backgroundColor: '#e3f2fd',
+          position: 'relative',
+          padding: 20,
         }}>
-          <Typography variant="h3" style={{ marginBottom: 8 }}>
-            Parent Portal
-          </Typography>
-          <Typography variant="body1" color="secondary">
-            Gentle waves pattern for parent dashboard
-          </Typography>
+          <Story />
+          <View style={{ 
+            position: 'absolute', 
+            top: 20, 
+            left: 20, 
+            right: 20,
+            zIndex: 1,
+          }}>
+            <Typography variant="h3" style={{ marginBottom: 8 }}>
+              Parent Portal
+            </Typography>
+            <Typography variant="body1" color="secondary">
+              Gentle waves pattern for parent dashboard
+            </Typography>
+          </View>
         </View>
-      </View>
+      </ThemeProvider>
     ),
   ],
   parameters: {
     docs: {
       description: {
-        story: 'Background pattern themed for parent portal.',
+        story: 'Background pattern themed for parent portal using theme context.',
       },
     },
   },
@@ -550,38 +554,39 @@ export const ManagementTheme: Story = {
   args: {
     variant: 'dots',
     intensity: 'light',
-    color: '#424242',
   },
   decorators: [
     (Story) => (
-      <View style={{ 
-        height: 400, 
-        backgroundColor: '#fafafa',
-        position: 'relative',
-        padding: 20,
-      }}>
-        <Story />
+      <ThemeProvider initialRole="management">
         <View style={{ 
-          position: 'absolute', 
-          top: 20, 
-          left: 20, 
-          right: 20,
-          zIndex: 1,
+          height: 400, 
+          backgroundColor: '#fafafa',
+          position: 'relative',
+          padding: 20,
         }}>
-          <Typography variant="h3" style={{ marginBottom: 8 }}>
-            Management Portal
-          </Typography>
-          <Typography variant="body1" color="secondary">
-            Professional dots pattern for management dashboard
-          </Typography>
+          <Story />
+          <View style={{ 
+            position: 'absolute', 
+            top: 20, 
+            left: 20, 
+            right: 20,
+            zIndex: 1,
+          }}>
+            <Typography variant="h3" style={{ marginBottom: 8 }}>
+              Management Portal
+            </Typography>
+            <Typography variant="body1" color="secondary">
+              Professional dots pattern for management dashboard
+            </Typography>
+          </View>
         </View>
-      </View>
+      </ThemeProvider>
     ),
   ],
   parameters: {
     docs: {
       description: {
-        story: 'Background pattern themed for management portal.',
+        story: 'Background pattern themed for management portal using theme context.',
       },
     },
   },
