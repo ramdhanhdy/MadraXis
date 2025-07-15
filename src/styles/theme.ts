@@ -172,9 +172,40 @@ const baseTheme = {
 
 const componentThemes = createComponentThemes(baseTheme);
 
-// Complete Theme Interface
+// Complete Theme Interface - flexible to accommodate role-based variations
 export interface Theme {
-  colors: typeof colors;
+  colors: {
+    // Allow flexible primary/secondary colors for role-based themes
+    primary: {
+      main: string;
+      light: string;
+      dark: string;
+      contrast: string;
+    };
+    secondary: {
+      main: string;
+      light: string;
+      dark: string;
+      contrast: string;
+    };
+    // Include all other color properties from the base colors
+    success: typeof colors.success;
+    warning: typeof colors.warning;
+    error: typeof colors.error;
+    info: typeof colors.info;
+    background: typeof colors.background;
+    surface: typeof colors.surface;
+    text: typeof colors.text;
+    border: typeof colors.border;
+    interactive: typeof colors.interactive;
+    role: typeof colors.role;
+    // Base colors
+    teal: typeof colors.teal;
+    gold: typeof colors.gold;
+    neutral: typeof colors.neutral;
+    white: typeof colors.white;
+    black: typeof colors.black;
+  };
   typography: typeof typography;
   spacing: typeof spacingTokens;
   shadows: typeof shadows;
@@ -186,7 +217,7 @@ export interface Theme {
   zIndex: typeof zIndex;
   zIndexUtils: typeof zIndexUtils;
   elevationLevels: typeof elevationLevels;
-  componentThemes: typeof componentThemes;
+  componentThemes: ReturnType<typeof createComponentThemes>;
 }
 
 // Main Theme Object
@@ -197,22 +228,47 @@ export const theme: Theme = {
 
 
 
+// Helper function to generate color variants for role themes
+const getRoleColorVariants = (role: UserRole) => {
+  const roleColorMap = {
+    student: {
+      primary: { light: baseColors.teal[400], dark: baseColors.teal[600] },
+      secondary: { light: baseColors.teal[200], dark: baseColors.teal[400] },
+    },
+    teacher: {
+      primary: { light: baseColors.success[400], dark: baseColors.success[600] },
+      secondary: { light: baseColors.gold[300], dark: baseColors.gold[500] },
+    },
+    parent: {
+      primary: { light: baseColors.warning[400], dark: baseColors.warning[600] },
+      secondary: { light: baseColors.warning[200], dark: baseColors.warning[400] },
+    },
+    management: {
+      primary: { light: baseColors.error[500], dark: baseColors.error[700] },
+      secondary: { light: baseColors.neutral[500], dark: baseColors.neutral[700] },
+    },
+  };
+  return roleColorMap[role];
+};
+
 // Role-specific theme variations
 const createRoleTheme = (role: UserRole): Theme => {
+  const colorVariants = getRoleColorVariants(role);
+  
   const roleBaseTheme = {
     ...baseTheme,
     colors: {
       ...colors,
       primary: {
         main: roleColors[role].primary,
-        light: baseColors.teal[400],
-        dark: baseColors.teal[600],
+        light: colorVariants.primary.light,
+        dark: colorVariants.primary.dark,
         contrast: baseColors.white,
       },
       secondary: {
         main: roleColors[role].accent,
-        light: baseColors.gold[300],
-        dark: baseColors.gold[500],
+        light: colorVariants.secondary.light,
+        dark: colorVariants.secondary.dark,
         contrast: baseColors.white,
       },
     },

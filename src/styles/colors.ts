@@ -132,6 +132,14 @@ export const semanticColors = {
     contrast: baseColors.white,
   },
   
+  // Info Colors
+  info: {
+    main: baseColors.teal[500],
+    light: baseColors.teal[400],
+    dark: baseColors.teal[600],
+    contrast: baseColors.white,
+  },
+  
   // Background Colors
   background: {
     primary: baseColors.neutral[100], // #f5f5f5
@@ -172,23 +180,23 @@ export const semanticColors = {
   },
 } as const;
 
-// Role-specific Color Variations (for future customization)
+// Role-specific Color Variations - distinct colors for visual differentiation
 export const roleColors = {
   student: {
-    primary: baseColors.teal[500],
-    accent: baseColors.gold[400],
+    primary: baseColors.teal[500],     // Teal - learning and growth
+    accent: baseColors.teal[300],      // Lighter teal accent
   },
   teacher: {
-    primary: baseColors.teal[500],
-    accent: baseColors.gold[400],
+    primary: baseColors.success[500],  // Green - guidance and knowledge
+    accent: baseColors.gold[400],      // Gold - achievement and wisdom
   },
   parent: {
-    primary: baseColors.teal[500],
-    accent: baseColors.gold[400],
+    primary: baseColors.warning[500],  // Orange - care and protection
+    accent: baseColors.warning[300],   // Lighter orange accent
   },
   management: {
-    primary: baseColors.teal[500],
-    accent: baseColors.gold[400],
+    primary: baseColors.error[600],    // Red - authority and decisions
+    accent: baseColors.neutral[600],   // Neutral gray - professionalism
   },
 } as const;
 
