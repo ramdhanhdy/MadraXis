@@ -45,3 +45,4 @@ app-example
 .kiro/settings/
 .kiro/steering/
 !.kiro/specs/
+npx
