@@ -211,6 +211,15 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
     };
   };
 
+  // Get separator styles for mixed content
+  const getSeparatorStyles = (): ViewStyle => ({
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.primary,
+    marginTop: 8,
+  });
+
   // Get actions container styles
   const getActionsStyles = (): ViewStyle => {
     return {
@@ -556,13 +565,6 @@ const styles = StyleSheet.create({
   },
 });
 
-  const getSeparatorStyles = (): ViewStyle => ({
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.primary,
-    marginTop: 8,
-  });
 
 // Export default
 export default NavigationPanel;
