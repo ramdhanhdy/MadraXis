@@ -3,7 +3,7 @@
  * Sets up testing environment for React Native components
  */
 
-import '@testing-library/jest-native/extend-expect';
+require('@testing-library/jest-native/extend-expect');
 
 // Mock Expo modules that might cause issues in tests
 jest.mock('expo-constants', () => ({
