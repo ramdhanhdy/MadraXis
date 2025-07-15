@@ -5,7 +5,8 @@
 
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react-native';
-import { ThemeProvider } from '../../../context/ThemeContext';
+import { ThemeProvider, useComponentTheme } from '../../../context/ThemeContext';
+import { theme } from '../../../styles/theme';
 import { Button } from './Button';
 
 // Test wrapper with ThemeProvider
@@ -335,6 +336,27 @@ describe('Button Component', () => {
       
       expect(screen.getByTestId('custom-text-style-button')).toBeTruthy();
       expect(screen.getByText('Custom Text Style')).toBeTruthy();
+    });
+  });
+
+  // Theme integration tests
+  describe('Theme Integration', () => {
+    it('retrieves correct theme from useComponentTheme hook', () => {
+      let buttonTheme;
+
+      const TestComponent = () => {
+        buttonTheme = useComponentTheme('button');
+        return null;
+      };
+
+      render(
+        <TestWrapper>
+          <TestComponent />
+        </TestWrapper>
+      );
+
+      expect(buttonTheme).toBeDefined();
+      expect(buttonTheme).toEqual(theme.componentThemes.button);
     });
   });
 });
