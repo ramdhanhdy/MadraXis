@@ -717,7 +717,7 @@ describe('NavigationPanel Component', () => {
 
     it('handles missing onPress handlers', () => {
       const itemsWithoutHandlers = [
-        { id: '1', title: 'No Handler', icon: 'home' as const, onPress: jest.fn() },
+        { id: '1', title: 'No Handler', icon: 'home' as const },
       ];
 
       const { getByText } = render(

@@ -357,8 +357,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
                 <View style={[styles.badge, { backgroundColor: item.badgeColor || colors.error.main }]}>
                   <Typography
                     variant="caption"
-                    color={colors.error.contrast}
-                    style={styles.badgeText}
+                    style={[styles.badgeText, { color: colors.error.contrast }]}
                   >
                     {item.badge > 99 ? '99+' : item.badge.toString()}
                   </Typography>
@@ -500,7 +499,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
         
         {/* Mixed content separator */}
         {type === 'mixed' && navigationItems.length > 0 && notifications.length > 0 && (
-          <View style={styles.separator}>
+          <View style={getSeparatorStyles()}>
             <Typography variant="caption" color="tertiary" align="center">
               Notifications
             </Typography>
@@ -555,14 +554,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     lineHeight: 10,
   },
-  separator: {
+});
+
+  const getSeparatorStyles = (): ViewStyle => ({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: colors.border.primary,
     marginTop: 8,
-  },
-});
+  });
 
 // Export default
 export default NavigationPanel;
