@@ -148,7 +148,8 @@
   - Implement pattern opacity and color customization through theme
   - _Requirements: 1.1, 1.3_
 
-- [ ] 5.3 Create additional template components
+- [x] 5.3 Create additional template components
+
   - Create `src/components/templates/ModalTemplate/ModalTemplate.tsx`
   - Create `src/components/templates/FormTemplate/FormTemplate.tsx`
   - Implement consistent layouts and spacing for different content types
