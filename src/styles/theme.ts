@@ -56,10 +56,9 @@ export const breakpoints = {
   xl: 1200,
 } as const;
 
-// Z-Index Scale
+// Z-Index Scale (numeric values only for type consistency)
 export const zIndex = {
   hide: -1,
-  auto: 'auto',
   base: 0,
   docked: 10,
   dropdown: 1000,
@@ -71,6 +70,13 @@ export const zIndex = {
   skipLink: 1600,
   toast: 1700,
   tooltip: 1800,
+} as const;
+
+// Z-Index utility for handling auto values
+export const zIndexUtils = {
+  auto: 'auto' as const,
+  getNumeric: (key: keyof typeof zIndex) => zIndex[key],
+  getAuto: () => 'auto' as const,
 } as const;
 
 // Function to generate component themes from a base theme
@@ -160,6 +166,7 @@ const baseTheme = {
   nativeEasing,
   breakpoints,
   zIndex,
+  zIndexUtils,
   elevationLevels,
 };
 
@@ -177,6 +184,7 @@ export interface Theme {
   nativeEasing: typeof nativeEasing;
   breakpoints: typeof breakpoints;
   zIndex: typeof zIndex;
+  zIndexUtils: typeof zIndexUtils;
   elevationLevels: typeof elevationLevels;
   componentThemes: typeof componentThemes;
 }
