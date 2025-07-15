@@ -147,10 +147,14 @@ export type SemanticShadowKey = keyof typeof semanticShadows;
 
 // Helper functions
 export const getShadow = (key: ShadowKey): ShadowStyle => {
-    return shadows[key];
+    const shadow = shadows[key];
+    if (key === 'interactive') {
+        return (shadow as typeof shadows['interactive']).rest;
+    }
+    return shadow as ShadowStyle;
 };
 
-export const getSemanticShadow = (key: SemanticShadowKey): ShadowStyle | any => {
+export const getSemanticShadow = (key: SemanticShadowKey) => {
     return shadows[key];
 };
 
