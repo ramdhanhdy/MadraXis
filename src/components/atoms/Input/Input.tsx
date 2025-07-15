@@ -86,7 +86,6 @@ export const Input = forwardRef<TextInput, InputProps>(({
   const { theme } = useTheme();
   const colors = useColors();
   const [isFocused, setIsFocused] = useState(false);
-  const [internalValue, setInternalValue] = useState(value || '');
 
   // Handle focus events
   const handleFocus = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
@@ -101,12 +100,11 @@ export const Input = forwardRef<TextInput, InputProps>(({
 
   // Handle value changes for character count
   const handleChangeText = (text: string) => {
-    setInternalValue(text);
     props.onChangeText?.(text);
   };
 
   // Get current value for character count
-  const currentValue = value !== undefined ? value : internalValue;
+  const currentValue = value || '';
 
   // Get container styles
   const getContainerStyles = (): ViewStyle => {
