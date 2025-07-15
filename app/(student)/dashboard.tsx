@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -10,6 +10,15 @@ import BoardingInfoModal from '../components/student/BoardingInfoModal';
 import CommunicationModal from '../components/student/CommunicationModal';
 import IncidentReportModal from '../components/student/IncidentReportModal';
 import { useAuth } from '../../src/context/AuthContext';
+import { DashboardTemplate } from '../../src/components/templates/DashboardTemplate';
+import type { TabConfig, HeaderAction } from '../../src/components/templates/DashboardTemplate';
+import { Card } from '../../src/components/molecules/Card';
+import { QuickAction } from '../../src/components/molecules/QuickAction';
+import { ProgressBar } from '../../src/components/molecules/ProgressBar';
+import { ListItem } from '../../src/components/molecules/ListItem';
+import { Button } from '../../src/components/atoms/Button';
+import { Typography } from '../../src/components/atoms/Typography';
+import { Modal } from '../../src/components/organisms/Modal';
 
 export default function StudentDashboard() {
   const router = useRouter();
@@ -20,6 +29,54 @@ export default function StudentDashboard() {
     content: React.ReactNode;
   }>({ title: '', content: null });
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Header configuration
+  const headerConfig = {
+    title: 'Dashboard Siswa',
+    rightActions: [
+      {
+        icon: 'notifications-outline' as keyof typeof Ionicons.glyphMap,
+        onPress: () => {
+          // TODO: Implement notification handling
+          console.log('Notifications pressed');
+        },
+        accessibilityLabel: 'Notifikasi',
+        testID: 'notifications-button',
+      },
+    ] as HeaderAction[],
+  };
+
+  // Tab configuration
+  const tabsConfig: TabConfig[] = [
+    {
+      id: 'dashboard',
+      label: 'Beranda',
+      icon: 'home-outline',
+      accessibilityLabel: 'Beranda',
+      testID: 'tab-dashboard',
+    },
+    {
+      id: 'messages',
+      label: 'Pesan',
+      icon: 'chatbubble-outline',
+      accessibilityLabel: 'Pesan',
+      testID: 'tab-messages',
+    },
+    {
+      id: 'schedule',
+      label: 'Jadwal',
+      icon: 'calendar-outline',
+      accessibilityLabel: 'Jadwal',
+      testID: 'tab-schedule',
+    },
+    {
+      id: 'profile',
+      label: 'Profil',
+      icon: 'person-outline',
+      accessibilityLabel: 'Profil',
+      testID: 'tab-profile',
+    },
+  ];
   
   const navigateToQuranProgress = () => {
     router.push('/student/quran-progress');
@@ -51,135 +108,175 @@ export default function StudentDashboard() {
   const renderDashboard = () => (
     <ScrollView style={styles.contentContainer}>
       {/* Welcome Banner */}
-      <View style={styles.welcomeBanner}>
+      <Card 
+        variant="default" 
+        padding="large"
+        style={styles.welcomeBanner}
+      >
         <View style={styles.welcomeContent}>
-          <Text style={styles.welcomeText}>Assalamu'alaikum,</Text>
-          <Text style={styles.userName}>Ahmad Fauzi</Text>
-          <Text style={styles.welcomeSubtext}>Semangat menghafal Al-Quran hari ini!</Text>
+          <Typography variant="body2" color="#ffffff">
+            Assalamu'alaikum,
+          </Typography>
+          <Typography variant="h3" color="#ffffff" weight="bold" style={{ marginVertical: 5 }}>
+            {profile?.full_name || 'Ahmad Fauzi'}
+          </Typography>
+          <Typography variant="body2" color="#f0c75e">
+            Semangat menghafal Al-Quran hari ini!
+          </Typography>
         </View>
         <View style={styles.logoContainer}>
           <SvgXml xml={logoSvg} width={80} height={80} />
         </View>
-      </View>
+      </Card>
       
       {/* Progress Section */}
       <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Progress Hafalan</Text>
-        <View style={styles.progressCard}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          Progress Hafalan
+        </Typography>
+        <Card variant="default" padding="medium">
           <View style={styles.progressHeader}>
-            <Text style={styles.progressTitle}>Al-Baqarah</Text>
-            <Text style={styles.progressPercentage}>60%</Text>
+            <Typography variant="body1" weight="bold" color="primary">
+              Al-Baqarah
+            </Typography>
+            <Typography variant="body1" weight="bold" color="#005e7a">
+              60%
+            </Typography>
           </View>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: '60%' }]} />
-          </View>
-          <Text style={styles.progressDetail}>120 dari 200 ayat</Text>
-        </View>
+          <ProgressBar
+            value={60}
+            variant="default"
+            size="medium"
+            animated={true}
+            style={{ marginVertical: 10 }}
+          />
+          <Typography variant="body2" color="secondary" align="center">
+            120 dari 200 ayat
+          </Typography>
+        </Card>
       </View>
       
       {/* Quick Actions */}
       <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Aksi Cepat</Text>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          Aksi Cepat
+        </Typography>
         <View style={styles.quickActionsContainer}>
-          <TouchableOpacity 
-            style={styles.quickActionButton}
+          <QuickAction
+            title="Hafalan"
+            icon="book"
+            variant="primary"
+            size="medium"
             onPress={navigateToQuranProgress}
-          >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#005e7a' }]}>
-              <Ionicons name="book" size={24} color="#ffffff" />
-            </View>
-            <Text style={styles.quickActionText}>Hafalan</Text>
-          </TouchableOpacity>
+            style={{ width: '23%' }}
+            testID="quick-action-hafalan"
+          />
           
-          <TouchableOpacity 
-            style={styles.quickActionButton}
+          <QuickAction
+            title="Jadwal"
+            icon="calendar"
+            variant="secondary"
+            size="medium"
             onPress={navigateToSchedule}
-          >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#f0c75e' }]}>
-              <Ionicons name="calendar" size={24} color="#ffffff" />
-            </View>
-            <Text style={styles.quickActionText}>Jadwal</Text>
-          </TouchableOpacity>
+            style={{ width: '23%' }}
+            testID="quick-action-jadwal"
+          />
           
-          <TouchableOpacity 
-            style={styles.quickActionButton}
+          <QuickAction
+            title="Komunikasi"
+            icon="chatbubbles"
+            variant="primary"
+            size="medium"
             onPress={() => openModal('Komunikasi', <CommunicationModal />)}
-          >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#4caf50' }]}>
-              <Ionicons name="chatbubbles" size={24} color="#ffffff" />
-            </View>
-            <Text style={styles.quickActionText}>Komunikasi</Text>
-          </TouchableOpacity>
+            style={{ width: '23%' }}
+            testID="quick-action-komunikasi"
+          />
           
-          <TouchableOpacity style={styles.quickActionButton}>
-            <View style={[styles.quickActionIcon, { backgroundColor: '#9c27b0' }]}>
-              <Ionicons name="person" size={24} color="#ffffff" />
-            </View>
-            <Text style={styles.quickActionText}>Profil</Text>
-          </TouchableOpacity>
+          <QuickAction
+            title="Profil"
+            icon="person"
+            variant="primary"
+            size="medium"
+            onPress={() => setActiveTab('profile')}
+            style={{ width: '23%' }}
+            testID="quick-action-profil"
+          />
         </View>
       </View>
 
       {/* New Feature Section */}
       <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Fitur Tambahan</Text>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          Fitur Tambahan
+        </Typography>
         <View style={styles.quickActionsContainer}>
-          <TouchableOpacity 
-            style={styles.quickActionButton}
+          <QuickAction
+            title="Info Asrama"
+            icon="home"
+            variant="default"
+            size="medium"
             onPress={navigateToBoardingInfo}
-          >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#3498db' }]}>
-              <Ionicons name="home" size={24} color="#ffffff" />
-            </View>
-            <Text style={styles.quickActionText}>Info Asrama</Text>
-          </TouchableOpacity>
+            style={{ width: '23%' }}
+            testID="quick-action-info-asrama"
+          />
           
-          <TouchableOpacity 
-            style={styles.quickActionButton}
+          <QuickAction
+            title="Lapor Masalah"
+            icon="warning"
+            variant="default"
+            size="medium"
             onPress={navigateToIncidentReport}
-          >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#e74c3c' }]}>
-              <Ionicons name="warning" size={24} color="#ffffff" />
-            </View>
-            <Text style={styles.quickActionText}>Lapor Masalah</Text>
-          </TouchableOpacity>
+            style={{ width: '23%' }}
+            testID="quick-action-lapor-masalah"
+          />
           
-          <TouchableOpacity 
-            style={styles.quickActionButton}
+          <QuickAction
+            title="Anti-Perundungan"
+            icon="shield"
+            variant="default"
+            size="medium"
             onPress={navigateToAntiBullying}
-          >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#9b59b6' }]}>
-              <Ionicons name="shield" size={24} color="#ffffff" />
-            </View>
-            <Text style={styles.quickActionText}>Anti-Perundungan</Text>
-          </TouchableOpacity>
+            style={{ width: '23%' }}
+            testID="quick-action-anti-perundungan"
+          />
           
-          <TouchableOpacity style={styles.quickActionButton}>
-            <View style={[styles.quickActionIcon, { backgroundColor: '#f39c12' }]}>
-              <Ionicons name="document-text" size={24} color="#ffffff" />
-            </View>
-            <Text style={styles.quickActionText}>Izin Keluar</Text>
-          </TouchableOpacity>
+          <QuickAction
+            title="Izin Keluar"
+            icon="document-text"
+            variant="default"
+            size="medium"
+            onPress={() => alert('Fitur izin keluar akan segera hadir!')}
+            style={{ width: '23%' }}
+            testID="quick-action-izin-keluar"
+          />
         </View>
       </View>
       
       {/* Upcoming Schedule */}
       <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Jadwal Mendatang</Text>
-        <View style={styles.scheduleCard}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          Jadwal Mendatang
+        </Typography>
+        <Card variant="default" padding="medium">
           <View style={styles.scheduleHeader}>
             <View style={styles.scheduleDay}>
-              <Text style={styles.scheduleDayText}>Senin</Text>
+              <Typography variant="body2" color="#ffffff" weight="bold">
+                Senin
+              </Typography>
             </View>
             <View style={styles.scheduleInfo}>
-              <Text style={styles.scheduleTime}>08:00 - 10:00</Text>
-              <Text style={styles.scheduleActivity}>Setoran Hafalan</Text>
+              <Typography variant="body1" color="primary" weight="bold" style={{ marginBottom: 5 }}>
+                08:00 - 10:00
+              </Typography>
+              <Typography variant="body2" color="secondary">
+                Setoran Hafalan
+              </Typography>
             </View>
           </View>
-          <Text style={styles.scheduleNote}>
+          <Typography variant="body2" color="tertiary" style={{ fontStyle: 'italic' }}>
             Persiapkan hafalan Al-Baqarah ayat 255-257
-          </Text>
-        </View>
+          </Typography>
+        </Card>
       </View>
     </ScrollView>
   );
@@ -187,20 +284,24 @@ export default function StudentDashboard() {
   const renderMessages = () => (
     <View style={styles.centeredContainer}>
       <MaterialIcons name="message" size={80} color="#cccccc" />
-      <Text style={styles.placeholderText}>Fitur Pesan Segera Hadir</Text>
-      <Text style={styles.placeholderSubtext}>
+      <Typography variant="h4" color="secondary" weight="bold" style={{ marginTop: 16 }}>
+        Fitur Pesan Segera Hadir
+      </Typography>
+      <Typography variant="body2" color="tertiary" align="center" style={{ marginTop: 8, paddingHorizontal: 40 }}>
         Anda akan dapat berkomunikasi dengan guru dan orang tua di sini.
-      </Text>
+      </Typography>
     </View>
   );
 
   const renderSchedule = () => (
     <View style={styles.centeredContainer}>
       <MaterialIcons name="event-note" size={80} color="#cccccc" />
-      <Text style={styles.placeholderText}>Jadwal Lengkap Segera Hadir</Text>
-      <Text style={styles.placeholderSubtext}>
+      <Typography variant="h4" color="secondary" weight="bold" style={{ marginTop: 16 }}>
+        Jadwal Lengkap Segera Hadir
+      </Typography>
+      <Typography variant="body2" color="tertiary" align="center" style={{ marginTop: 8, paddingHorizontal: 40 }}>
         Anda akan dapat melihat jadwal harian, mingguan, dan bulanan di sini.
-      </Text>
+      </Typography>
     </View>
   );
 
@@ -210,8 +311,12 @@ export default function StudentDashboard() {
         <ScrollView style={styles.contentContainer}>
           <View style={styles.profileHeader}>
             <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
-            <Text style={styles.profileName}>Loading...</Text>
-            <Text style={styles.profileRole}>Loading...</Text>
+            <Typography variant="h3" color="primary" weight="bold" style={{ marginTop: 12 }}>
+              Loading...
+            </Typography>
+            <Typography variant="body1" color="secondary" style={{ marginTop: 4 }}>
+              Loading...
+            </Typography>
           </View>
         </ScrollView>
       );
@@ -221,83 +326,86 @@ export default function StudentDashboard() {
       <ScrollView style={styles.contentContainer}>
         <View style={styles.profileHeader}>
           <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
-          <Text style={styles.profileName}>{profile?.full_name || 'Nama Siswa'}</Text>
-          <Text style={styles.profileRole}>
+          <Typography variant="h3" color="primary" weight="bold" style={{ marginTop: 12 }}>
+            {profile?.full_name || 'Nama Siswa'}
+          </Typography>
+          <Typography variant="body1" color="secondary" style={{ marginTop: 4 }}>
             {profile?.role === 'student' ? 'Siswa' : profile?.role || 'Role tidak diketahui'}
-          </Text>
+          </Typography>
         </View>
       
-      <View style={styles.profileSection}>
-        <Text style={styles.sectionTitle}>Pengaturan Akun</Text>
+        <View style={styles.profileSection}>
+          <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+            Pengaturan Akun
+          </Typography>
+          
+          <Card variant="default" padding="none" style={{ marginBottom: 8 }}>
+            <ListItem
+              title="Edit Profil"
+              leftIcon="person"
+              rightIcon="chevron-forward"
+              onPress={() => alert('Fitur edit profil akan segera hadir!')}
+              testID="profile-edit"
+            />
+            <ListItem
+              title="Ubah Password"
+              leftIcon="lock-closed"
+              rightIcon="chevron-forward"
+              onPress={() => alert('Fitur ubah password akan segera hadir!')}
+              showDivider={true}
+              testID="profile-password"
+            />
+            <ListItem
+              title="Pengaturan Notifikasi"
+              leftIcon="notifications"
+              rightIcon="chevron-forward"
+              onPress={() => alert('Fitur pengaturan notifikasi akan segera hadir!')}
+              showDivider={true}
+              testID="profile-notifications"
+            />
+            <ListItem
+              title="Bahasa"
+              leftIcon="language"
+              rightIcon="chevron-forward"
+              onPress={() => alert('Fitur pengaturan bahasa akan segera hadir!')}
+              showDivider={true}
+              testID="profile-language"
+            />
+          </Card>
+        </View>
         
-        <TouchableOpacity 
-          style={styles.profileItem}
-          onPress={() => alert('Fitur edit profil akan segera hadir!')}
-        >
-          <Ionicons name="person" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Edit Profil</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
+        <View style={styles.profileSection}>
+          <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+            Bantuan
+          </Typography>
+          
+          <Card variant="default" padding="none" style={{ marginBottom: 8 }}>
+            <ListItem
+              title="Pusat Bantuan"
+              leftIcon="help-circle"
+              rightIcon="chevron-forward"
+              onPress={() => alert('Fitur pusat bantuan akan segera hadir!')}
+              testID="profile-help"
+            />
+            <ListItem
+              title="Syarat & Ketentuan"
+              leftIcon="document-text"
+              rightIcon="chevron-forward"
+              onPress={() => alert('Fitur syarat & ketentuan akan segera hadir!')}
+              showDivider={true}
+              testID="profile-terms"
+            />
+            <ListItem
+              title="Kebijakan Privasi"
+              leftIcon="shield-checkmark"
+              rightIcon="chevron-forward"
+              onPress={() => alert('Fitur kebijakan privasi akan segera hadir!')}
+              showDivider={true}
+              testID="profile-privacy"
+            />
+          </Card>
+        </View>
         
-        <TouchableOpacity 
-          style={styles.profileItem}
-          onPress={() => alert('Fitur ubah password akan segera hadir!')}
-        >
-          <Ionicons name="lock-closed" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Ubah Password</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.profileItem}
-          onPress={() => alert('Fitur pengaturan notifikasi akan segera hadir!')}
-        >
-          <Ionicons name="notifications" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Pengaturan Notifikasi</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.profileItem}
-          onPress={() => alert('Fitur pengaturan bahasa akan segera hadir!')}
-        >
-          <Ionicons name="language" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Bahasa</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.profileSection}>
-        <Text style={styles.sectionTitle}>Bantuan</Text>
-        
-        <TouchableOpacity 
-          style={styles.profileItem}
-          onPress={() => alert('Fitur pusat bantuan akan segera hadir!')}
-        >
-          <Ionicons name="help-circle" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Pusat Bantuan</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.profileItem}
-          onPress={() => alert('Fitur syarat & ketentuan akan segera hadir!')}
-        >
-          <Ionicons name="document-text" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Syarat & Ketentuan</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.profileItem}
-          onPress={() => alert('Fitur kebijakan privasi akan segera hadir!')}
-        >
-          <Ionicons name="shield-checkmark" size={24} color="#005e7a" />
-          <Text style={styles.profileItemText}>Kebijakan Privasi</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-      </View>
-      
         <View style={styles.profileSection}>
           <LogoutButton variant="button" style={styles.logoutButton} />
         </View>
@@ -305,114 +413,57 @@ export default function StudentDashboard() {
     );
   };
   
+  // Render current tab content
+  const renderCurrentTabContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return renderDashboard();
+      case 'messages':
+        return renderMessages();
+      case 'schedule':
+        return renderSchedule();
+      case 'profile':
+        return renderProfile();
+      default:
+        return renderDashboard();
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <>
       <Stack.Screen options={{ 
         headerShown: false,
         title: "Dashboard Siswa" 
       }} />
-      <StatusBar style="dark" />
       
-      {/* Background Pattern */}
-      <View style={styles.backgroundContainer}>
-        <SvgXml xml={backgroundPatternSvg} width="100%" height="100%" />
-      </View>
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={{ width: 24 }} />
-        <Text style={styles.headerTitle}>Dashboard Siswa</Text>
-        <TouchableOpacity>
-          <Ionicons name="notifications-outline" size={24} color="#ffffff" />
-        </TouchableOpacity>
-      </View>
-      
-      {activeTab === 'dashboard' && renderDashboard()}
-      {activeTab === 'messages' && renderMessages()}
-      {activeTab === 'schedule' && renderSchedule()}
-      {activeTab === 'profile' && renderProfile()}
-
-      {/* Bottom Tab Bar */}
-      <View style={styles.tabBar}>
-        <TouchableOpacity
-          style={[styles.tabItem, activeTab === 'dashboard' && styles.activeTabItem]}
-          onPress={() => setActiveTab('dashboard')}
-        >
-          <Ionicons
-            name={activeTab === 'dashboard' ? 'home' : 'home-outline'}
-            size={24}
-            color={activeTab === 'dashboard' ? '#005e7a' : '#666666'}
-          />
-          <Text style={[styles.tabLabel, activeTab === 'dashboard' && styles.activeTabLabel]}>
-            Beranda
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabItem, activeTab === 'messages' && styles.activeTabItem]}
-          onPress={() => setActiveTab('messages')}
-        >
-          <Ionicons
-            name={activeTab === 'messages' ? 'chatbubble' : 'chatbubble-outline'}
-            size={24}
-            color={activeTab === 'messages' ? '#005e7a' : '#666666'}
-          />
-          <Text style={[styles.tabLabel, activeTab === 'messages' && styles.activeTabLabel]}>
-            Pesan
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabItem, activeTab === 'schedule' && styles.activeTabItem]}
-          onPress={() => setActiveTab('schedule')}
-        >
-          <Ionicons
-            name={activeTab === 'schedule' ? 'calendar' : 'calendar-outline'}
-            size={24}
-            color={activeTab === 'schedule' ? '#005e7a' : '#666666'}
-          />
-          <Text style={[styles.tabLabel, activeTab === 'schedule' && styles.activeTabLabel]}>
-            Jadwal
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabItem, activeTab === 'profile' && styles.activeTabItem]}
-          onPress={() => setActiveTab('profile')}
-        >
-          <Ionicons
-            name={activeTab === 'profile' ? 'person' : 'person-outline'}
-            size={24}
-            color={activeTab === 'profile' ? '#005e7a' : '#666666'}
-          />
-          <Text style={[styles.tabLabel, activeTab === 'profile' && styles.activeTabLabel]}>
-            Profil
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <DashboardTemplate
+        header={headerConfig}
+        tabs={tabsConfig}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        backgroundPattern={true}
+        scrollable={false}
+        contentPadding={false}
+        testID="student-dashboard"
+      >
+        {renderCurrentTabContent()}
+      </DashboardTemplate>
 
       {/* Modal for detailed views */}
       <Modal
-        animationType="slide"
-        transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onClose={() => setModalVisible(false)}
+        title={modalContent.title}
+        size="large"
+        animationType="slide"
+        scrollable={true}
+        closeOnBackdrop={true}
+        showCloseButton={true}
+        testID="student-dashboard-modal"
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{modalContent.title}</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#333333" />
-              </TouchableOpacity>
-            </View>
-            <ScrollView style={styles.modalBody}>
-              {modalContent.content}
-            </ScrollView>
-          </View>
-        </View>
+        {modalContent.content}
       </Modal>
-    </SafeAreaView>
+    </>
   );
 }
 
@@ -539,154 +590,47 @@ const logoSvg = `
 `;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  backgroundContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: -1,
-  },
-  header: {
-    backgroundColor: '#005e7a',
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    flex: 1,
-  },
+  // Core layout styles
   contentContainer: {
     flex: 1,
     padding: 20,
   },
+  
+  // Welcome banner styles (custom styling for Card component)
   welcomeBanner: {
     backgroundColor: '#005e7a',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   welcomeContent: {
     flex: 1,
-  },
-  welcomeText: {
-    fontSize: 14,
-    color: '#ffffff',
-    marginBottom: 5,
-  },
-  userName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginBottom: 5,
-  },
-  welcomeSubtext: {
-    fontSize: 14,
-    color: '#f0c75e',
   },
   logoContainer: {
     justifyContent: 'center',
     alignItems: 'center',
   },
+  
+  // Section layout styles
   sectionContainer: {
     marginBottom: 20,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#005e7a',
-    marginBottom: 15,
-  },
-  progressCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 15,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    marginBottom: 10,
-  },
+  
+  // Progress section styles
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
   },
-  progressTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  progressPercentage: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#005e7a',
-  },
-  progressBar: {
-    height: 10,
-    backgroundColor: '#eeeeee',
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  progressFill: {
-    height: 10,
-    backgroundColor: '#005e7a',
-    borderRadius: 5,
-  },
-  progressDetail: {
-    fontSize: 14,
-    color: '#888888',
-    textAlign: 'center',
-  },
+  
+  // Quick actions layout
   quickActionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  quickActionButton: {
-    alignItems: 'center',
-    width: '23%',
-    marginBottom: 10,
-  },
-  quickActionIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  quickActionText: {
-    fontSize: 12,
-    color: '#333333',
-    textAlign: 'center',
-  },
-  scheduleCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 15,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    marginBottom: 10,
-  },
+  
+  // Schedule section styles
   scheduleHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -701,287 +645,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 15,
   },
-  scheduleDayText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
   scheduleInfo: {
     flex: 1,
   },
-  scheduleTime: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 5,
-  },
-  scheduleActivity: {
-    fontSize: 14,
-    color: '#555555',
-  },
-  scheduleNote: {
-    fontSize: 14,
-    color: '#888888',
-    fontStyle: 'italic',
-  },
-  developmentNote: {
-    flexDirection: 'row',
-    backgroundColor: '#e6f7ff',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 30,
-    alignItems: 'center',
-  },
-  developmentNoteText: {
-    fontSize: 14,
-    color: '#333333',
-    marginLeft: 10,
-    flex: 1,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#f5f5f5',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 20,
-    maxHeight: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eeeeee',
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#005e7a',
-  },
-  modalBody: {
-    padding: 16,
-  },
-  modalSection: {
-    marginBottom: 20,
-  },
-  modalSectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 10,
-  },
-  infoCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: '#555555',
-  },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  mealScheduleCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-  },
-  mealRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-  },
-  mealType: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  mealTime: {
-    fontSize: 14,
-    color: '#555555',
-  },
-  mealMenu: {
-    fontSize: 14,
-    color: '#888888',
-    fontStyle: 'italic',
-  },
-  activityCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  activityTime: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 5,
-  },
-  activityName: {
-    fontSize: 14,
-    color: '#555555',
-  },
-  contactCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-  },
-  contactIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  contactInfo: {
-    flex: 1,
-  },
-  contactName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  contactRole: {
-    fontSize: 12,
-    color: '#888888',
-  },
-  messageCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-  },
-  messageHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-  },
-  messageSender: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  messageTime: {
-    fontSize: 12,
-    color: '#888888',
-  },
-  messageContent: {
-    fontSize: 14,
-    color: '#555555',
-  },
-  incidentDescription: {
-    fontSize: 14,
-    color: '#555555',
-    marginBottom: 15,
-    lineHeight: 20,
-  },
-  incidentTypeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-  },
-  incidentIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  incidentInfo: {
-    flex: 1,
-  },
-  incidentTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  incidentSubtitle: {
-    fontSize: 12,
-    color: '#888888',
-  },
-  emergencyContact: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffebee',
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 10,
-  },
-  emergencyText: {
-    fontSize: 14,
-    color: '#e74c3c',
-    marginLeft: 10,
-    flex: 1,
-  },
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderTopWidth: 1,
-    borderTopColor: '#eeeeee',
-    height: 60,
-  },
-  tabItem: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  activeTabItem: {
-    borderTopWidth: 2,
-    borderTopColor: '#005e7a',
-  },
-  tabLabel: {
-    fontSize: 12,
-    color: '#666666',
-    marginTop: 4,
-  },
-  activeTabLabel: {
-    color: '#005e7a',
-    fontWeight: '600',
-  },
+  
+
+  
+  // Placeholder content styles
   centeredContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
-  placeholderText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#666666',
-    marginTop: 16,
+  
+  // Profile section styles
+  profileHeader: {
+    alignItems: 'center',
+    padding: 20,
   },
-  placeholderSubtext: {
-    fontSize: 14,
-    color: '#999999',
-    textAlign: 'center',
-    marginTop: 8,
-    paddingHorizontal: 40,
+  profileSection: {
+    marginBottom: 24,
   },
   logoutButton: {
     backgroundColor: '#ff4444',
@@ -996,42 +680,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-  },
-  profileHeader: {
-    alignItems: 'center',
-    padding: 20,
-  },
-  profileName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#005e7a',
-    marginTop: 12,
-  },
-  profileRole: {
-    fontSize: 16,
-    color: '#666666',
-    marginTop: 4,
-  },
-  profileSection: {
-    marginBottom: 24,
-  },
-  profileItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  profileItemText: {
-    fontSize: 16,
-    color: '#333333',
-    marginLeft: 12,
-    flex: 1,
   },
 });
