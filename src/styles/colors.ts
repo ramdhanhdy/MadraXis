@@ -126,9 +126,9 @@ export const semanticColors = {
   },
   
   error: {
-    main: baseColors.error[500],
+    main: baseColors.error[600],
     light: baseColors.error[400],
-    dark: baseColors.error[600],
+    dark: baseColors.error[700],
     contrast: baseColors.white,
   },
   
@@ -160,7 +160,7 @@ export const semanticColors = {
     primary: baseColors.neutral[200], // #eeeeee
     secondary: baseColors.neutral[300],
     focus: baseColors.teal[500],
-    error: baseColors.error[500],
+    error: baseColors.error[600],
   },
   
   // Interactive Colors
