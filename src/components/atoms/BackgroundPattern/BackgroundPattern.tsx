@@ -300,7 +300,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
       console.warn('Failed to generate pattern SVG:', error);
       return '';
     }
-  }, [variant, actualColor, actualOpacity]);
+  }, [variant, getPatternColor(), getPatternOpacity()]);
 
   if (variant === 'none' || !patternSvg) {
     return null;

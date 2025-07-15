@@ -33,7 +33,7 @@ const meta: Meta<typeof Icon> = {
       options: [
         'home', 'settings', 'person', 'notifications', 'search', 'add', 'close',
         'checkmark', 'heart', 'star', 'bookmark', 'share', 'download', 'upload',
-        'edit', 'trash', 'camera', 'image', 'mail', 'call', 'location'
+        'pencil', 'trash', 'camera', 'image', 'mail', 'call', 'location'
       ],
       description: 'Ionicon name to display',
     },
@@ -254,7 +254,7 @@ export const NavigationIcons: Story = {
 export const ActionIcons: Story = {
   render: () => (
     <View style={styles.grid}>
-      <Icon name="edit" onPress={() => {}} accessibilityLabel="Edit" />
+      <Icon name="pencil" onPress={() => {}} accessibilityLabel="Edit" />
       <Icon name="trash" onPress={() => {}} color="error" accessibilityLabel="Delete" />
       <Icon name="download" onPress={() => {}} accessibilityLabel="Download" />
       <Icon name="share" onPress={() => {}} accessibilityLabel="Share" />
