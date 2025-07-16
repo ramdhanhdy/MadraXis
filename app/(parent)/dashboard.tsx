@@ -146,7 +146,7 @@ export default function ParentDashboard() {
 
   // Handle navigation
   const handleNavigate = (route: string) => {
-    router.push(route as any);
+    router.push(route as Parameters<typeof router.push>[0]);
   };
 
   // Handle modal opening
@@ -366,10 +366,10 @@ export default function ParentDashboard() {
               <Typography variant="body1" weight="semibold">Hafalan Quran</Typography>
               <Typography variant="body1" weight="bold" color="primary">{studentData.quranProgress}%</Typography>
             </View>
-            <ProgressBar 
-              value={studentData.quranProgress} 
-              variant={getProgressVariant('quran') as any} 
-              size="medium" 
+            <ProgressBar
+              value={studentData.quranProgress}
+              variant={getProgressVariant('quran') as 'default' | 'success' | 'warning' | 'error'}
+              size="medium"
             />
           </View>
           
@@ -378,10 +378,10 @@ export default function ParentDashboard() {
               <Typography variant="body1" weight="semibold">Akademik</Typography>
               <Typography variant="body1" weight="bold" color={colors.success.main}>{studentData.academicProgress}%</Typography>
             </View>
-            <ProgressBar 
-              value={studentData.academicProgress} 
-              variant={getProgressVariant('academic') as any} 
-              size="medium" 
+            <ProgressBar
+              value={studentData.academicProgress}
+              variant={getProgressVariant('academic') as 'default' | 'success' | 'warning' | 'error'}
+              size="medium"
             />
           </View>
           
@@ -390,10 +390,10 @@ export default function ParentDashboard() {
               <Typography variant="body1" weight="semibold">Kehadiran</Typography>
               <Typography variant="body1" weight="bold" color={colors.warning.main}>{studentData.attendanceRate}%</Typography>
             </View>
-            <ProgressBar 
-              value={studentData.attendanceRate} 
-              variant={getProgressVariant('attendance') as any} 
-              size="medium" 
+            <ProgressBar
+              value={studentData.attendanceRate}
+              variant={getProgressVariant('attendance') as 'default' | 'success' | 'warning' | 'error'}
+              size="medium"
             />
           </View>
         </Card>
