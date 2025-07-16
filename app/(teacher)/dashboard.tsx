@@ -20,6 +20,7 @@ import { SkeletonCard } from '../../src/components/molecules/SkeletonCard/Skelet
 import { useAuth } from '../../src/context/AuthContext';
 import { supabase } from '../../src/utils/supabase';
 import { logoSvg } from '../../src/utils/svgPatterns';
+import { colors } from '../../src/styles/colors';
 
 // Modal Components
 import ProfileView from '../components/teacher/ProfileView';
@@ -419,7 +420,7 @@ export default function TeacherDashboard() {
                   width: 40,
                   height: 40,
                   borderRadius: 20,
-                  backgroundColor: '#f0c75e',
+                  backgroundColor: colors.secondary.main,
                   justifyContent: 'center',
                   alignItems: 'center',
                   marginRight: 15,
