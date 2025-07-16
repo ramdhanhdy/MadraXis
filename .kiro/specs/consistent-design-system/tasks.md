@@ -281,13 +281,13 @@
   - Ensure all authentication components use consistent styling
   - _Requirements: 2.1, 2.2, 5.1, 5.2_
 
-- [ ] 11.1 Update authentication components
+- [x] 11.1 Update authentication components
   - Refactor LogoutButton to use design system Button component
   - Update AuthForm components to use new Input and Button components
   - Ensure consistent styling across all authentication flows
   - _Requirements: 5.1, 5.2_
 
-- [ ] 11.2 Update utility components
+- [x] 11.2 Update utility components
   - Refactor AnimatedSplashScreen to use design tokens
   - Update BackgroundPattern to integrate with theme system
   - Ensure all utility components follow design system patterns
