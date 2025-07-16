@@ -1,17 +1,70 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useEffect } from 'react';
+import { View, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
-import { Stack, useRouter } from 'expo-router';
-import LogoutButton from '../components/auth/LogoutButton';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { SvgXml } from 'react-native-svg';
+
+// Design System Components
+import { DashboardTemplate } from '../../src/components/templates/DashboardTemplate';
+import { Card } from '../../src/components/molecules/Card';
+import { QuickAction } from '../../src/components/molecules/QuickAction';
+import { ListItem } from '../../src/components/molecules/ListItem';
+import { Typography } from '../../src/components/atoms/Typography';
+import { ProgressBar } from '../../src/components/molecules/ProgressBar';
+import { LoadingSpinner } from '../../src/components/atoms/LoadingSpinner/LoadingSpinner';
+import { ErrorMessage } from '../../src/components/molecules/ErrorMessage/ErrorMessage';
+import { EmptyState } from '../../src/components/molecules/EmptyState/EmptyState';
+
+// Context and Services
+import { useAuth } from '../../src/context/AuthContext';
+import { supabase } from '../../src/utils/supabase';
+import { logoSvg } from '../../src/utils/svgPatterns';
+import { colors } from '../../src/styles/colors';
+
+// Icon types for proper typing
+type IoniconsIcon = keyof typeof Ionicons.glyphMap;
+
+interface ActivityItem {
+  id: number;
+  type: 'academic' | 'quran' | 'dorm';
+  title: string;
+  score?: string;
+  progress?: string;
+  status?: string;
+  date: string;
+}
+
+interface EventItem {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+}
+
+interface StudentData {
+  name: string;
+  grade: string;
+  class: string;
+  dorm: string;
+  room: string;
+  quranProgress: number;
+  academicProgress: number;
+  attendanceRate: number;
+  recentActivities: ActivityItem[];
+  upcomingEvents: EventItem[];
+}
 
 export default function ParentDashboard() {
   const router = useRouter();
+  const { profile, loading } = useAuth();
+  const [schoolName, setSchoolName] = useState('Zaid Bin Tsabit');
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data for student
-  const studentData = {
+  // Mock data for demonstration
+  const [studentData] = useState<StudentData>({
     name: 'Ahmad Farhan',
     grade: '8',
     class: 'VIII-A',
@@ -21,585 +74,561 @@ export default function ParentDashboard() {
     academicProgress: 85,
     attendanceRate: 98,
     recentActivities: [
-      { id: 1, type: 'academic', title: 'Ujian Matematika', score: '85/100', date: '2 jam yang lalu' },
-      { id: 2, type: 'quran', title: 'Surah Al-Baqarah', progress: '75-82', date: '5 jam yang lalu' },
-      { id: 3, type: 'dorm', title: 'Sholat Maghrib', status: 'Hadir', date: 'Kemarin' },
-      { id: 4, type: 'academic', title: 'Proyek Sains', status: 'Diserahkan', date: 'Kemarin' },
+      {
+        id: 1,
+        type: 'academic',
+        title: 'Ujian Matematika',
+        score: '85/100',
+        date: '2 jam yang lalu',
+      },
+      {
+        id: 2,
+        type: 'quran',
+        title: 'Surah Al-Baqarah',
+        progress: '75-82',
+        date: '5 jam yang lalu',
+      },
+      {
+        id: 3,
+        type: 'dorm',
+        title: 'Sholat Maghrib',
+        status: 'Hadir',
+        date: 'Kemarin',
+      },
+      {
+        id: 4,
+        type: 'academic',
+        title: 'Proyek Sains',
+        status: 'Diserahkan',
+        date: 'Kemarin',
+      },
     ],
     upcomingEvents: [
-      { id: 1, title: 'Pertemuan Orang Tua-Guru', date: '15 Maret, 2025', time: '10:00' },
-      { id: 2, title: 'Lomba Tilawah Al-Quran', date: '20 Maret, 2025', time: '14:00' },
+      {
+        id: 1,
+        title: 'Pertemuan Orang Tua-Guru',
+        date: '15 Maret, 2025',
+        time: '10:00',
+      },
+      {
+        id: 2,
+        title: 'Lomba Tilawah Al-Quran',
+        date: '20 Maret, 2025',
+        time: '14:00',
+      },
     ],
+  });
+
+  // Fetch school name from database
+  useEffect(() => {
+    const fetchSchoolName = async () => {
+      if (profile?.school_id) {
+        try {
+          const { data, error } = await supabase
+            .from('schools')
+            .select('name')
+            .eq('id', profile.school_id)
+            .single();
+          
+          if (data && !error) {
+            setSchoolName(data.name);
+          }
+        } catch (error) {
+          console.error('Error fetching school name:', error);
+          setError('Gagal memuat data sekolah');
+        }
+      }
+      setIsLoading(false);
+    };
+
+    fetchSchoolName();
+  }, [profile?.school_id]);
+
+  // Handle navigation
+  const handleNavigate = (route: string) => {
+    router.push(route as any);
   };
 
+  // Handle modal opening
+  const handleOpenModal = (modalType: string) => {
+    console.log('Opening modal:', modalType);
+  };
+
+  // Tab configuration
+  const tabs = [
+    {
+      id: 'dashboard',
+      label: 'Beranda',
+      icon: 'home-outline' as IoniconsIcon,
+    },
+    {
+      id: 'messages',
+      label: 'Pesan',
+      icon: 'chatbubble-outline' as IoniconsIcon,
+    },
+    {
+      id: 'leave',
+      label: 'Izin',
+      icon: 'calendar-outline' as IoniconsIcon,
+    },
+    {
+      id: 'settings',
+      label: 'Pengaturan',
+      icon: 'settings-outline' as IoniconsIcon,
+    },
+  ];
+
+  // Header actions
+  const headerActions = [
+    {
+      icon: 'notifications-outline' as IoniconsIcon,
+      onPress: () => console.log('Notifications pressed'),
+      badge: 3,
+      accessibilityLabel: 'Notifikasi',
+    },
+    {
+      icon: 'person-outline' as IoniconsIcon,
+      onPress: () => handleNavigate('/'),
+      accessibilityLabel: 'Profil',
+    },
+  ];
+
+  // Quick actions configuration
+  const quickActions = [
+    {
+      title: 'CCTV',
+      icon: 'videocam-outline' as IoniconsIcon,
+      onPress: () => handleNavigate('/parent/cctv-request'),
+      variant: 'primary' as const,
+    },
+    {
+      title: 'Laporan Insiden',
+      icon: 'warning-outline' as IoniconsIcon,
+      onPress: () => handleNavigate('/parent/incident-report'),
+      variant: 'secondary' as const,
+    },
+    {
+      title: 'Anti-Bullying',
+      icon: 'shield-outline' as IoniconsIcon,
+      onPress: () => handleNavigate('/parent/anti-bullying'),
+      variant: 'primary' as const,
+    },
+    {
+      title: 'Pesan Guru',
+      icon: 'chatbubbles-outline' as IoniconsIcon,
+      onPress: () => handleOpenModal('teacher-messages'),
+      variant: 'primary' as const,
+    },
+    {
+      title: 'Izin Anak',
+      icon: 'calendar-outline' as IoniconsIcon,
+      onPress: () => handleNavigate('/parent/leave-request'),
+      variant: 'primary' as const,
+    },
+    {
+      title: 'Nilai Anak',
+      icon: 'book-outline' as IoniconsIcon,
+      onPress: () => handleNavigate('/parent/grades'),
+      variant: 'primary' as const,
+    },
+  ];
+
+  // Helper functions with design tokens
+  const getActivityIcon = (type: string): IoniconsIcon => {
+    switch (type) {
+      case 'academic':
+        return 'school-outline';
+      case 'quran':
+        return 'book-outline';
+      case 'dorm':
+        return 'home-outline';
+      default:
+        return 'information-circle-outline';
+    }
+  };
+
+  const getActivityColor = (type: string) => {
+    switch (type) {
+      case 'academic': return colors.success.main;
+      case 'quran': return colors.primary.main;
+      case 'dorm': return colors.warning.main;
+      default: return colors.neutral[500];
+    }
+  };
+
+  const getProgressVariant = (type: string) => {
+    switch (type) {
+      case 'quran': return 'default';
+      case 'academic': return 'success';
+      case 'attendance': return 'warning';
+      default: return 'default';
+    }
+  };
+
+  if (loading || isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <StatusBar style="dark" />
+        <LoadingSpinner size="large" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <ErrorMessage 
+          message={error}
+          onRetry={() => {
+            setError(null);
+            setIsLoading(true);
+            // Re-fetch logic would go here
+          }}
+        />
+      </View>
+    );
+  }
+
   const renderDashboard = () => (
-    <ScrollView style={styles.contentContainer}>
-      <View style={styles.welcomeContainer}>
-        <Text style={styles.welcomeText}>Selamat Datang, Orang Tua dari</Text>
-        <Text style={styles.studentName}>{studentData.name}</Text>
-        <View style={styles.studentInfoContainer}>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Kelas</Text>
-            <Text style={styles.infoValue}>{studentData.grade}</Text>
+    <ScrollView showsVerticalScrollIndicator={false}>
+      {/* Welcome Section */}
+      <Card variant="elevated" style={{ marginBottom: 20 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flex: 1 }}>
+            <Typography variant="h4" color="textSecondary" style={{ marginBottom: 4 }}>
+              Selamat Datang, Orang Tua dari
+            </Typography>
+            <Typography variant="h3" weight="bold" color="primary" style={{ marginBottom: 8 }}>
+              {studentData.name}
+            </Typography>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 12 }}>
+              <View style={{ width: '50%', marginBottom: 8 }}>
+                <Typography variant="caption" color="textSecondary">Kelas</Typography>
+                <Typography variant="body1" weight="semibold">{studentData.grade}</Typography>
+              </View>
+              <View style={{ width: '50%', marginBottom: 8 }}>
+                <Typography variant="caption" color="textSecondary">Ruang</Typography>
+                <Typography variant="body1" weight="semibold">{studentData.class}</Typography>
+              </View>
+              <View style={{ width: '50%', marginBottom: 8 }}>
+                <Typography variant="caption" color="textSecondary">Asrama</Typography>
+                <Typography variant="body1" weight="semibold">{studentData.dorm}</Typography>
+              </View>
+              <View style={{ width: '50%', marginBottom: 8 }}>
+                <Typography variant="caption" color="textSecondary">Kamar</Typography>
+                <Typography variant="body1" weight="semibold">{studentData.room}</Typography>
+              </View>
+            </View>
           </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Ruang</Text>
-            <Text style={styles.infoValue}>{studentData.class}</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Asrama</Text>
-            <Text style={styles.infoValue}>{studentData.dorm}</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Kamar</Text>
-            <Text style={styles.infoValue}>{studentData.room}</Text>
-          </View>
+          <SvgXml xml={logoSvg} width={60} height={60} />
+        </View>
+      </Card>
+
+      {/* Quick Actions */}
+      <View style={{ marginBottom: 20 }}>
+        <Typography variant="h4" style={{ marginBottom: 15 }}>
+          Aksi Cepat
+        </Typography>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          {quickActions.slice(0, 3).map((action, index) => (
+            <QuickAction
+              key={index}
+              title={action.title}
+              icon={action.icon}
+              onPress={action.onPress}
+              style={{ width: '48%', marginBottom: 12 }}
+              variant={action.variant}
+            />
+          ))}
+        </View>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          {quickActions.slice(3).map((action, index) => (
+            <QuickAction
+              key={index + 3}
+              title={action.title}
+              icon={action.icon}
+              onPress={action.onPress}
+              style={{ width: '48%', marginBottom: 12 }}
+              variant={action.variant}
+            />
+          ))}
         </View>
       </View>
 
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Ringkasan Perkembangan</Text>
-        <View style={styles.progressContainer}>
-          <View style={styles.progressItem}>
-            <View style={styles.progressCircle}>
-              <Text style={styles.progressValue}>{studentData.quranProgress}%</Text>
+      {/* Progress Overview */}
+      <View style={{ marginBottom: 20 }}>
+        <Typography variant="h4" style={{ marginBottom: 15 }}>
+          Ringkasan Perkembangan
+        </Typography>
+        <Card variant="default">
+          <View style={{ marginBottom: 16 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <Typography variant="body1" weight="semibold">Hafalan Quran</Typography>
+              <Typography variant="body1" weight="bold" color="primary">{studentData.quranProgress}%</Typography>
             </View>
-            <Text style={styles.progressLabel}>Hafalan Quran</Text>
+            <ProgressBar 
+              value={studentData.quranProgress} 
+              variant={getProgressVariant('quran') as any} 
+              size="medium" 
+            />
           </View>
-          <View style={styles.progressItem}>
-            <View style={styles.progressCircle}>
-              <Text style={styles.progressValue}>{studentData.academicProgress}%</Text>
+          
+          <View style={{ marginBottom: 16 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <Typography variant="body1" weight="semibold">Akademik</Typography>
+              <Typography variant="body1" weight="bold" color={colors.success.main}>{studentData.academicProgress}%</Typography>
             </View>
-            <Text style={styles.progressLabel}>Akademik</Text>
+            <ProgressBar 
+              value={studentData.academicProgress} 
+              variant={getProgressVariant('academic') as any} 
+              size="medium" 
+            />
           </View>
-          <View style={styles.progressItem}>
-            <View style={styles.progressCircle}>
-              <Text style={styles.progressValue}>{studentData.attendanceRate}%</Text>
+          
+          <View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <Typography variant="body1" weight="semibold">Kehadiran</Typography>
+              <Typography variant="body1" weight="bold" color={colors.warning.main}>{studentData.attendanceRate}%</Typography>
             </View>
-            <Text style={styles.progressLabel}>Kehadiran</Text>
+            <ProgressBar 
+              value={studentData.attendanceRate} 
+              variant={getProgressVariant('attendance') as any} 
+              size="medium" 
+            />
           </View>
-        </View>
+        </Card>
       </View>
 
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Aktivitas Terbaru</Text>
-        {studentData.recentActivities.map((activity) => (
-          <View key={activity.id} style={styles.activityItem}>
-            <View style={[styles.activityIcon, { backgroundColor: getActivityColor(activity.type) }]}>
-              {getActivityIcon(activity.type)}
-            </View>
-            <View style={styles.activityContent}>
-              <Text style={styles.activityTitle}>{activity.title}</Text>
-              <Text style={styles.activityDetail}>
-                {activity.score || activity.progress || activity.status}
-              </Text>
-              <Text style={styles.activityTime}>{activity.date}</Text>
-            </View>
-          </View>
-        ))}
+      {/* Recent Activities */}
+      <View style={{ marginBottom: 20 }}>
+        <Typography variant="h4" style={{ marginBottom: 15 }}>
+          Aktivitas Terbaru
+        </Typography>
+        <Card variant="default">
+          {studentData.recentActivities.length === 0 ? (
+            <EmptyState
+              title="Belum ada aktivitas"
+              message="Aktivitas terbaru anak Anda akan muncul di sini"
+              icon="time-outline"
+            />
+          ) : (
+            studentData.recentActivities.map((activity, index) => (
+              <View key={activity.id}>
+                <ListItem
+                  title={activity.title}
+                  subtitle={activity.score || activity.progress || activity.status}
+                  leftIcon={getActivityIcon(activity.type)}
+                  rightIcon="chevron-forward"
+                  onPress={() => console.log('Activity pressed:', activity.title)}
+                />
+                {index < studentData.recentActivities.length - 1 && (
+                  <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
+                )}
+              </View>
+            ))
+          )}
+        </Card>
       </View>
 
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Acara Mendatang</Text>
-        {studentData.upcomingEvents.map((event) => (
-          <View key={event.id} style={styles.eventItem}>
-            <View style={styles.eventDateContainer}>
-              <Text style={styles.eventDate}>{event.date.split(',')[0]}</Text>
-              <Text style={styles.eventMonth}>{event.date.split(',')[1]}</Text>
-            </View>
-            <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>{event.title}</Text>
-              <Text style={styles.eventTime}>{event.time}</Text>
-            </View>
-          </View>
-        ))}
+      {/* Upcoming Events */}
+      <View style={{ marginBottom: 20 }}>
+        <Typography variant="h4" style={{ marginBottom: 15 }}>
+          Acara Mendatang
+        </Typography>
+        <Card variant="default">
+          {studentData.upcomingEvents.length === 0 ? (
+            <EmptyState
+              title="Belum ada acara"
+              message="Acara mendatang akan muncul di sini"
+              icon="calendar-outline"
+            />
+          ) : (
+            studentData.upcomingEvents.map((event, index) => (
+              <View key={event.id}>
+                <ListItem
+                  title={event.title}
+                  subtitle={event.time}
+                  leftComponent={
+                    <View style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 8,
+                      backgroundColor: colors.primary.main,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                      <Typography variant="body2" color="white" weight="bold">
+                        {event.date.split(',')[0].split(' ')[1]}
+                      </Typography>
+                      <Typography variant="caption" color="white">
+                        {event.date.split(',')[0].split(' ')[0].substring(0, 3)}
+                      </Typography>
+                    </View>
+                  }
+                  rightIcon="chevron-forward"
+                  onPress={() => console.log('Event pressed:', event.title)}
+                />
+                {index < studentData.upcomingEvents.length - 1 && (
+                  <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
+                )}
+              </View>
+            ))
+          )}
+        </Card>
       </View>
 
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Keamanan & Pemantauan</Text>
-        <TouchableOpacity 
-          style={styles.safetyButton} 
-          onPress={() => router.push('/parent/cctv-request')}
-        >
-          <MaterialIcons name="video-library" size={24} color="#ffffff" />
-          <Text style={styles.safetyButtonText}>Permintaan Akses CCTV</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.safetyButton} 
-          onPress={() => router.push('/parent/incident-report')}
-        >
-          <MaterialIcons name="report-problem" size={24} color="#ffffff" />
-          <Text style={styles.safetyButtonText}>Laporkan Insiden</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.safetyButton} 
-          onPress={() => router.push('/parent/anti-bullying')}
-        >
-          <FontAwesome5 name="book-reader" size={24} color="#ffffff" />
-          <Text style={styles.safetyButtonText}>Sumber Anti-Perundungan</Text>
-        </TouchableOpacity>
+      {/* Safety & Monitoring */}
+      <View style={{ marginBottom: 20 }}>
+        <Typography variant="h4" style={{ marginBottom: 15 }}>
+          Keamanan & Pemantauan
+        </Typography>
+        <Card variant="default">
+          <ListItem
+            title="Permintaan Akses CCTV"
+            subtitle="Minta akses untuk memantau kegiatan anak Anda"
+            leftIcon="videocam-outline"
+            rightIcon="chevron-forward"
+            onPress={() => handleNavigate('/parent/cctv-request')}
+          />
+          <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
+          <ListItem
+            title="Laporkan Insiden"
+            subtitle="Laporkan insiden atau kejadian yang perlu perhatian"
+            leftIcon="warning-outline"
+            rightIcon="chevron-forward"
+            onPress={() => handleNavigate('/parent/incident-report')}
+          />
+          <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
+          <ListItem
+            title="Sumber Anti-Perundungan"
+            subtitle="Akses informasi dan sumber daya anti-perundungan"
+            leftIcon="shield-outline"
+            rightIcon="chevron-forward"
+            onPress={() => handleNavigate('/parent/anti-bullying')}
+          />
+        </Card>
       </View>
     </ScrollView>
   );
 
   const renderMessages = () => (
-    <View style={styles.centeredContainer}>
-      <MaterialIcons name="message" size={80} color="#cccccc" />
-      <Text style={styles.placeholderText}>Fitur Pesan Segera Hadir</Text>
-      <Text style={styles.placeholderSubtext}>
-        Anda akan dapat berkomunikasi dengan guru dan staf di sini.
-      </Text>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+      <EmptyState
+        title="Fitur Pesan Segera Hadir"
+        message="Anda akan dapat berkomunikasi dengan guru dan staf di sini"
+        icon="chatbubble-outline"
+      />
     </View>
   );
 
   const renderLeaveRequests = () => (
-    <View style={styles.centeredContainer}>
-      <MaterialIcons name="event-busy" size={80} color="#cccccc" />
-      <Text style={styles.placeholderText}>Permintaan Izin Segera Hadir</Text>
-      <Text style={styles.placeholderSubtext}>
-        Anda akan dapat mengajukan dan melacak izin ketidakhadiran anak Anda di sini.
-      </Text>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+      <EmptyState
+        title="Permintaan Izin Segera Hadir"
+        message="Anda akan dapat mengajukan dan melacak izin ketidakhadiran anak Anda di sini"
+        icon="calendar-outline"
+      />
     </View>
   );
 
   const renderSettings = () => (
-    <ScrollView style={styles.contentContainer}>
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Pengaturan Akun</Text>
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <Card variant="default" style={{ marginBottom: 16 }}>
+        <Typography variant="h4" style={{ marginBottom: 16 }}>
+          Pengaturan Akun
+        </Typography>
         
-        <TouchableOpacity 
-          style={styles.settingItem}
+        <ListItem
+          title="Edit Profil"
+          leftIcon="person-outline"
+          rightIcon="chevron-forward"
           onPress={() => alert('Fitur edit profil akan segera hadir!')}
-        >
-          <Ionicons name="person" size={24} color="#005e7a" />
-          <Text style={styles.settingItemText}>Edit Profil</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
+        />
+        <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
         
-        <TouchableOpacity 
-          style={styles.settingItem}
+        <ListItem
+          title="Pengaturan Notifikasi"
+          leftIcon="notifications-outline"
+          rightIcon="chevron-forward"
           onPress={() => alert('Fitur pengaturan notifikasi akan segera hadir!')}
-        >
-          <Ionicons name="notifications" size={24} color="#005e7a" />
-          <Text style={styles.settingItemText}>Pengaturan Notifikasi</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
+        />
+        <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
         
-        <TouchableOpacity 
-          style={styles.settingItem}
+        <ListItem
+          title="Bahasa"
+          leftIcon="language-outline"
+          rightIcon="chevron-forward"
           onPress={() => alert('Fitur pengaturan bahasa akan segera hadir!')}
-        >
-          <Ionicons name="language" size={24} color="#005e7a" />
-          <Text style={styles.settingItemText}>Bahasa</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-      </View>
+        />
+      </Card>
       
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Bantuan</Text>
+      <Card variant="default" style={{ marginBottom: 16 }}>
+        <Typography variant="h4" style={{ marginBottom: 16 }}>
+          Bantuan
+        </Typography>
         
-        <TouchableOpacity 
-          style={styles.settingItem}
+        <ListItem
+          title="Pusat Bantuan"
+          leftIcon="help-circle-outline"
+          rightIcon="chevron-forward"
           onPress={() => alert('Fitur pusat bantuan akan segera hadir!')}
-        >
-          <Ionicons name="help-circle" size={24} color="#005e7a" />
-          <Text style={styles.settingItemText}>Pusat Bantuan</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
+        />
+        <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
         
-        <TouchableOpacity 
-          style={styles.settingItem}
+        <ListItem
+          title="Syarat & Ketentuan"
+          leftIcon="document-text-outline"
+          rightIcon="chevron-forward"
           onPress={() => alert('Fitur syarat & ketentuan akan segera hadir!')}
-        >
-          <Ionicons name="document-text" size={24} color="#005e7a" />
-          <Text style={styles.settingItemText}>Syarat & Ketentuan</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
+        />
+        <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
         
-        <TouchableOpacity 
-          style={styles.settingItem}
+        <ListItem
+          title="Kebijakan Privasi"
+          leftIcon="shield-checkmark-outline"
+          rightIcon="chevron-forward"
           onPress={() => alert('Fitur kebijakan privasi akan segera hadir!')}
-        >
-          <Ionicons name="shield-checkmark" size={24} color="#005e7a" />
-          <Text style={styles.settingItemText}>Kebijakan Privasi</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666666" />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.sectionContainer}>
-        <LogoutButton variant="button" style={styles.logoutButton} />
-      </View>
+        />
+      </Card>
     </ScrollView>
   );
 
-  // Helper functions
-  const getActivityColor = (type: string) => {
-    switch (type) {
-      case 'academic': return '#4CAF50';
-      case 'quran': return '#2196F3';
-      case 'dorm': return '#FF9800';
-      default: return '#9E9E9E';
-    }
-  };
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'academic':
-        return <Ionicons name="school" size={20} color="#ffffff" />;
-      case 'quran':
-        return <FontAwesome5 name="book-open" size={20} color="#ffffff" />;
-      case 'dorm':
-        return <MaterialIcons name="home" size={20} color="#ffffff" />;
+  // Content mapping based on active tab
+  const getContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return renderDashboard();
+      case 'messages':
+        return renderMessages();
+      case 'leave':
+        return renderLeaveRequests();
+      case 'settings':
+        return renderSettings();
       default:
-        return <Ionicons name="information-circle" size={20} color="#ffffff" />;
+        return renderDashboard();
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ 
-        headerShown: false,
-        title: "Dashboard Orang Tua" 
-      }} />
-      <StatusBar style="light" />
-      <View style={styles.header}>
-        <View style={{ width: 24 }} />
-        <Text style={styles.headerTitle}>Dashboard Orang Tua</Text>
-        <TouchableOpacity onPress={() => alert('Notifikasi')}>
-          <Ionicons name="notifications-outline" size={24} color="#ffffff" />
-        </TouchableOpacity>
-      </View>
-
-      {activeTab === 'dashboard' && renderDashboard()}
-      {activeTab === 'messages' && renderMessages()}
-      {activeTab === 'leave' && renderLeaveRequests()}
-      {activeTab === 'settings' && renderSettings()}
-
-      <View style={styles.tabBar}>
-        <TouchableOpacity
-          style={[styles.tabItem, activeTab === 'dashboard' && styles.activeTabItem]}
-          onPress={() => setActiveTab('dashboard')}
-        >
-          <Ionicons
-            name={activeTab === 'dashboard' ? 'home' : 'home-outline'}
-            size={24}
-            color={activeTab === 'dashboard' ? '#005e7a' : '#666666'}
-          />
-          <Text style={[styles.tabLabel, activeTab === 'dashboard' && styles.activeTabLabel]}>
-            Beranda
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabItem, activeTab === 'messages' && styles.activeTabItem]}
-          onPress={() => setActiveTab('messages')}
-        >
-          <Ionicons
-            name={activeTab === 'messages' ? 'chatbubble' : 'chatbubble-outline'}
-            size={24}
-            color={activeTab === 'messages' ? '#005e7a' : '#666666'}
-          />
-          <Text style={[styles.tabLabel, activeTab === 'messages' && styles.activeTabLabel]}>
-            Pesan
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabItem, activeTab === 'leave' && styles.activeTabItem]}
-          onPress={() => setActiveTab('leave')}
-        >
-          <MaterialIcons
-            name="event-note"
-            size={24}
-            color={activeTab === 'leave' ? '#005e7a' : '#666666'}
-          />
-          <Text style={[styles.tabLabel, activeTab === 'leave' && styles.activeTabLabel]}>
-            Izin
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabItem, activeTab === 'settings' && styles.activeTabItem]}
-          onPress={() => setActiveTab('settings')}
-        >
-          <Ionicons
-            name={activeTab === 'settings' ? 'settings' : 'settings-outline'}
-            size={24}
-            color={activeTab === 'settings' ? '#005e7a' : '#666666'}
-          />
-          <Text style={[styles.tabLabel, activeTab === 'settings' && styles.activeTabLabel]}>
-            Pengaturan
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    <DashboardTemplate
+      header={{
+        title: 'Dashboard Orang Tua',
+        subtitle: schoolName,
+        leftAction: {
+          icon: 'arrow-back-outline' as IoniconsIcon,
+          onPress: () => router.replace('/login'),
+          accessibilityLabel: 'Kembali ke login',
+        },
+        rightActions: headerActions,
+      }}
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      backgroundPattern={true}
+      contentPadding={true}
+      testID="parent-dashboard"
+    >
+      {getContent()}
+    </DashboardTemplate>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#005e7a',
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    flex: 1,
-  },
-  contentContainer: {
-    flex: 1,
-    padding: 16,
-  },
-  welcomeContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  welcomeText: {
-    fontSize: 16,
-    color: '#666666',
-  },
-  studentName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#005e7a',
-    marginBottom: 12,
-  },
-  studentInfoContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 8,
-  },
-  infoItem: {
-    width: '50%',
-    marginBottom: 12,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: '#666666',
-  },
-  infoValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333333',
-  },
-  sectionContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#005e7a',
-    marginBottom: 16,
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  progressItem: {
-    alignItems: 'center',
-    width: '30%',
-  },
-  progressCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#e6f7ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-    borderWidth: 3,
-    borderColor: '#005e7a',
-  },
-  progressValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#005e7a',
-  },
-  progressLabel: {
-    fontSize: 12,
-    textAlign: 'center',
-    color: '#666666',
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eeeeee',
-  },
-  activityIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333333',
-  },
-  activityDetail: {
-    fontSize: 14,
-    color: '#666666',
-    marginTop: 2,
-  },
-  activityTime: {
-    fontSize: 12,
-    color: '#999999',
-    marginTop: 2,
-  },
-  eventItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eeeeee',
-  },
-  eventDateContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    backgroundColor: '#005e7a',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  eventDate: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  eventMonth: {
-    fontSize: 12,
-    color: '#ffffff',
-  },
-  eventContent: {
-    flex: 1,
-  },
-  eventTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333333',
-  },
-  eventTime: {
-    fontSize: 14,
-    color: '#666666',
-    marginTop: 2,
-  },
-  safetyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#005e7a',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-  },
-  safetyButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-    marginLeft: 12,
-  },
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderTopWidth: 1,
-    borderTopColor: '#eeeeee',
-    height: 60,
-  },
-  tabItem: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  activeTabItem: {
-    borderTopWidth: 2,
-    borderTopColor: '#005e7a',
-  },
-  tabLabel: {
-    fontSize: 12,
-    color: '#666666',
-    marginTop: 4,
-  },
-  activeTabLabel: {
-    color: '#005e7a',
-    fontWeight: '600',
-  },
-  centeredContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  placeholderText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#666666',
-    marginTop: 16,
-  },
-  placeholderSubtext: {
-    fontSize: 14,
-    color: '#999999',
-    textAlign: 'center',
-    marginTop: 8,
-    paddingHorizontal: 40,
-  },
-  settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  settingItemText: {
-    fontSize: 16,
-    color: '#333333',
-    marginLeft: 12,
-    flex: 1,
-  },
-  logoutButton: {
-    backgroundColor: '#ff4444',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-}); 
