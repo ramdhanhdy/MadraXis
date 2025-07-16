@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -19,6 +19,8 @@ import { ListItem } from '../../src/components/molecules/ListItem';
 import { Button } from '../../src/components/atoms/Button';
 import { Typography } from '../../src/components/atoms/Typography';
 import { Modal } from '../../src/components/organisms/Modal';
+import { colors } from '../../src/styles/colors';
+import { spacing } from '../../src/styles/spacing';
 
 export default function StudentDashboard() {
   const router = useRouter();
@@ -114,13 +116,13 @@ export default function StudentDashboard() {
         style={styles.welcomeBanner}
       >
         <View style={styles.welcomeContent}>
-          <Typography variant="body2" color="#ffffff">
+          <Typography variant="body2" color={colors.text.inverse}>
             Assalamu'alaikum,
           </Typography>
-          <Typography variant="h3" color="#ffffff" weight="bold" style={{ marginVertical: 5 }}>
+          <Typography variant="h3" color={colors.text.inverse} weight="bold" style={{ marginVertical: spacing.xs }}>
             {profile?.full_name || 'Ahmad Fauzi'}
           </Typography>
-          <Typography variant="body2" color="#f0c75e">
+          <Typography variant="body2" color={colors.secondary.light}>
             Semangat menghafal Al-Quran hari ini!
           </Typography>
         </View>
@@ -131,7 +133,7 @@ export default function StudentDashboard() {
       
       {/* Progress Section */}
       <View style={styles.sectionContainer}>
-        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: spacing.md }}>
           Progress Hafalan
         </Typography>
         <Card variant="default" padding="medium">
@@ -139,7 +141,7 @@ export default function StudentDashboard() {
             <Typography variant="body1" weight="bold" color="primary">
               Al-Baqarah
             </Typography>
-            <Typography variant="body1" weight="bold" color="#005e7a">
+            <Typography variant="body1" weight="bold" color={colors.primary.main}>
               60%
             </Typography>
           </View>
@@ -148,7 +150,7 @@ export default function StudentDashboard() {
             variant="default"
             size="medium"
             animated={true}
-            style={{ marginVertical: 10 }}
+            style={{ marginVertical: spacing.md }}
           />
           <Typography variant="body2" color="secondary" align="center">
             120 dari 200 ayat
@@ -158,7 +160,7 @@ export default function StudentDashboard() {
       
       {/* Quick Actions */}
       <View style={styles.sectionContainer}>
-        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: spacing.md }}>
           Aksi Cepat
         </Typography>
         <View style={styles.quickActionsContainer}>
@@ -206,7 +208,7 @@ export default function StudentDashboard() {
 
       {/* New Feature Section */}
       <View style={styles.sectionContainer}>
-        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: spacing.md }}>
           Fitur Tambahan
         </Typography>
         <View style={styles.quickActionsContainer}>
@@ -254,18 +256,18 @@ export default function StudentDashboard() {
       
       {/* Upcoming Schedule */}
       <View style={styles.sectionContainer}>
-        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: spacing.md }}>
           Jadwal Mendatang
         </Typography>
         <Card variant="default" padding="medium">
           <View style={styles.scheduleHeader}>
             <View style={styles.scheduleDay}>
-              <Typography variant="body2" color="#ffffff" weight="bold">
+              <Typography variant="body2" color={colors.text.inverse} weight="bold">
                 Senin
               </Typography>
             </View>
             <View style={styles.scheduleInfo}>
-              <Typography variant="body1" color="primary" weight="bold" style={{ marginBottom: 5 }}>
+              <Typography variant="body1" color="primary" weight="bold" style={{ marginBottom: spacing.xs }}>
                 08:00 - 10:00
               </Typography>
               <Typography variant="body2" color="secondary">
@@ -283,11 +285,11 @@ export default function StudentDashboard() {
 
   const renderMessages = () => (
     <View style={styles.centeredContainer}>
-      <MaterialIcons name="message" size={80} color="#cccccc" />
-      <Typography variant="h4" color="secondary" weight="bold" style={{ marginTop: 16 }}>
+      <MaterialIcons name="message" size={80} color={colors.neutral[400]} />
+      <Typography variant="h4" color="secondary" weight="bold" style={{ marginTop: spacing.md }}>
         Fitur Pesan Segera Hadir
       </Typography>
-      <Typography variant="body2" color="tertiary" align="center" style={{ marginTop: 8, paddingHorizontal: 40 }}>
+      <Typography variant="body2" color="tertiary" align="center" style={{ marginTop: spacing.sm, paddingHorizontal: spacing.lg }}>
         Anda akan dapat berkomunikasi dengan guru dan orang tua di sini.
       </Typography>
     </View>
@@ -295,11 +297,11 @@ export default function StudentDashboard() {
 
   const renderSchedule = () => (
     <View style={styles.centeredContainer}>
-      <MaterialIcons name="event-note" size={80} color="#cccccc" />
-      <Typography variant="h4" color="secondary" weight="bold" style={{ marginTop: 16 }}>
+      <MaterialIcons name="event-note" size={80} color={colors.neutral[400]} />
+      <Typography variant="h4" color="secondary" weight="bold" style={{ marginTop: spacing.md }}>
         Jadwal Lengkap Segera Hadir
       </Typography>
-      <Typography variant="body2" color="tertiary" align="center" style={{ marginTop: 8, paddingHorizontal: 40 }}>
+      <Typography variant="body2" color="tertiary" align="center" style={{ marginTop: spacing.sm, paddingHorizontal: spacing.lg }}>
         Anda akan dapat melihat jadwal harian, mingguan, dan bulanan di sini.
       </Typography>
     </View>
@@ -310,11 +312,11 @@ export default function StudentDashboard() {
       return (
         <ScrollView style={styles.contentContainer}>
           <View style={styles.profileHeader}>
-            <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
-            <Typography variant="h3" color="primary" weight="bold" style={{ marginTop: 12 }}>
+            <Ionicons name="person-circle-outline" size={80} color={colors.role.student.primary} />
+            <Typography variant="h3" color="primary" weight="bold" style={{ marginTop: spacing.md }}>
               Loading...
             </Typography>
-            <Typography variant="body1" color="secondary" style={{ marginTop: 4 }}>
+            <Typography variant="body1" color="secondary" style={{ marginTop: spacing.xs }}>
               Loading...
             </Typography>
           </View>
@@ -325,21 +327,21 @@ export default function StudentDashboard() {
     return (
       <ScrollView style={styles.contentContainer}>
         <View style={styles.profileHeader}>
-          <Ionicons name="person-circle-outline" size={80} color="#005e7a" />
-          <Typography variant="h3" color="primary" weight="bold" style={{ marginTop: 12 }}>
+          <Ionicons name="person-circle-outline" size={80} color={colors.role.student.primary} />
+          <Typography variant="h3" color="primary" weight="bold" style={{ marginTop: spacing.md }}>
             {profile?.full_name || 'Nama Siswa'}
           </Typography>
-          <Typography variant="body1" color="secondary" style={{ marginTop: 4 }}>
+          <Typography variant="body1" color="secondary" style={{ marginTop: spacing.xs }}>
             {profile?.role === 'student' ? 'Siswa' : profile?.role || 'Role tidak diketahui'}
           </Typography>
         </View>
       
         <View style={styles.profileSection}>
-          <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: spacing.md }}>
             Pengaturan Akun
           </Typography>
           
-          <Card variant="default" padding="none" style={{ marginBottom: 8 }}>
+          <Card variant="default" padding="none" style={{ marginBottom: spacing.xs }}>
             <ListItem
               title="Edit Profil"
               leftIcon="person"
@@ -375,11 +377,11 @@ export default function StudentDashboard() {
         </View>
         
         <View style={styles.profileSection}>
-          <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: spacing.md }}>
             Bantuan
           </Typography>
           
-          <Card variant="default" padding="none" style={{ marginBottom: 8 }}>
+          <Card variant="default" padding="none" style={{ marginBottom: spacing.xs }}>
             <ListItem
               title="Pusat Bantuan"
               leftIcon="help-circle"
@@ -471,7 +473,7 @@ export default function StudentDashboard() {
 const backgroundPatternSvg = `
 <svg width="100%" height="100%" viewBox="0 0 800 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Background -->
-  <rect width="800" height="1600" fill="#f5f5f5"/>
+  <rect width="800" height="1600" fill="${colors.background.primary}"/>
   
   <!-- Islamic Geometric Pattern -->
   <!-- Pattern 1: Top section -->
@@ -505,10 +507,10 @@ function generateGeometricPattern(rows: number, cols: number, size: number): str
       const x = j * size;
       const y = i * size;
       pattern += `
-        <path d="M${x} ${y} L${x + size/2} ${y + size/2} L${x} ${y + size} L${x - size/2} ${y + size/2} Z" fill="#005e7a"/>
-        <path d="M${x + size} ${y} L${x + size/2} ${y + size/2} L${x + size} ${y + size} L${x + size*1.5} ${y + size/2} Z" fill="#005e7a"/>
-        <path d="M${x} ${y + size} L${x + size/2} ${y + size/2} L${x + size} ${y + size} L${x + size/2} ${y + size*1.5} Z" fill="#005e7a"/>
-        <path d="M${x} ${y} L${x + size/2} ${y + size/2} L${x + size} ${y} L${x + size/2} ${y - size/2} Z" fill="#005e7a"/>
+        <path d="M${x} ${y} L${x + size/2} ${y + size/2} L${x} ${y + size} L${x - size/2} ${y + size/2} Z" fill="${colors.role.student.primary}"/>
+        <path d="M${x + size} ${y} L${x + size/2} ${y + size/2} L${x + size} ${y + size} L${x + size*1.5} ${y + size/2} Z" fill="${colors.role.student.primary}"/>
+        <path d="M${x} ${y + size} L${x + size/2} ${y + size/2} L${x + size} ${y + size} L${x + size/2} ${y + size*1.5} Z" fill="${colors.role.student.primary}"/>
+        <path d="M${x} ${y} L${x + size/2} ${y + size/2} L${x + size} ${y} L${x + size/2} ${y - size/2} Z" fill="${colors.role.student.primary}"/>
       `;
     }
   }
@@ -527,15 +529,15 @@ function generateStarPattern(rows: number, cols: number, size: number): string {
       
       // 8-point star
       pattern += `
-        <path d="M${centerX} ${centerY - size} L${centerX + size/3} ${centerY - size/3} L${centerX + size} ${centerY} L${centerX + size/3} ${centerY + size/3} L${centerX} ${centerY + size} L${centerX - size/3} ${centerY + size/3} L${centerX - size} ${centerY} L${centerX - size/3} ${centerY - size/3} Z" fill="#005e7a"/>
+        <path d="M${centerX} ${centerY - size} L${centerX + size/3} ${centerY - size/3} L${centerX + size} ${centerY} L${centerX + size/3} ${centerY + size/3} L${centerX} ${centerY + size} L${centerX - size/3} ${centerY + size/3} L${centerX - size} ${centerY} L${centerX - size/3} ${centerY - size/3} Z" fill="${colors.role.student.primary}"/>
       `;
       
       // Connecting lines
       pattern += `
-        <path d="M${centerX - size} ${centerY} L${centerX - size*2} ${centerY}" stroke="#005e7a" stroke-width="1"/>
-        <path d="M${centerX + size} ${centerY} L${centerX + size*2} ${centerY}" stroke="#005e7a" stroke-width="1"/>
-        <path d="M${centerX} ${centerY - size} L${centerX} ${centerY - size*2}" stroke="#005e7a" stroke-width="1"/>
-        <path d="M${centerX} ${centerY + size} L${centerX} ${centerY + size*2}" stroke="#005e7a" stroke-width="1"/>
+        <path d="M${centerX - size} ${centerY} L${centerX - size*2} ${centerY}" stroke="${colors.role.student.primary}" stroke-width="1"/>
+        <path d="M${centerX + size} ${centerY} L${centerX + size*2} ${centerY}" stroke="${colors.role.student.primary}" stroke-width="1"/>
+        <path d="M${centerX} ${centerY - size} L${centerX} ${centerY - size*2}" stroke="${colors.role.student.primary}" stroke-width="1"/>
+        <path d="M${centerX} ${centerY + size} L${centerX} ${centerY + size*2}" stroke="${colors.role.student.primary}" stroke-width="1"/>
       `;
     }
   }
@@ -551,12 +553,12 @@ function generateArabicPattern(rows: number, cols: number, size: number): string
       const centerY = i * size * 3 + size * 1.5;
       
       pattern += `
-        <path d="M${centerX - size} ${centerY - size} L${centerX} ${centerY - size*1.5} L${centerX + size} ${centerY - size} L${centerX + size} ${centerY + size/2} L${centerX} ${centerY + size} L${centerX - size} ${centerY + size/2} Z" stroke="#005e7a" stroke-width="1" fill="none"/>
-        <path d="M${centerX - size} ${centerY - size} L${centerX - size} ${centerY + size/2}" stroke="#005e7a" stroke-width="1"/>
-        <path d="M${centerX + size} ${centerY - size} L${centerX + size} ${centerY + size/2}" stroke="#005e7a" stroke-width="1"/>
-        <path d="M${centerX - size} ${centerY + size/2} L${centerX - size} ${centerY + size}" stroke="#005e7a" stroke-width="1"/>
-        <path d="M${centerX + size} ${centerY + size/2} L${centerX + size} ${centerY + size}" stroke="#005e7a" stroke-width="1"/>
-        <path d="M${centerX - size} ${centerY + size} Q${centerX} ${centerY + size*1.2}, ${centerX + size} ${centerY + size}" stroke="#005e7a" stroke-width="1" fill="none"/>
+        <path d="M${centerX - size} ${centerY - size} L${centerX} ${centerY - size*1.5} L${centerX + size} ${centerY - size} L${centerX + size} ${centerY + size/2} L${centerX} ${centerY + size} L${centerX - size} ${centerY + size/2} Z" stroke="${colors.role.student.primary}" stroke-width="1" fill="none"/>
+        <path d="M${centerX - size} ${centerY - size} L${centerX - size} ${centerY + size/2}" stroke="${colors.role.student.primary}" stroke-width="1"/>
+        <path d="M${centerX + size} ${centerY - size} L${centerX + size} ${centerY + size/2}" stroke="${colors.role.student.primary}" stroke-width="1"/>
+        <path d="M${centerX - size} ${centerY + size/2} L${centerX - size} ${centerY + size}" stroke="${colors.role.student.primary}" stroke-width="1"/>
+        <path d="M${centerX + size} ${centerY + size/2} L${centerX + size} ${centerY + size}" stroke="${colors.role.student.primary}" stroke-width="1"/>
+        <path d="M${centerX - size} ${centerY + size} Q${centerX} ${centerY + size*1.2}, ${centerX + size} ${centerY + size}" stroke="${colors.role.student.primary}" stroke-width="1" fill="none"/>
       `;
     }
   }
@@ -566,26 +568,26 @@ function generateArabicPattern(rows: number, cols: number, size: number): string
 // Logo SVG
 const logoSvg = `
 <svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="60" cy="60" r="60" fill="#005e7a"/>
-  <circle cx="60" cy="60" r="50" fill="#005e7a" stroke="#f0c75e" stroke-width="2"/>
+  <circle cx="60" cy="60" r="60" fill="${colors.role.student.primary}"/>
+  <circle cx="60" cy="60" r="50" fill="${colors.role.student.primary}" stroke="${colors.secondary.main}" stroke-width="2"/>
   
   <!-- Open Book -->
-  <path d="M30 45 L30 75 L60 65 L90 75 L90 45 L60 35 L30 45Z" fill="#f0c75e"/>
-  <path d="M30 45 L60 35 L60 65 L30 75 L30 45Z" fill="#f0c75e" stroke="#005e7a" stroke-width="1"/>
-  <path d="M60 35 L90 45 L90 75 L60 65 L60 35Z" fill="#ffffff" stroke="#005e7a" stroke-width="1"/>
+  <path d="M30 45 L30 75 L60 65 L90 75 L90 45 L60 35 L30 45Z" fill="${colors.secondary.main}"/>
+  <path d="M30 45 L60 35 L60 65 L30 75 L30 45Z" fill="${colors.secondary.main}" stroke="${colors.role.student.primary}" stroke-width="1"/>
+  <path d="M60 35 L90 45 L90 75 L60 65 L60 35Z" fill="${colors.white}" stroke="${colors.role.student.primary}" stroke-width="1"/>
   
   <!-- Book Pages Lines -->
-  <path d="M40 48 L50 45" stroke="#005e7a" stroke-width="1"/>
-  <path d="M40 53 L50 50" stroke="#005e7a" stroke-width="1"/>
-  <path d="M40 58 L50 55" stroke="#005e7a" stroke-width="1"/>
-  <path d="M70 45 L80 48" stroke="#005e7a" stroke-width="1"/>
-  <path d="M70 50 L80 53" stroke="#005e7a" stroke-width="1"/>
-  <path d="M70 55 L80 58" stroke="#005e7a" stroke-width="1"/>
+  <path d="M40 48 L50 45" stroke="${colors.role.student.primary}" stroke-width="1"/>
+  <path d="M40 53 L50 50" stroke="${colors.role.student.primary}" stroke-width="1"/>
+  <path d="M40 58 L50 55" stroke="${colors.role.student.primary}" stroke-width="1"/>
+  <path d="M70 45 L80 48" stroke="${colors.role.student.primary}" stroke-width="1"/>
+  <path d="M70 50 L80 53" stroke="${colors.role.student.primary}" stroke-width="1"/>
+  <path d="M70 55 L80 58" stroke="${colors.role.student.primary}" stroke-width="1"/>
   
   <!-- Decorative Elements -->
-  <circle cx="60" cy="85" r="5" fill="#f0c75e"/>
-  <path d="M55 25 Q60 15 65 25" stroke="#f0c75e" stroke-width="2" fill="none"/>
-  <path d="M50 28 Q60 15 70 28" stroke="#f0c75e" stroke-width="2" fill="none"/>
+  <circle cx="60" cy="85" r="5" fill="${colors.secondary.main}"/>
+  <path d="M55 25 Q60 15 65 25" stroke="${colors.secondary.main}" stroke-width="2" fill="none"/>
+  <path d="M50 28 Q60 15 70 28" stroke="${colors.secondary.main}" stroke-width="2" fill="none"/>
 </svg>
 `;
 
@@ -593,12 +595,12 @@ const styles = StyleSheet.create({
   // Core layout styles
   contentContainer: {
     flex: 1,
-    padding: 20,
+    padding: spacing.md,
   },
   
   // Welcome banner styles (custom styling for Card component)
   welcomeBanner: {
-    backgroundColor: '#005e7a',
+    backgroundColor: colors.role.student.primary,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -612,7 +614,7 @@ const styles = StyleSheet.create({
   
   // Section layout styles
   sectionContainer: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   
   // Progress section styles
@@ -620,7 +622,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: spacing.md,
   },
   
   // Quick actions layout
@@ -634,48 +636,46 @@ const styles = StyleSheet.create({
   scheduleHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: spacing.md,
   },
   scheduleDay: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#f0c75e',
+    backgroundColor: colors.secondary.main,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: spacing.md,
   },
   scheduleInfo: {
     flex: 1,
   },
-  
-
   
   // Placeholder content styles
   centeredContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: spacing.md,
   },
   
   // Profile section styles
   profileHeader: {
     alignItems: 'center',
-    padding: 20,
+    padding: spacing.md,
   },
   profileSection: {
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   logoutButton: {
-    backgroundColor: '#ff4444',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 24,
-    shadowColor: '#000',
+    backgroundColor: colors.error.main,
+    borderRadius: spacing.sm,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
+    marginBottom: spacing.lg,
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
