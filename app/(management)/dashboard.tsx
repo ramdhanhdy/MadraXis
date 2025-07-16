@@ -1,12 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
+import { View, ScrollView, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { SvgXml } from 'react-native-svg';
+
+// Design System Components
+import { DashboardTemplate } from '../../src/components/templates/DashboardTemplate';
+import { Card } from '../../src/components/molecules/Card';
+import { QuickAction } from '../../src/components/molecules/QuickAction';
+import { ListItem } from '../../src/components/molecules/ListItem';
+import { Typography } from '../../src/components/atoms/Typography';
+
+// Context and Services
 import { useAuth } from '../../src/context/AuthContext';
 import { fetchIncidentsForSchool } from '../../src/services/incidents';
 import { fetchDashboardMetrics, DashboardMetrics } from '../../src/services/dashboard';
-import LogoutButton from '../components/auth/LogoutButton';
+import { logoSvg } from '../../src/utils/svgPatterns';
+
+// Icon types for proper typing
+type IoniconsIcon = keyof typeof Ionicons.glyphMap;
 
 // Updated interface to match Supabase query result
 interface Incident {
@@ -25,17 +38,14 @@ interface Incident {
 
 export default function ManagementDashboard() {
   const router = useRouter();
-  const { user, profile, signOut, loading: authLoading } = useAuth(); // Use auth context, get loading state
-  const [showNotifications, setShowNotifications] = useState(false);
+  const { user, profile, signOut, loading: authLoading } = useAuth();
+  const [schoolName, setSchoolName] = useState('Zaid Bin Tsabit');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('dashboard');
-  
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-  };
+  const [dashboardLoading, setDashboardLoading] = useState(true);
 
   // Function to get incident priority color based on type
   const getIncidentPriorityColor = (type: string) => {
@@ -138,234 +148,77 @@ export default function ManagementDashboard() {
       setError('Failed to load dashboard data. Please try again.');
     } finally {
       setIsLoading(false);
+      setDashboardLoading(false);
     }
   };
 
   // Navigate to incident detail
   const navigateToIncidentDetail = (incidentId: number) => {
     console.log('Navigating to incident detail:', incidentId);
-    // TODO: Implement navigation to incident detail screen
     Alert.alert('Info', `Detail insiden #${incidentId} akan segera tersedia`);
   };
 
-  // Render profile section
-  const renderProfile = () => {
-    if (authLoading) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#005e7a" />
-          <Text style={styles.loadingText}>Memuat profil...</Text>
-        </View>
-      );
-    }
-
-    return (
-      <ScrollView style={styles.container}>
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            <Ionicons name="person-circle" size={80} color="#005e7a" />
-          </View>
-          <Text style={styles.profileName}>
-            {profile?.full_name || 'Nama Pengguna'}
-          </Text>
-          <Text style={styles.profileRole}>
-            {profile?.role === 'management' ? 'Manajemen Sekolah' : 'Pengguna'}
-          </Text>
-          <Text style={styles.profileSchool}>Zaid Bin Tsabit</Text>
-        </View>
-
-        <View style={styles.profileSection}>
-          <TouchableOpacity 
-            style={styles.profileItem}
-            onPress={() => Alert.alert('Info', 'Fitur edit profil akan segera hadir!')}
-          >
-            <Ionicons name="person-outline" size={24} color="#005e7a" />
-            <Text style={styles.profileItemText}>Edit Profil</Text>
-            <Ionicons name="chevron-forward" size={20} color="#cccccc" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.profileItem}
-            onPress={() => Alert.alert('Info', 'Fitur pengaturan notifikasi akan segera hadir!')}
-          >
-            <Ionicons name="notifications-outline" size={24} color="#005e7a" />
-            <Text style={styles.profileItemText}>Pengaturan Notifikasi</Text>
-            <Ionicons name="chevron-forward" size={20} color="#cccccc" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.profileItem}
-            onPress={() => Alert.alert('Info', 'Fitur pengaturan bahasa akan segera hadir!')}
-          >
-            <Ionicons name="language-outline" size={24} color="#005e7a" />
-            <Text style={styles.profileItemText}>Bahasa</Text>
-            <Ionicons name="chevron-forward" size={20} color="#cccccc" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.profileItem}
-            onPress={() => Alert.alert('Info', 'Fitur pusat bantuan akan segera hadir!')}
-          >
-            <Ionicons name="help-circle-outline" size={24} color="#005e7a" />
-            <Text style={styles.profileItemText}>Pusat Bantuan</Text>
-            <Ionicons name="chevron-forward" size={20} color="#cccccc" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.profileItem}
-            onPress={() => Alert.alert('Info', 'Fitur syarat & ketentuan akan segera hadir!')}
-          >
-            <Ionicons name="document-text-outline" size={24} color="#005e7a" />
-            <Text style={styles.profileItemText}>Syarat & Ketentuan</Text>
-            <Ionicons name="chevron-forward" size={20} color="#cccccc" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.profileItem}
-            onPress={() => Alert.alert('Info', 'Fitur kebijakan privasi akan segera hadir!')}
-          >
-            <Ionicons name="shield-checkmark-outline" size={24} color="#005e7a" />
-            <Text style={styles.profileItemText}>Kebijakan Privasi</Text>
-            <Ionicons name="chevron-forward" size={20} color="#cccccc" />
-          </TouchableOpacity>
-        </View>
-
-        <LogoutButton />
-      </ScrollView>
-    );
+  // Handle navigation
+  const handleNavigate = (route: string) => {
+    router.push(route as any);
   };
 
-  // Render dashboard content
-  const renderDashboard = () => {
-    if (isLoading) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#005e7a" />
-          <Text style={styles.loadingText}>Memuat data dashboard...</Text>
-        </View>
-      );
-    }
+  // Tab configuration
+  const tabs = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: 'home-outline' as IoniconsIcon,
+    },
+    {
+      id: 'profile',
+      label: 'Profil',
+      icon: 'person-outline' as IoniconsIcon,
+    },
+  ];
 
-    if (error) {
-      return (
-        <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle-outline" size={48} color="#e74c3c" />
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={fetchDashboardData}>
-            <Text style={styles.retryButtonText}>Coba Lagi</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
+  // Header actions
+  const headerActions = [
+    {
+      icon: 'notifications-outline' as IoniconsIcon,
+      onPress: () => console.log('Notifications pressed'),
+      badge: 3,
+      accessibilityLabel: 'Notifikasi',
+    },
+    {
+      icon: 'person-outline' as IoniconsIcon,
+      onPress: () => setActiveTab('profile'),
+      accessibilityLabel: 'Profil',
+    },
+  ];
 
-    return (
-      <ScrollView style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.greeting}>Selamat datang,</Text>
-            <Text style={styles.userName}>
-              {profile?.full_name || 'Pengguna'}
-            </Text>
-          </View>
-          <TouchableOpacity onPress={toggleNotifications}>
-            <Ionicons name="notifications-outline" size={24} color="#005e7a" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Dashboard Metrics */}
-        {dashboardMetrics && (
-          <View style={styles.metricsContainer}>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricValue}>{dashboardMetrics.studentEnrollment}</Text>
-              <Text style={styles.metricLabel}>Total Siswa</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricValue}>{dashboardMetrics.teacherCount}</Text>
-              <Text style={styles.metricLabel}>Total Guru</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricValue}>{dashboardMetrics.incidentSummary.total}</Text>
-              <Text style={styles.metricLabel}>Total Insiden</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricValue}>{dashboardMetrics.incidentSummary.pending}</Text>
-              <Text style={styles.metricLabel}>Insiden Pending</Text>
-            </View>
-          </View>
-        )}
-
-        {/* Recent Incidents */}
-        <View style={styles.incidentsContainer}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Insiden Terbaru</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>Lihat Semua</Text>
-            </TouchableOpacity>
-          </View>
-
-          {incidents.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="document-outline" size={48} color="#cccccc" />
-              <Text style={styles.emptyText}>Tidak ada insiden terbaru</Text>
-            </View>
-          ) : (
-            incidents.slice(0, 5).map((incident) => (
-              <TouchableOpacity
-                key={incident.id}
-                style={styles.incidentItem}
-                onPress={() => navigateToIncidentDetail(incident.id)}
-              >
-                <View 
-                  style={[
-                    styles.incidentPriority, 
-                    { backgroundColor: getIncidentPriorityColor(incident.incident_type) }
-                  ]} 
-                />
-                <View style={styles.incidentContent}>
-                  <Text style={styles.incidentTitle}>
-                    {incident.incident_type.charAt(0).toUpperCase() + incident.incident_type.slice(1)}
-                  </Text>
-                  <Text style={styles.incidentDetails} numberOfLines={2}>
-                    {incident.description}
-                  </Text>
-                  <Text style={styles.incidentTime}>
-                    {getRelativeTime(incident.created_at)} • {incident.location}
-                  </Text>
-                </View>
-                <TouchableOpacity style={styles.incidentAction}>
-                  <Ionicons name="chevron-forward" size={20} color="#cccccc" />
-                </TouchableOpacity>
-              </TouchableOpacity>
-            ))
-          )}
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.quickActionsContainer}>
-          <Text style={styles.sectionTitle}>Aksi Cepat</Text>
-          <View style={styles.quickActionsGrid}>
-            <TouchableOpacity style={styles.quickActionItem}>
-              <Ionicons name="add-circle-outline" size={24} color="#005e7a" />
-              <Text style={styles.actionText}>Tambah Insiden</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.quickActionItem}>
-              <Ionicons name="people-outline" size={24} color="#005e7a" />
-              <Text style={styles.actionText}>Kelola Pengguna</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.quickActionItem}>
-              <Ionicons name="stats-chart-outline" size={24} color="#005e7a" />
-              <Text style={styles.actionText}>Laporan</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.quickActionItem}>
-              <Ionicons name="settings-outline" size={24} color="#005e7a" />
-              <Text style={styles.actionText}>Pengaturan</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-    );
-  };
+  // Quick actions configuration
+  const quickActions = [
+    {
+      title: 'Tambah Insiden',
+      icon: 'add-circle-outline' as IoniconsIcon,
+      onPress: () => handleNavigate('/management/incident/create'),
+      variant: 'primary' as const,
+    },
+    {
+      title: 'Kelola Pengguna',
+      icon: 'people-outline' as IoniconsIcon,
+      onPress: () => handleNavigate('/management/users'),
+      variant: 'primary' as const,
+    },
+    {
+      title: 'Laporan',
+      icon: 'stats-chart-outline' as IoniconsIcon,
+      onPress: () => handleNavigate('/management/reports'),
+      variant: 'secondary' as const,
+    },
+    {
+      title: 'Pengaturan',
+      icon: 'settings-outline' as IoniconsIcon,
+      onPress: () => handleNavigate('/management/settings'),
+      variant: 'primary' as const,
+    },
+  ];
 
   // Load data when component mounts or user/profile changes
   useEffect(() => {
@@ -374,7 +227,242 @@ export default function ManagementDashboard() {
     }
   }, [user, profile, authLoading]);
 
-  const renderContent = () => {
+  const renderDashboard = () => {
+    if (isLoading && dashboardLoading) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#005e7a" />
+          <Typography variant="body1" color="textSecondary" style={{ marginTop: 12 }}>
+            Memuat data dashboard...
+          </Typography>
+        </View>
+      );
+    }
+
+    if (error) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <Ionicons name="alert-circle-outline" size={48} color="#e74c3c" />
+          <Typography variant="body1" color="error" style={{ marginTop: 12, textAlign: 'center' }}>
+            {error}
+          </Typography>
+          <QuickAction
+            title="Coba Lagi"
+            icon="refresh-outline"
+            onPress={fetchDashboardData}
+            style={{ marginTop: 16 }}
+            variant="primary"
+          />
+        </View>
+      );
+    }
+
+    return (
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Welcome Section */}
+        <Card variant="elevated" style={{ marginBottom: 20 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flex: 1 }}>
+              <Typography variant="h4" color="textSecondary" style={{ marginBottom: 4 }}>
+                Selamat datang,
+              </Typography>
+              <Typography variant="h3" weight="bold" color="primary">
+                {profile?.full_name || 'Pengguna'}
+              </Typography>
+            </View>
+            <SvgXml xml={logoSvg} width={60} height={60} />
+          </View>
+        </Card>
+
+        {/* Dashboard Metrics */}
+        {dashboardMetrics && (
+          <View style={{ marginBottom: 20 }}>
+            <Typography variant="h4" style={{ marginBottom: 15 }}>
+              Ringkasan Sekolah
+            </Typography>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+              <Card variant="default" style={{ flex: 1, minWidth: '45%', alignItems: 'center', padding: 20 }}>
+                <Typography variant="h2" weight="bold" color="primary">
+                  {dashboardMetrics.studentEnrollment}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Total Siswa
+                </Typography>
+              </Card>
+              <Card variant="default" style={{ flex: 1, minWidth: '45%', alignItems: 'center', padding: 20 }}>
+                <Typography variant="h2" weight="bold" color="primary">
+                  {dashboardMetrics.teacherCount}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Total Guru
+                </Typography>
+              </Card>
+              <Card variant="default" style={{ flex: 1, minWidth: '45%', alignItems: 'center', padding: 20 }}>
+                <Typography variant="h2" weight="bold" color="error">
+                  {dashboardMetrics.incidentSummary.total}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Total Insiden
+                </Typography>
+              </Card>
+              <Card variant="default" style={{ flex: 1, minWidth: '45%', alignItems: 'center', padding: 20 }}>
+                <Typography variant="h2" weight="bold" color="warning">
+                  {dashboardMetrics.incidentSummary.pending}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Insiden Pending
+                </Typography>
+              </Card>
+            </View>
+          </View>
+        )}
+
+        {/* Quick Actions */}
+        <View style={{ marginBottom: 20 }}>
+          <Typography variant="h4" style={{ marginBottom: 15 }}>
+            Aksi Cepat
+          </Typography>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+            {quickActions.map((action, index) => (
+              <QuickAction
+                key={index}
+                title={action.title}
+                icon={action.icon}
+                onPress={action.onPress}
+                style={{ flex: 1, minWidth: '45%' }}
+                variant={action.variant}
+              />
+            ))}
+          </View>
+        </View>
+
+        {/* Recent Incidents */}
+        <View style={{ marginBottom: 20 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+            <Typography variant="h4">Insiden Terbaru</Typography>
+            <TouchableOpacity>
+              <Typography variant="body2" color="primary">Lihat Semua</Typography>
+            </TouchableOpacity>
+          </View>
+          
+          <Card variant="default">
+            {incidents.length === 0 ? (
+              <View style={{ padding: 40, alignItems: 'center' }}>
+                <Ionicons name="document-outline" size={48} color="#cccccc" />
+                <Typography variant="body1" color="textSecondary" style={{ marginTop: 12, textAlign: 'center' }}>
+                  Tidak ada insiden terbaru
+                </Typography>
+              </View>
+            ) : (
+              incidents.slice(0, 5).map((incident, index) => (
+                <View key={incident.id}>
+                  <ListItem
+                    title={incident.incident_type.charAt(0).toUpperCase() + incident.incident_type.slice(1)}
+                    subtitle={incident.description}
+                    leftComponent={
+                      <View style={{
+                        width: 4,
+                        height: 40,
+                        backgroundColor: getIncidentPriorityColor(incident.incident_type),
+                        borderRadius: 2,
+                      }} />
+                    }
+                    rightComponent={
+                      <Typography variant="caption" color="textSecondary">
+                        {getRelativeTime(incident.created_at)} • {incident.location}
+                      </Typography>
+                    }
+                    onPress={() => navigateToIncidentDetail(incident.id)}
+                  />
+                  {index < incidents.slice(0, 5).length - 1 && (
+                    <View style={{ height: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 }} />
+                  )}
+                </View>
+              ))
+            )}
+          </Card>
+        </View>
+      </ScrollView>
+    );
+  };
+
+  const renderProfile = () => (
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <Card variant="elevated" style={{ marginBottom: 20, alignItems: 'center', padding: 40 }}>
+        <Ionicons name="person-circle" size={80} color="#005e7a" />
+        <Typography variant="h3" weight="bold" color="primary" style={{ marginTop: 12 }}>
+          {profile?.full_name || 'Nama Pengguna'}
+        </Typography>
+        <Typography variant="body1" color="textSecondary" style={{ marginTop: 4 }}>
+          {profile?.role === 'management' ? 'Manajemen Sekolah' : 'Pengguna'}
+        </Typography>
+        <Typography variant="body2" color="textSecondary" style={{ marginTop: 2 }}>
+          {schoolName}
+        </Typography>
+      </Card>
+
+      <Card variant="default" style={{ marginBottom: 16 }}>
+        <Typography variant="h4" style={{ marginBottom: 16 }}>
+          Pengaturan Akun
+        </Typography>
+        
+        <ListItem
+          title="Edit Profil"
+          leftIcon="person-outline"
+          rightIcon="chevron-forward"
+          onPress={() => Alert.alert('Info', 'Fitur edit profil akan segera hadir!')}
+        />
+        <View style={{ height: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 }} />
+        
+        <ListItem
+          title="Pengaturan Notifikasi"
+          leftIcon="notifications-outline"
+          rightIcon="chevron-forward"
+          onPress={() => Alert.alert('Info', 'Fitur pengaturan notifikasi akan segera hadir!')}
+        />
+        <View style={{ height: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 }} />
+        
+        <ListItem
+          title="Bahasa"
+          leftIcon="language-outline"
+          rightIcon="chevron-forward"
+          onPress={() => Alert.alert('Info', 'Fitur pengaturan bahasa akan segera hadir!')}
+        />
+      </Card>
+      
+      <Card variant="default" style={{ marginBottom: 16 }}>
+        <Typography variant="h4" style={{ marginBottom: 16 }}>
+          Bantuan
+        </Typography>
+        
+        <ListItem
+          title="Pusat Bantuan"
+          leftIcon="help-circle-outline"
+          rightIcon="chevron-forward"
+          onPress={() => Alert.alert('Info', 'Fitur pusat bantuan akan segera hadir!')}
+        />
+        <View style={{ height: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 }} />
+        
+        <ListItem
+          title="Syarat & Ketentuan"
+          leftIcon="document-text-outline"
+          rightIcon="chevron-forward"
+          onPress={() => Alert.alert('Info', 'Fitur syarat & ketentuan akan segera hadir!')}
+        />
+        <View style={{ height: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 }} />
+        
+        <ListItem
+          title="Kebijakan Privasi"
+          leftIcon="shield-checkmark-outline"
+          rightIcon="chevron-forward"
+          onPress={() => Alert.alert('Info', 'Fitur kebijakan privasi akan segera hadir!')}
+        />
+      </Card>
+    </ScrollView>
+  );
+
+  // Content mapping based on active tab
+  const getContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return renderDashboard();
@@ -386,357 +474,25 @@ export default function ManagementDashboard() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <Stack.Screen options={{ 
-        headerShown: false,
-        title: "Dashboard Manajemen" 
-      }} />
-      {renderContent()}
-      
-      {/* Tab Bar */}
-      <View style={styles.tabBar}>
-        <TouchableOpacity
-          style={[styles.tabItem, activeTab === 'dashboard' && styles.activeTabItem]}
-          onPress={() => setActiveTab('dashboard')}
-        >
-          <Ionicons 
-            name={activeTab === 'dashboard' ? 'home' : 'home-outline'} 
-            size={24} 
-            color={activeTab === 'dashboard' ? '#005e7a' : '#666666'} 
-          />
-          <Text style={[styles.tabLabel, activeTab === 'dashboard' && styles.activeTabLabel]}>
-            Dashboard
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabItem, activeTab === 'profile' && styles.activeTabItem]}
-          onPress={() => setActiveTab('profile')}
-        >
-          <Ionicons 
-            name={activeTab === 'profile' ? 'person' : 'person-outline'} 
-            size={24} 
-            color={activeTab === 'profile' ? '#005e7a' : '#666666'} 
-          />
-          <Text style={[styles.tabLabel, activeTab === 'profile' && styles.activeTabLabel]}>
-            Profil
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    <DashboardTemplate
+      header={{
+        title: 'Dashboard Manajemen',
+        subtitle: schoolName,
+        leftAction: {
+          icon: 'arrow-back-outline' as IoniconsIcon,
+          onPress: () => router.replace('/login'),
+          accessibilityLabel: 'Kembali ke login',
+        },
+        rightActions: headerActions,
+      }}
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      backgroundPattern={true}
+      contentPadding={true}
+      testID="management-dashboard"
+    >
+      {getContent()}
+    </DashboardTemplate>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-    backgroundColor: '#ffffff',
-  },
-  headerLeft: {
-    flex: 1,
-  },
-  greeting: {
-    fontSize: 14,
-    color: '#666666',
-  },
-  userName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#005e7a',
-    marginTop: 4,
-  },
-  metricsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 16,
-    gap: 12,
-  },
-  metricCard: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  metricValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#005e7a',
-  },
-  metricLabel: {
-    fontSize: 12,
-    color: '#666666',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  seeAllText: {
-    fontSize: 14,
-    color: '#005e7a',
-  },
-  quickActionsContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    margin: 16,
-    marginTop: 8,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 12,
-    gap: 12,
-  },
-  quickActionItem: {
-    flex: 1,
-    minWidth: '45%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-  },
-  actionIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 12,
-  },
-  actionText: {
-    fontSize: 14,
-    color: '#333',
-    flex: 1,
-  },
-  incidentsContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    margin: 16,
-    marginTop: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    overflow: 'hidden',
-  },
-  incidentItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    padding: 16,
-  },
-  incidentPriority: {
-    width: 4,
-    height: '100%',
-    marginRight: 12,
-  },
-  incidentContent: {
-    flex: 1,
-  },
-  incidentTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  incidentDetails: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  incidentTime: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 4,
-  },
-  incidentAction: {
-    padding: 8,
-  },
-  performanceContainer: {
-    margin: 16,
-    marginTop: 8,
-  },
-  performanceCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  performanceValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#005e7a',
-  },
-  performanceLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 8,
-  },
-  loadingContainer: {
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#666666',
-  },
-  errorContainer: {
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  errorText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#e74c3c',
-    textAlign: 'center',
-  },
-  retryButton: {
-    marginTop: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: '#005e7a',
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  emptyContainer: {
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#666666',
-    textAlign: 'center',
-  },
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderTopWidth: 1,
-    borderTopColor: '#eeeeee',
-    height: 60,
-  },
-  tabItem: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  activeTabItem: {
-    borderTopWidth: 2,
-    borderTopColor: '#005e7a',
-  },
-  tabLabel: {
-    fontSize: 12,
-    color: '#666666',
-    marginTop: 4,
-  },
-  activeTabLabel: {
-    color: '#005e7a',
-    fontWeight: '600',
-  },
-  profileHeader: {
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#ffffff',
-    marginBottom: 16,
-  },
-  profileName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#005e7a',
-    marginTop: 12,
-  },
-  profileRole: {
-    fontSize: 16,
-    color: '#666666',
-    marginTop: 4,
-  },
-  profileSchool: {
-    fontSize: 14,
-    color: '#888888',
-    marginTop: 4,
-  },
-  profileSection: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    margin: 16,
-    marginTop: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    overflow: 'hidden',
-  },
-  profileItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  profileItemText: {
-    fontSize: 16,
-    color: '#333333',
-    marginLeft: 12,
-    flex: 1,
-  },
-  profileLogoutButton: {
-    backgroundColor: '#ff4444',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    margin: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  avatarContainer: {
-    marginBottom: 8,
-  },
-}); 

@@ -221,23 +221,24 @@
   - Implement consistent modal animations and interactions
   - _Requirements: 3.3_
 
-- [ ] 8. Refactor Teacher dashboard to use design system
+- [x] 8. Refactor Teacher dashboard to use design system
   - Apply same refactoring approach as Student dashboard
   - Ensure consistent component usage and styling
   - Update all role-specific features to use design system
   - _Requirements: 1.1, 1.2, 1.3, 3.1, 3.2, 4.1, 4.2, 4.3_
 
-- [ ] 8.1 Refactor Teacher dashboard structure
+- [x] 8.1 Refactor Teacher dashboard structure
   - Replace header and navigation with design system components
   - Update notification panel to use NavigationPanel component
   - Implement consistent layout using DashboardTemplate
   - _Requirements: 3.1, 3.2, 7.1, 7.2_
 
-- [ ] 8.2 Refactor Teacher dashboard content
+- [x] 8.2 Refactor Teacher dashboard content
   - Update all cards and list items to use design system components
   - Replace quick actions with QuickAction components
   - Update activity items to use ListItem components
-  - _Requirements: 4.1, 4.2, 4.3_
+  - Integrate LoadingSpinner, ErrorMessage, EmptyState, and SkeletonCard for state management
+  - _Requirements: 4.1, 4.2, 4.3, 6.1, 6.2, 6.3_
 
 - [ ] 9. Refactor Parent dashboard to use design system
   - Apply consistent refactoring approach
