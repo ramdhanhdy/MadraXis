@@ -73,14 +73,15 @@ export const usePatternConfig = (configKey: keyof typeof patternConfigs, role?: 
   const { theme } = useTheme();
   const colors = useColors();
   
-  const config = patternConfigs[configKey];
-  
-  // Handle role-specific color mapping
-  let patternColor: string | undefined;
+  let config: PatternConfig;
   
   // Handle dashboard configurations with role-based colors
   if (configKey === 'dashboard' && role) {
     const dashboardConfig = patternConfigs.dashboard;
+    const roleConfig = dashboardConfig[role as keyof typeof dashboardConfig] || dashboardConfig.default;
+    
+    // Resolve color values for role-specific configurations
+    let patternColor: string | undefined;
     switch (role) {
       case 'student':
         patternColor = colors.primary.main;
@@ -98,33 +99,52 @@ export const usePatternConfig = (configKey: keyof typeof patternConfigs, role?: 
         patternColor = colors.primary.main;
         break;
     }
+    
+    config = {
+      ...roleConfig,
+      color: patternColor,
+    };
   } else {
-    // Handle other pattern types without color specification
-    patternColor = colors.primary.main;
+    // Handle other pattern types
+    const baseConfig = patternConfigs[configKey];
+    config = {
+      ...baseConfig,
+      color: colors.primary.main,
+    };
   }
   
-  return {
-    ...config,
-    color: patternColor,
-  };
+  return config;
 };
 
-// Helper function to get role-specific pattern
-export const getRolePatternConfig = (role: string): PatternConfig => {
+// Helper function to get role-specific pattern with resolved colors
+export const getRolePatternConfig = (role: string, colors?: any): PatternConfig => {
   const baseConfig = {
     variant: 'geometric' as PatternVariant,
     intensity: 'subtle' as PatternIntensity,
   };
 
+  // Use provided colors or fallback to default hex values
+  const colorMap = colors ? {
+    primary: colors.primary?.main || '#3B82F6',
+    success: colors.success?.main || '#10B981',
+    warning: colors.warning?.main || '#F59E0B',
+    error: colors.error?.main || '#EF4444',
+  } : {
+    primary: '#3B82F6',
+    success: '#10B981',
+    warning: '#F59E0B',
+    error: '#EF4444',
+  };
+
   switch (role) {
     case 'student':
-      return { ...baseConfig, color: 'primary' };
+      return { ...baseConfig, color: colorMap.primary };
     case 'teacher':
-      return { ...baseConfig, color: 'success', intensity: 'light' as PatternIntensity };
+      return { ...baseConfig, color: colorMap.success, intensity: 'light' as PatternIntensity };
     case 'parent':
-      return { ...baseConfig, color: 'warning', intensity: 'light' as PatternIntensity };
+      return { ...baseConfig, color: colorMap.warning, intensity: 'light' as PatternIntensity };
     case 'management':
-      return { ...baseConfig, color: 'error', intensity: 'medium' as PatternIntensity };
+      return { ...baseConfig, color: colorMap.error, intensity: 'medium' as PatternIntensity };
     default:
       return baseConfig;
   }
