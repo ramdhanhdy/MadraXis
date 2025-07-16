@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
+import { View, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -11,12 +11,17 @@ import { Card } from '../../src/components/molecules/Card';
 import { QuickAction } from '../../src/components/molecules/QuickAction';
 import { ListItem } from '../../src/components/molecules/ListItem';
 import { Typography } from '../../src/components/atoms/Typography';
+import { LoadingSpinner } from '../../src/components/atoms/LoadingSpinner/LoadingSpinner';
+import { ErrorMessage } from '../../src/components/molecules/ErrorMessage/ErrorMessage';
+import { EmptyState } from '../../src/components/molecules/EmptyState/EmptyState';
+import { SkeletonCard } from '../../src/components/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
 import { useAuth } from '../../src/context/AuthContext';
 import { fetchIncidentsForSchool } from '../../src/services/incidents';
 import { fetchDashboardMetrics, DashboardMetrics } from '../../src/services/dashboard';
 import { logoSvg } from '../../src/utils/svgPatterns';
+import { colors } from '../../src/styles/colors';
 
 // Icon types for proper typing
 type IoniconsIcon = keyof typeof Ionicons.glyphMap;
@@ -51,13 +56,13 @@ export default function ManagementDashboard() {
   const getIncidentPriorityColor = (type: string) => {
     switch(type) {
       case 'bullying':
-        return '#e74c3c'; // Red for bullying
+        return colors.error.main; // Red for bullying
       case 'safety':
-        return '#f39c12'; // Orange for safety issues
+        return colors.warning.main; // Orange for safety issues
       case 'property':
-        return '#3498db'; // Blue for property damage
+        return colors.info.main; // Blue for property damage
       default:
-        return '#9b59b6'; // Purple for other issues
+        return colors.secondary.main; // Purple for other issues
     }
   };
 
@@ -160,7 +165,7 @@ export default function ManagementDashboard() {
 
   // Handle navigation
   const handleNavigate = (route: string) => {
-    router.push(route as any);
+    router.push(route as Parameters<typeof router.push>[0]);
   };
 
   // Tab configuration
@@ -227,33 +232,54 @@ export default function ManagementDashboard() {
     }
   }, [user, profile, authLoading]);
 
+  // No additional refresh needed - data loads on mount and user change
+
   const renderDashboard = () => {
     if (isLoading && dashboardLoading) {
       return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color="#005e7a" />
-          <Typography variant="body1" color="textSecondary" style={{ marginTop: 12 }}>
-            Memuat data dashboard...
-          </Typography>
-        </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Welcome Section Skeleton */}
+          <SkeletonCard style={{ marginBottom: 20, height: 100 }} />
+          
+          {/* Metrics Skeleton */}
+          <View style={{ marginBottom: 20 }}>
+            <SkeletonCard style={{ width: 200, height: 30, marginBottom: 15 }} />
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+              <SkeletonCard style={{ flex: 1, minWidth: '45%', height: 120 }} />
+              <SkeletonCard style={{ flex: 1, minWidth: '45%', height: 120 }} />
+              <SkeletonCard style={{ flex: 1, minWidth: '45%', height: 120 }} />
+              <SkeletonCard style={{ flex: 1, minWidth: '45%', height: 120 }} />
+            </View>
+          </View>
+
+          {/* Quick Actions Skeleton */}
+          <View style={{ marginBottom: 20 }}>
+            <SkeletonCard style={{ width: 150, height: 30, marginBottom: 15 }} />
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+              <SkeletonCard style={{ flex: 1, minWidth: '45%', height: 80 }} />
+              <SkeletonCard style={{ flex: 1, minWidth: '45%', height: 80 }} />
+              <SkeletonCard style={{ flex: 1, minWidth: '45%', height: 80 }} />
+              <SkeletonCard style={{ flex: 1, minWidth: '45%', height: 80 }} />
+            </View>
+          </View>
+
+          {/* Recent Incidents Skeleton */}
+          <View style={{ marginBottom: 20 }}>
+            <SkeletonCard style={{ width: 180, height: 30, marginBottom: 15 }} />
+            <SkeletonCard style={{ height: 300 }} />
+          </View>
+        </ScrollView>
       );
     }
 
     if (error) {
       return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <Ionicons name="alert-circle-outline" size={48} color="#e74c3c" />
-          <Typography variant="body1" color="error" style={{ marginTop: 12, textAlign: 'center' }}>
-            {error}
-          </Typography>
-          <QuickAction
-            title="Coba Lagi"
-            icon="refresh-outline"
-            onPress={fetchDashboardData}
-            style={{ marginTop: 16 }}
-            variant="primary"
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <ErrorMessage
+            message={error}
+            onRetry={fetchDashboardData}
           />
-        </View>
+        </ScrollView>
       );
     }
 
@@ -347,12 +373,11 @@ export default function ManagementDashboard() {
           
           <Card variant="default">
             {incidents.length === 0 ? (
-              <View style={{ padding: 40, alignItems: 'center' }}>
-                <Ionicons name="document-outline" size={48} color="#cccccc" />
-                <Typography variant="body1" color="textSecondary" style={{ marginTop: 12, textAlign: 'center' }}>
-                  Tidak ada insiden terbaru
-                </Typography>
-              </View>
+              <EmptyState
+                title="Tidak ada insiden terbaru"
+                message="Insiden baru akan muncul di sini"
+                icon="document-outline"
+              />
             ) : (
               incidents.slice(0, 5).map((incident, index) => (
                 <View key={incident.id}>
@@ -375,7 +400,7 @@ export default function ManagementDashboard() {
                     onPress={() => navigateToIncidentDetail(incident.id)}
                   />
                   {index < incidents.slice(0, 5).length - 1 && (
-                    <View style={{ height: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 }} />
+                    <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
                   )}
                 </View>
               ))
@@ -389,7 +414,7 @@ export default function ManagementDashboard() {
   const renderProfile = () => (
     <ScrollView showsVerticalScrollIndicator={false}>
       <Card variant="elevated" style={{ marginBottom: 20, alignItems: 'center', padding: 40 }}>
-        <Ionicons name="person-circle" size={80} color="#005e7a" />
+        <Ionicons name="person-circle" size={80} color={colors.primary.main} />
         <Typography variant="h3" weight="bold" color="primary" style={{ marginTop: 12 }}>
           {profile?.full_name || 'Nama Pengguna'}
         </Typography>
@@ -412,7 +437,7 @@ export default function ManagementDashboard() {
           rightIcon="chevron-forward"
           onPress={() => Alert.alert('Info', 'Fitur edit profil akan segera hadir!')}
         />
-        <View style={{ height: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 }} />
+        <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
         
         <ListItem
           title="Pengaturan Notifikasi"
@@ -420,7 +445,7 @@ export default function ManagementDashboard() {
           rightIcon="chevron-forward"
           onPress={() => Alert.alert('Info', 'Fitur pengaturan notifikasi akan segera hadir!')}
         />
-        <View style={{ height: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 }} />
+        <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
         
         <ListItem
           title="Bahasa"
@@ -441,7 +466,7 @@ export default function ManagementDashboard() {
           rightIcon="chevron-forward"
           onPress={() => Alert.alert('Info', 'Fitur pusat bantuan akan segera hadir!')}
         />
-        <View style={{ height: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 }} />
+        <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
         
         <ListItem
           title="Syarat & Ketentuan"
@@ -449,7 +474,7 @@ export default function ManagementDashboard() {
           rightIcon="chevron-forward"
           onPress={() => Alert.alert('Info', 'Fitur syarat & ketentuan akan segera hadir!')}
         />
-        <View style={{ height: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 }} />
+        <View style={{ height: 1, backgroundColor: colors.neutral[200], marginHorizontal: 16 }} />
         
         <ListItem
           title="Kebijakan Privasi"
