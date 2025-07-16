@@ -5,6 +5,7 @@ import { Button } from '@/src/components/atoms/Button';
 import { Input } from '@/src/components/atoms/Input';
 import { Typography } from '@/src/components/atoms/Typography';
 import { useColors } from '@/src/context/ThemeContext';
+import { baseColors } from '@/src/styles/colors';
 
 interface AuthFormProps {
   role?: string | null;
@@ -114,7 +115,7 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
   return (
     <View style={styles.formContainer}>
       {errorMessage ? (
-        <View style={styles.errorContainer}>
+        <View style={[styles.errorContainer, { backgroundColor: baseColors.error[100] }]}>
           <Typography color="error" align="center">{errorMessage}</Typography>
         </View>
       ) : null}
@@ -287,7 +288,6 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   errorContainer: {
-    backgroundColor: 'rgba(244, 67, 54, 0.1)',
     padding: 12,
     borderRadius: 8,
   },
