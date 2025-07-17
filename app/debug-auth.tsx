@@ -72,7 +72,7 @@ export default function DebugAuthScreen() {
           <Text style={styles.buttonText}>🔓 Sign Out</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={() => router.replace('/(auth)/login')}
+        <TouchableOpacity style={styles.button} onPress={() => router.replace('/(auth)/login')}>
           <Text style={styles.buttonText}>🔄 Go to Login</Text>
         </TouchableOpacity>
       </View>

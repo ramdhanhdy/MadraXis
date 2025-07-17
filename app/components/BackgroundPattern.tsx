@@ -1,5 +1,5 @@
 import React from 'react';
-import { BackgroundPattern as DesignSystemBackgroundPattern } from '../src/components/atoms/BackgroundPattern';
+import { BackgroundPattern as DesignSystemBackgroundPattern } from '../../src/components/atoms/BackgroundPattern';
 
 // Update app/components/BackgroundPattern.tsx to use the atomic design system
 const BackgroundPattern: React.FC<{ color?: string; opacity?: number }> = ({ 

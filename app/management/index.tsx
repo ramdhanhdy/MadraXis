@@ -10,29 +10,29 @@ export default function ManagementIndex() {
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.replace('/screens/auth/login');
+        router.replace('/(auth)/login');
       } else if (user && profile) {
         // User is authenticated and profile is loaded
         if (profile.role !== 'management') {
           // Redirect based on role or to login if role doesn't match
           switch (profile.role) {
             case 'teacher':
-              router.replace('/screens/teacher/TeacherDashboard');
+              router.replace('/(teacher)/dashboard');
               break;
             case 'parent':
-              router.replace('/screens/parent/ParentDashboard');
+              router.replace('/(parent)/dashboard');
               break;
             case 'student':
-              router.replace('/screens/student/StudentDashboard');
+              router.replace('/(student)/dashboard');
               break;
             default:
-              router.replace('/screens/auth/login');
+              router.replace('/(auth)/login');
           }
         } else if (profile.role === 'management') {
           // Check if school_id exists to decide between dashboard and setup
           const schoolId = user.user_metadata?.school_id || profile.school_id;
           if (schoolId) {
-            router.replace('/management/dashboard');
+            router.replace('/(management)/dashboard');
           } else {
             router.replace('/management/setup');
           }

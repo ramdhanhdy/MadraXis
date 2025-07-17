@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) {
         console.error('Error fetching user profile:', error);
-        router.replace('/screens/auth/login');
+        router.replace('/(auth)/login');
         return;
       }
 
@@ -57,11 +57,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         navigateBasedOnRole(userProfile.role, userProfile.school_id);
       } else {
         console.error('No role found for user');
-        router.replace('/screens/auth/login');
+        router.replace('/(auth)/login');
       }
     } catch (error) {
       console.error('Error in fetchUserProfileAndNavigate:', error);
-      router.replace('/screens/auth/login');
+      router.replace('/(auth)/login');
     }
   };
 
@@ -70,24 +70,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('🔐 Navigating based on role:', role, 'school_id:', schoolId);
     switch (role) {
       case 'teacher':
-        router.replace('/screens/teacher/TeacherDashboard');
+        router.replace('/(teacher)/dashboard');
         break;
       case 'management':
         if (schoolId) {
-          router.replace('/management/dashboard');
+          router.replace('/(management)/dashboard');
         } else {
           router.replace('/management/setup');
         }
         break;
       case 'parent':
-        router.replace('/screens/parent/ParentDashboard');
+        router.replace('/(parent)/dashboard');
         break;
       case 'student':
-        router.replace('/screens/student/StudentDashboard');
+        router.replace('/(student)/dashboard');
         break;
       default:
         console.error('Unknown role:', role);
-        router.replace('/screens/auth/login');
+        router.replace('/(auth)/login');
         break;
     }
   };
@@ -106,7 +106,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error('🚨 Error during session clearing:', error);
       // Force redirect to login if signOut fails
-      router.replace('/screens/auth/login');
+      router.replace('/(auth)/login');
     } finally {
       setLoading(false);
     }
@@ -147,7 +147,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else if (event === 'SIGNED_OUT') {
         console.log('🔐 User signed out - redirecting to login');
         setProfile(null);
-        router.replace('/screens/auth/login');
+        router.replace('/(auth)/login');
       }
     });
 
