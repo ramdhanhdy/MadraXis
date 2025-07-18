@@ -140,6 +140,28 @@ jest.mock('react-native/Libraries/Components/ScrollView/ScrollViewNativeComponen
   };
 });
 
+// Mock React Native SafeAreaView to avoid ES6 syntax issues
+jest.mock('react-native/Libraries/Components/SafeAreaView/SafeAreaView', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: ({ children, style, ...props }) => {
+      return React.createElement(View, {
+        ...props,
+        style: style,
+      }, children);
+    },
+  };
+});
+
+// Mock RCTSafeAreaViewNativeComponent
+jest.mock('react-native/src/private/specs_DEPRECATED/components/RCTSafeAreaViewNativeComponent', () => {
+  return {
+    __INTERNAL_VIEW_CONFIG: {},
+  };
+});
+
 // Mock Theme Context for hooks
 jest.mock('./src/context/ThemeContext', () => ({
   ...jest.requireActual('./src/context/ThemeContext'),
