@@ -9,7 +9,6 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "test:bun": "jest --watchAll --config=jest.bun.config.js",
     "lint": "expo lint"
   },
   "jest": {
