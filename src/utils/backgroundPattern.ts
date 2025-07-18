@@ -4,12 +4,12 @@
  */
 
 import { useTheme, useColors } from '../context/ThemeContext';
-import { PatternVariant, PatternIntensity } from '../components/atoms/BackgroundPattern';
+import { PatternVariant, PatternIntensity } from '../shared/components/atoms/BackgroundPattern';
 
 // Pattern configuration for different contexts
 export interface PatternConfig {
   variant: PatternVariant;
-  intensity: PatternIntensity;
+  intensity?: PatternIntensity;
   color?: string;
   opacity?: number;
 }
@@ -69,51 +69,45 @@ export const patternConfigs = {
 };
 
 // Hook to get pattern configuration with theme integration
-export const usePatternConfig = (configKey: keyof typeof patternConfigs, role?: string) => {
+export const usePatternConfig = (configKey: keyof typeof patternConfigs, role?: string): PatternConfig => {
   const { theme } = useTheme();
   const colors = useColors();
-  
-  let config: PatternConfig;
-  
+
   // Handle dashboard configurations with role-based colors
-  if (configKey === 'dashboard' && role) {
-    const dashboardConfig = patternConfigs.dashboard;
-    const roleConfig = dashboardConfig[role as keyof typeof dashboardConfig] || dashboardConfig.default;
-    
-    // Resolve color values for role-specific configurations
-    let patternColor: string | undefined;
-    switch (role) {
-      case 'student':
-        patternColor = colors.primary.main;
-        break;
-      case 'teacher':
-        patternColor = colors.success.main;
-        break;
-      case 'parent':
-        patternColor = colors.warning.main;
-        break;
-      case 'management':
-        patternColor = colors.error.main;
-        break;
-      default:
-        patternColor = colors.primary.main;
-        break;
-    }
-    
-    config = {
-      ...roleConfig,
+  if (configKey === 'dashboard') {
+    const dashboardConfigs = patternConfigs.dashboard;
+    const effectiveRole = role && role in dashboardConfigs ? role : 'default';
+    const roleConfig = dashboardConfigs[effectiveRole as keyof typeof dashboardConfigs];
+
+    // Define the color map and the type for its keys
+    const colorMap = {
+      primary: colors.primary.main,
+      success: colors.success.main,
+      warning: colors.warning.main,
+      error: colors.error.main,
+    };
+    type ColorName = keyof typeof colorMap;
+
+    // Resolve color name from config, ensuring it's a valid key
+    const colorName = ('color' in roleConfig && roleConfig.color) ? roleConfig.color as ColorName : 'primary';
+    const patternColor = colorMap[colorName];
+
+    return {
+      variant: roleConfig.variant,
+      intensity: roleConfig.intensity,
       color: patternColor,
     };
-  } else {
-    // Handle other pattern types
-    const baseConfig = patternConfigs[configKey];
-    config = {
-      ...baseConfig,
-      color: colors.primary.main,
-    };
-  }
+  } 
+
+  // Handle other simple pattern types
+  const config = patternConfigs[configKey];
+  const color = ('color' in config && typeof config.color === 'string') ? config.color : colors.primary.main;
   
-  return config;
+  return {
+    variant: config.variant,
+    intensity: 'intensity' in config ? config.intensity : undefined,
+    color: color,
+  };
 };
 
 // Helper function to get role-specific pattern with resolved colors
