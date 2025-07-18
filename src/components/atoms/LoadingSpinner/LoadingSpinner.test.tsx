@@ -173,8 +173,47 @@ jest.mock('../../../context/ThemeContext', () => ({
     toggleDarkMode: jest.fn(),
   }),
   useColors: () => mockTheme.colors,
+  useTypography: () => mockTheme.typography,
+  useSpacing: () => mockTheme.spacing,
   ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
+
+// Mock ActivityIndicator to provide proper testID and props
+jest.mock('react-native/Libraries/Components/ActivityIndicator/ActivityIndicator', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: ({ size = 'small', color = '#007AFF', testID, ...props }: any) => {
+      // Return a View that represents the ActivityIndicator
+      return React.createElement(View, {
+        ...props,
+        testID: testID,
+        size,
+        color,
+      });
+    },
+  };
+});
+
+// Mock Typography component
+jest.mock('../../atoms/Typography/Typography', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  const TypographyComponent = ({ children, style, testID, ...props }: any) => {
+    return React.createElement(Text, {
+      ...props,
+      style: style || {},
+      testID: testID || 'typography',
+    }, children);
+  };
+  
+  return {
+    __esModule: true,
+    Typography: TypographyComponent,
+    default: TypographyComponent,
+  };
+});
 
 describe('LoadingSpinner', () => {
   it('renders correctly with default props', () => {
@@ -221,10 +260,17 @@ describe('LoadingSpinner', () => {
     );
     
     const spinnerContainer = getByTestId('loading-spinner');
-    expect(spinnerContainer.props.style.padding).toBe(24); // theme.spacing.base.lg
+    // Style is an array, so we need to check the first element or flatten it
+    const containerStyle = Array.isArray(spinnerContainer.props.style) 
+      ? spinnerContainer.props.style[0] 
+      : spinnerContainer.props.style;
+    expect(containerStyle.padding).toBe(24); // theme.spacing.base.lg
     
     const message = getByTestId('loading-message');
-    expect(message.props.style.marginTop).toBe(8); // theme.spacing.base.sm
+    const messageStyle = Array.isArray(message.props.style) 
+      ? message.props.style[0] 
+      : message.props.style;
+    expect(messageStyle.marginTop).toBe(8); // theme.spacing.base.sm
   });
 
   it('renders with custom message', () => {
