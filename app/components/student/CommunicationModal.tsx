@@ -1,129 +1,107 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View } from 'react-native';
+import { Card } from '../../../src/components/molecules/Card';
+import { ListItem } from '../../../src/components/molecules/ListItem';
+import { Typography } from '../../../src/components/atoms/Typography';
+import { Avatar } from '../../../src/components/atoms/Avatar';
 
 export default function CommunicationModal() {
   return (
     <View>
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Guru</Text>
-        <TouchableOpacity style={styles.contactCard}>
-          <View style={[styles.contactIcon, { backgroundColor: '#005e7a' }]}>
-            <Ionicons name="person" size={24} color="#ffffff" />
-          </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactName}>Ustadz Ahmad</Text>
-            <Text style={styles.contactRole}>Guru Tahfidz</Text>
-          </View>
-          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.contactCard}>
-          <View style={[styles.contactIcon, { backgroundColor: '#005e7a' }]}>
-            <Ionicons name="person" size={24} color="#ffffff" />
-          </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactName}>Ustadzah Fatimah</Text>
-            <Text style={styles.contactRole}>Guru Bahasa Arab</Text>
-          </View>
-          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
-        </TouchableOpacity>
+      <View style={{ marginBottom: 20 }}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          Guru
+        </Typography>
+        <Card variant="default" padding="none">
+          <ListItem
+            title="Ustadz Ahmad"
+            subtitle="Guru Tahfidz"
+            leftComponent={
+              <Avatar
+                size="md"
+                backgroundColor="#005e7a"
+                iconName="person"
+                iconColor="#ffffff"
+              />
+            }
+            rightIcon="chatbubble-outline"
+            onPress={() => alert('Fitur chat dengan guru akan segera hadir!')}
+            testID="contact-ustadz-ahmad"
+          />
+          <ListItem
+            title="Ustadzah Fatimah"
+            subtitle="Guru Bahasa Arab"
+            leftComponent={
+              <Avatar
+                size="md"
+                backgroundColor="#005e7a"
+                iconName="person"
+                iconColor="#ffffff"
+              />
+            }
+            rightIcon="chatbubble-outline"
+            onPress={() => alert('Fitur chat dengan guru akan segera hadir!')}
+            showDivider={true}
+            testID="contact-ustadzah-fatimah"
+          />
+        </Card>
       </View>
 
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Orang Tua</Text>
-        <TouchableOpacity style={styles.contactCard}>
-          <View style={[styles.contactIcon, { backgroundColor: '#f0c75e' }]}>
-            <Ionicons name="people" size={24} color="#ffffff" />
-          </View>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactName}>Orang Tua</Text>
-            <Text style={styles.contactRole}>Ayah & Ibu</Text>
-          </View>
-          <Ionicons name="chatbubble-outline" size={24} color="#005e7a" />
-        </TouchableOpacity>
+      <View style={{ marginBottom: 20 }}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          Orang Tua
+        </Typography>
+        <Card variant="default" padding="none">
+          <ListItem
+            title="Orang Tua"
+            subtitle="Ayah & Ibu"
+            leftComponent={
+              <Avatar
+                size="md"
+                backgroundColor="#f0c75e"
+                iconName="people"
+                iconColor="#ffffff"
+              />
+            }
+            rightIcon="chatbubble-outline"
+            onPress={() => alert('Fitur chat dengan orang tua akan segera hadir!')}
+            testID="contact-parents"
+          />
+        </Card>
       </View>
 
-      <View style={styles.modalSection}>
-        <Text style={styles.modalSectionTitle}>Pesan Terbaru</Text>
-        <View style={styles.messageCard}>
-          <View style={styles.messageHeader}>
-            <Text style={styles.messageSender}>Ustadz Ahmad</Text>
-            <Text style={styles.messageTime}>10:30</Text>
+      <View style={{ marginBottom: 20 }}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          Pesan Terbaru
+        </Typography>
+        <Card variant="default" padding="medium" style={{ marginBottom: 10 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+            <Typography variant="body1" color="primary" weight="bold">
+              Ustadz Ahmad
+            </Typography>
+            <Typography variant="body2" color="tertiary">
+              10:30
+            </Typography>
           </View>
-          <Text style={styles.messageContent}>Jangan lupa persiapkan hafalan untuk besok ya</Text>
-        </View>
-        <View style={styles.messageCard}>
-          <View style={styles.messageHeader}>
-            <Text style={styles.messageSender}>Ibu</Text>
-            <Text style={styles.messageTime}>Kemarin</Text>
+          <Typography variant="body2" color="secondary">
+            Jangan lupa persiapkan hafalan untuk besok ya
+          </Typography>
+        </Card>
+        <Card variant="default" padding="medium">
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+            <Typography variant="body1" color="primary" weight="bold">
+              Ibu
+            </Typography>
+            <Typography variant="body2" color="tertiary">
+              Kemarin
+            </Typography>
           </View>
-          <Text style={styles.messageContent}>Bagaimana kabarmu hari ini, nak?</Text>
-        </View>
+          <Typography variant="body2" color="secondary">
+            Bagaimana kabarmu hari ini, nak?
+          </Typography>
+        </Card>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  modalSection: {
-    marginBottom: 20,
-  },
-  modalSectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 10,
-  },
-  contactCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-  },
-  contactIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  contactInfo: {
-    flex: 1,
-  },
-  contactName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  contactRole: {
-    fontSize: 12,
-    color: '#888888',
-  },
-  messageCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-  },
-  messageHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-  },
-  messageSender: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  messageTime: {
-    fontSize: 12,
-    color: '#888888',
-  },
-  messageContent: {
-    fontSize: 14,
-    color: '#555555',
-  },
-});

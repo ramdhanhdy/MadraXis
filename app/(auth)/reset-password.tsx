@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Alert, View, TextInput, Button, Text, StyleSheet } from 'react-native';
+import { Alert, View, StyleSheet } from 'react-native';
 import { supabase } from '../../src/utils/supabase';
 import { Stack, useRouter, useGlobalSearchParams } from 'expo-router';
+import { Button } from '../../src/components/atoms/Button';
+import { Input } from '../../src/components/atoms/Input';
+import { Typography } from '../../src/components/atoms/Typography';
 
 export default function ResetPasswordScreen() {
   const [password, setPassword] = useState('');
@@ -68,22 +71,32 @@ export default function ResetPasswordScreen() {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Set Password' }} />
-      <Text style={styles.title}>
+      <Typography variant="h3" align="center" style={styles.title}>
         Choose a New Password
-      </Text>
-      <TextInput
-        placeholder="New Password"
+      </Typography>
+      
+      <Input
+        label="New Password"
+        placeholder="Enter new password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={styles.input}
         autoCapitalize="none"
+        helperText="Must be 8+ characters with uppercase, lowercase, number, and special character"
+        leftIcon="lock-closed-outline"
       />
+      
       <Button
-        title={loading ? 'Setting...' : 'Set New Password'}
+        variant="primary"
+        size="large"
+        fullWidth
         onPress={handleResetPassword}
         disabled={loading}
-      />
+        loading={loading}
+        style={styles.button}
+      >
+        Set New Password
+      </Button>
     </View>
   );
 }
@@ -93,18 +106,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
+    gap: 16,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
     marginBottom: 20,
-    textAlign: 'center',
   },
-  input: {
-    borderWidth: 1,
-    borderColor: 'gray',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 20,
+  button: {
+    marginTop: 20,
   },
 });

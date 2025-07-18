@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { supabase } from '@/src/utils/supabase';
+import { Button } from '@/src/components/atoms/Button';
+import { Input } from '@/src/components/atoms/Input';
+import { Typography } from '@/src/components/atoms/Typography';
+import { useColors } from '@/src/context/ThemeContext';
+import { baseColors } from '@/src/styles/colors';
 
 interface AuthFormProps {
   role?: string | null;
@@ -14,6 +19,8 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
   const [mode, setMode] = useState<'login' | 'reset' | 'otp' | 'otp-verify'>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const colors = useColors();
 
   async function handleLogin() {
     if (!email || !password) {
@@ -108,256 +115,183 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
   return (
     <View style={styles.formContainer}>
       {errorMessage ? (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{errorMessage}</Text>
+        <View style={[styles.errorContainer, { backgroundColor: baseColors.error[100] }]}>
+          <Typography color="error" align="center">{errorMessage}</Typography>
         </View>
       ) : null}
       
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={[styles.input, mode === 'otp-verify' && styles.disabledInput]}
-          placeholder="Enter your email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          editable={!isLoading && mode !== 'otp-verify'}
-        />
-      </View>
+      <Input
+        label="Email"
+        placeholder="Enter your email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        editable={!isLoading && mode !== 'otp-verify'}
+        leftIcon="mail-outline"
+      />
 
       {mode === 'login' && (
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize="none"
-            editable={!isLoading}
-          />
-        </View>
+        <Input
+          label="Password"
+          placeholder="Enter your password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoCapitalize="none"
+          editable={!isLoading}
+          leftIcon="lock-closed-outline"
+        />
       )}
 
       {mode === 'otp-verify' && (
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Verification Code</Text>
-          <TextInput
-            style={[styles.input, styles.otpInput]}
-            placeholder="000000"
-            value={otpCode}
-            onChangeText={(text) => setOtpCode(text.replace(/[^0-9]/g, '').slice(0, 6))}
-            keyboardType="number-pad"
-            maxLength={6}
-            editable={!isLoading}
-            textAlign="center"
-          />
-          <Text style={styles.otpHint}>Enter the 6-digit code sent to your email</Text>
-        </View>
+        <Input
+          label="Verification Code"
+          placeholder="000000"
+          value={otpCode}
+          onChangeText={(text) => setOtpCode(text.replace(/[^0-9]/g, '').slice(0, 6))}
+          keyboardType="number-pad"
+          maxLength={6}
+          editable={!isLoading}
+          textAlign="center"
+          helperText="Enter the 6-digit code sent to your email"
+        />
       )}
 
       {/* Main Action Buttons */}
       {mode === 'login' ? (
-        <TouchableOpacity
-          style={[styles.loginButton, isLoading && styles.disabledButton]}
+        <Button
+          variant="primary"
+          size="large"
+          fullWidth
           onPress={handleLogin}
           disabled={isLoading}
+          loading={isLoading}
+          icon="log-in-outline"
+          iconPosition="left"
         >
-          {isLoading ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={styles.loginButtonText}>Login with Password</Text>
-          )}
-        </TouchableOpacity>
+          Login with Password
+        </Button>
       ) : mode === 'otp' ? (
-        <TouchableOpacity
-          style={[styles.loginButton, isLoading && styles.disabledButton]}
+        <Button
+          variant="primary"
+          size="large"
+          fullWidth
           onPress={handleSendOTP}
           disabled={isLoading}
+          loading={isLoading}
+          icon="mail-outline"
+          iconPosition="left"
         >
-          {isLoading ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={styles.loginButtonText}>Send Code</Text>
-          )}
-        </TouchableOpacity>
+          Send Code
+        </Button>
       ) : mode === 'otp-verify' ? (
-        <TouchableOpacity
-          style={[styles.loginButton, isLoading && styles.disabledButton]}
+        <Button
+          variant="primary"
+          size="large"
+          fullWidth
           onPress={handleVerifyOTP}
           disabled={isLoading}
+          loading={isLoading}
+          icon="checkmark-outline"
+          iconPosition="left"
         >
-          {isLoading ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={styles.loginButtonText}>Verify Code</Text>
-          )}
-        </TouchableOpacity>
+          Verify Code
+        </Button>
       ) : (
-        <TouchableOpacity
-          style={[styles.loginButton, isLoading && styles.disabledButton]}
+        <Button
+          variant="primary"
+          size="large"
+          fullWidth
           onPress={handleSendReset}
           disabled={isLoading}
+          loading={isLoading}
+          icon="mail-outline"
+          iconPosition="left"
         >
-          {isLoading ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={styles.loginButtonText}>Send Reset Link</Text>
-          )}
-        </TouchableOpacity>
+          Send Reset Link
+        </Button>
       )}
 
       {/* Mode Toggle Links */}
       {mode === 'login' && (
         <>
-          <TouchableOpacity
-            style={styles.toggleContainer}
+          <Button
+            variant="ghost"
+            size="medium"
             onPress={() => setMode('otp')}
+            style={styles.toggleButton}
           >
-            <Text style={styles.toggleText}>Or login with code instead</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.forgotPasswordContainer}
+            Or login with code instead
+          </Button>
+          <Button
+            variant="ghost"
+            size="medium"
             onPress={() => setMode('reset')}
+            style={styles.toggleButton}
           >
-            <Text style={styles.forgotPasswordText}>Forgot password? Set/Reset Password</Text>
-          </TouchableOpacity>
+            Forgot password? Set/Reset Password
+          </Button>
         </>
       )}
 
       {mode === 'otp' && (
-        <>
-          <TouchableOpacity
-            style={styles.toggleContainer}
-            onPress={() => setMode('login')}
-          >
-            <Text style={styles.toggleText}>Back to password login</Text>
-          </TouchableOpacity>
-        </>
+        <Button
+          variant="ghost"
+          size="medium"
+          onPress={() => setMode('login')}
+          style={styles.toggleButton}
+        >
+          Back to password login
+        </Button>
       )}
 
       {mode === 'otp-verify' && (
         <>
-          <TouchableOpacity
-            style={styles.toggleContainer}
+          <Button
+            variant="ghost"
+            size="medium"
             onPress={handleSendOTP}
             disabled={isLoading}
+            style={styles.toggleButton}
           >
-            <Text style={[styles.toggleText, isLoading && styles.disabledText]}>Resend code</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.forgotPasswordContainer}
+            Resend code
+          </Button>
+          <Button
+            variant="ghost"
+            size="medium"
             onPress={() => setMode('login')}
+            style={styles.toggleButton}
           >
-            <Text style={styles.forgotPasswordText}>Back to login</Text>
-          </TouchableOpacity>
+            Back to login
+          </Button>
         </>
       )}
 
       {mode === 'reset' && (
-        <TouchableOpacity
-          style={styles.forgotPasswordContainer}
+        <Button
+          variant="ghost"
+          size="medium"
           onPress={() => setMode('login')}
+          style={styles.toggleButton}
         >
-          <Text style={styles.forgotPasswordText}>Back to Login</Text>
-        </TouchableOpacity>
+          Back to Login
+        </Button>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-    formContainer: {
-        paddingHorizontal: 10,
-      },
-      errorContainer: {
-        backgroundColor: '#ffebee',
-        padding: 10,
-        borderRadius: 5,
-        marginBottom: 20,
-      },
-      errorText: {
-        color: '#d32f2f',
-        textAlign: 'center',
-      },
-      inputContainer: {
-        marginBottom: 20,
-      },
-      label: {
-        fontSize: 14,
-        color: '#555555',
-        marginBottom: 8,
-      },
-      input: {
-        borderWidth: 1,
-        borderColor: '#dddddd',
-        borderRadius: 8,
-        paddingHorizontal: 15,
-        paddingVertical: 12,
-        fontSize: 16,
-      },
-      disabledInput: {
-        backgroundColor: '#f5f5f5',
-        color: '#888888',
-      },
-      otpInput: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        letterSpacing: 8,
-        textAlign: 'center',
-      },
-      otpHint: {
-        fontSize: 12,
-        color: '#777777',
-        textAlign: 'center',
-        marginTop: 5,
-      },
-      forgotPasswordContainer: {
-        alignItems: 'flex-end',
-        marginBottom: 20,
-      },
-      forgotPasswordText: {
-        color: '#005e7a',
-        fontSize: 14,
-      },
-      toggleContainer: {
-        alignItems: 'center',
-        marginVertical: 15,
-      },
-      toggleText: {
-        color: '#005e7a',
-        fontSize: 14,
-        textDecorationLine: 'underline',
-      },
-      disabledText: {
-        color: '#a0a0a0',
-      },
-      loginButton: {
-        backgroundColor: '#005e7a',
-        paddingVertical: 15,
-        borderRadius: 8,
-        alignItems: 'center',
-      },
-      disabledButton: {
-        backgroundColor: '#a0a0a0',
-      },
-      loginButtonText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: 'bold',
-      },
-      registerButton: {
-        backgroundColor: '#f0c75e',
-        paddingVertical: 15,
-        paddingHorizontal: 30,
-        borderRadius: 8,
-        alignItems: 'center',
-      },
-      registerButtonText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: 'bold',
-      },
+  formContainer: {
+    paddingHorizontal: 16,
+    gap: 16,
+  },
+  errorContainer: {
+    padding: 12,
+    borderRadius: 8,
+  },
+  toggleButton: {
+    marginTop: 8,
+  },
 });

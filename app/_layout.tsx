@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { ThemeProvider } from '../src/context/ThemeContext';
 import * as SplashScreen from 'expo-splash-screen';
 import AnimatedSplashScreen from './components/AnimatedSplashScreen';
 
@@ -72,8 +73,10 @@ const RootLayoutNav = () => {
 
 export default function RootLayout() {
     return (
-        <AuthProvider>
-            <RootLayoutNav />
-        </AuthProvider>
+        <ThemeProvider>
+            <AuthProvider>
+                <RootLayoutNav />
+            </AuthProvider>
+        </ThemeProvider>
     );
 }

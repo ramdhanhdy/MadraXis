@@ -40,3 +40,16 @@ app-example
 
 /docs/codebase_audit_14july.md
 /docs/project_definition_14july.md
+
+# Kiro IDE - ignore settings but keep specs
+.kiro/settings/
+.kiro/steering/
+!.kiro/specs/
+npx
+
+# Bun configuration files (experimental/unused)
+bun.config.js
+bun.config.ts
+bunfig.toml
+jest.bun.config.js
+BUN_FLOW_FIX_REPORT.md
