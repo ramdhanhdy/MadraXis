@@ -217,13 +217,22 @@ describe('Input Component', () => {
     });
 
     it('updates character count on text change', () => {
-      render(
-        <TestWrapper>
+      const TestComponent = () => {
+        const [value, setValue] = React.useState('');
+        return (
           <Input 
             showCharacterCount
             maxLength={50}
+            value={value}
+            onChangeText={setValue}
             testID="dynamic-count-input"
           />
+        );
+      };
+
+      render(
+        <TestWrapper>
+          <TestComponent />
         </TestWrapper>
       );
       

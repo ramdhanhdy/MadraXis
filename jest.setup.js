@@ -140,6 +140,14 @@ jest.mock('./src/context/ThemeContext', () => ({
       selected: '#007bff',
       disabled: '#f8f9fa',
     },
+    border: {
+      primary: '#dee2e6',
+      secondary: '#e9ecef',
+      focus: '#007bff',
+      error: '#dc3545',
+      success: '#28a745',
+      warning: '#ffc107',
+    },
   })),
   useSpacing: jest.fn(() => ({
     base: {
