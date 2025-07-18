@@ -64,7 +64,7 @@ describe('DashboardTemplate Component', () => {
         <TestWrapper>
           <DashboardTemplate
             header={{ title: 'Test Dashboard' }}
-            testID=\"test-dashboard\"
+            testID="test-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -188,7 +188,7 @@ describe('DashboardTemplate Component', () => {
               { id: 'home', label: 'Home', icon: 'home' },
               { id: 'profile', label: 'Profile', icon: 'person' }
             ]}
-            activeTab=\"home\"
+            activeTab="home"
             onTabChange={mockTabChange}
           >
             <SampleContent />
@@ -208,7 +208,7 @@ describe('DashboardTemplate Component', () => {
               { id: 'home', label: 'Home', icon: 'home' },
               { id: 'messages', label: 'Messages', icon: 'mail', badge: 3 }
             ]}
-            activeTab=\"home\"
+            activeTab="home"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -228,7 +228,7 @@ describe('DashboardTemplate Component', () => {
               { id: 'home', label: 'Home', icon: 'home' },
               { id: 'profile', label: 'Profile', icon: 'person' }
             ]}
-            activeTab=\"home\"
+            activeTab="home"
             onTabChange={mockTabChange}
           >
             <SampleContent />
@@ -281,7 +281,7 @@ describe('DashboardTemplate Component', () => {
         <TestWrapper>
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
-            testID=\"scrollable-dashboard\"
+            testID="scrollable-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -297,7 +297,7 @@ describe('DashboardTemplate Component', () => {
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
             scrollable={false}
-            testID=\"non-scrollable-dashboard\"
+            testID="non-scrollable-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -315,7 +315,7 @@ describe('DashboardTemplate Component', () => {
         <TestWrapper>
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
-            testID=\"pattern-dashboard\"
+            testID="pattern-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -332,7 +332,7 @@ describe('DashboardTemplate Component', () => {
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
             backgroundPattern={false}
-            testID=\"no-pattern-dashboard\"
+            testID="no-pattern-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -351,7 +351,7 @@ describe('DashboardTemplate Component', () => {
         <TestWrapper>
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
-            testID=\"safe-area-dashboard\"
+            testID="safe-area-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -368,7 +368,7 @@ describe('DashboardTemplate Component', () => {
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
             safeArea={false}
-            testID=\"no-safe-area-dashboard\"
+            testID="no-safe-area-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -384,7 +384,7 @@ describe('DashboardTemplate Component', () => {
         <TestWrapper>
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
-            testID=\"padded-dashboard\"
+            testID="padded-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -401,7 +401,7 @@ describe('DashboardTemplate Component', () => {
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
             contentPadding={false}
-            testID=\"no-padding-dashboard\"
+            testID="no-padding-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -420,8 +420,8 @@ describe('DashboardTemplate Component', () => {
         <TestWrapper>
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
-            backgroundColor=\"#ff0000\"
-            testID=\"custom-bg-dashboard\"
+            backgroundColor="#ff0000"
+            testID="custom-bg-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -437,8 +437,8 @@ describe('DashboardTemplate Component', () => {
         <TestWrapper>
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
-            contentBackgroundColor=\"#00ff00\"
-            testID=\"custom-content-bg-dashboard\"
+            contentBackgroundColor="#00ff00"
+            testID="custom-content-bg-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -464,7 +464,7 @@ describe('DashboardTemplate Component', () => {
             contentStyle={customContentStyle}
             tabBarStyle={customTabBarStyle}
             tabs={[{ id: 'home', label: 'Home', icon: 'home' }]}
-            testID=\"styled-dashboard\"
+            testID="styled-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -483,7 +483,7 @@ describe('DashboardTemplate Component', () => {
         <TestWrapper>
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
-            testID=\"accessible-dashboard\"
+            testID="accessible-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -499,8 +499,8 @@ describe('DashboardTemplate Component', () => {
         <TestWrapper>
           <DashboardTemplate
             header={{ title: 'Dashboard' }}
-            accessibilityLabel=\"Custom dashboard label\"
-            testID=\"custom-accessible-dashboard\"
+            accessibilityLabel="Custom dashboard label"
+            testID="custom-accessible-dashboard"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -538,7 +538,7 @@ describe('DashboardTemplate Component', () => {
               { id: 'home', label: 'Home', icon: 'home' },
               { id: 'profile', label: 'Profile', icon: 'person' }
             ]}
-            activeTab=\"home\"
+            activeTab="home"
           >
             <SampleContent />
           </DashboardTemplate>
@@ -604,13 +604,13 @@ describe('DashboardTemplate Component', () => {
               { id: 'home', label: 'Home', icon: 'home' },
               { id: 'profile', label: 'Profile', icon: 'person', badge: 2 }
             ]}
-            activeTab=\"home\"
+            activeTab="home"
             onTabChange={mockTabChange}
             backgroundPattern={true}
             scrollable={true}
             safeArea={true}
             contentPadding={true}
-            testID=\"full-dashboard\"
+            testID="full-dashboard"
           >
             <Text>Full featured content</Text>
           </DashboardTemplate>
