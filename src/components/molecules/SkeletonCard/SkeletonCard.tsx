@@ -163,7 +163,7 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({
         getLayoutStyles,
         style,
       ]}
-      testID={testID}
+      testID={testID || 'skeleton-card'}
     >
       {/* Avatar placeholder */}
       {showAvatar && <View style={getSkeletonStyles('avatar')} />}

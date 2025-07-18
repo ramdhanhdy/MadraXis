@@ -3,22 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ThemeProvider } from '../../../context/ThemeContext';
 import { EmptyState } from './EmptyState';
 
-// Mock the theme context
-jest.mock('../../../context/ThemeContext', () => ({
-  useTheme: () => ({
-    theme: {
-      spacing: {
-        base: { sm: 8, md: 12, lg: 16, xl: 20 }
-      }
-    }
-  }),
-  useColors: () => ({
-    primary: { main: '#007bff' },
-    secondary: { main: '#6c757d' },
-    text: { tertiary: '#6c757d' }
-  }),
-  ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+// Use global theme context mocks from jest.setup.js
 
 describe('EmptyState', () => {
   it('renders correctly with title and message', () => {
