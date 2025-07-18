@@ -1,14 +1,7 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Animated,
-  PanGestureHandler,
-  State,
-} from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, AccessibilityInfo } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
+import { SwipeableRow } from '../SwipeableRow/SwipeableRow';
 
 // Import types and utils
 import { Expense } from '../../../services/finance';
@@ -35,9 +28,6 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const [translateX] = useState(new Animated.Value(0));
-  const [showActions, setShowActions] = useState(false);
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const today = new Date();
@@ -56,263 +46,119 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
     }
   };
 
-  const handleGestureEvent = (event: PanGestureHandlerGestureEvent) => {
-    const { translationX } = event.nativeEvent;
-    
-    // Only allow left swipe (negative translation)
-    if (translationX < 0) {
-      translateX.setValue(Math.max(translationX, -120));
-    }
-  };
-
-  const handleStateChange = (event: any) => {
-    if (event.nativeEvent.state === State.END) {
-      const { translationX, velocityX } = event.nativeEvent;
-      
-      // Determine if swipe was significant enough to show actions
-      const shouldShowActions = translationX < -60 || velocityX < -500;
-      
-      if (shouldShowActions) {
-        setShowActions(true);
-        Animated.spring(translateX, {
-          toValue: -120,
-          useNativeDriver: true,
-          tension: 100,
-          friction: 8,
-        }).start();
-      } else {
-        setShowActions(false);
-        Animated.spring(translateX, {
-          toValue: 0,
-          useNativeDriver: true,
-          tension: 100,
-          friction: 8,
-        }).start();
-      }
-    }
-  };
-
   const handleDuplicate = () => {
-    setShowActions(false);
-    Animated.spring(translateX, {
-      toValue: 0,
-      useNativeDriver: true,
-      tension: 100,
-      friction: 8,
-    }).start();
     onDuplicate();
-  };
-
-  const handleEdit = () => {
-    if (onEdit) {
-      setShowActions(false);
-      Animated.spring(translateX, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 100,
-        friction: 8,
-      }).start();
-      onEdit();
-    }
-  };
-
-  const handleDelete = () => {
-    if (onDelete) {
-      setShowActions(false);
-      Animated.spring(translateX, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 100,
-        friction: 8,
-      }).start();
-      onDelete();
-    }
+    // Announce action for accessibility
+    AccessibilityInfo.announceForAccessibility('Expense duplicated');
   };
 
   return (
-    <View style={styles.container}>
-      {/* Action buttons (shown when swiped) */}
-      <View style={styles.actionsContainer}>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.duplicateButton]}
-          onPress={handleDuplicate}
-        >
-          <Ionicons name="copy-outline" size={20} color={colors.white} />
-          <Text style={styles.actionButtonText}>Duplicate</Text>
-        </TouchableOpacity>
-        
-        {onEdit && (
-          <TouchableOpacity
-            style={[styles.actionButton, styles.editButton]}
-            onPress={handleEdit}
-          >
-            <Ionicons name="pencil-outline" size={20} color={colors.white} />
-            <Text style={styles.actionButtonText}>Edit</Text>
-          </TouchableOpacity>
-        )}
-        
-        {onDelete && (
-          <TouchableOpacity
-            style={[styles.actionButton, styles.deleteButton]}
-            onPress={handleDelete}
-          >
-            <Ionicons name="trash-outline" size={20} color={colors.white} />
-            <Text style={styles.actionButtonText}>Delete</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Main card content */}
-      <PanGestureHandler
-        onGestureEvent={handleGestureEvent}
-        onHandlerStateChange={handleStateChange}
-      >
-        <Animated.View
-          style={[
-            styles.card,
-            {
-              transform: [{ translateX }],
-            },
-          ]}
-        >
-          <View style={styles.cardContent}>
-            <View style={styles.leftContent}>
-              <View style={styles.categoryBadge}>
-                <Text style={styles.categoryText}>
-                  {expense.expense_categories?.name || 'Unknown'}
-                </Text>
-              </View>
-              
-              <Text style={styles.description} numberOfLines={2}>
-                {expense.description}
+    <SwipeableRow onDuplicate={handleDuplicate}>
+      <View style={styles.card}>
+        <View style={styles.cardContent}>
+          <View style={styles.leftContent}>
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryText}>
+                {expense.expense_categories?.name || 'Unknown'}
               </Text>
-              
-              {expense.notes && (
-                <Text style={styles.notes} numberOfLines={1}>
-                  {expense.notes}
-                </Text>
-              )}
             </View>
             
-            <View style={styles.rightContent}>
-              <Text style={styles.amount}>
-                {utils.formatCurrency(expense.amount)}
+            <Text style={styles.description} numberOfLines={2}>
+              {expense.description}
+            </Text>
+            
+            {expense.notes && (
+              <Text style={styles.notes} numberOfLines={1}>
+                {expense.notes}
               </Text>
-              
-              <Text style={styles.date}>
-                {formatDate(expense.date)}
-              </Text>
-              
-              {expense.attachment_url && (
-                <View style={styles.attachmentIndicator}>
-                  <Ionicons name="attach" size={16} color={colors.gray[500]} />
-                </View>
-              )}
-            </View>
+            )}
           </View>
-        </Animated.View>
-      </PanGestureHandler>
-    </View>
+          
+          <View style={styles.rightContent}>
+            <Text style={styles.amount}>
+              {utils.formatCurrency(expense.amount)}
+            </Text>
+            
+            <Text style={styles.date}>
+              {formatDate(expense.date)}
+            </Text>
+            
+            {expense.attachment_url && (
+              <View style={styles.attachmentIndicator}>
+                <Ionicons name="attach" size={16} color={colors.text.tertiary} />
+              </View>
+            )}
+          </View>
+        </View>
+      </View>
+    </SwipeableRow>
   );
 };
 
-const styles = {
-  container: {
-    marginBottom: spacing.md,
-    position: 'relative' as const,
-  },
-  actionsContainer: {
-    position: 'absolute' as const,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    zIndex: 1,
-  },
-  actionButton: {
-    width: 60,
-    height: '100%',
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-    paddingHorizontal: spacing.xs,
-  },
-  duplicateButton: {
-    backgroundColor: colors.blue[500],
-  },
-  editButton: {
-    backgroundColor: colors.yellow[500],
-  },
-  deleteButton: {
-    backgroundColor: colors.red[500],
-  },
-  actionButtonText: {
-    ...typography.caption,
-    color: colors.white,
-    marginTop: spacing.xs,
-    fontSize: 10,
-  },
+const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface.primary,
     borderRadius: 12,
     shadowColor: colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    zIndex: 2,
+    marginHorizontal: 16,
+    marginVertical: 4,
   },
   cardContent: {
-    flexDirection: 'row' as const,
+    flexDirection: 'row',
     padding: spacing.md,
-    alignItems: 'flex-start' as const,
+    alignItems: 'flex-start',
+    minHeight: 80, // Ensure touch target is at least 48x48dp
   },
   leftContent: {
     flex: 1,
     marginRight: spacing.md,
   },
   rightContent: {
-    alignItems: 'flex-end' as const,
+    alignItems: 'flex-end',
     minWidth: 100,
   },
   categoryBadge: {
-    backgroundColor: colors.blue[100],
+    backgroundColor: colors.primary.light,
     borderRadius: 12,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-    alignSelf: 'flex-start' as const,
+    alignSelf: 'flex-start',
     marginBottom: spacing.sm,
   },
   categoryText: {
-    ...typography.caption,
-    color: colors.blue[700],
-    fontWeight: '600' as const,
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.primary.dark,
   },
   description: {
-    ...typography.body,
-    color: colors.gray[900],
+    fontSize: 16,
+    color: colors.text.primary,
     marginBottom: spacing.xs,
     lineHeight: 20,
   },
   notes: {
-    ...typography.caption,
-    color: colors.gray[600],
-    fontStyle: 'italic' as const,
+    fontSize: 12,
+    color: colors.text.secondary,
+    fontStyle: 'italic',
   },
   amount: {
-    ...typography.h4,
-    color: colors.gray[900],
-    fontWeight: '700' as const,
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text.primary,
     marginBottom: spacing.xs,
   },
   date: {
-    ...typography.caption,
-    color: colors.gray[600],
+    fontSize: 14,
+    color: colors.text.secondary,
     marginBottom: spacing.xs,
   },
   attachmentIndicator: {
-    alignSelf: 'flex-end' as const,
+    alignSelf: 'flex-end',
   },
-};
+});
 
 export default ExpenseCard;

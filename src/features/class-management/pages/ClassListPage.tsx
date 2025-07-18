@@ -1,18 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useAuth } from '@/src/features/authentication/context/AuthContext';
+import { ClassData, CreateClassData } from '../types';
+import { fetchClassesForSchool, fetchClassesForTeacher, createClass } from '../services/class.service';
 
-export default function ClassesScreen() {
+export default function ClassListPage() {
   const router = useRouter();
+  const { profile } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [newClassName, setNewClassName] = useState('');
   const [newClassLevel, setNewClassLevel] = useState('');
   const [newClassDescription, setNewClassDescription] = useState('');
-  const [classes, setClasses] = useState<ClassData[]>(sampleClasses);
+  const [classes, setClasses] = useState<ClassData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadClasses();
+  }, [profile]);
+
+  const loadClasses = async () => {
+    if (!profile?.school_id) return;
+
+    setLoading(true);
+    try {
+      let result;
+      if (profile.role === 'teacher') {
+        result = await fetchClassesForTeacher(profile.id);
+      } else {
+        result = await fetchClassesForSchool(profile.school_id);
+      }
+
+      if (result.error) {
+        console.error('Error loading classes:', result.error);
+      } else {
+        setClasses(result.data || []);
+      }
+    } catch (error) {
+      console.error('Error loading classes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredClasses = classes.filter(
     (classItem) => 
@@ -20,33 +53,37 @@ export default function ClassesScreen() {
       classItem.level.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleAddClass = () => {
-    if (!newClassName || !newClassLevel) {
-      alert('Mohon isi nama kelas dan tingkat');
+  const handleAddClass = async () => {
+    if (!newClassName || !newClassLevel || !profile?.school_id) {
+      alert('Please fill in all required fields');
       return;
     }
 
-    const newClass: ClassData = {
-      id: classes.length + 1,
+    const newClass: CreateClassData = {
       name: newClassName,
       level: newClassLevel,
       description: newClassDescription,
-      studentCount: 0,
-      progress: 0,
+      school_id: profile.school_id,
+      teacher_id: profile.role === 'teacher' ? profile.id : undefined,
     };
 
-    setClasses([...classes, newClass]);
-    setShowAddModal(false);
-    setNewClassName('');
-    setNewClassLevel('');
-    setNewClassDescription('');
+    const { data, error } = await createClass(newClass);
+    if (error) {
+      alert('Error creating class: ' + error.message);
+    } else {
+      setClasses([...classes, data]);
+      setShowAddModal(false);
+      setNewClassName('');
+      setNewClassLevel('');
+      setNewClassDescription('');
+    }
   };
 
   const renderClassItem = ({ item }: { item: ClassData }) => (
     <TouchableOpacity 
       style={styles.classCard}
       onPress={() => router.push({
-        pathname: '/(teacher)/class/[id]',
+        pathname: '/teacher/class/[id]',
         params: { id: item.id }
       })}
     >
@@ -57,7 +94,7 @@ export default function ClassesScreen() {
           </View>
           <View>
             <Text style={styles.className}>{item.name}</Text>
-            <Text style={styles.classLevel}>Tingkat {item.level}</Text>
+            <Text style={styles.classLevel}>Level {item.level}</Text>
           </View>
         </View>
         <TouchableOpacity>
@@ -72,7 +109,7 @@ export default function ClassesScreen() {
       <View style={styles.classStats}>
         <View style={styles.statItem}>
           <Ionicons name="people-outline" size={16} color="#888888" />
-          <Text style={styles.statText}>{item.studentCount} Siswa</Text>
+          <Text style={styles.statText}>{item.studentCount} Students</Text>
         </View>
         <View style={styles.statItem}>
           <Ionicons name="bar-chart-outline" size={16} color="#888888" />
@@ -89,7 +126,7 @@ export default function ClassesScreen() {
           })}
         >
           <Ionicons name="people" size={16} color="#005e7a" />
-          <Text style={styles.footerButtonText}>Siswa</Text>
+          <Text style={styles.footerButtonText}>Students</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.footerButton}
@@ -99,17 +136,17 @@ export default function ClassesScreen() {
           })}
         >
           <Ionicons name="calendar" size={16} color="#005e7a" />
-          <Text style={styles.footerButtonText}>Jadwal</Text>
+          <Text style={styles.footerButtonText}>Schedule</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.footerButton}
           onPress={() => router.push({
-            pathname: '/(teacher)/class/[id]/reports',
+            pathname: '/teacher/class/[id]/reports',
             params: { id: item.id }
           })}
         >
           <Ionicons name="document-text" size={16} color="#005e7a" />
-          <Text style={styles.footerButtonText}>Laporan</Text>
+          <Text style={styles.footerButtonText}>Reports</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -121,7 +158,7 @@ export default function ClassesScreen() {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Daftar Kelas</Text>
+        <Text style={styles.headerTitle}>Class List</Text>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={() => setShowAddModal(true)}
@@ -136,7 +173,7 @@ export default function ClassesScreen() {
           <Ionicons name="search" size={20} color="#888888" />
           <TextInput
             style={styles.searchInput}
-            placeholder="Cari kelas..."
+            placeholder="Search classes..."
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -144,7 +181,11 @@ export default function ClassesScreen() {
       </View>
       
       {/* Classes List */}
-      {filteredClasses.length > 0 ? (
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <Text>Loading classes...</Text>
+        </View>
+      ) : filteredClasses.length > 0 ? (
         <FlatList
           data={filteredClasses}
           renderItem={renderClassItem}
@@ -155,13 +196,13 @@ export default function ClassesScreen() {
         <View style={styles.emptyContainer}>
           <Ionicons name="school-outline" size={60} color="#cccccc" />
           <Text style={styles.emptyText}>
-            {searchQuery ? 'Tidak ada kelas yang sesuai' : 'Belum ada kelas'}
+            {searchQuery ? 'No classes found' : 'No classes yet'}
           </Text>
           <TouchableOpacity 
             style={styles.emptyButton}
             onPress={() => setShowAddModal(true)}
           >
-            <Text style={styles.emptyButtonText}>Tambah Kelas Baru</Text>
+            <Text style={styles.emptyButtonText}>Add New Class</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -175,7 +216,7 @@ export default function ClassesScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Tambah Kelas Baru</Text>
+              <Text style={styles.modalTitle}>Add New Class</Text>
               <TouchableOpacity onPress={() => setShowAddModal(false)}>
                 <Ionicons name="close" size={24} color="#333333" />
               </TouchableOpacity>
@@ -183,30 +224,30 @@ export default function ClassesScreen() {
             
             <View style={styles.modalContent}>
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Nama Kelas</Text>
+                <Text style={styles.inputLabel}>Class Name</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Contoh: Tahfidz Al-Baqarah"
+                  placeholder="e.g., Tahfidz Al-Baqarah"
                   value={newClassName}
                   onChangeText={setNewClassName}
                 />
               </View>
               
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Tingkat</Text>
+                <Text style={styles.inputLabel}>Level</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Contoh: Pemula, Menengah, Lanjutan"
+                  placeholder="e.g., Beginner, Intermediate, Advanced"
                   value={newClassLevel}
                   onChangeText={setNewClassLevel}
                 />
               </View>
               
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Deskripsi (Opsional)</Text>
+                <Text style={styles.inputLabel}>Description (Optional)</Text>
                 <TextInput
                   style={[styles.input, styles.textArea]}
-                  placeholder="Tambahkan deskripsi kelas..."
+                  placeholder="Add class description..."
                   value={newClassDescription}
                   onChangeText={setNewClassDescription}
                   multiline
@@ -221,13 +262,13 @@ export default function ClassesScreen() {
                 style={styles.cancelButton}
                 onPress={() => setShowAddModal(false)}
               >
-                <Text style={styles.cancelButtonText}>Batal</Text>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.saveButton}
                 onPress={handleAddClass}
               >
-                <Text style={styles.saveButtonText}>Simpan</Text>
+                <Text style={styles.saveButtonText}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -236,44 +277,6 @@ export default function ClassesScreen() {
     </SafeAreaView>
   );
 }
-
-// Types
-interface ClassData {
-  id: number;
-  name: string;
-  level: string;
-  description?: string;
-  studentCount: number;
-  progress: number;
-}
-
-// Sample Data
-const sampleClasses: ClassData[] = [
-  {
-    id: 1,
-    name: 'Tahfidz Al-Baqarah',
-    level: 'Menengah',
-    description: 'Kelas fokus pada hafalan Surah Al-Baqarah dengan penekanan pada tajwid dan makna.',
-    studentCount: 15,
-    progress: 75,
-  },
-  {
-    id: 2,
-    name: 'Tahfidz Juz 30',
-    level: 'Pemula',
-    description: 'Kelas untuk pemula yang fokus pada hafalan Juz 30 (Juz Amma).',
-    studentCount: 20,
-    progress: 60,
-  },
-  {
-    id: 3,
-    name: 'Tahfidz Lanjutan',
-    level: 'Lanjutan',
-    description: 'Kelas untuk siswa yang telah menyelesaikan hafalan minimal 5 juz.',
-    studentCount: 8,
-    progress: 40,
-  },
-];
 
 const styles = StyleSheet.create({
   container: {
@@ -324,6 +327,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 8,
     fontSize: 14,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   listContainer: {
     padding: 20,

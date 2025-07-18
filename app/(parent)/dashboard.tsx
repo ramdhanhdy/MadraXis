@@ -6,15 +6,15 @@ import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 
 // Design System Components
-import { DashboardTemplate } from '../../src/components/templates/DashboardTemplate';
-import { Card } from '../../src/components/molecules/Card';
-import { QuickAction } from '../../src/components/molecules/QuickAction';
-import { ListItem } from '../../src/components/molecules/ListItem';
-import { Typography } from '../../src/components/atoms/Typography';
-import { ProgressBar } from '../../src/components/molecules/ProgressBar';
-import { LoadingSpinner } from '../../src/components/atoms/LoadingSpinner/LoadingSpinner';
-import { ErrorMessage } from '../../src/components/molecules/ErrorMessage/ErrorMessage';
-import { EmptyState } from '../../src/components/molecules/EmptyState/EmptyState';
+import { DashboardTemplate } from '../../src/shared/components/templates/DashboardTemplate';
+import { Card } from '../../src/shared/components/molecules/Card';
+import { QuickAction } from '../../src/shared/components/molecules/QuickAction';
+import { ListItem } from '../../src/shared/components/molecules/ListItem';
+import { Typography } from '../../src/shared/components/atoms/Typography';
+import { ProgressBar } from '../../src/shared/components/molecules/ProgressBar';
+import { LoadingSpinner } from '../../src/shared/components/atoms/LoadingSpinner/LoadingSpinner';
+import { ErrorMessage } from '../../src/features/finance/components/molecules/ErrorMessage/ErrorMessage';
+import { EmptyState } from '../../src/shared/components/atoms/EmptyState/EmptyState';
 
 // Context and Services
 import { useAuth } from '../../src/context/AuthContext';
@@ -408,7 +408,7 @@ export default function ParentDashboard() {
           {studentData.recentActivities.length === 0 ? (
             <EmptyState
               title="Belum ada aktivitas"
-              message="Aktivitas terbaru anak Anda akan muncul di sini"
+              subtitle="Aktivitas terbaru anak Anda akan muncul di sini"
               icon="time-outline"
             />
           ) : (
@@ -439,7 +439,7 @@ export default function ParentDashboard() {
           {studentData.upcomingEvents.length === 0 ? (
             <EmptyState
               title="Belum ada acara"
-              message="Acara mendatang akan muncul di sini"
+              subtitle="Acara mendatang akan muncul di sini"
               icon="calendar-outline"
             />
           ) : (
@@ -515,7 +515,7 @@ export default function ParentDashboard() {
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
       <EmptyState
         title="Fitur Pesan Segera Hadir"
-        message="Anda akan dapat berkomunikasi dengan guru dan staf di sini"
+        subtitle="Anda akan dapat berkomunikasi dengan guru dan staf di sini"
         icon="chatbubble-outline"
       />
     </View>
@@ -525,7 +525,7 @@ export default function ParentDashboard() {
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
       <EmptyState
         title="Permintaan Izin Segera Hadir"
-        message="Anda akan dapat mengajukan dan melacak izin ketidakhadiran anak Anda di sini"
+        subtitle="Anda akan dapat mengajukan dan melacak izin ketidakhadiran anak Anda di sini"
         icon="calendar-outline"
       />
     </View>

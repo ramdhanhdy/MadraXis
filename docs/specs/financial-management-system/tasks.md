@@ -2,7 +2,7 @@
 
 ## Phase 1: Database Foundation (Day 1)
 
-- [ ] **1.1 Execute Database Migration**
+- [x] **1.1 Execute Database Migration**
   - Run migration SQL from `migration-plan.md` to create financial tables
   - Verify table creation with validation queries
   - Test RLS policies with management role access
@@ -10,7 +10,7 @@
   - _Requirements: FR-6 (secure integration)_
   - _Deliverable: Shell + sheet scaffold, sheet opens < 500ms on Moto G_
 
-- [ ] **1.2 Backend Services Foundation**
+- [x] **1.2 Backend Services Foundation**
   - Create `src/services/finance.ts` with CRUD operations
   - Implement `get_budget_health()` and `get_finance_dashboard_summary()` functions
   - Add optimistic update support with React Query integration
@@ -19,14 +19,14 @@
 
 ## Phase 2: Core Finance Hub UI (Day 2)
 
-- [ ] **2.1 Finance Hub Main Screen**
+- [x] **2.1 Finance Hub Main Screen**
   - Create `app/(management)/finance/index.tsx` with single-screen structure
   - Implement search bar + filter chips (Today/Yesterday/This Week/Category)
   - Add recent expenses list (latest 3) with swipe-left duplicate action
   - Create floating action button (FAB) positioned 16dp above bottom nav
   - _Requirements: FR-3, FR-4 (budget health display, search/filter)_
 
-- [ ] **2.2 Radial Progress Ring Component**
+- [x] **2.2 Radial Progress Ring Component**
   - Create `components/ProgressRing.tsx` with animated radial progress
   - Implement color rules: Green > 20%, Amber 5-20%, Red ≤ 5% (with pulse)
   - Add micro-copy display: "$60 left • 9 days to Aug"
@@ -36,7 +36,7 @@
 
 ## Phase 3: Bottom Sheet Modals (Day 3)
 
-- [ ] **3.1 Log Expense Bottom Sheet**
+- [x] **3.1 Log Expense Bottom Sheet**
   - Create bottom-sheet modal with "Log Expense" as default tab
   - Implement zero-scroll form fitting 5.5" screen with keyboard open
   - Add smart category selection (ML on description after 3 characters)
@@ -45,7 +45,7 @@
   - Include collapsible camera section with auto-compress ≤ 500KB
   - _Requirements: FR-1 (expense logging in < 30s)_
 
-- [ ] **3.2 Budget Adjust Bottom Sheet**
+- [x] **3.2 Budget Adjust Bottom Sheet**
   - Create second tab "Adjust Budget" in same modal
   - Implement category list with current limit and spent-to-date
   - Add slider controls (-10%/+10%) with numeric input fallback
@@ -53,7 +53,7 @@
   - Add archive/un-archive toggle per category
   - _Requirements: FR-2 (quick budget adjustments)_
 
-- [ ] **3.3 Optimistic Updates & Offline Support**
+- [x] **3.3 Optimistic Updates & Offline Support**
   - Implement optimistic UI updates within 200ms of submission
   - Add offline write queueing to AsyncStorage
   - Create sync banner showing "X expenses pending sync"

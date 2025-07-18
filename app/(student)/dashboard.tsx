@@ -5,26 +5,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
-import LogoutButton from '../components/auth/LogoutButton';
-import BoardingInfoModal from '../components/student/BoardingInfoModal';
-import CommunicationModal from '../components/student/CommunicationModal';
-import IncidentReportModal from '../components/student/IncidentReportModal';
+
+
+
 import { useAuth } from '../../src/context/AuthContext';
-import { DashboardTemplate } from '../../src/components/templates/DashboardTemplate';
-import type { TabConfig, HeaderAction } from '../../src/components/templates/DashboardTemplate';
-import { Card } from '../../src/components/molecules/Card';
-import { QuickAction } from '../../src/components/molecules/QuickAction';
-import { ProgressBar } from '../../src/components/molecules/ProgressBar';
-import { ListItem } from '../../src/components/molecules/ListItem';
-import { Button } from '../../src/components/atoms/Button';
-import { Typography } from '../../src/components/atoms/Typography';
-import { Modal } from '../../src/components/organisms/Modal';
+import { DashboardTemplate } from '../../src/shared/components/templates/DashboardTemplate';
+import type { TabConfig, HeaderAction } from '../../src/shared/components/templates/DashboardTemplate';
+import { Card } from '../../src/shared/components/molecules/Card';
+import { QuickAction } from '../../src/shared/components/molecules/QuickAction';
+import { ProgressBar } from '../../src/shared/components/molecules/ProgressBar';
+import { ListItem } from '../../src/shared/components/molecules/ListItem';
+import { Button } from '../../src/shared/components/atoms/Button';
+import { Typography } from '../../src/shared/components/atoms/Typography';
+import { Modal } from '../../src/shared/components/organisms/Modal';
 import { colors } from '../../src/styles/colors';
 import { spacing } from '../../src/styles/spacing';
 
 export default function StudentDashboard() {
   const router = useRouter();
-  const { profile, loading } = useAuth();
+  const { profile, loading, clearSession } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState<{
     title: string;
@@ -189,7 +188,7 @@ export default function StudentDashboard() {
             icon="chatbubbles"
             variant="primary"
             size="medium"
-            onPress={() => openModal('Komunikasi', <CommunicationModal />)}
+            onPress={() => openModal('Komunikasi', <Typography>Fitur komunikasi akan segera hadir!</Typography>)}
             style={{ width: '23%' }}
             testID="quick-action-komunikasi"
           />
@@ -409,7 +408,13 @@ export default function StudentDashboard() {
         </View>
         
         <View style={styles.profileSection}>
-          <LogoutButton variant="button" style={styles.logoutButton} />
+          <Button 
+            variant="primary"
+            onPress={clearSession}
+            style={styles.logoutButton}
+          >
+            Keluar
+          </Button>
         </View>
       </ScrollView>
     );

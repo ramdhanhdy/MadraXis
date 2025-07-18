@@ -1,25 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Alert, TouchableOpacity } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 
 // Design System Components
-import { DashboardTemplate } from '../../src/components/templates/DashboardTemplate';
-import { Card } from '../../src/components/molecules/Card';
-import { QuickAction } from '../../src/components/molecules/QuickAction';
-import { ListItem } from '../../src/components/molecules/ListItem';
-import { Typography } from '../../src/components/atoms/Typography';
-import { LoadingSpinner } from '../../src/components/atoms/LoadingSpinner/LoadingSpinner';
-import { ErrorMessage } from '../../src/components/molecules/ErrorMessage/ErrorMessage';
-import { EmptyState } from '../../src/components/molecules/EmptyState/EmptyState';
-import { SkeletonCard } from '../../src/components/molecules/SkeletonCard/SkeletonCard';
+import { DashboardTemplate } from '../../src/shared/components/templates/DashboardTemplate';
+import { Card } from '../../src/shared/components/molecules/Card';
+import { QuickAction } from '../../src/shared/components/molecules/QuickAction';
+import { ListItem } from '../../src/shared/components/molecules/ListItem';
+import { Typography } from '../../src/shared/components/atoms/Typography';
+import { ErrorMessage } from '../../src/features/finance/components/molecules/ErrorMessage/ErrorMessage';
+import { EmptyState } from '../../src/shared/components/atoms/EmptyState/EmptyState';
+import { SkeletonCard } from '../../src/features/finance/components/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
 import { useAuth } from '../../src/context/AuthContext';
-import { fetchIncidentsForSchool } from '../../src/services/incidents';
-import { fetchDashboardMetrics, DashboardMetrics } from '../../src/services/dashboard';
+import { fetchIncidentsForSchool } from '../../src/shared/services/incidents';
+import { fetchDashboardMetrics, DashboardMetrics } from '../../src/shared/services/dashboard';
 import { logoSvg } from '../../src/utils/svgPatterns';
 import { colors } from '../../src/styles/colors';
 
@@ -375,7 +373,7 @@ export default function ManagementDashboard() {
             {incidents.length === 0 ? (
               <EmptyState
                 title="Tidak ada insiden terbaru"
-                message="Insiden baru akan muncul di sini"
+                subtitle="Insiden baru akan muncul di sini"
                 icon="document-outline"
               />
             ) : (

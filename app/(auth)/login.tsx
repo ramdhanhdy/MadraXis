@@ -1,8 +1,10 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
-import AuthForm from '../components/auth/AuthForm';
+import { supabase } from '../../src/utils/supabase';
+import { Button } from '../../src/shared/components/atoms/Button';
+import { Typography } from '../../src/shared/components/atoms/Typography';
 
 const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -20,6 +22,75 @@ const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
   <path d="M85 170V180H115V170" stroke="#005e7a" stroke-width="10" stroke-linecap="round" />
 </svg>`;
 
+const AuthForm = ({ role }: { role: string }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+      // Navigation will be handled by the onAuthStateChange listener in AuthContext
+    } catch (e: any) {
+      setError(e.message);
+      Alert.alert('Login Gagal', e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <View style={styles.formContainer}>
+      {error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : null}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Masukkan email Anda"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+      </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Masukkan password Anda"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+      </View>
+      <TouchableOpacity style={styles.forgotPasswordContainer}>
+        <Text style={styles.forgotPasswordText}>Lupa Password?</Text>
+      </TouchableOpacity>
+      <Button
+        onPress={handleLogin}
+        disabled={loading}
+        loading={loading}
+      >
+        Login
+      </Button>
+    </View>
+  );
+};
+
 export default function LoginScreen() {
   const { role } = useLocalSearchParams<{ role: string }>();
 
@@ -28,17 +99,17 @@ export default function LoginScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.logoContainer}>
         <SvgXml xml={logoSvg} width={100} height={100} />
-        <Text style={styles.appName}>Pondok Pesantren Tahfidz ZAID BIN TSAABIT</Text>
+        <Typography variant="h3" style={styles.appName}>Pondok Pesantren Tahfidz ZAID BIN TSAABIT</Typography>
         {role && (
           <View style={styles.roleChip}>
             <Text style={styles.roleText}>
-              Login as: {role.charAt(0).toUpperCase() + role.slice(1)}
+              Login sebagai: {role.charAt(0).toUpperCase() + role.slice(1)}
             </Text>
           </View>
         )}
       </View>
 
-      <AuthForm role={role} />
+      <AuthForm role={role || ''} />
     </View>
   );
 }
