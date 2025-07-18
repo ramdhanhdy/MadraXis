@@ -106,10 +106,11 @@ jest.mock('react-native/src/private/specs_DEPRECATED/components/RCTModalHostView
 // Mock React Native ScrollView to avoid ES6 syntax issues
 jest.mock('react-native/Libraries/Components/ScrollView/ScrollView', () => {
   const React = require('react');
+  const { View } = require('react-native');
   
-  // Create a simple View-like component without requiring react-native
+  // Create a simple View-like component using actual React Native View
   const MockScrollView = ({ children, refreshing, onRefresh, showsVerticalScrollIndicator, testID, ...props }) => {
-    return React.createElement('View', {
+    return React.createElement(View, {
       ...props,
       testID: testID || 'scroll-view',
     }, children);
