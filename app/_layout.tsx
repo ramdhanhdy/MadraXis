@@ -1,10 +1,23 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { ThemeProvider } from '../src/context/ThemeContext';
 import * as SplashScreen from 'expo-splash-screen';
 import AnimatedSplashScreen from './components/AnimatedSplashScreen';
+
+// Create a client for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -60,6 +73,7 @@ const RootLayoutNav = () => {
                 <Stack.Screen name="management/dashboard" />
                 <Stack.Screen name="management/setup" />
                 <Stack.Screen name="management/user-management" />
+                <Stack.Screen name="(management)/finance/index" options={{ title: "Finance Hub" }} />
                 <Stack.Screen name="parent/dashboard" />
                 <Stack.Screen name="parent/incident-report" />
                 <Stack.Screen name="parent/anti-bullying" />
@@ -73,10 +87,12 @@ const RootLayoutNav = () => {
 
 export default function RootLayout() {
     return (
-        <ThemeProvider>
-            <AuthProvider>
-                <RootLayoutNav />
-            </AuthProvider>
-        </ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+            <ThemeProvider>
+                <AuthProvider>
+                    <RootLayoutNav />
+                </AuthProvider>
+            </ThemeProvider>
+        </QueryClientProvider>
     );
 }

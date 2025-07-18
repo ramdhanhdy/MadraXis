@@ -7,11 +7,11 @@ import {
   Text,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../../context/ThemeContext';
 
 // Import styles
-import { colors } from '../../../styles/colors';
 import { spacing } from '../../../styles/spacing';
-import { typography } from '../../../styles/typography';
+import { typographyVariants } from '../../../styles/typography';
 
 interface FilterChip {
   id: string;
@@ -30,7 +30,7 @@ interface SearchBarProps {
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
-  placeholder = 'Search...',
+  placeholder = 'Search expenses...',
   value,
   onChangeText,
   filterChips = [],
@@ -39,6 +39,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onClear,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
 
   const handleClear = () => {
     onChangeText('');
@@ -57,13 +59,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <Ionicons 
           name="search" 
           size={20} 
-          color={isFocused ? colors.blue[500] : colors.gray[400]} 
+          color={isFocused ? theme.colors.primary.main : theme.colors.text.secondary} 
         />
         
         <TextInput
           style={styles.searchInput}
           placeholder={placeholder}
-          placeholderTextColor={colors.gray[400]}
+          placeholderTextColor={theme.colors.text.secondary}
           value={value}
           onChangeText={onChangeText}
           onFocus={() => setIsFocused(true)}
@@ -75,7 +77,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         
         {value.length > 0 && (
           <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
-            <Ionicons name="close-circle" size={20} color={colors.gray[400]} />
+            <Ionicons name="close-circle" size={20} color={theme.colors.text.secondary} />
           </TouchableOpacity>
         )}
       </View>
@@ -112,14 +114,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   );
 };
 
-const styles = {
+const createStyles = (theme: any) => ({
   container: {
     marginBottom: spacing.md,
   },
   searchInputContainer: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    backgroundColor: colors.gray[100],
+    backgroundColor: theme.colors.surface.secondary,
     borderRadius: 12,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -128,9 +130,9 @@ const styles = {
     marginBottom: spacing.sm,
   },
   searchInputContainerFocused: {
-    backgroundColor: colors.white,
-    borderColor: colors.blue[500],
-    shadowColor: colors.blue[500],
+    backgroundColor: theme.colors.surface.primary,
+    borderColor: theme.colors.primary.main,
+    shadowColor: theme.colors.primary.main,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -140,9 +142,8 @@ const styles = {
     flex: 1,
     marginLeft: spacing.sm,
     marginRight: spacing.sm,
-    ...typography.body,
-    color: colors.gray[900],
-    fontSize: 16,
+    ...typographyVariants.body1,
+    color: theme.colors.text.primary,
   },
   clearButton: {
     padding: spacing.xs,
@@ -154,7 +155,7 @@ const styles = {
     paddingRight: spacing.md,
   },
   filterChip: {
-    backgroundColor: colors.gray[100],
+    backgroundColor: theme.colors.surface.secondary,
     borderRadius: 20,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -166,18 +167,18 @@ const styles = {
     alignItems: 'center' as const,
   },
   filterChipActive: {
-    backgroundColor: colors.blue[500],
-    borderColor: colors.blue[600],
+    backgroundColor: theme.colors.primary.main,
+    borderColor: theme.colors.primary.dark,
   },
   filterChipText: {
-    ...typography.caption,
-    color: colors.gray[600],
+    ...typographyVariants.caption,
+    color: theme.colors.text.secondary,
     fontWeight: '500' as const,
   },
   filterChipTextActive: {
-    color: colors.white,
+    color: theme.colors.surface.primary,
     fontWeight: '600' as const,
   },
-};
+});
 
 export default SearchBar;
