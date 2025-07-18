@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../context/ThemeContext';
-import { ProgressRing } from '../../atoms/ProgressRing';
-import { utils } from '../../../services/finance';
+import { useTheme } from '@/src/context/ThemeContext';
+import { ProgressRing } from '@/src/shared/components/atoms/ProgressRing';
+import { utils } from '@/src/features/finance/services/finance.service';
 
 interface BudgetOverviewProps {
   dashboardSummary?: {

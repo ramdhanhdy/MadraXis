@@ -15,20 +15,15 @@ import { useRouter } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Import services
-import { expenses, analytics, search, utils } from '../../../services/finance';
-import { useAuth } from '../../../context/AuthContext';
-import { useTheme } from '../../../context/ThemeContext';
+import { expenses, analytics, search, utils } from '@/src/features/finance/services';
+import { useAuth } from '@/src/features/authentication/context/AuthContext';
+import { useTheme } from '@/src/context/ThemeContext';
 
 // Import components
-import { ProgressRing } from '../../atoms/ProgressRing';
-import { ExpenseCard } from '../../molecules/ExpenseCard';
-import { BottomSheetModal } from '../../molecules/BottomSheetModal';
-import { LogExpenseForm } from '../../organisms/LogExpenseForm';
-import { AdjustBudgetForm } from '../../organisms/AdjustBudgetForm';
-import { BudgetOverview } from '../../organisms/BudgetOverview';
-import { ExpensesList } from '../../organisms/ExpensesList';
-import { FinanceEmptyState } from '../../molecules/FinanceEmptyState';
-import { FinanceSkeleton } from '../../molecules/SkeletonLoader/FinanceSkeleton';
+import { BudgetOverview } from '@/src/features/finance/components/organisms/BudgetOverview';
+import { ExpensesList } from '@/src/features/finance/components/organisms/ExpensesList';
+import { FinanceEmptyState } from '@/src/features/finance/components/molecules/FinanceEmptyState';
+import { SkeletonCard as FinanceSkeleton } from '@/src/features/finance/components/molecules/SkeletonCard/SkeletonCard';
 
 interface FilterChip {
   id: string;

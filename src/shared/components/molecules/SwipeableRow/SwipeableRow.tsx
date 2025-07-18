@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../../styles/colors';
+import { colors } from '@/src/styles/colors';
 
 interface SwipeableRowProps {
   children: React.ReactNode;

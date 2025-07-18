@@ -5,7 +5,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { View, ViewStyle, StyleSheet } from 'react-native';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
 
 // SkeletonCard Props Interface
 export interface SkeletonCardProps {

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react-native';
-import { ThemeProvider } from '../../../context/ThemeContext';
+import { ThemeProvider } from '@/src/context/ThemeContext';
 import { Icon } from './Icon';
 
 // Test wrapper with ThemeProvider

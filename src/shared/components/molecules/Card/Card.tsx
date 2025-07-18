@@ -11,7 +11,7 @@ import {
   StyleSheet,
   TouchableOpacityProps,
 } from 'react-native';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
 
 // Card Props Interface
 export interface CardProps extends Omit<TouchableOpacityProps, 'style'> {

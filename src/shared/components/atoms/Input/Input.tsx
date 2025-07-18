@@ -17,7 +17,7 @@ import {
   TextInputFocusEventData,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors, useComponentTheme } from '../../../context/ThemeContext';
+import { useTheme, useColors, useComponentTheme } from '@/src/context/ThemeContext';
 
 // Input Props Interface
 export interface InputProps extends Omit<TextInputProps, 'style'> {

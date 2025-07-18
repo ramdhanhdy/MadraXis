@@ -83,7 +83,7 @@ export default function ClassListPage() {
     <TouchableOpacity 
       style={styles.classCard}
       onPress={() => router.push({
-        pathname: '/teacher/class/[id]',
+        pathname: '/(teacher)/class/[id]',
         params: { id: item.id }
       })}
     >
@@ -121,7 +121,7 @@ export default function ClassListPage() {
         <TouchableOpacity 
           style={styles.footerButton}
           onPress={() => router.push({
-            pathname: '/teacher/class/[id]/students',
+            pathname: '/(teacher)/class/[id]/students',
             params: { id: item.id }
           })}
         >
@@ -131,7 +131,7 @@ export default function ClassListPage() {
         <TouchableOpacity 
           style={styles.footerButton}
           onPress={() => router.push({
-            pathname: '/teacher/class/[id]/schedule',
+            pathname: '/(teacher)/class/[id]/schedule',
             params: { id: item.id }
           })}
         >
@@ -141,7 +141,7 @@ export default function ClassListPage() {
         <TouchableOpacity 
           style={styles.footerButton}
           onPress={() => router.push({
-            pathname: '/teacher/class/[id]/reports',
+            pathname: '/(teacher)/class/[id]/reports',
             params: { id: item.id }
           })}
         >

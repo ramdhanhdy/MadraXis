@@ -18,10 +18,10 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors } from '../../../context/ThemeContext';
-import { Typography } from '../../atoms/Typography';
-import { Icon } from '../../atoms/Icon';
-import { Button } from '../../atoms/Button';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
+import { Typography } from '@/src/shared/components/atoms/Typography';
+import { Icon } from '@/src/shared/components/atoms/Icon';
+import { Button } from '@/src/shared/components/atoms/Button';
 
 // Modal size type
 export type ModalSize = 'small' | 'medium' | 'large' | 'fullscreen';

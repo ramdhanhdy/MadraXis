@@ -8,8 +8,8 @@ import {
   PanResponder,
   StyleSheet,
 } from 'react-native';
-import { useTheme } from '../../../context/ThemeContext';
-import { spacing } from '../../../styles/spacing';
+import { useTheme } from '@/src/context/ThemeContext';
+import { spacing } from '@/src/styles/spacing';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_HEIGHT = SCREEN_HEIGHT * 0.75; // 75% of screen height

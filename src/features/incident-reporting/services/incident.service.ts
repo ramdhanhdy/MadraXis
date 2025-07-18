@@ -15,9 +15,9 @@ export const fetchIncidentsForSchool = async (schoolId: number, limit: number = 
       location,
       status,
       created_at,
-      student_name,
+      
       is_anonymous,
-      reporter:reporter_id ( full_name ) 
+      reporter:profiles(id, full_name) 
     `)
     .eq('school_id', schoolId)
     .order('created_at', { ascending: false })
@@ -40,9 +40,9 @@ export const fetchAllIncidents = async (schoolId: number, filters?: IncidentFilt
       location,
       status,
       created_at,
-      student_name,
+      
       is_anonymous,
-      reporter:reporter_id ( full_name ) 
+      reporter:profiles(id, full_name) 
     `)
     .eq('school_id', schoolId)
     .order('created_at', { ascending: false });
@@ -79,9 +79,9 @@ export const createIncident = async (incidentData: CreateIncidentData) => {
       location,
       status,
       created_at,
-      student_name,
+      
       is_anonymous,
-      reporter:reporter_id ( full_name ) 
+      reporter:profiles(id, full_name) 
     `)
     .single();
 
@@ -100,9 +100,9 @@ export const updateIncidentStatus = async (incidentId: string, status: string) =
       location,
       status,
       created_at,
-      student_name,
+      
       is_anonymous,
-      reporter:reporter_id ( full_name ) 
+      reporter:profiles(id, full_name) 
     `)
     .single();
 

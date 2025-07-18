@@ -7,9 +7,9 @@ import React from 'react';
 import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react-native';
 import { FormTemplate } from './FormTemplate';
-import { Typography } from '../../atoms/Typography';
-import { Input } from '../../atoms/Input';
-import { Button } from '../../atoms/Button';
+import { Typography } from '@/src/shared/components/atoms/Typography';
+import { Input } from '@/src/shared/components/atoms/Input';
+import { Button } from '@/src/shared/components/atoms/Button';
 
 const meta: Meta<typeof FormTemplate> = {
   title: 'Templates/FormTemplate',

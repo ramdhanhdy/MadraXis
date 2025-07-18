@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react-native';
-import { ThemeProvider } from '../../../context/ThemeContext';
+import { ThemeProvider } from '@/src/context/ThemeContext';
 import { SkeletonCard } from './SkeletonCard';
 
 // Mock the theme context

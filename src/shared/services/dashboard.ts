@@ -1,4 +1,4 @@
-import { supabase } from '../../utils/supabase';
+import { supabase } from '@/src/utils/supabase';
 import { getStudentCount, getTeacherCount } from './users';
 
 /**

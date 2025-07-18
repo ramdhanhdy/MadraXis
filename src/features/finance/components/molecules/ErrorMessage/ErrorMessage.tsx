@@ -5,10 +5,10 @@
 
 import React from 'react';
 import { View, ViewStyle, StyleSheet, TouchableOpacity } from 'react-native';
-import { useTheme, useColors } from '../../../context/ThemeContext';
-import { Typography } from '../../atoms/Typography';
-import { Icon } from '../../atoms/Icon';
-import { Button } from '../../atoms/Button';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
+import { Typography } from '@/src/shared/components/atoms/Typography';
+import { Icon } from '@/src/shared/components/atoms/Icon';
+import { Button } from '@/src/shared/components/atoms/Button';
 
 // ErrorMessage Props Interface
 export interface ErrorMessageProps {
@@ -145,10 +145,10 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
     >
       <View style={{ flexDirection: 'row', alignItems: 'flex-start' }} testID={testID ? `${testID}-content` : 'error-content'}>
         <Icon
-          name={getIconName() as keyof typeof import('@expo/vector-icons/Ionicons').Ionicons.glyphMap}
+          name={getIconName() as any}
           size="lg"
           color={variantColors.iconColor}
-          style={{ marginRight: theme.spacing.base.md, marginTop: 2 }}
+          containerStyle={{ marginRight: theme.spacing.base.md, marginTop: theme.spacing.base.xs }}
         />
         
         <View style={{ flex: 1 }}>
@@ -203,7 +203,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
           
           {onRetry && (
             <Button
-              variant="solid"
+              variant="primary"
               size="small"
               onPress={onRetry}
               style={{ flex: 1 }}

@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { Alert, View, StyleSheet } from 'react-native';
 import { supabase } from '../../src/utils/supabase';
 import { Stack, useRouter, useGlobalSearchParams } from 'expo-router';
-import { Button } from '../../src/components/atoms/Button';
-import { Input } from '../../src/components/atoms/Input';
-import { Typography } from '../../src/components/atoms/Typography';
+import { Button } from '../../src/shared/components/atoms/Button/Button';
+import { Input } from '../../src/shared/components/atoms/Input/Input';
+import { Typography } from '../../src/shared/components/atoms/Typography/Typography';
 
 export default function ResetPasswordScreen() {
   const [password, setPassword] = useState('');

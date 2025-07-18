@@ -13,10 +13,10 @@ import {
     Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors } from '../../../context/ThemeContext';
-import { Typography } from '../../atoms/Typography';
-import { Button } from '../../atoms/Button';
-import { Card } from '../../molecules/Card';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
+import { Typography } from '@/src/shared/components/atoms/Typography';
+import { Button } from '@/src/shared/components/atoms/Button';
+import { Card } from '@/src/shared/components/molecules/Card';
 
 // Form section interface
 export interface FormSection {

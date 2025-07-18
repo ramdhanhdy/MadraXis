@@ -11,10 +11,10 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors } from '../../../context/ThemeContext';
-import { Modal } from '../../organisms/Modal';
-import { Typography } from '../../atoms/Typography';
-import { Button } from '../../atoms/Button';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
+import { Modal } from '@/src/shared/components/organisms/Modal';
+import { Typography } from '@/src/shared/components/atoms/Typography';
+import { Button } from '@/src/shared/components/atoms/Button';
 
 // Action button interface
 export interface ModalAction {

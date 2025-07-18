@@ -10,8 +10,8 @@ import {
   StyleSheet,
   Animated,
 } from 'react-native';
-import { useTheme, useColors } from '../../../context/ThemeContext';
-import { Typography } from '../../atoms/Typography';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
+import { Typography } from '@/src/shared/components/atoms/Typography';
 
 // ProgressBar Props Interface
 export interface ProgressBarProps {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react-native';
-import { ThemeProvider } from '../../../context/ThemeContext';
+import { ThemeProvider } from '@/src/context/ThemeContext';
 import { LoadingSpinner } from './LoadingSpinner';
 
 // Comprehensive theme mock that matches the actual structure

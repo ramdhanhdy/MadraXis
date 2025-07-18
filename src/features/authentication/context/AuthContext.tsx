@@ -105,10 +105,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Get the initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('🔐 Initial session check:', session ? 'AUTHENTICATED' : 'NOT AUTHENTICATED');
       setSession(session);
       setUser(session?.user ?? null);
+      
+      // If there's an existing session, fetch profile and navigate
+      if (session?.user) {
+        await fetchUserProfileAndNavigate(session.user.id);
+      }
+      
       setLoading(false);
     });
 

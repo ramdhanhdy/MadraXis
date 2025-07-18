@@ -6,24 +6,24 @@ import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 
 // Design System Components
-import { DashboardTemplate } from '../../src/shared/components/templates/DashboardTemplate';
-import { Card } from '../../src/shared/components/molecules/Card';
-import { QuickAction } from '../../src/shared/components/molecules/QuickAction';
-import { ListItem } from '../../src/shared/components/molecules/ListItem';
-import { Typography } from '../../src/shared/components/atoms/Typography';
-import { LoadingSpinner } from '../../src/shared/components/atoms/LoadingSpinner';
-import { ErrorMessage } from '../../src/features/finance/components/molecules/ErrorMessage';
-import { EmptyState } from '../../src/shared/components/atoms/EmptyState';
-import { SkeletonCard } from '../../src/features/finance/components/molecules/SkeletonCard';
+import { DashboardTemplate } from '@/src/shared/components/templates/DashboardTemplate';
+import { Card } from '@/src/shared/components/molecules/Card';
+import { QuickAction } from '@/src/shared/components/molecules/QuickAction';
+import { ListItem } from '@/src/shared/components/molecules/ListItem';
+import { Typography } from '@/src/shared/components/atoms/Typography';
+import { LoadingSpinner } from '@/src/shared/components/atoms/LoadingSpinner';
+import { ErrorMessage } from '@/src/features/finance/components/molecules/ErrorMessage/ErrorMessage';
+import { EmptyState } from '@/src/shared/components/atoms/EmptyState/EmptyState';
+import { SkeletonCard } from '@/src/features/finance/components/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
-import { useAuth } from '../../src/context/AuthContext';
-import { supabase } from '../../src/utils/supabase';
-import { logoSvg } from '../../src/utils/svgPatterns';
-import { colors } from '../../src/styles/colors';
+import { useAuth } from '@/src/features/authentication/context/AuthContext';
+import { supabase } from '@/src/utils/supabase';
+import { logoSvg } from '@/src/utils/svgPatterns';
+import { colors } from '@/src/styles/colors';
 
 // Modal Components
-import ProfileView from '../components/teacher/ProfileView';
+// import ProfileView from '../components/teacher/ProfileView'; // NOTE: File not found, commented out for now
 
 // Icon types for proper typing
 type IoniconsIcon = keyof typeof Ionicons.glyphMap;
@@ -166,6 +166,11 @@ export default function TeacherDashboard() {
       label: 'Hafalan',
       icon: 'book-outline' as IoniconsIcon,
     },
+    {
+      id: 'profile',
+      label: 'Profil',
+      icon: 'person-outline' as IoniconsIcon,
+    }
   ];
 
   // Header actions
@@ -178,7 +183,7 @@ export default function TeacherDashboard() {
     },
     {
       icon: 'person-outline' as IoniconsIcon,
-      onPress: () => handleNavigate('/'),
+      onPress: () => setActiveTab('profile'),
       accessibilityLabel: 'Profil',
     },
   ];
@@ -188,19 +193,19 @@ export default function TeacherDashboard() {
     {
       title: 'Siswa',
       icon: 'people-outline' as IoniconsIcon,
-      onPress: () => handleNavigate('/teacher/students'),
+      onPress: () => handleNavigate('/(teacher)/students'),
       variant: 'primary' as const,
     },
     {
       title: 'Kelas',
       icon: 'school-outline' as IoniconsIcon,
-      onPress: () => handleNavigate('/teacher/class'),
+      onPress: () => handleNavigate('/(teacher)/class'),
       variant: 'secondary' as const,
     },
     {
       title: 'Hafalan',
       icon: 'book-outline' as IoniconsIcon,
-      onPress: () => handleNavigate('/hafalan'),
+      onPress: () => handleNavigate('/(teacher)/hafalan'),
       variant: 'primary' as const,
     },
     {
@@ -224,13 +229,13 @@ export default function TeacherDashboard() {
     {
       title: 'Laporan',
       icon: 'document-text-outline' as IoniconsIcon,
-      onPress: () => handleNavigate('/reports'),
+      onPress: () => handleNavigate('/(teacher)/reports'),
       variant: 'primary' as const,
     },
     {
       title: 'Profil',
       icon: 'person-outline' as IoniconsIcon,
-      onPress: () => handleNavigate('/'),
+      onPress: () => setActiveTab('profile'),
       variant: 'primary' as const,
     },
   ];
@@ -258,67 +263,6 @@ export default function TeacherDashboard() {
       onRetry={handleRetry}
     />
   );
-
-  // Empty state renderer
-  const renderEmptyState = () => (
-    <EmptyState
-      title="Belum Ada Aktivitas"
-      message="Belum ada aktivitas terbaru untuk ditampilkan"
-      icon="time-outline"
-    />
-  );
-
-  // Loading state
-  if (authLoading || isLoading) {
-    return (
-      <DashboardTemplate
-        header={{
-          title: 'Dashboard Guru',
-          subtitle: schoolName,
-          leftAction: {
-            icon: 'arrow-back-outline' as IoniconsIcon,
-            onPress: () => router.replace('/login'),
-            accessibilityLabel: 'Kembali ke login',
-          },
-          rightActions: headerActions,
-        }}
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        backgroundPattern={true}
-        contentPadding={true}
-        testID="teacher-dashboard"
-      >
-        {renderLoadingState()}
-      </DashboardTemplate>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <DashboardTemplate
-        header={{
-          title: 'Dashboard Guru',
-          subtitle: schoolName,
-          leftAction: {
-            icon: 'arrow-back-outline' as IoniconsIcon,
-            onPress: () => router.replace('/login'),
-            accessibilityLabel: 'Kembali ke login',
-          },
-          rightActions: headerActions,
-        }}
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        backgroundPattern={true}
-        contentPadding={true}
-        testID="teacher-dashboard"
-      >
-        {renderErrorState()}
-      </DashboardTemplate>
-    );
-  }
 
   const renderDashboard = () => (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -351,21 +295,9 @@ export default function TeacherDashboard() {
           Aksi Cepat
         </Typography>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-          {quickActions.slice(0, 4).map((action, index) => (
+          {quickActions.map((action, index) => (
             <QuickAction
               key={index}
-              title={action.title}
-              icon={action.icon}
-              onPress={action.onPress}
-              style={{ width: '48%', marginBottom: 12 }}
-              variant={action.variant}
-            />
-          ))}
-        </View>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-          {quickActions.slice(4).map((action, index) => (
-            <QuickAction
-              key={index + 4}
               title={action.title}
               icon={action.icon}
               onPress={action.onPress}
@@ -384,7 +316,7 @@ export default function TeacherDashboard() {
         {activities.length === 0 ? (
           <EmptyState
             title="Belum Ada Aktivitas"
-            message="Belum ada aktivitas terbaru untuk ditampilkan"
+            subtitle="Belum ada aktivitas terbaru untuk ditampilkan"
             icon="time-outline"
           />
         ) : (
@@ -451,7 +383,7 @@ export default function TeacherDashboard() {
   const renderStudents = () => (
     <EmptyState
       title="Daftar Siswa"
-      message="Fitur daftar siswa akan segera hadir"
+      subtitle="Fitur daftar siswa akan segera hadir"
       icon="people-outline"
     />
   );
@@ -459,7 +391,7 @@ export default function TeacherDashboard() {
   const renderClasses = () => (
     <EmptyState
       title="Manajemen Kelas"
-      message="Fitur manajemen kelas akan segera hadir"
+      subtitle="Fitur manajemen kelas akan segera hadir"
       icon="school-outline"
     />
   );
@@ -467,17 +399,29 @@ export default function TeacherDashboard() {
   const renderHafalan = () => (
     <EmptyState
       title="Manajemen Hafalan"
-      message="Fitur manajemen hafalan akan segera hadir"
+      subtitle="Fitur manajemen hafalan akan segera hadir"
       icon="book-outline"
     />
   );
 
   const renderProfile = () => (
-    <ProfileView profile={profile || undefined} loading={authLoading} schoolName={schoolName} />
+    // <ProfileView profile={profile || undefined} loading={authLoading} schoolName={schoolName} />
+    <EmptyState 
+      title="Profil Pengguna"
+      subtitle="Tampilan profil sedang dalam pengembangan."
+      icon="person-circle-outline"
+    />
   );
 
   // Content mapping based on active tab
   const getContent = () => {
+    if (authLoading || isLoading) {
+      return renderLoadingState();
+    }
+    if (error) {
+      return renderErrorState();
+    }
+
     switch (activeTab) {
       case 'dashboard':
         return renderDashboard();
@@ -501,7 +445,7 @@ export default function TeacherDashboard() {
         subtitle: schoolName,
         leftAction: {
           icon: 'arrow-back-outline' as IoniconsIcon,
-          onPress: () => router.replace('/login'),
+          onPress: () => router.replace('/(auth)/login'),
           accessibilityLabel: 'Kembali ke login',
         },
         rightActions: headerActions,

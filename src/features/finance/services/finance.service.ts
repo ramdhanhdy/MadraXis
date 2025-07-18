@@ -1,4 +1,4 @@
-import { supabase } from '../utils/supabase';
+import { supabase } from '@/src/utils/supabase';
 
 // Types for financial management
 export interface ExpenseCategory {
@@ -327,7 +327,7 @@ export const analytics = {
     if (error) throw error;
 
     // Aggregate spending by category
-    const spending = data?.reduce((acc, expense) => {
+    const spending = data?.reduce((acc: Record<string, number>, expense: any) => {
       const categoryName = (expense.expense_categories as any)?.name || 'Unknown';
       acc[categoryName] = (acc[categoryName] || 0) + expense.amount;
       return acc;

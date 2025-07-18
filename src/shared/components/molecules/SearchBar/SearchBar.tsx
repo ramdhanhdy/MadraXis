@@ -7,11 +7,11 @@ import {
   Text,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../context/ThemeContext';
+import { useTheme } from '@/src/context/ThemeContext';
 
 // Import styles
-import { spacing } from '../../../styles/spacing';
-import { typographyVariants } from '../../../styles/typography';
+import { spacing } from '@/src/styles/spacing';
+import { typographyVariants } from '@/src/styles/typography';
 
 interface FilterChip {
   id: string;

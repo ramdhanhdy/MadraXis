@@ -15,7 +15,7 @@ import { EmptyState } from '../../src/shared/components/atoms/EmptyState/EmptySt
 import { SkeletonCard } from '../../src/features/finance/components/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../src/features/authentication/context/AuthContext';
 import { fetchIncidentsForSchool } from '../../src/shared/services/incidents';
 import { fetchDashboardMetrics, DashboardMetrics } from '../../src/shared/services/dashboard';
 import { logoSvg } from '../../src/utils/svgPatterns';

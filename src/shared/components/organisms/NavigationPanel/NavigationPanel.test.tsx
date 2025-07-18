@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import { NavigationPanel } from './NavigationPanel';
-import { ThemeProvider } from '../../../context/ThemeContext';
+import { ThemeProvider } from '@/src/context/ThemeContext';
 
 // Test wrapper with theme provider
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (

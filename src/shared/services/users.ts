@@ -1,4 +1,4 @@
-import { supabase } from '../../utils/supabase';
+import { supabase } from '@/src/utils/supabase';
 import { Student, Teacher, Profile, StudentWithDetails, LegacyStudent, StudentWithRelations } from '../../types';
 
 /**

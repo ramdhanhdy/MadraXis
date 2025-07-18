@@ -14,11 +14,11 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors } from '../../../context/ThemeContext';
-import { Typography } from '../../atoms/Typography';
-import { Icon } from '../../atoms/Icon';
-import { Button } from '../../atoms/Button';
-import { NotificationItem, NotificationType } from '../../molecules/NotificationItem';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
+import { Typography } from '@/src/shared/components/atoms/Typography';
+import { Icon } from '@/src/shared/components/atoms/Icon';
+import { Button } from '@/src/shared/components/atoms/Button';
+import { NotificationItem } from '@/src/shared/components/molecules/NotificationItem/NotificationItem';
 
 // Navigation item interface
 export interface NavigationItem {
@@ -38,14 +38,15 @@ export interface PanelNotification {
   id: string;
   title: string;
   message: string;
-  type?: NotificationType;
+  type?: 'success' | 'error' | 'info' | 'warning';
   timestamp?: string;
   read?: boolean;
   icon?: keyof typeof Ionicons.glyphMap;
-  onPress?: () => void;
+  onPress?: (id: string) => void;
   onDismiss?: () => void;
   onAction?: () => void;
   actionLabel?: string;
+  testID?: string;
 }
 
 // NavigationPanel Props Interface
@@ -115,7 +116,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
   scrollable = true,
   emptyTitle = 'No items',
   emptyMessage = 'There are no items to display',
-  emptyIcon = 'inbox',
+  emptyIcon = 'inbox' as keyof typeof Ionicons.glyphMap,
   loading = false,
   refreshing = false,
   style,
@@ -288,7 +289,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
                 <Icon
                   name="refresh"
                   size="sm"
-                  color={refreshing ? colors.text.disabled : colors.text.secondary}
+                  color={refreshing ? 'disabled' : 'secondary'}
                 />
               </TouchableOpacity>
             )}
@@ -304,7 +305,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
                 <Icon
                   name="checkmark-done"
                   size="sm"
-                  color={colors.text.secondary}
+                  color="secondary"
                 />
               </TouchableOpacity>
             )}
@@ -320,7 +321,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
                 <Icon
                   name="trash"
                   size="sm"
-                  color={colors.text.secondary}
+                  color="secondary"
                 />
               </TouchableOpacity>
             )}
@@ -359,14 +360,14 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
               <Icon
                 name={item.icon}
                 size="md"
-                color={item.disabled ? colors.text.disabled : colors.text.secondary}
+                color={item.disabled ? 'disabled' : 'secondary'}
               />
               
               {item.badge && item.badge > 0 && (
                 <View style={[styles.badge, { backgroundColor: item.badgeColor || colors.error.main }]}>
                   <Typography
                     variant="caption"
-                    style={[styles.badgeText, { color: colors.error.contrast }]}
+                    style={StyleSheet.flatten([styles.badgeText, { color: colors.error.contrast }])}
                   >
                     {item.badge > 99 ? '99+' : item.badge.toString()}
                   </Typography>
@@ -398,7 +399,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
           <Icon
             name="chevron-forward"
             size="sm"
-            color={item.disabled ? colors.text.disabled : colors.text.tertiary}
+            color={item.disabled ? 'disabled' : 'tertiary'}
           />
         </View>
       </TouchableOpacity>
@@ -411,9 +412,9 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
       <View style={getEmptyStateStyles()}>
         <Icon
           name={emptyIcon}
-          size="xl"
-          color={colors.text.tertiary}
-          style={{ marginBottom: theme.spacing.base.md }}
+          size="2xl"
+          color="tertiary"
+          containerStyle={{ marginBottom: theme.spacing.base.md }}
         />
         
         <Typography
@@ -457,8 +458,8 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
           <Icon
             name="hourglass"
             size="xl"
-            color={colors.text.tertiary}
-            style={{ marginBottom: theme.spacing.base.md }}
+            color="tertiary"
+            containerStyle={{ marginBottom: theme.spacing.base.md }}
           />
           <Typography variant="body1" color="secondary" align="center">
             Loading...
@@ -489,20 +490,14 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
         {type !== 'navigation' && notifications.map((notification, index) => (
           <NotificationItem
             key={notification.id}
+            id={notification.id}
             title={notification.title}
             message={notification.message}
-            type={notification.type}
-            timestamp={notification.timestamp}
-            read={notification.read}
-            icon={notification.icon}
-            onPress={notification.onPress}
-            onDismiss={notification.onDismiss}
-            onAction={notification.onAction}
-            actionLabel={notification.actionLabel}
-            style={{
-              marginHorizontal: theme.spacing.base.sm,
-              marginVertical: theme.spacing.base.xs,
-            }}
+            type={notification.type || 'info'}
+            timestamp={notification.timestamp || ''}
+            read={notification.read || false}
+            onPress={notification.onPress ? (id) => notification.onPress!(id) : undefined}
+            testID={notification.testID}
           />
         ))}
         
@@ -521,7 +516,6 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
   return (
     <View
       style={[getContainerStyles(), style]}
-      accessibilityRole="region"
       accessibilityLabel={accessibilityLabel || title || 'Navigation panel'}
       testID={testID}
     >

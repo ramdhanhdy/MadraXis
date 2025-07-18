@@ -7,7 +7,7 @@ import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import { Modal } from './Modal';
-import { ThemeProvider } from '../../../context/ThemeContext';
+import { ThemeProvider } from '@/src/context/ThemeContext';
 
 // Test wrapper with theme provider
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (

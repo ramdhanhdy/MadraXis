@@ -5,12 +5,12 @@
 
 import React from 'react';
 import { ScrollView, View, StyleSheet } from 'react-native';
-import { useTheme } from '../../../context/ThemeContext';
-import { Typography } from '../../atoms/Typography';
-import { Card } from '../../molecules/Card';
-import { QuickAction } from '../../molecules/QuickAction';
-import { ProgressBar } from '../../molecules/ProgressBar';
-import type { QuickActionConfig, ProgressConfig } from '../../../types/dashboard';
+import { useTheme } from '@/src/context/ThemeContext';
+import { Typography } from '@/src/shared/components/atoms/Typography';
+import { Card } from '@/src/shared/components/molecules/Card';
+import { QuickAction } from '@/src/shared/components/molecules/QuickAction';
+import { ProgressBar } from '@/src/shared/components/molecules/ProgressBar';
+import type { QuickActionConfig, ProgressConfig } from '@/src/types/dashboard';
 
 // DashboardContent Props Interface
 export interface DashboardContentProps {

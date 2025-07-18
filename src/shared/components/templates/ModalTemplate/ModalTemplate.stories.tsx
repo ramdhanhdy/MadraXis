@@ -7,10 +7,9 @@ import React from 'react';
 import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react-native';
 import { ModalTemplate } from './ModalTemplate';
-import { Typography } from '../../atoms/Typography';
-import { Input } from '../../atoms/Input';
-import { Button } from '../../atoms/Button';
-import { Card } from '../../molecules/Card';
+import { Typography } from '@/src/shared/components/atoms/Typography';
+import { Input } from '@/src/shared/components/atoms/Input';
+import { Card } from '@/src/shared/components/molecules/Card';
 
 const meta: Meta<typeof ModalTemplate> = {
   title: 'Templates/ModalTemplate',

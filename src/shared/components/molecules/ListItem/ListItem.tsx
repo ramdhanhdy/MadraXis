@@ -13,10 +13,10 @@ import {
   TouchableOpacityProps,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors } from '../../../context/ThemeContext';
-import { Typography } from '../../atoms/Typography';
-import { Icon } from '../../atoms/Icon';
-import { combineStyles } from '../../../utils/styleHelpers';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
+import { Typography } from '@/src/shared/components/atoms/Typography';
+import { Icon } from '@/src/shared/components/atoms/Icon';
+import { combineStyles } from '@/src/utils/styleHelpers';
 
 // ListItem Props Interface
 export interface ListItemProps extends Omit<TouchableOpacityProps, 'style'> {

@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, AccessibilityInfo } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SwipeableRow } from '../SwipeableRow/SwipeableRow';
+import { SwipeableRow } from '@/src/shared/components/molecules/SwipeableRow/SwipeableRow';
 
 // Import types and utils
-import { Expense } from '../../../services/finance';
-import { utils } from '../../../services/finance';
-import { colors } from '../../../styles/colors';
-import { spacing } from '../../../styles/spacing';
+import { Expense } from '../services/finance.service';
+import { utils } from '../services/finance.service';
+import { colors } from '@/src/styles/colors';
+import { spacing } from '@/src/styles/spacing';
 import { typography } from '../../../styles/typography';
 
 interface ExpenseCardProps {

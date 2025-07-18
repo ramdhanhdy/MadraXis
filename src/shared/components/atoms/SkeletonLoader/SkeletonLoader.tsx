@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '@/src/context/ThemeContext';
 
 interface SkeletonLoaderProps {
   width?: number | string;
@@ -103,7 +103,7 @@ export const SkeletonFinanceHub: React.FC = () => {
   return (
     <View style={styles.financeHub}>
       {/* Search bar skeleton */}
-      <SkeletonLoader width="100%" height={48} borderRadius={24} style={{ marginBottom: theme.spacing.md }} />
+      <SkeletonLoader width="100%" height={48} borderRadius={24} style={{ marginBottom: theme.spacing.base.md }} />
       
       {/* Filter chips skeleton */}
       <View style={styles.filterChips}>
@@ -119,7 +119,7 @@ export const SkeletonFinanceHub: React.FC = () => {
       
       {/* Recent expenses skeleton */}
       <View style={styles.expensesSection}>
-        <SkeletonLoader width="40%" height={20} style={{ marginBottom: theme.spacing.md }} />
+        <SkeletonLoader width="40%" height={20} style={{ marginBottom: theme.spacing.base.md }} />
         <SkeletonExpenseCard />
         <SkeletonExpenseCard />
         <SkeletonExpenseCard />
@@ -135,8 +135,8 @@ const createStyles = (theme: any) => StyleSheet.create({
   expenseCard: {
     backgroundColor: theme.colors.surface.primary,
     borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
+    padding: theme.spacing.base.md,
+    marginBottom: theme.spacing.base.sm,
     elevation: 1,
     shadowColor: theme.colors.shadow,
     shadowOffset: { width: 0, height: 1 },
@@ -149,28 +149,28 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   expenseCardContent: {
     flex: 1,
-    marginLeft: theme.spacing.sm,
+    marginLeft: theme.spacing.base.sm,
   },
   progressRing: {
     alignItems: 'center',
-    padding: theme.spacing.lg,
+    padding: theme.spacing.base.lg,
   },
   progressRingText: {
     alignItems: 'center',
-    marginTop: theme.spacing.sm,
+    marginTop: theme.spacing.base.sm,
   },
   financeHub: {
     flex: 1,
-    padding: theme.spacing.md,
+    padding: theme.spacing.base.md,
   },
   filterChips: {
     flexDirection: 'row',
-    gap: theme.spacing.sm,
-    marginBottom: theme.spacing.lg,
+    gap: theme.spacing.base.sm,
+    marginBottom: theme.spacing.base.lg,
   },
   progressSection: {
     alignItems: 'center',
-    marginBottom: theme.spacing.xl,
+    marginBottom: theme.spacing.base.xl,
   },
   expensesSection: {
     flex: 1,

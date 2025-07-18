@@ -17,7 +17,7 @@ import { ErrorMessage } from '../../src/features/finance/components/molecules/Er
 import { EmptyState } from '../../src/shared/components/atoms/EmptyState/EmptyState';
 
 // Context and Services
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../src/features/authentication/context/AuthContext';
 import { supabase } from '../../src/utils/supabase';
 import { logoSvg } from '../../src/utils/svgPatterns';
 import { colors } from '../../src/styles/colors';

@@ -10,11 +10,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTheme } from '../../../context/ThemeContext';
-import { useAuth } from '../../../context/AuthContext';
-import { financeService } from '../../../services/finance';
-import { spacing } from '../../../styles/spacing';
-import { typographyVariants } from '../../../styles/typography';
+import { useTheme } from '@/src/context/ThemeContext';
+import { useAuth } from '@/src/features/authentication/context/AuthContext';
+import { financeService } from '@/src/features/finance/services/finance.service';
+import { spacing } from '@/src/styles/spacing';
+import { typographyVariants } from '@/src/styles/typography';
 
 interface AdjustBudgetFormProps {
   onSuccess?: () => void;
@@ -48,7 +48,7 @@ export const AdjustBudgetForm: React.FC<AdjustBudgetFormProps> = ({
   // Create/Update budget mutation
   const budgetMutation = useMutation({
     mutationFn: currentBudget 
-      ? (data: any) => financeService.updateBudget(currentBudget.id, data)
+      ? (data: any) => financeService.updateBudget({ ...data, id: currentBudget.id })
       : financeService.createBudget,
     onSuccess: () => {
       // Invalidate and refetch budgets
@@ -109,8 +109,9 @@ export const AdjustBudgetForm: React.FC<AdjustBudgetFormProps> = ({
     }
 
     const budgetData = {
-      school_id: profile.school_id,
       month: formData.month + '-01', // Convert to first day of month
+      category_id: '1', // Default category ID - you may need to adjust this
+      limit_amount: parseFloat(formData.total_budget),
       total_budget: parseFloat(formData.total_budget),
       operational_budget: parseFloat(formData.operational_budget || '0'),
       maintenance_budget: parseFloat(formData.maintenance_budget || '0'),

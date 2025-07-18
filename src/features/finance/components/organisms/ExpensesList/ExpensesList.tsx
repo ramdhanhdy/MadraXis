@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '../../../context/ThemeContext';
-import { ExpenseCard } from '../../molecules/ExpenseCard';
-import { Expense } from '../../../services/finance';
+import { useTheme } from '@/src/context/ThemeContext';
+import { ExpenseCard } from '@/src/features/finance/molecules/ExpenseCard';
+import { Expense } from '@/src/features/finance/services/finance.service';
 
 interface ExpensesListProps {
   expenses?: Expense[];

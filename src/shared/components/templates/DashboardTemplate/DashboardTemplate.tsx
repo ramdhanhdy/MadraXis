@@ -14,10 +14,10 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors } from '../../../context/ThemeContext';
-import { Header } from '../../organisms/Header';
-import { TabBar } from '../../organisms/TabBar';
-import { BackgroundPattern } from '../../atoms/BackgroundPattern';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
+import { Header } from '@/src/shared/components/organisms/Header';
+import { TabBar } from '@/src/shared/components/organisms/TabBar';
+import { BackgroundPattern } from '@/src/shared/components/atoms/BackgroundPattern';
 
 // Header action interface
 export interface HeaderAction {

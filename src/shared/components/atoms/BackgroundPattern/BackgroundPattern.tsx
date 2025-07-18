@@ -6,7 +6,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, ViewStyle, StyleSheet, Text, DimensionValue } from 'react-native';
 import { SvgXml } from 'react-native-svg';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
 
 // Pattern variant types
 export type PatternVariant = 'geometric' | 'minimal' | 'dots' | 'waves' | 'none';
@@ -291,8 +291,6 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
           return generateDotsPattern();
         case 'waves':
           return generateWavesPattern();
-        case 'none':
-          return '';
         default:
           return generateGeometricPattern();
       }
@@ -302,7 +300,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
     }
   }, [variant, color, opacity, intensity, colors.primary.main]);
 
-  if (variant === 'none' || !patternSvg) {
+  if (!patternSvg) {
     return null;
   }
 

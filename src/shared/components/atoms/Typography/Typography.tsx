@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Text, TextProps, TextStyle } from 'react-native';
-import { useTheme, useColors, useTypography } from '../../../context/ThemeContext';
+import { useTheme, useColors, useTypography } from '@/src/context/ThemeContext';
 
 // Typography Props Interface
 export interface TypographyProps extends Omit<TextProps, 'style'> {

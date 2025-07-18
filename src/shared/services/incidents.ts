@@ -1,4 +1,4 @@
-import { supabase } from '../utils/supabase';
+import { supabase } from '@/src/utils/supabase';
 
 /**
  * Fetches the most recent incidents for a given school.
@@ -21,9 +21,9 @@ export const fetchIncidentsForSchool = async (schoolId: number, limit: number = 
       location,
       status,
       created_at,
-      student_name,
+      
       is_anonymous,
-      reporter:reporter_id ( full_name ) 
+      reporter:profiles(id, full_name) 
     `)
     .eq('school_id', schoolId)
     .order('created_at', { ascending: false })

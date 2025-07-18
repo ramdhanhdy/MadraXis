@@ -6,7 +6,7 @@
 import React from 'react';
 import { View, TouchableOpacity, ViewStyle, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
 
 // Icon Props Interface
 export interface IconProps {

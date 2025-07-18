@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { ActivityIndicator, View, ViewStyle, TextStyle, StyleSheet } from 'react-native';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useTheme, useColors } from '@/src/context/ThemeContext';
 import { Typography } from '../Typography';
 
 // LoadingSpinner Props Interface

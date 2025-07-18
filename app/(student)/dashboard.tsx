@@ -8,7 +8,7 @@ import { SvgXml } from 'react-native-svg';
 
 
 
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../src/features/authentication/context/AuthContext';
 import { DashboardTemplate } from '../../src/shared/components/templates/DashboardTemplate';
 import type { TabConfig, HeaderAction } from '../../src/shared/components/templates/DashboardTemplate';
 import { Card } from '../../src/shared/components/molecules/Card';
@@ -80,23 +80,23 @@ export default function StudentDashboard() {
   ];
   
   const navigateToQuranProgress = () => {
-    router.push('/student/quran-progress');
+    router.push('/(student)/quran-progress');
   };
 
   const navigateToSchedule = () => {
-    router.push('/student/schedule');
+    router.push('/(student)/schedule');
   };
 
   const navigateToBoardingInfo = () => {
-    router.push('/student/boarding-info');
+    router.push('/(student)/boarding-info');
   };
 
   const navigateToIncidentReport = () => {
-    router.push('/student/incident-report');
+    router.push('/(student)/incident-report');
   };
 
   const navigateToAntiBullying = () => {
-    router.push('/student/anti-bullying');
+    router.push('/(student)/anti-bullying');
   };
 
   const openModal = (title: string, content: React.ReactNode) => {
@@ -182,17 +182,6 @@ export default function StudentDashboard() {
             style={{ width: '23%' }}
             testID="quick-action-jadwal"
           />
-          
-          <QuickAction
-            title="Komunikasi"
-            icon="chatbubbles"
-            variant="primary"
-            size="medium"
-            onPress={() => openModal('Komunikasi', <Typography>Fitur komunikasi akan segera hadir!</Typography>)}
-            style={{ width: '23%' }}
-            testID="quick-action-komunikasi"
-          />
-          
           <QuickAction
             title="Profil"
             icon="person"
