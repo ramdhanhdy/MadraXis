@@ -33,7 +33,7 @@ export interface LoadingSpinnerProps {
 }
 
 // LoadingSpinner Component
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'large',
   color,
   message,
@@ -92,12 +92,12 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       style={[getContainerStyles(), style]}
       accessibilityRole="progressbar"
       accessibilityLabel={accessibilityLabel || (message ? `Loading: ${message}` : 'Loading')}
-      testID={testID}
+      testID={testID || 'loading-spinner'}
     >
       <ActivityIndicator
         size={getSpinnerSize()}
         color={getSpinnerColor()}
-        testID={testID ? `${testID}-spinner` : 'loading-spinner'}
+        testID={testID ? `${testID}-spinner` : 'loading-spinner-spinner'}
       />
       
       {message && (
@@ -119,6 +119,9 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 const styles = StyleSheet.create({
   // Add any internal styles if needed
 });
+
+// Named export
+export { LoadingSpinner };
 
 // Export default
 export default LoadingSpinner;
