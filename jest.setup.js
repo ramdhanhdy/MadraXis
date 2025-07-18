@@ -79,6 +79,67 @@ jest.mock('react-native/src/private/specs_DEPRECATED/components/ActivityIndicato
   };
 });
 
+// Mock React Native Modal to avoid ES6 syntax issues
+jest.mock('react-native/Libraries/Modal/Modal', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: ({ visible, transparent, animationType, onRequestClose, children, testID, ...props }) => {
+      if (!visible) return null;
+      return React.createElement(View, {
+        ...props,
+        testID: testID || 'modal',
+        style: { backgroundColor: transparent ? 'transparent' : 'white' }
+      }, children);
+    },
+  };
+});
+
+// Mock RCTModalHostViewNativeComponent
+jest.mock('react-native/src/private/specs_DEPRECATED/components/RCTModalHostViewNativeComponent', () => {
+  return {
+    __INTERNAL_VIEW_CONFIG: {},
+  };
+});
+
+// Mock React Native ScrollView to avoid ES6 syntax issues
+jest.mock('react-native/Libraries/Components/ScrollView/ScrollView', () => {
+  const React = require('react');
+  
+  // Create a simple View-like component without requiring react-native
+  const MockScrollView = ({ children, refreshing, onRefresh, showsVerticalScrollIndicator, testID, ...props }) => {
+    return React.createElement('View', {
+      ...props,
+      testID: testID || 'scroll-view',
+    }, children);
+  };
+  
+  return {
+    __esModule: true,
+    default: MockScrollView,
+  };
+});
+
+// Mock ScrollView related native components
+jest.mock('react-native/src/private/specs_DEPRECATED/components/AndroidHorizontalScrollContentViewNativeComponent', () => {
+  return {
+    __INTERNAL_VIEW_CONFIG: {},
+  };
+});
+
+jest.mock('react-native/src/private/components/HScrollViewNativeComponents', () => {
+  return {
+    __INTERNAL_VIEW_CONFIG: {},
+  };
+});
+
+jest.mock('react-native/Libraries/Components/ScrollView/ScrollViewNativeComponent', () => {
+  return {
+    __INTERNAL_VIEW_CONFIG: {},
+  };
+});
+
 // Mock Theme Context for hooks
 jest.mock('./src/context/ThemeContext', () => ({
   ...jest.requireActual('./src/context/ThemeContext'),
