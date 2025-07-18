@@ -71,7 +71,7 @@ describe('NavigationPanel Component', () => {
   // Helper function to run timers
   const runTimers = () => {
     act(() => {
-      jest.runAllTimers();
+      jest.advanceTimersByTime(1000); // Advance by 1 second instead of running all timers
     });
   };
 
@@ -634,7 +634,7 @@ describe('NavigationPanel Component', () => {
     });
 
     it('provides proper accessibility for navigation items', () => {
-      const { getByText } = render(
+      const { getByLabelText } = render(
         <TestWrapper>
           <NavigationPanel
             type="navigation"
@@ -643,7 +643,7 @@ describe('NavigationPanel Component', () => {
         </TestWrapper>
       );
 
-      const dashboardItem = getByText('Dashboard');
+      const dashboardItem = getByLabelText('Dashboard');
       expect(dashboardItem.props.accessibilityRole).toBe('button');
     });
   });
@@ -717,7 +717,7 @@ describe('NavigationPanel Component', () => {
 
     it('handles missing onPress handlers', () => {
       const itemsWithoutHandlers = [
-        { id: '1', title: 'No Handler', icon: 'home' as const },
+        { id: '1', title: 'No Handler', icon: 'home' as const, onPress: jest.fn() },
       ];
 
       const { getByText } = render(
