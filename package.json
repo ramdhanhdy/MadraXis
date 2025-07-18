@@ -9,13 +9,14 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
+    "test:bun": "jest --watchAll --config=jest.bun.config.js",
     "lint": "expo lint"
   },
   "jest": {
     "preset": "jest-expo",
     "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
     "transformIgnorePatterns": [
-      "node_modules/(?!(react-native|@react-native|expo|@expo|@expo/.*|expo-.*|@unimodules|@unimodules/.*|@react-navigation|@react-navigation/.*|react-native-.*|@testing-library/.*)/)"
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-.*|expo(nent)?|@expo(nent)?/.*|@unimodules|@sentry/.*|sentry-expo|native-base))"
     ],
     "moduleFileExtensions": ["ts", "tsx", "js", "jsx"],
     "transform": {

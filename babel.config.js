@@ -3,7 +3,7 @@ module.exports = function (api) {
 
   return {
     presets: [
-      'babel-preset-expo',
+      ['babel-preset-expo', { jsxRuntime: 'automatic' }],
       '@babel/preset-typescript'
     ],
     plugins: [
@@ -12,9 +12,9 @@ module.exports = function (api) {
     env: {
       test: {
         presets: [
-          'babel-preset-expo',
+          ['babel-preset-expo', { jsxRuntime: 'automatic' }],
           '@babel/preset-typescript',
-          '@babel/preset-env'
+          ['@babel/preset-env', { targets: { node: 'current' } }]
         ],
         plugins: []
       }
