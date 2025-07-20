@@ -81,23 +81,23 @@ export default function StudentDashboard() {
   ];
   
   const navigateToQuranProgress = () => {
-    router.push('/student/quran-progress');
+    router.push('/(student)/quran-progress');
   };
 
   const navigateToSchedule = () => {
-    router.push('/student/schedule');
+    router.push('/(student)/schedule');
   };
 
   const navigateToBoardingInfo = () => {
-    router.push('/student/boarding-info');
+    router.push('/(student)/boarding-info');
   };
 
   const navigateToIncidentReport = () => {
-    router.push('/student/incident-report');
+    router.push('/(student)/incident-report');
   };
 
   const navigateToAntiBullying = () => {
-    router.push('/student/anti-bullying');
+    router.push('/(student)/anti-bullying');
   };
 
   const openModal = (title: string, content: React.ReactNode) => {
