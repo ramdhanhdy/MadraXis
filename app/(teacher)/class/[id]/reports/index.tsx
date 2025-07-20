@@ -1,9 +1,15 @@
-import { Redirect, useLocalSearchParams } from 'expo-router';
+import React from 'react';
+import { Stack } from 'expo-router';
+import ClassReports from '../../../../../src/components/templates/ClassReportsTemplate';
 
 export default function ClassReportsIndex() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  return <Redirect href={{
-    pathname: "/screens/teacher/ClassReports",
-    params: { id }
-  }} />;
-} 
+  return (
+    <>
+      <Stack.Screen options={{
+        headerShown: false,
+        title: "Laporan Kelas"
+      }} />
+      <ClassReports />
+    </>
+  );
+}

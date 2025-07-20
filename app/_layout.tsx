@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { ThemeProvider } from '../src/context/ThemeContext';
 import * as SplashScreen from 'expo-splash-screen';
-import AnimatedSplashScreen from './components/AnimatedSplashScreen';
+import AnimatedSplashScreen from '../src/components/organisms/AnimatedSplashScreen';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

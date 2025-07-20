@@ -5,8 +5,9 @@ export default function TeacherLayout() {
     return (
         <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="dashboard" />
-            <Stack.Screen name="classes" />
-            <Stack.Screen name="students" />
+            <Stack.Screen name="students/index" />
+            <Stack.Screen name="students/[id]" />
+            <Stack.Screen name="students/add" />
             <Stack.Screen name="index" />
             <Stack.Screen name="class/index" />
             <Stack.Screen name="class/[id]/index" />

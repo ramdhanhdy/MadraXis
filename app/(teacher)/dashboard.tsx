@@ -23,7 +23,7 @@ import { logoSvg } from '../../src/utils/svgPatterns';
 import { colors } from '../../src/styles/colors';
 
 // Modal Components
-import ProfileView from '../components/teacher/ProfileView';
+import TeacherProfileView from '../../src/components/organisms/TeacherProfileView';
 
 // Icon types for proper typing
 type IoniconsIcon = keyof typeof Ionicons.glyphMap;
@@ -473,7 +473,7 @@ export default function TeacherDashboard() {
   );
 
   const renderProfile = () => (
-    <ProfileView profile={profile || undefined} loading={authLoading} schoolName={schoolName} />
+    <TeacherProfileView profile={profile || undefined} loading={authLoading} schoolName={schoolName} />
   );
 
   // Content mapping based on active tab

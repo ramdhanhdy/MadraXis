@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import CCTVAccessRequest from '../screens/parent/CCTVAccessRequest';
+import CCTVAccessRequest from '../../src/components/templates/CCTVAccessRequestTemplate';
 
 export default function CCTVRequestScreen() {
   return (

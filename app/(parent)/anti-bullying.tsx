@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import AntiBullyingResources from '../screens/parent/AntiBullyingResources';
+import AntiBullyingResources from '../../src/components/templates/AntiBullyingResourcesTemplate';
 
 export default function AntiBullyingScreen() {
   return (

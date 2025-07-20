@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import IncidentReport from '../screens/parent/IncidentReport';
+import IncidentReport from '../../src/components/templates/ParentIncidentReportTemplate';
 
 export default function IncidentReportScreen() {
   return (
