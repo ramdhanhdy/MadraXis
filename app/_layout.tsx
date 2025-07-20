@@ -38,27 +38,11 @@ const RootLayoutNav = () => {
         <>
             <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
-                <Stack.Screen name="teacher/index" />
-                <Stack.Screen name="student/index" />
-                <Stack.Screen name="student/dashboard" />
-                <Stack.Screen name="student/quran-progress" />
-                <Stack.Screen name="student/schedule" />
-                <Stack.Screen name="student/boarding-info" />
-                <Stack.Screen name="student/incident-report" />
-                <Stack.Screen name="student/anti-bullying" />
-                <Stack.Screen name="teacher/class/index" />
-                <Stack.Screen name="teacher/class/[id]/index" />
-                <Stack.Screen name="teacher/class/[id]/students/index" />
-                <Stack.Screen name="teacher/class/[id]/schedule/index" />
-                <Stack.Screen name="teacher/class/[id]/reports/index" />
-                <Stack.Screen name="management/dashboard" />
-                <Stack.Screen name="management/setup" />
-                <Stack.Screen name="management/user-management" />
-                <Stack.Screen name="parent/dashboard" />
-                <Stack.Screen name="parent/incident-report" />
-                <Stack.Screen name="parent/anti-bullying" />
-                <Stack.Screen name="parent/cctv-request" />
-                <Stack.Screen name="(auth)/reset-password" />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(student)" options={{ headerShown: false }} />
+                <Stack.Screen name="(teacher)" options={{ headerShown: false }} />
+                <Stack.Screen name="(parent)" options={{ headerShown: false }} />
+                <Stack.Screen name="(management)" options={{ headerShown: false }} />
             </Stack>
             <StatusBar style="light" />
         </>
