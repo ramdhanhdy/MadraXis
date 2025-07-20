@@ -109,7 +109,6 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
         </Button>
       );
 
-    case 'button':
     default:
       return (
         <Button

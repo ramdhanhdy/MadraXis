@@ -5,6 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+
 // Types
 interface Student {
   id: number;
@@ -249,7 +251,7 @@ export default function ClassDetail() {
     </View>
   );
 
-  const tabs = [
+  const tabs: { id: string; label: string; icon: IoniconName }[] = [
     { id: 'overview', label: 'Ringkasan', icon: 'information-circle-outline' },
     { id: 'students', label: 'Siswa', icon: 'people-outline' },
     { id: 'schedule', label: 'Jadwal', icon: 'calendar-outline' },
@@ -279,7 +281,7 @@ export default function ClassDetail() {
             onPress={() => setActiveTab(tab.id)}
           >
             <Ionicons 
-              name={tab.icon as any} 
+              name={tab.icon} 
               size={20} 
               color={activeTab === tab.id ? '#005e7a' : '#666666'} 
             />

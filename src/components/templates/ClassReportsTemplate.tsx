@@ -4,12 +4,13 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { v4 as uuidv4 } from 'uuid';
 
 // Types
 type ReportType = 'daily' | 'weekly' | 'monthly' | 'evaluation';
 
 interface Report {
-  id: number;
+  id: string;
   title: string;
   type: ReportType;
   date: string;
@@ -32,7 +33,7 @@ const sampleClasses: ClassData[] = [
     level: 'Menengah',
     reports: [
       {
-        id: 1,
+        id: '1',
         title: 'Laporan Bulanan Januari 2024',
         type: 'monthly',
         date: '2024-01-31',
@@ -40,7 +41,7 @@ const sampleClasses: ClassData[] = [
         status: 'published'
       },
       {
-        id: 2,
+        id: '2',
         title: 'Evaluasi Tengah Semester',
         type: 'evaluation',
         date: '2024-01-15',
@@ -48,7 +49,7 @@ const sampleClasses: ClassData[] = [
         status: 'published'
       },
       {
-        id: 3,
+        id: '3',
         title: 'Laporan Mingguan 3',
         type: 'weekly',
         date: '2024-01-21',
@@ -63,7 +64,7 @@ const sampleClasses: ClassData[] = [
     level: 'Lanjutan',
     reports: [
       {
-        id: 4,
+        id: '4',
         title: 'Laporan Bulanan Januari 2024',
         type: 'monthly',
         date: '2024-01-31',
@@ -127,7 +128,7 @@ export default function ClassReports() {
     }
 
     const newReport: Report = {
-      id: Date.now(),
+      id: uuidv4(),
       title: newTitle,
       type: newType,
       date: newDate,
@@ -148,7 +149,7 @@ export default function ClassReports() {
     setShowAddModal(false);
   };
 
-  const handleDeleteReport = (reportId: number) => {
+  const handleDeleteReport = (reportId: string) => {
     Alert.alert(
       'Hapus Laporan',
       'Apakah Anda yakin ingin menghapus laporan ini?',
@@ -168,7 +169,7 @@ export default function ClassReports() {
     );
   };
 
-  const toggleReportStatus = (reportId: number) => {
+  const toggleReportStatus = (reportId: string) => {
     setClassData(prev => prev ? {
       ...prev,
       reports: prev.reports.map(report => 

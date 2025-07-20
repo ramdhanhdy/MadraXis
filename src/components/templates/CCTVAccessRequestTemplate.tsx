@@ -4,14 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-// Note: These packages would need to be installed in a real project
-// import DateTimePicker from '@react-native-community/datetimepicker';
-// import { Picker } from '@react-native-picker/picker';
-
-// Mock components for demo purposes
-const DateTimePicker = ({ value, mode, display, onChange }: any) => null;
-const Picker = ({ selectedValue, onValueChange, style, children }: any) => null;
-Picker.Item = ({ label, value }: any) => null;
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 
 interface Camera {
   id: string;

@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { AnalysisConfig, FileType } from './types';
+import * as micromatch from 'micromatch';
 
 /**
  * Information about a scanned file
@@ -40,16 +41,9 @@ export interface ScanResult {
 function isExcluded(filePath: string, rootDir: string, excludePatterns: string[]): boolean {
   const relativePath = path.relative(rootDir, filePath).replace(/\\/g, '/');
   
-  return excludePatterns.some(pattern => {
-    // Convert glob pattern to regex
-    const regexPattern = pattern
-      .replace(/\*\*/g, '.*')
-      .replace(/\*/g, '[^/]*')
-      .replace(/\?/g, '[^/]');
-    
-    const regex = new RegExp(`^${regexPattern}$`);
-    return regex.test(relativePath) || regex.test(path.basename(filePath));
-  });
+  return excludePatterns.some(pattern => 
+    micromatch.isMatch(relativePath, pattern) || micromatch.isMatch(path.basename(filePath), pattern)
+  );
 }
 
 /**

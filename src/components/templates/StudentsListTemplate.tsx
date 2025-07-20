@@ -132,14 +132,7 @@ export default function StudentsList() {
             </View>
             <Text style={styles.progressText}>{item.progress}%</Text>
           </View>
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => {
-              // Handle quick action
-            }}
-          >
-            <Ionicons name="create-outline" size={20} color="#005e7a" />
-          </TouchableOpacity>
+          
         </View>
       </View>
     </TouchableOpacity>

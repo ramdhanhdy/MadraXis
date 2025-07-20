@@ -5,16 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-// Mock component for date picker
-const DatePicker = ({ value, onChange }: any) => (
-  <TouchableOpacity 
-    style={styles.datePickerButton}
-    onPress={() => onChange(new Date())}
-  >
-    <Text style={styles.dateText}>{value.toLocaleDateString('id-ID')}</Text>
-    <MaterialIcons name="event" size={24} color="#005e7a" />
-  </TouchableOpacity>
-);
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface IncidentType {
   id: string;
@@ -25,6 +16,7 @@ interface IncidentType {
 export default function StudentIncidentReport() {
   const router = useRouter();
   const [incidentDate, setIncidentDate] = useState(new Date());
+const [showDatePicker, setShowDatePicker] = useState(false);
   const [incidentType, setIncidentType] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
@@ -146,10 +138,26 @@ export default function StudentIncidentReport() {
           {/* Date */}
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Tanggal Kejadian *</Text>
-            <DatePicker 
-              value={incidentDate} 
-              onChange={setIncidentDate}
-            />
+            <TouchableOpacity 
+  style={styles.datePickerButton}
+  onPress={() => setShowDatePicker(true)}
+>
+  <Text style={styles.dateText}>{incidentDate.toLocaleDateString('id-ID')}</Text>
+  <MaterialIcons name="event" size={24} color="#005e7a" />
+</TouchableOpacity>
+{showDatePicker && (
+  <DateTimePicker
+    value={incidentDate}
+    mode="date"
+    display="default"
+    onChange={(event, selectedDate) => {
+      setShowDatePicker(false);
+      if (selectedDate) {
+        setIncidentDate(selectedDate);
+      }
+    }}
+  />
+)}
           </View>
 
           {/* Incident Type */}

@@ -24,7 +24,7 @@ export default function AddStudent() {
   const [name, setName] = useState('');
   const [gender, setGender] = useState('');
   const [birthDate, setBirthDate] = useState('');
-  const [selectedClass, setSelectedClass] = useState('');
+  const [selectedClass, setSelectedClass] = useState(classId && classes.includes(classId) ? classId : '');
   const [parentName, setParentName] = useState('');
   const [parentPhone, setParentPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -100,13 +100,16 @@ export default function AddStudent() {
             <View style={styles.genderContainer}>
               {genderOptions.map((option) => (
                 <TouchableOpacity
-                  key={option.value}
-                  style={[
-                    styles.genderOption,
-                    gender === option.value && styles.selectedGenderOption
-                  ]}
-                  onPress={() => setGender(option.value)}
-                >
+        key={option.value}
+        style={[
+          styles.genderOption,
+          gender === option.value && styles.selectedGenderOption
+        ]}
+        onPress={() => setGender(option.value)}
+        accessibilityRole="radio"
+        accessibilityState={{ selected: gender === option.value }}
+        accessibilityLabel={option.label}
+      >
                   <Ionicons 
                     name={gender === option.value ? "radio-button-on" : "radio-button-off"} 
                     size={20} 
@@ -140,6 +143,9 @@ export default function AddStudent() {
                     selectedClass === className && styles.selectedClassOption
                   ]}
                   onPress={() => setSelectedClass(className)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: selectedClass === className }}
+                  accessibilityLabel={className}
                 >
                   <Text style={[
                     styles.classOptionText,
