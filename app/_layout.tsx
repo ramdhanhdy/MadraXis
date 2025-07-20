@@ -38,12 +38,6 @@ const RootLayoutNav = () => {
         <>
             <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
-                <Stack.Screen name="debug-auth" />
-                <Stack.Screen name="screens/auth/login" />
-                <Stack.Screen name="screens/auth/ManagementAuthScreen" />
-                <Stack.Screen name="screens/teacher/TeacherDashboard" />
-                <Stack.Screen name="screens/student/StudentDashboard" />
-                <Stack.Screen name="screens/parent/ParentDashboard" />
                 <Stack.Screen name="teacher/index" />
                 <Stack.Screen name="student/index" />
                 <Stack.Screen name="student/dashboard" />

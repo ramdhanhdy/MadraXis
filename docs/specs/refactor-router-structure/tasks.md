@@ -1,0 +1,78 @@
+# Implementation Plan for Refactoring Expo Router Structure
+
+- [ ] 1. Preparation and Setup
+  - [ ] 1.1 Backup current structure
+    - Create a backup of the entire `app/` directory
+    - Commit current state to git with message "Backup before router refactoring"
+    - _Requirements: 4.1, 4.2_
+  - [ ] 1.2 Review existing routes
+    - Analyze `app/_layout.tsx` to list all current Stack.Screen definitions
+    - Categorize screens by role (student, teacher, parent, management)
+    - Document any shared screens
+    - _Requirements: 1.1, 2.1_
+
+- [ ] 2. Create Nested Layouts
+  - [ ] 2.1 Create student layout
+    - Create `app/(student)/_layout.tsx`
+    - Add Stack with student-specific screens
+    - _Requirements: 1.1, 1.2_
+  - [ ] 2.2 Create teacher layout
+    - Create `app/(teacher)/_layout.tsx`
+    - Add Stack with teacher-specific screens
+    - _Requirements: 1.1, 1.2_
+  - [ ] 2.3 Create parent layout
+    - Create `app/(parent)/_layout.tsx`
+    - Add Stack with parent-specific screens
+    - _Requirements: 1.1, 1.2_
+  - [ ] 2.4 Create management layout
+    - Create `app/(management)/_layout.tsx`
+    - Add Stack with management-specific screens
+    - _Requirements: 1.1, 1.2_
+
+- [ ] 3. Restructure Files
+  - [ ] 3.1 Move student files
+    - Move student-specific files to `app/(student)/`
+    - Update any imports accordingly
+    - _Requirements: 1.2, 3.1_
+  - [ ] 3.2 Move teacher files
+    - Move teacher-specific files to `app/(teacher)/`
+    - Update imports
+    - _Requirements: 1.2, 3.1_
+  - [ ] 3.3 Move parent files
+    - Move parent-specific files to `app/(parent)/`
+    - Update imports
+    - _Requirements: 1.2, 3.1_
+  - [ ] 3.4 Move management files
+    - Move management-specific files to `app/(management)/`
+    - Update imports
+    - _Requirements: 1.2, 3.1_
+
+- [ ] 4. Update Root Layout and Navigation
+  - [ ] 4.1 Simplify root _layout.tsx
+    - Remove role-specific Stack.Screen entries
+    - Add route groups like (student), (teacher), etc.
+    - _Requirements: 2.1, 2.2_
+  - [ ] 4.2 Update AuthContext navigation
+    - Modify redirects to use new grouped paths (e.g., '/(student)/dashboard')
+    - Test redirection logic
+    - _Requirements: 3.1, 3.2_
+
+- [ ] 5. Testing and Verification
+  - [ ] 5.1 Test navigation flows
+    - Verify authentication and redirection for each role
+    - Check all routes are accessible
+    - _Requirements: 4.1, 4.2_
+  - [ ] 5.2 Performance checks
+    - Measure load times before and after
+    - Verify lazy-loading works
+    - _Requirements: 3.2_
+
+- [ ] 6. Cleanup and Documentation
+  - [ ] 6.1 Remove obsolete elements
+    - Delete unused files or references
+    - Clean up imports
+    - _Requirements: 3.1_
+  - [ ] 6.2 Update documentation
+    - Update any route-related docs
+    - Commit changes with detailed messages
+    - _Requirements: 4.2_
