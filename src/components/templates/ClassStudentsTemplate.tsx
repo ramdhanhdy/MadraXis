@@ -226,7 +226,7 @@ export default function ClassStudents() {
               style={styles.emptyStateButton}
               onPress={() => router.push({
                 pathname: '/(teacher)/students/add',
-                params: { classId }
+                params: { classId: convertNumberToString(classId) }
               })}
             >
               <Text style={styles.emptyStateButtonText}>Tambah Siswa</Text>

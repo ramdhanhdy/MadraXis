@@ -4,10 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { v4 as uuidv4 } from 'uuid';
 import { mockClassData, ClassData as MockClassData, ClassScheduleItem } from '../../mocks/classData';
-
-// No longer needed as we're using numeric UUID conversion
 
 const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
@@ -72,7 +69,7 @@ export default function ClassSchedule() {
     }
 
     const newScheduleItem: ClassScheduleItem = {
-      id: parseInt(uuidv4().replace(/-/g, '').substring(0, 8), 16),
+      id: Date.now(),
       day: trimmedDay,
       time: trimmedTime,
       activity: trimmedActivity,
