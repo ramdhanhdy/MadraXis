@@ -27,9 +27,60 @@ Phase 1 introduces essential financial management capabilities for the managemen
 ```
 
 ### Data Flow
+
+#### Management-Centric Flows
 1. **Fee Creation**: Management → Financial API → Supabase → Student Records
 2. **Payment Processing**: Parent/Student → Payment Gateway → Financial API → Update Records
 3. **Reports**: Management → Financial API → Database Queries → Dashboard Display
+
+#### Parent/Student Interaction Flows (Indirect)
+4. **Overdue Notifications**: Management → Notification Service → Parent/Student → Payment Action
+5. **Payment Receipts**: Payment Processing → Email/SMS → Parent/Student → Confirmation
+6. **Fee Visibility**: Parent/Student → Parent Portal → Student Dashboard → Fee Display
+
+### User Story Mapping for Roles
+
+#### Management Stories
+```
+As a financial officer, I want to:
+- Create bulk fees for all Grade 10 students so I don't have to enter them individually
+- See a dashboard of overdue payments so I can prioritize collection efforts
+- Generate monthly collection reports for board meetings
+- Send payment reminders to parents of overdue students
+- Process offline cash payments from parents who visit the office
+```
+
+#### Parent Stories (Indirect Interactions)
+```
+As a parent, I want to:
+- Receive an SMS alert when my child's tuition is due in 3 days
+- Get an email notification when my payment is confirmed
+- View my child's complete fee history through the parent portal
+- See a clear breakdown of what each fee covers
+- Receive gentle reminders before fees become overdue
+
+As a student, I want to:
+- See my outstanding fees on my dashboard
+- View payment history for my records
+- Receive in-app notifications about upcoming fee due dates
+```
+
+#### Notification Flow Example
+```
+Trigger: Fee becomes overdue (3 days past due_date)
+↓
+System: Generate notification record
+↓
+Management: Review and approve reminder batch
+↓
+Notification Service: Send SMS/Email to parents
+↓
+Parent: Receives "Your child's tuition fee of $500 is 3 days overdue"
+↓
+Parent: Makes payment via preferred method
+↓
+System: Updates payment status and sends confirmation
+```
 
 ## Component Design
 

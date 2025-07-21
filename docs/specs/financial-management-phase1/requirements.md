@@ -37,7 +37,55 @@ Phase 1 of the Financial Management feature introduces core financial capabiliti
 - **Needs**: Clear understanding of what fees are due, payment history, payment receipts
 - **Pain Points**: Unclear fee breakdown, difficulty tracking payment status
 
-## 3. Functional Requirements
+## 3. Functional Requirements (Mapped to User Stories)
+
+### User Story Mapping
+
+#### Management User Stories
+- **US-MGT-001**: As a bursar, I want to create individual fees for students so I can charge for specific services
+- **US-MGT-002**: As a financial officer, I want to create bulk fees for multiple students so I can save time on repetitive tasks
+- **US-MGT-003**: As an administrator, I want to send payment reminders to reduce overdue payments by 80%
+- **US-MGT-004**: As a bursar, I want to see a dashboard of financial status so I can prioritize collection efforts
+- **US-MGT-005**: As a financial officer, I want to generate monthly collection reports for board meetings
+
+#### Parent/Student Stories (Indirect)
+- **US-PAR-001**: As a parent, I want to receive SMS alerts when fees are due so I can pay promptly
+- **US-PAR-002**: As a parent, I want to see my child's fee history through the parent portal
+- **US-STD-001**: As a student, I want to view my outstanding fees on my mobile dashboard
+
+### 3. Functional Requirements
+
+### Agile Tie-In & Sprint Planning
+
+#### Sprint 1 Backlog (Week 1)
+- **Epic**: Database Foundation
+- **Stories**: US-MGT-001, US-MGT-002 (partial)
+- **Tasks**: Create fees table, implement RLS policies
+- **OKR**: Database schema complete with 100% test coverage
+
+#### Sprint 2 Backlog (Week 2)
+- **Epic**: API Development
+- **Stories**: US-MGT-001, US-MGT-002 (completion), US-MGT-003 (setup)
+- **Tasks**: Create fee endpoints, bulk creation API
+- **OKR**: All API endpoints return correct data with <100ms response time
+
+#### Sprint 3 Backlog (Week 3)
+- **Epic**: Frontend Components
+- **Stories**: US-MGT-004, US-MGT-005 (setup)
+- **Tasks**: Financial dashboard, fee management interface
+- **OKR**: Management can create fees in <30 seconds
+
+#### Sprint 4 Backlog (Week 4)
+- **Epic**: Integration & Testing
+- **Stories**: US-MGT-003, US-MGT-005 (completion)
+- **Tasks**: Payment reminder system, report generation
+- **OKR**: 90% test coverage achieved, overdue reports generate in <5 seconds
+
+#### Sprint 5 Backlog (Week 5)
+- **Epic**: Documentation & Deployment
+- **Stories**: All stories complete
+- **Tasks**: User training, final testing, deployment
+- **OKR**: 100% of management staff trained within 2 weeks
 
 ### 3.1 Fee Management
 
@@ -153,7 +201,13 @@ Phase 1 of the Financial Management feature introduces core financial capabiliti
 
 ### 4.4 Usability Requirements
 - **NFR-013**: Mobile-responsive design for tablets and phones
+  - Support iOS/Android notch screens (iPhone X+, Android 9+)
+  - Dark mode compatibility with system preferences
+  - Touch targets minimum 44x44pt for accessibility
 - **NFR-014**: Offline capability for viewing cached data
+  - Cache last 30 days of financial reports
+  - Cache student fee summaries for offline viewing
+  - Sync indicator when network restored
 - **NFR-015**: Maximum 3 clicks to access any feature
 - **NFR-016**: Contextual help and tooltips
 
@@ -285,17 +339,32 @@ Phase 1 of the Financial Management feature introduces core financial capabiliti
 ### 12.1 Technical Constraints
 - **C-001**: Must work within existing Supabase infrastructure
 - **C-002**: Must be compatible with React Native/Expo
-- **C-003**: Must support offline functionality
+- **C-003**: Must support offline functionality (cached reports only)
 - **C-004**: Must maintain existing user authentication
+- **C-005**: Manual payment processing with gateway hooks for future integration
 
 ### 12.2 Business Constraints
-- **C-005**: Budget limit for Phase 1 development
-- **C-006**: Timeline of 4-6 weeks for implementation
-- **C-007**: No disruption to existing features
-- **C-008**: Training time for management staff < 2 hours
+- **C-006**: Budget limit for Phase 1 development
+- **C-007**: Timeline of 4-6 weeks for implementation
+- **C-008**: No disruption to existing features
+- **C-009**: Training time for management staff < 2 hours
+- **C-010**: Phase 1 scope limited to manual payments only
 
 ### 12.3 Assumptions
 - **A-001**: Existing student data is accurate and complete
 - **A-002**: Management staff has basic tech literacy
-- **A-003**: Payment processing will be manual initially
+- **A-003**: Payment processing will be manual initially (validated via stakeholder interview)
 - **A-004**: Single currency per school deployment
+- **A-005**: 95% of current payments are handled manually (cash, bank transfer, cheque)
+
+### 12.4 Scope Boundaries (Phase 1)
+- **IN SCOPE**: Manual payment recording, fee management, basic reporting
+- **OUT OF SCOPE**: Online payment gateways, automated payment processing, multi-currency support
+- **FUTURE PHASE**: IR-005 through IR-008 (Stripe, Razorpay, PayPal integrations)
+
+### 12.5 User Story Validation
+**Validation Plan for Assumption A-003**:
+- **Week 1**: Conduct 5 stakeholder interviews with bursars/financial officers
+- **Validation Criteria**: Confirm >90% of current payments are manual
+- **Success Metric**: Document current payment methods and frequencies
+- **Risk Mitigation**: If automated methods >20%, adjust Phase 1 scope accordingly
