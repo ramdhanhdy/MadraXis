@@ -212,8 +212,8 @@ Phase 1 of the Financial Management feature introduces core financial capabiliti
 - **NFR-016**: Contextual help and tooltips
 
 ### 4.5 Compliance Requirements
-- **NFR-017**: GDPR compliance for student financial data
-- **NFR-018**: 7-year data retention policy
+- **NFR-017**: GDPR compliance for student financial data, ensuring a lawful basis for all processing activities.
+- **NFR-018**: 7-year data retention for financial records, based on legal obligations for financial auditing and tax purposes. A data disposal workflow will be implemented to securely erase or anonymize data after this period.
 - **NFR-019**: Audit trail for all financial transactions
 - **NFR-020**: Export capabilities for regulatory reporting
 

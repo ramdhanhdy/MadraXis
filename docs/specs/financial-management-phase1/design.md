@@ -154,6 +154,7 @@ CREATE TABLE payments (
   student_id UUID REFERENCES students(id),
   fee_id UUID REFERENCES fees(id),
   amount DECIMAL(10,2) NOT NULL,
+  currency CHAR(3) NOT NULL DEFAULT 'IDR', -- ISO 4217 currency code
   CHECK (amount > 0),
   payment_method VARCHAR(50), -- 'card', 'bank_transfer', 'cash'
   payment_date DATE NOT NULL,
