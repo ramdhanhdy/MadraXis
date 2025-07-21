@@ -4,11 +4,12 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Student as GlobalStudent } from '../../types';
 
-// Types
-interface Student {
-  id: number;
-  name: string;
+// Types - extending global Student type for local component needs
+interface Student extends Omit<GlobalStudent, 'id'> {
+  id: number; // Local component uses number instead of string
+  name: string; // Alias for full_name for backward compatibility
   memorizedVerses: number;
   totalVerses: number;
   lastActivity?: string;
@@ -33,7 +34,12 @@ const sampleClasses: ClassData[] = [
     students: [
       { 
         id: 1, 
-        name: 'Ahmad Fauzi', 
+        name: 'Ahmad Fauzi',
+        full_name: 'Ahmad Fauzi',
+        role: 'student' as const,
+        school_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-15T00:00:00Z',
         memorizedVerses: 150, 
         totalVerses: 200, 
         lastActivity: '2024-01-15',
@@ -41,7 +47,12 @@ const sampleClasses: ClassData[] = [
       },
       { 
         id: 2, 
-        name: 'Fatimah Zahra', 
+        name: 'Fatimah Zahra',
+        full_name: 'Fatimah Zahra',
+        role: 'student' as const,
+        school_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-14T00:00:00Z',
         memorizedVerses: 180, 
         totalVerses: 200, 
         lastActivity: '2024-01-14',
@@ -49,7 +60,12 @@ const sampleClasses: ClassData[] = [
       },
       { 
         id: 3, 
-        name: 'Muhammad Ali', 
+        name: 'Muhammad Ali',
+        full_name: 'Muhammad Ali',
+        role: 'student' as const,
+        school_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-13T00:00:00Z',
         memorizedVerses: 120, 
         totalVerses: 200, 
         lastActivity: '2024-01-13',
@@ -57,7 +73,12 @@ const sampleClasses: ClassData[] = [
       },
       { 
         id: 4, 
-        name: 'Siti Aisyah', 
+        name: 'Siti Aisyah',
+        full_name: 'Siti Aisyah',
+        role: 'student' as const,
+        school_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-15T00:00:00Z',
         memorizedVerses: 160, 
         totalVerses: 200, 
         lastActivity: '2024-01-15',
@@ -65,7 +86,12 @@ const sampleClasses: ClassData[] = [
       },
       { 
         id: 5, 
-        name: 'Omar bin Khattab', 
+        name: 'Omar bin Khattab',
+        full_name: 'Omar bin Khattab',
+        role: 'student' as const,
+        school_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-12T00:00:00Z',
         memorizedVerses: 140, 
         totalVerses: 200, 
         lastActivity: '2024-01-12',
@@ -81,7 +107,12 @@ const sampleClasses: ClassData[] = [
     students: [
       { 
         id: 6, 
-        name: 'Khadijah binti Khuwailid', 
+        name: 'Khadijah binti Khuwailid',
+        full_name: 'Khadijah binti Khuwailid',
+        role: 'student' as const,
+        school_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-15T00:00:00Z',
         memorizedVerses: 100, 
         totalVerses: 150, 
         lastActivity: '2024-01-15',

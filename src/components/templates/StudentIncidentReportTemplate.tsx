@@ -10,7 +10,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 interface IncidentType {
   id: string;
   label: string;
-  icon: string;
+  icon: React.ComponentProps<typeof FontAwesome5>['name'];
 }
 
 export default function StudentIncidentReport() {
@@ -73,7 +73,7 @@ const [showDatePicker, setShowDatePicker] = useState(false);
       onPress={() => setIncidentType(type.id)}
     >
       <FontAwesome5 
-        name={type.icon as any} 
+        name={type.icon} 
         size={20} 
         color={incidentType === type.id ? '#ffffff' : '#005e7a'} 
       />

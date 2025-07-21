@@ -4,13 +4,14 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Student as GlobalStudent } from '../../types';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
-// Types
-interface Student {
-  id: number;
-  name: string;
+// Types - extending global Student type for local component needs
+interface Student extends Omit<GlobalStudent, 'id'> {
+  id: number; // Local component uses number instead of string
+  name: string; // Alias for full_name for backward compatibility
   memorizedVerses: number;
   totalVerses: number;
 }
@@ -50,9 +51,39 @@ const sampleClasses: ClassData[] = [
     studentCount: 25,
     progress: 75,
     students: [
-      { id: 1, name: 'Ahmad Fauzi', memorizedVerses: 150, totalVerses: 200 },
-      { id: 2, name: 'Fatimah Zahra', memorizedVerses: 180, totalVerses: 200 },
-      { id: 3, name: 'Muhammad Ali', memorizedVerses: 120, totalVerses: 200 },
+      { 
+        id: 1, 
+        name: 'Ahmad Fauzi',
+        full_name: 'Ahmad Fauzi',
+        role: 'student' as const,
+        school_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-15T00:00:00Z',
+        memorizedVerses: 150, 
+        totalVerses: 200 
+      },
+      { 
+        id: 2, 
+        name: 'Fatimah Zahra',
+        full_name: 'Fatimah Zahra',
+        role: 'student' as const,
+        school_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-14T00:00:00Z',
+        memorizedVerses: 180, 
+        totalVerses: 200 
+      },
+      { 
+        id: 3, 
+        name: 'Muhammad Ali',
+        full_name: 'Muhammad Ali',
+        role: 'student' as const,
+        school_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-13T00:00:00Z',
+        memorizedVerses: 120, 
+        totalVerses: 200 
+      },
     ],
     schedule: [
       { day: 'Senin', time: '08:00 - 10:00', activity: 'Hafalan Baru' },

@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Student as GlobalStudent } from '../../types';
 
 // Types
 interface Memorization {
@@ -20,9 +21,10 @@ interface Note {
   content: string;
 }
 
-interface Student {
-  id: number;
-  name: string;
+// Types - extending global Student type for local component needs
+interface Student extends Omit<GlobalStudent, 'id'> {
+  id: number; // Local component uses number instead of string
+  name: string; // Alias for full_name for backward compatibility
   class: string;
   memorizedVerses: number;
   totalVerses: number;
@@ -39,6 +41,11 @@ const sampleStudents: Student[] = [
   {
     id: 1,
     name: 'Ahmad Fauzi',
+    full_name: 'Ahmad Fauzi',
+    role: 'student' as const,
+    school_id: 1,
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-15T00:00:00Z',
     class: 'Tahfidz Al-Baqarah',
     memorizedVerses: 150,
     totalVerses: 200,
@@ -59,6 +66,11 @@ const sampleStudents: Student[] = [
   {
     id: 2,
     name: 'Fatimah Zahra',
+    full_name: 'Fatimah Zahra',
+    role: 'student' as const,
+    school_id: 1,
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-14T00:00:00Z',
     class: 'Tahfidz Al-Baqarah',
     memorizedVerses: 180,
     totalVerses: 200,

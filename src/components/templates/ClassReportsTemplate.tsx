@@ -121,9 +121,24 @@ export default function ClassReports() {
     );
   }
   
+  const isValidDate = (dateString: string): boolean => {
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateString)) {
+      return false;
+    }
+
+    const date = new Date(dateString);
+    return date instanceof Date && !isNaN(date.getTime());
+  };
+
   const handleAddReport = () => {
     if (!newTitle || !newDate) {
       Alert.alert('Error', 'Mohon isi judul dan tanggal laporan');
+      return;
+    }
+
+    if (!isValidDate(newDate)) {
+      Alert.alert('Error', 'Tanggal harus dalam format YYYY-MM-DD dan merupakan tanggal yang valid');
       return;
     }
 

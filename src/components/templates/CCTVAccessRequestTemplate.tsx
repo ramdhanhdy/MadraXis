@@ -31,7 +31,65 @@ export default function CCTVAccessRequest() {
     { id: 'library', name: 'Perpustakaan' },
   ];
 
+  const validateDateRange = () => {
+    if (!startDate || !endDate) return false;
+    
+    const DAY_IN_MS = 24 * 60 * 60 * 1000;
+    const maxAllowedDays = 7;
+    const daysDifference = Math.ceil((endDate.getTime() - startDate.getTime()) / DAY_IN_MS);
+    
+    return daysDifference > 0 && daysDifference <= maxAllowedDays;
+  };
+
+  const validateJustification = () => {
+    const trimmed = justification.trim();
+    return trimmed.length >= 20 && trimmed.length <= 500;
+  };
+
+  // Enhanced validation based on UI guidelines
+  const MAX_JUSTIFICATION_LENGTH = 500;
+  const MAX_DATE_RANGE_DAYS = 90; // Maximum 90 days allowed
+  const MIN_DATE_RANGE_DAYS = 1; // Minimum 1 day required
+
+  const isFormValid = () => {
+    const trimmedJustification = justification.trim();
+    if (trimmedJustification.length < 10 || trimmedJustification.length > MAX_JUSTIFICATION_LENGTH) {
+      return false;
+    }
+    if (!selectedCamera) return false;
+    
+    // Date range validation
+    if (!startDate || !endDate) return false;
+    if (new Date(startDate).getTime() > new Date(endDate).getTime()) return false;
+
+    const daysDiff = (new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24);
+    if (daysDiff < MIN_DATE_RANGE_DAYS || daysDiff > MAX_DATE_RANGE_DAYS) return false;
+
+    // Ensure dates are not in the future
+    if (new Date(startDate).getTime() > new Date().getTime()) return false;
+    if (new Date(endDate).getTime() > new Date().getTime()) return false;
+
+    return true;
+  };
+
+  const getDateError = () => {
+    if (!startDate || !endDate) return null;
+    
+    const DAY_IN_MS = 24 * 60 * 60 * 1000;
+    const daysDifference = Math.ceil((endDate.getTime() - startDate.getTime()) / DAY_IN_MS);
+    
+    if (daysDifference <= 0) {
+      return 'Tanggal selesai harus setelah tanggal mulai';
+    }
+    if (daysDifference > 7) {
+      return 'Maksimal 7 hari akses diperbolehkan';
+    }
+    return null;
+  };
+
   const handleSubmit = () => {
+    if (!isFormValid()) return;
+    
     // In a real app, this would send the request to the backend
     setSubmitted(true);
     
@@ -154,12 +212,16 @@ export default function CCTVAccessRequest() {
               style={styles.textArea}
               value={justification}
               onChangeText={setJustification}
-              placeholder="Jelaskan alasan Anda memerlukan akses rekaman CCTV..."
+              placeholder="Jelaskan alasan Anda memerlukan akses rekaman CCTV (minimal 10, maksimal 500 karakter)..."
               placeholderTextColor="#999999"
               multiline
               numberOfLines={4}
               textAlignVertical="top"
+              maxLength={500}
             />
+            <Text style={styles.characterCount}>
+              {justification.trim().length}/500 karakter (minimal 10)
+            </Text>
           </View>
 
           {/* Guidelines */}
@@ -184,10 +246,10 @@ export default function CCTVAccessRequest() {
         <TouchableOpacity 
           style={[
             styles.submitButton,
-            (!justification.trim() || !selectedCamera) && styles.submitButtonDisabled
+            !isFormValid() && styles.submitButtonDisabled
           ]}
           onPress={handleSubmit}
-          disabled={!justification.trim() || !selectedCamera}
+          disabled={!isFormValid()}
         >
           <Text style={styles.submitButtonText}>Kirim Permintaan</Text>
         </TouchableOpacity>
@@ -407,5 +469,10 @@ const styles = StyleSheet.create({
     color: '#999999',
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  characterCount: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'right',
   },
 });

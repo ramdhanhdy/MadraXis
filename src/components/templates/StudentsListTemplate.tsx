@@ -4,9 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-
-// Types
-interface Student {
+// Local interface for StudentsList display purposes
+interface StudentsListItem {
   id: number;
   name: string;
   class: string;
@@ -17,7 +16,7 @@ interface Student {
 }
 
 // Sample Data
-const sampleStudents: Student[] = [
+const sampleStudents: StudentsListItem[] = [
   {
     id: 1,
     name: 'Ahmad Fauzi',
@@ -74,17 +73,17 @@ export default function StudentsList() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedClass, setSelectedClass] = useState('Semua');
   const [selectedSort, setSelectedSort] = useState('Nama (A-Z)');
-  const [students, setStudents] = useState<Student[]>(sampleStudents);
+  const [students, setStudents] = useState<StudentsListItem[]>(sampleStudents);
   const [isLoading, setIsLoading] = useState(false);
 
   // Filter and sort students
   const filteredAndSortedStudents = students
-    .filter(student => {
+    .filter((student: StudentsListItem) => {
       const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesClass = selectedClass === 'Semua' || student.class === selectedClass;
       return matchesSearch && matchesClass;
     })
-    .sort((a, b) => {
+    .sort((a: StudentsListItem, b: StudentsListItem) => {
       switch (selectedSort) {
         case 'Nama (A-Z)':
           return a.name.localeCompare(b.name);
@@ -99,7 +98,7 @@ export default function StudentsList() {
       }
     });
 
-  const renderStudentItem = ({ item }: { item: Student }) => (
+  const renderStudentItem = ({ item }: { item: StudentsListItem }) => (
     <TouchableOpacity 
       style={styles.studentCard}
       onPress={() => router.push({
