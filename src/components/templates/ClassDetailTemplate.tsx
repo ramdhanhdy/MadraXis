@@ -5,117 +5,32 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Student as GlobalStudent } from '../../types';
+import { convertNumberToString } from '../../utils/idConversion';
+import { mockClassData, ClassData as MockClassData, Student as MockStudent, ClassScheduleItem, Activity } from '../../mocks/classData';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
 // Types - extending global Student type for local component needs
 interface Student extends Omit<GlobalStudent, 'id'> {
-  id: number; // Local component uses number instead of string
+  id: number; // Local component uses number for internal operations
   name: string; // Alias for full_name for backward compatibility
   memorizedVerses: number;
   totalVerses: number;
 }
 
-interface ScheduleItem {
-  day: string;
-  time: string;
-  activity: string;
-  note?: string;
-}
 
-interface Activity {
-  type: 'attendance' | 'memorization' | 'report';
-  description: string;
-  date: string;
-}
-
-interface ClassData {
-  id: number;
-  name: string;
-  level: string;
-  description?: string;
-  studentCount: number;
-  progress: number;
-  students?: Student[];
-  schedule?: ScheduleItem[];
-  recentActivities?: Activity[];
-}
-
-// Sample Data
-const sampleClasses: ClassData[] = [
-  {
-    id: 1,
-    name: 'Tahfidz Al-Baqarah',
-    level: 'Menengah',
-    description: 'Kelas fokus pada hafalan Surah Al-Baqarah dengan penekanan pada tajwid dan makna.',
-    studentCount: 25,
-    progress: 75,
-    students: [
-      { 
-        id: 1, 
-        name: 'Ahmad Fauzi',
-        full_name: 'Ahmad Fauzi',
-        role: 'student' as const,
-        school_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-15T00:00:00Z',
-        memorizedVerses: 150, 
-        totalVerses: 200 
-      },
-      { 
-        id: 2, 
-        name: 'Fatimah Zahra',
-        full_name: 'Fatimah Zahra',
-        role: 'student' as const,
-        school_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-14T00:00:00Z',
-        memorizedVerses: 180, 
-        totalVerses: 200 
-      },
-      { 
-        id: 3, 
-        name: 'Muhammad Ali',
-        full_name: 'Muhammad Ali',
-        role: 'student' as const,
-        school_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-13T00:00:00Z',
-        memorizedVerses: 120, 
-        totalVerses: 200 
-      },
-    ],
-    schedule: [
-      { day: 'Senin', time: '08:00 - 10:00', activity: 'Hafalan Baru' },
-      { day: 'Rabu', time: '08:00 - 10:00', activity: 'Muraja\'ah' },
-      { day: 'Jumat', time: '08:00 - 10:00', activity: 'Evaluasi' },
-    ],
-    recentActivities: [
-      { type: 'memorization', description: 'Ahmad menyelesaikan hafalan ayat 50-60', date: '2024-01-15' },
-      { type: 'attendance', description: 'Kehadiran kelas 95%', date: '2024-01-14' },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Tahfidz Al-Imran',
-    level: 'Lanjutan',
-    description: 'Kelas lanjutan untuk hafalan Surah Ali Imran.',
-    studentCount: 20,
-    progress: 60,
-  },
-];
 
 export default function ClassDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const classId = parseInt(id || '0');
   
-  const [classData, setClassData] = useState<ClassData | null>(null);
+  const [classData, setClassData] = useState<MockClassData | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   
   // Fetch class data
   useEffect(() => {
-    const foundClass = sampleClasses.find(c => c.id === classId);
+    const foundClass = mockClassData.find(c => c.id === classId);
     if (foundClass) {
       setClassData(foundClass);
     }
@@ -159,9 +74,9 @@ export default function ClassDetail() {
           <Text style={styles.infoLabel}>Progress</Text>
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${classData.progress}%` }]} />
+              <View style={[styles.progressFill, { width: `${classData.progress || 0}%` }]} />
             </View>
-            <Text style={styles.progressText}>{classData.progress}%</Text>
+            <Text style={styles.progressText}>{classData.progress || 0}%</Text>
           </View>
         </View>
         {classData.description && (
@@ -218,7 +133,7 @@ export default function ClassDetail() {
               style={styles.studentItem}
               onPress={() => router.push({
                 pathname: '/(teacher)/students/[id]',
-                params: { id: item.id }
+                params: { id: convertNumberToString(item.id) }
               })}
             >
               <View style={styles.studentInfo}>

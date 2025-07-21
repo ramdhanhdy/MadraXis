@@ -4,42 +4,9 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { mockClassData, ClassData as MockClassData } from '../../mocks/classData';
 
-interface ClassData {
-  id: number;
-  name: string;
-  level: string;
-  description: string;
-  studentCount: number;
-  progress: number;
-}
 
-const sampleClasses: ClassData[] = [
-  {
-    id: 1,
-    name: 'Tahfidz Al-Baqarah',
-    level: 'Tingkat 1',
-    description: 'Menghafal Surah Al-Baqarah ayat 1-50',
-    studentCount: 25,
-    progress: 75,
-  },
-  {
-    id: 2,
-    name: 'Tahfidz Al-Imran',
-    level: 'Tingkat 2',
-    description: 'Menghafal Surah Ali Imran ayat 1-100',
-    studentCount: 20,
-    progress: 60,
-  },
-  {
-    id: 3,
-    name: 'Tahfidz An-Nisa',
-    level: 'Tingkat 3',
-    description: 'Menghafal Surah An-Nisa ayat 1-75',
-    studentCount: 18,
-    progress: 45,
-  },
-];
 
 export default function ClassesList() {
   const router = useRouter();
@@ -48,7 +15,7 @@ export default function ClassesList() {
   const [newClassName, setNewClassName] = useState('');
   const [newClassLevel, setNewClassLevel] = useState('');
   const [newClassDescription, setNewClassDescription] = useState('');
-  const [classes, setClasses] = useState<ClassData[]>(sampleClasses);
+  const [classes, setClasses] = useState<MockClassData[]>(mockClassData);
 
   const filteredClasses = classes.filter(
     (classItem) => 
@@ -62,7 +29,7 @@ export default function ClassesList() {
       return;
     }
 
-    const newClass: ClassData = {
+    const newClass: MockClassData = {
       id: classes.length + 1,
       name: newClassName,
       level: newClassLevel,
@@ -78,7 +45,7 @@ export default function ClassesList() {
     setNewClassDescription('');
   };
 
-  const renderClassItem = ({ item }: { item: ClassData }) => (
+  const renderClassItem = ({ item }: { item: MockClassData }) => (
     <TouchableOpacity 
       style={styles.classCard}
       onPress={() => router.push({
@@ -99,9 +66,9 @@ export default function ClassesList() {
           </View>
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${item.progress}%` }]} />
+              <View style={[styles.progressFill, { width: `${item.progress || 0}%` }]} />
             </View>
-            <Text style={styles.progressText}>{item.progress}%</Text>
+            <Text style={styles.progressText}>{item.progress || 0}%</Text>
           </View>
         </View>
       </View>

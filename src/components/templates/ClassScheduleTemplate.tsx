@@ -4,48 +4,12 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { mockClassData, ClassData as MockClassData, ClassScheduleItem } from '../../mocks/classData';
 
-// Types
-interface ScheduleItem {
+// Types - extending the imported ClassScheduleItem to include id for local operations
+interface LocalClassScheduleItem extends ClassScheduleItem {
   id: number;
-  day: string;
-  time: string;
-  activity: string;
-  note?: string;
 }
-
-interface ClassData {
-  id: number;
-  name: string;
-  level: string;
-  schedule: ScheduleItem[];
-}
-
-// Sample Data
-const sampleClasses: ClassData[] = [
-  {
-    id: 1,
-    name: 'Tahfidz Al-Baqarah',
-    level: 'Menengah',
-    schedule: [
-      { id: 1, day: 'Senin', time: '08:00 - 10:00', activity: 'Hafalan Baru', note: 'Fokus pada ayat 1-20' },
-      { id: 2, day: 'Selasa', time: '08:00 - 09:30', activity: 'Muraja\'ah', note: 'Review hafalan minggu lalu' },
-      { id: 3, day: 'Rabu', time: '08:00 - 10:00', activity: 'Hafalan Baru', note: 'Lanjutan ayat 21-40' },
-      { id: 4, day: 'Kamis', time: '08:00 - 09:30', activity: 'Tajwid', note: 'Perbaikan bacaan' },
-      { id: 5, day: 'Jumat', time: '08:00 - 10:00', activity: 'Evaluasi', note: 'Tes hafalan mingguan' },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Tahfidz Al-Imran',
-    level: 'Lanjutan',
-    schedule: [
-      { id: 6, day: 'Senin', time: '10:30 - 12:00', activity: 'Hafalan Baru' },
-      { id: 7, day: 'Rabu', time: '10:30 - 12:00', activity: 'Muraja\'ah' },
-      { id: 8, day: 'Jumat', time: '10:30 - 12:00', activity: 'Evaluasi' },
-    ],
-  },
-];
 
 const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
@@ -54,7 +18,7 @@ export default function ClassSchedule() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const classId = parseInt(id || '0');
   
-  const [classData, setClassData] = useState<ClassData | null>(null);
+  const [classData, setClassData] = useState<MockClassData | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newDay, setNewDay] = useState('');
   const [newTime, setNewTime] = useState('');
@@ -63,7 +27,7 @@ export default function ClassSchedule() {
   
   // Fetch class data
   useEffect(() => {
-    const foundClass = sampleClasses.find(c => c.id === classId);
+    const foundClass = mockClassData.find(c => c.id === classId);
     if (foundClass) {
       setClassData(foundClass);
     }
@@ -93,7 +57,7 @@ export default function ClassSchedule() {
       return;
     }
 
-    const newScheduleItem: ScheduleItem = {
+    const newScheduleItem: ClassScheduleItem = {
       id: Date.now(),
       day: newDay,
       time: newTime,
@@ -103,7 +67,7 @@ export default function ClassSchedule() {
 
     setClassData(prev => prev ? {
       ...prev,
-      schedule: [...prev.schedule, newScheduleItem]
+      schedule: [...(prev.schedule || []), newScheduleItem]
     } : null);
 
     // Reset form
@@ -126,7 +90,7 @@ export default function ClassSchedule() {
           onPress: () => {
             setClassData(prev => prev ? {
               ...prev,
-              schedule: prev.schedule.filter(item => item.id !== scheduleId)
+              schedule: (prev.schedule || []).filter(item => item.id !== scheduleId)
             } : null);
           }
         }
@@ -134,7 +98,7 @@ export default function ClassSchedule() {
     );
   };
 
-  const renderScheduleItem = ({ item }: { item: ScheduleItem }) => (
+  const renderScheduleItem = ({ item }: { item: ClassScheduleItem }) => (
     <View style={styles.scheduleCard}>
       <View style={styles.scheduleHeader}>
         <View style={styles.dayBadge}>
@@ -147,7 +111,7 @@ export default function ClassSchedule() {
         </View>
         <TouchableOpacity 
           style={styles.deleteButton}
-          onPress={() => handleDeleteSchedule(item.id)}
+          onPress={() => item.id && handleDeleteSchedule(item.id)}
         >
           <Ionicons name="trash-outline" size={20} color="#ff4444" />
         </TouchableOpacity>
@@ -157,7 +121,7 @@ export default function ClassSchedule() {
 
   const groupedSchedule = daysOfWeek.map(day => ({
     day,
-    items: classData.schedule.filter(item => item.day === day)
+    items: (classData.schedule || []).filter(item => item.day === day)
   })).filter(group => group.items.length > 0);
 
   return (
@@ -178,9 +142,9 @@ export default function ClassSchedule() {
       {/* Schedule List */}
       {groupedSchedule.length > 0 ? (
         <FlatList
-          data={classData.schedule}
+          data={classData.schedule || []}
           renderItem={renderScheduleItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
         />

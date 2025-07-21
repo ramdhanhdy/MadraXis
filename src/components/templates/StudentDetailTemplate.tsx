@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Student as GlobalStudent } from '../../types';
+import { convertStringToNumber } from '../../utils/idConversion';
 
 // Types
 interface Memorization {
@@ -23,7 +24,7 @@ interface Note {
 
 // Types - extending global Student type for local component needs
 interface Student extends Omit<GlobalStudent, 'id'> {
-  id: number; // Local component uses number instead of string
+  id: number; // Local component uses number for internal operations
   name: string; // Alias for full_name for backward compatibility
   class: string;
   memorizedVerses: number;
@@ -90,7 +91,7 @@ const sampleStudents: Student[] = [
 export default function StudentDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const studentId = parseInt(id || '0');
+  const studentId = convertStringToNumber(id || '0');
   
   const [student, setStudent] = useState<Student | null>(null);
   const [activeTab, setActiveTab] = useState('hafalan');
@@ -250,7 +251,7 @@ export default function StudentDetail() {
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Progress Hafalan</Text>
-          <Text style={styles.infoValue}>{student.memorizedVerses}/{student.totalVerses} ayat ({student.progress}%)</Text>
+          <Text style={styles.infoValue}>{student.memorizedVerses}/{student.totalVerses} ayat ({student.progress || 0}%)</Text>
         </View>
         {student.parentName && (
           <View style={styles.infoItem}>
@@ -307,9 +308,9 @@ export default function StudentDetail() {
           <Text style={styles.summaryClass}>{student.class}</Text>
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${student.progress}%` }]} />
+              <View style={[styles.progressFill, { width: `${student.progress || 0}%` }]} />
             </View>
-            <Text style={styles.progressText}>{student.progress}%</Text>
+            <Text style={styles.progressText}>{student.progress || 0}%</Text>
           </View>
         </View>
       </View>

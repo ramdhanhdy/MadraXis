@@ -5,10 +5,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Student as GlobalStudent } from '../../types';
+import { convertStringToNumber, convertNumberToString } from '../../utils/idConversion';
+import { mockClassData, ClassData as MockClassData, Student as MockStudent } from '../../mocks/classData';
 
 // Types - extending global Student type for local component needs
 interface Student extends Omit<GlobalStudent, 'id'> {
-  id: number; // Local component uses number instead of string
+  id: number; // Local component uses number for internal operations
   name: string; // Alias for full_name for backward compatibility
   memorizedVerses: number;
   totalVerses: number;
@@ -24,119 +26,55 @@ interface ClassData {
   students?: Student[];
 }
 
-// Sample Data
-const sampleClasses: ClassData[] = [
-  {
-    id: 1,
-    name: 'Tahfidz Al-Baqarah',
-    level: 'Menengah',
-    studentCount: 25,
-    students: [
-      { 
-        id: 1, 
-        name: 'Ahmad Fauzi',
-        full_name: 'Ahmad Fauzi',
-        role: 'student' as const,
-        school_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-15T00:00:00Z',
-        memorizedVerses: 150, 
-        totalVerses: 200, 
-        lastActivity: '2024-01-15',
-        progress: 75 
-      },
-      { 
-        id: 2, 
-        name: 'Fatimah Zahra',
-        full_name: 'Fatimah Zahra',
-        role: 'student' as const,
-        school_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-14T00:00:00Z',
-        memorizedVerses: 180, 
-        totalVerses: 200, 
-        lastActivity: '2024-01-14',
-        progress: 90 
-      },
-      { 
-        id: 3, 
-        name: 'Muhammad Ali',
-        full_name: 'Muhammad Ali',
-        role: 'student' as const,
-        school_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-13T00:00:00Z',
-        memorizedVerses: 120, 
-        totalVerses: 200, 
-        lastActivity: '2024-01-13',
-        progress: 60 
-      },
-      { 
-        id: 4, 
-        name: 'Siti Aisyah',
-        full_name: 'Siti Aisyah',
-        role: 'student' as const,
-        school_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-15T00:00:00Z',
-        memorizedVerses: 160, 
-        totalVerses: 200, 
-        lastActivity: '2024-01-15',
-        progress: 80 
-      },
-      { 
-        id: 5, 
-        name: 'Omar bin Khattab',
-        full_name: 'Omar bin Khattab',
-        role: 'student' as const,
-        school_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-12T00:00:00Z',
-        memorizedVerses: 140, 
-        totalVerses: 200, 
-        lastActivity: '2024-01-12',
-        progress: 70 
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Tahfidz Al-Imran',
-    level: 'Lanjutan',
-    studentCount: 20,
-    students: [
-      { 
-        id: 6, 
-        name: 'Khadijah binti Khuwailid',
-        full_name: 'Khadijah binti Khuwailid',
-        role: 'student' as const,
-        school_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-15T00:00:00Z',
-        memorizedVerses: 100, 
-        totalVerses: 150, 
-        lastActivity: '2024-01-15',
-        progress: 67 
-      },
-    ],
-  },
-];
+
 
 export default function ClassStudents() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const classId = parseInt(id || '0');
+  
+  // Validate and parse class ID
+  const parsedId = parseInt(id || '0', 10);
+  const classId = !isNaN(parsedId) && parsedId > 0 ? parsedId : null;
   
   const [classData, setClassData] = useState<ClassData | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   
   // Fetch class data
   useEffect(() => {
-    const foundClass = sampleClasses.find(c => c.id === classId);
-    if (foundClass) {
-      setClassData(foundClass);
+    if (classId) {
+      const foundClass = mockClassData.find(c => c.id === classId);
+      if (foundClass) {
+        setClassData(foundClass);
+      }
     }
   }, [classId]);
+  
+  // Handle invalid class ID
+  if (classId === null) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#333333" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Error</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={64} color="#ff4444" />
+          <Text style={styles.errorTitle}>ID Kelas Tidak Valid</Text>
+          <Text style={styles.errorMessage}>ID kelas yang diberikan tidak valid atau tidak ditemukan.</Text>
+          <TouchableOpacity 
+            style={styles.errorButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.errorButtonText}>Kembali</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
   
   if (!classData) {
     return (
@@ -165,7 +103,7 @@ export default function ClassStudents() {
       style={styles.studentCard}
       onPress={() => router.push({
         pathname: '/(teacher)/students/[id]',
-        params: { id: item.id }
+        params: { id: convertNumberToString(item.id) }
       })}
     >
       <View style={styles.studentHeader}>
@@ -177,7 +115,7 @@ export default function ClassStudents() {
         <View style={styles.studentInfo}>
           <Text style={styles.studentName}>{item.name}</Text>
           <Text style={styles.studentProgress}>
-            {item.memorizedVerses}/{item.totalVerses} ayat ({item.progress}%)
+            {item.memorizedVerses}/{item.totalVerses} ayat ({item.progress || 0}%)
           </Text>
           {item.lastActivity && (
             <Text style={styles.studentActivity}>
@@ -237,7 +175,7 @@ export default function ClassStudents() {
           style={styles.addButton}
           onPress={() => router.push({
             pathname: '/(teacher)/students/add',
-            params: { classId }
+            params: { classId: convertNumberToString(classId) }
           })}
         >
           <Ionicons name="add" size={24} color="#ffffff" />
@@ -493,6 +431,38 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   emptyStateButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 40,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ff4444',
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  errorButton: {
+    backgroundColor: '#ff4444',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  errorButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',

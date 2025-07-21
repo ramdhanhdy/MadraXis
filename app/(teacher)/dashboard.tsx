@@ -36,7 +36,7 @@ export default function TeacherDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
-  const [upcomingSchedule, setUpcomingSchedule] = useState<ScheduleItem | null>(null);
+  const [upcomingSchedule, setUpcomingSchedule] = useState<TeacherScheduleItem | null>(null);
 
   // Data interfaces
   interface ActivityItem {
@@ -47,7 +47,7 @@ export default function TeacherDashboard() {
     icon: IoniconsIcon;
   }
 
-  interface ScheduleItem {
+  interface TeacherScheduleItem {
     day: string;
     date: string;
     time: string;

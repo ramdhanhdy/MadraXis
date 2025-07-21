@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { convertNumberToString } from '../../utils/idConversion';
 // Local interface for StudentsList display purposes
 interface StudentsListItem {
   id: number;
@@ -103,7 +104,7 @@ export default function StudentsList() {
       style={styles.studentCard}
       onPress={() => router.push({
         pathname: '/(teacher)/students/[id]',
-        params: { id: item.id }
+        params: { id: convertNumberToString(item.id) }
       })}
     >
       <View style={styles.studentHeader}>
@@ -127,9 +128,9 @@ export default function StudentsList() {
         <View style={styles.studentStats}>
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${item.progress}%` }]} />
+              <View style={[styles.progressFill, { width: `${item.progress || 0}%` }]} />
             </View>
-            <Text style={styles.progressText}>{item.progress}%</Text>
+            <Text style={styles.progressText}>{item.progress || 0}%</Text>
           </View>
           
         </View>

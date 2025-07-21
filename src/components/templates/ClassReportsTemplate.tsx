@@ -4,82 +4,15 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { v4 as uuidv4 } from 'uuid';
+import { mockClassData, ClassData as MockClassData, Report } from '../../mocks/classData';
 
 // Types
-type ReportType = 'daily' | 'weekly' | 'monthly' | 'evaluation';
-
-interface Report {
-  id: string;
-  title: string;
-  type: ReportType;
-  date: string;
-  description: string;
-  status: 'draft' | 'published';
-}
-
-interface ClassData {
-  id: number;
-  name: string;
-  level: string;
-  reports: Report[];
-}
-
-// Sample Data
-const sampleClasses: ClassData[] = [
-  {
-    id: 1,
-    name: 'Tahfidz Al-Baqarah',
-    level: 'Menengah',
-    reports: [
-      {
-        id: '1',
-        title: 'Laporan Bulanan Januari 2024',
-        type: 'monthly',
-        date: '2024-01-31',
-        description: 'Progress hafalan siswa selama bulan Januari. Rata-rata kemajuan 85%.',
-        status: 'published'
-      },
-      {
-        id: '2',
-        title: 'Evaluasi Tengah Semester',
-        type: 'evaluation',
-        date: '2024-01-15',
-        description: 'Evaluasi kemampuan hafalan dan tajwid siswa.',
-        status: 'published'
-      },
-      {
-        id: '3',
-        title: 'Laporan Mingguan 3',
-        type: 'weekly',
-        date: '2024-01-21',
-        description: 'Kehadiran 95%, progress hafalan baik.',
-        status: 'draft'
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Tahfidz Al-Imran',
-    level: 'Lanjutan',
-    reports: [
-      {
-        id: '4',
-        title: 'Laporan Bulanan Januari 2024',
-        type: 'monthly',
-        date: '2024-01-31',
-        description: 'Progress kelas lanjutan sangat baik.',
-        status: 'published'
-      },
-    ],
-  },
-];
+type ReportType = 'academic' | 'behavior' | 'attendance';
 
 const reportTypes = [
-  { value: 'daily', label: 'Harian', icon: 'today' },
-  { value: 'weekly', label: 'Mingguan', icon: 'calendar' },
-  { value: 'monthly', label: 'Bulanan', icon: 'calendar-outline' },
-  { value: 'evaluation', label: 'Evaluasi', icon: 'document-text' },
+  { value: 'academic', label: 'Akademik', icon: 'school' },
+  { value: 'behavior', label: 'Perilaku', icon: 'people' },
+  { value: 'attendance', label: 'Kehadiran', icon: 'checkmark-circle' },
 ];
 
 export default function ClassReports() {
@@ -87,17 +20,17 @@ export default function ClassReports() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const classId = parseInt(id || '0');
   
-  const [classData, setClassData] = useState<ClassData | null>(null);
+  const [classData, setClassData] = useState<MockClassData | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTitle, setNewTitle] = useState('');
-  const [newType, setNewType] = useState<ReportType>('monthly');
+  const [newType, setNewType] = useState<ReportType>('academic');
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
   const [newDescription, setNewDescription] = useState('');
   const [filterType, setFilterType] = useState<ReportType | 'all'>('all');
   
   // Fetch class data
   useEffect(() => {
-    const foundClass = sampleClasses.find(c => c.id === classId);
+    const foundClass = mockClassData.find(c => c.id === classId);
     if (foundClass) {
       setClassData(foundClass);
     }
@@ -143,7 +76,7 @@ export default function ClassReports() {
     }
 
     const newReport: Report = {
-      id: uuidv4(),
+      id: Date.now(),
       title: newTitle,
       type: newType,
       date: newDate,
@@ -153,18 +86,18 @@ export default function ClassReports() {
 
     setClassData(prev => prev ? {
       ...prev,
-      reports: [newReport, ...prev.reports]
+      reports: [newReport, ...(prev.reports || [])]
     } : null);
 
     // Reset form
     setNewTitle('');
-    setNewType('monthly');
+    setNewType('academic');
     setNewDate(new Date().toISOString().split('T')[0]);
     setNewDescription('');
     setShowAddModal(false);
   };
 
-  const handleDeleteReport = (reportId: string) => {
+  const handleDeleteReport = (reportId: number) => {
     Alert.alert(
       'Hapus Laporan',
       'Apakah Anda yakin ingin menghapus laporan ini?',
@@ -176,7 +109,7 @@ export default function ClassReports() {
           onPress: () => {
             setClassData(prev => prev ? {
               ...prev,
-              reports: prev.reports.filter(report => report.id !== reportId)
+              reports: (prev.reports || []).filter(report => report.id !== reportId)
             } : null);
           }
         }
@@ -184,10 +117,10 @@ export default function ClassReports() {
     );
   };
 
-  const toggleReportStatus = (reportId: string) => {
+  const toggleReportStatus = (reportId: number) => {
     setClassData(prev => prev ? {
       ...prev,
-      reports: prev.reports.map(report => 
+      reports: (prev.reports || []).map(report => 
         report.id === reportId 
           ? { ...report, status: report.status === 'draft' ? 'published' : 'draft' }
           : report
@@ -196,8 +129,8 @@ export default function ClassReports() {
   };
 
   const filteredReports = filterType === 'all' 
-    ? classData.reports 
-    : classData.reports.filter(report => report.type === filterType);
+    ? (classData?.reports || []) 
+    : (classData?.reports || []).filter(report => report.type === filterType);
 
   const getReportTypeInfo = (type: ReportType) => {
     return reportTypes.find(rt => rt.value === type) || reportTypes[0];
@@ -312,7 +245,7 @@ export default function ClassReports() {
       </View>
 
       {/* Reports List */}
-      {filteredReports.length > 0 ? (
+      {(filteredReports || []).length > 0 ? (
         <FlatList
           data={filteredReports}
           renderItem={renderReportItem}
