@@ -23,7 +23,8 @@ interface Student extends Omit<GlobalStudent, 'id'> {
 export default function ClassDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const classId = parseInt(id || '0');
+  const parsedId = Number(id);
+  const classId = isNaN(parsedId) ? 0 : parsedId;
   
   const [classData, setClassData] = useState<MockClassData | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
