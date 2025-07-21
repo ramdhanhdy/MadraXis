@@ -62,10 +62,12 @@ export default function ClassSchedule() {
       return;
     }
 
-    // Validate time format (HH:mm or H:mm)
-    const timeRegex = /^(0?[1-9]|1[0-9]|2[0-4]):([0-5][0-9])$/;
-    if (!timeRegex.test(trimmedTime)) {
-      Alert.alert('Error', 'Format waktu tidak valid. Mohon gunakan format HH:mm (contoh: 09:30 atau 14:15)');
+    // Validate time format (supports both single time HH:mm and time range HH:mm - HH:mm)
+    const singleTimeRegex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
+    const timeRangeRegex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])\s*-\s*([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
+    
+    if (!singleTimeRegex.test(trimmedTime) && !timeRangeRegex.test(trimmedTime)) {
+      Alert.alert('Error', 'Format waktu tidak valid. Mohon gunakan format HH:mm (contoh: 09:30) atau HH:mm - HH:mm (contoh: 08:00 - 10:00)');
       return;
     }
 
