@@ -86,6 +86,7 @@ CREATE TABLE fees (
   student_id UUID REFERENCES students(id),
   fee_type VARCHAR(50) NOT NULL, -- 'tuition', 'transport', 'activities', etc.
   amount DECIMAL(10,2) NOT NULL,
+  CHECK (amount > 0),
   due_date DATE NOT NULL,
   status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'paid', 'overdue', 'waived'
   description TEXT,
@@ -102,6 +103,7 @@ CREATE TABLE payments (
   student_id UUID REFERENCES students(id),
   fee_id UUID REFERENCES fees(id),
   amount DECIMAL(10,2) NOT NULL,
+  CHECK (amount > 0),
   payment_method VARCHAR(50), -- 'card', 'bank_transfer', 'cash'
   payment_date DATE NOT NULL,
   transaction_id VARCHAR(100), -- External payment reference
