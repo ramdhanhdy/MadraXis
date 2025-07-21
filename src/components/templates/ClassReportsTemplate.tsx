@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { mockClassData, ClassData as MockClassData, Report } from '../../mocks/classData';
+import { convertStringToNumber } from '../../utils/idConversion';
 
 // Types
 type ReportType = 'academic' | 'behavior' | 'attendance';
@@ -18,7 +19,7 @@ const reportTypes = [
 export default function ClassReports() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const classId = parseInt(id || '0');
+  const classId = convertStringToNumber(id || '0');
   
   const [classData, setClassData] = useState<MockClassData | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);

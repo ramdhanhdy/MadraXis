@@ -4,12 +4,10 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { v4 as uuidv4 } from 'uuid';
 import { mockClassData, ClassData as MockClassData, ClassScheduleItem } from '../../mocks/classData';
 
-// Types - extending the imported ClassScheduleItem to include id for local operations
-interface LocalClassScheduleItem extends ClassScheduleItem {
-  id: number;
-}
+// No longer needed as we're using numeric UUID conversion
 
 const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
@@ -52,17 +50,31 @@ export default function ClassSchedule() {
   }
   
   const handleAddSchedule = () => {
-    if (!newDay || !newTime || !newActivity) {
+    // Trim whitespace from inputs
+    const trimmedDay = newDay.trim();
+    const trimmedTime = newTime.trim();
+    const trimmedActivity = newActivity.trim();
+    const trimmedNote = newNote ? newNote.trim() : newNote;
+
+    // Validate empty inputs
+    if (!trimmedDay || !trimmedTime || !trimmedActivity) {
       Alert.alert('Error', 'Mohon isi hari, waktu, dan aktivitas');
       return;
     }
 
+    // Validate time format (HH:mm or H:mm)
+    const timeRegex = /^(0?[1-9]|1[0-9]|2[0-4]):([0-5][0-9])$/;
+    if (!timeRegex.test(trimmedTime)) {
+      Alert.alert('Error', 'Format waktu tidak valid. Mohon gunakan format HH:mm (contoh: 09:30 atau 14:15)');
+      return;
+    }
+
     const newScheduleItem: ClassScheduleItem = {
-      id: Date.now(),
-      day: newDay,
-      time: newTime,
-      activity: newActivity,
-      note: newNote || undefined,
+      id: parseInt(uuidv4().replace(/-/g, '').substring(0, 8), 16),
+      day: trimmedDay,
+      time: trimmedTime,
+      activity: trimmedActivity,
+      note: trimmedNote || undefined,
     };
 
     setClassData(prev => prev ? {
@@ -144,7 +156,7 @@ export default function ClassSchedule() {
         <FlatList
           data={classData.schedule || []}
           renderItem={renderScheduleItem}
-          keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
+          keyExtractor={(item) => item.id?.toString() || `${item.day}-${item.time}-${item.activity}`}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
         />

@@ -108,8 +108,27 @@ CREATE TABLE payments (
   status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'completed', 'failed', 'refunded'
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   processed_by UUID REFERENCES users(id)
 );
+
+-- Trigger to auto-update updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_payments_updated_at
+  BEFORE UPDATE ON payments
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- Unique index on transaction_id for reconciliation
+CREATE UNIQUE INDEX idx_payments_transaction_id_unique ON payments(transaction_id) 
+WHERE transaction_id IS NOT NULL;
 ```
 
 #### `fee_templates`
