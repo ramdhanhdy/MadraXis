@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (schoolId) {
           router.replace('/(management)/dashboard');
         } else {
-          router.replace('/management/setup');
+          router.replace('/(management)/setup');
         }
         break;
       case 'parent':

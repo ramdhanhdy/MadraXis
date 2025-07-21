@@ -5,22 +5,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
-import LogoutButton from '../components/auth/LogoutButton';
-import BoardingInfoModal from '../components/student/BoardingInfoModal';
-import CommunicationModal from '../components/student/CommunicationModal';
-import IncidentReportModal from '../components/student/IncidentReportModal';
-import { useAuth } from '../../src/context/AuthContext';
-import { DashboardTemplate } from '../../src/components/templates/DashboardTemplate';
-import type { TabConfig, HeaderAction } from '../../src/components/templates/DashboardTemplate';
-import { Card } from '../../src/components/molecules/Card';
-import { QuickAction } from '../../src/components/molecules/QuickAction';
-import { ProgressBar } from '../../src/components/molecules/ProgressBar';
-import { ListItem } from '../../src/components/molecules/ListItem';
-import { Button } from '../../src/components/atoms/Button';
-import { Typography } from '../../src/components/atoms/Typography';
-import { Modal } from '../../src/components/organisms/Modal';
-import { colors } from '../../src/styles/colors';
-import { spacing } from '../../src/styles/spacing';
+import LogoutButton from '@/src/components/molecules/LogoutButton';
+import BoardingInfoModal from '@/src/components/organisms/StudentBoardingInfoModal';
+import CommunicationModal from '@/src/components/organisms/StudentCommunicationModal';
+import IncidentReportModal from '@/src/components/organisms/StudentIncidentReportModal';
+import { useAuth } from '@/src/context/AuthContext';
+import { DashboardTemplate } from '@/src/components/templates/DashboardTemplate';
+import type { TabConfig, HeaderAction } from '@/src/components/templates/DashboardTemplate';
+import { Card } from '@/src/components/molecules/Card';
+import { QuickAction } from '@/src/components/molecules/QuickAction';
+import { ProgressBar } from '@/src/components/molecules/ProgressBar';
+import { ListItem } from '@/src/components/molecules/ListItem';
+import { Button } from '@/src/components/atoms/Button';
+import { Typography } from '@/src/components/atoms/Typography';
+import { Modal } from '@/src/components/organisms/Modal';
+import { colors } from '@/src/styles/colors';
+import { spacing } from '@/src/styles/spacing';
 
 export default function StudentDashboard() {
   const router = useRouter();
@@ -81,23 +81,23 @@ export default function StudentDashboard() {
   ];
   
   const navigateToQuranProgress = () => {
-    router.push('/student/quran-progress');
+    router.push('/(student)/quran-progress');
   };
 
   const navigateToSchedule = () => {
-    router.push('/student/schedule');
+    router.push('/(student)/schedule');
   };
 
   const navigateToBoardingInfo = () => {
-    router.push('/student/boarding-info');
+    router.push('/(student)/boarding-info');
   };
 
   const navigateToIncidentReport = () => {
-    router.push('/student/incident-report');
+    router.push('/(student)/incident-report');
   };
 
   const navigateToAntiBullying = () => {
-    router.push('/student/anti-bullying');
+    router.push('/(student)/anti-bullying');
   };
 
   const openModal = (title: string, content: React.ReactNode) => {

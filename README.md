@@ -11,10 +11,48 @@ A comprehensive school management application built with React Native and Expo, 
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React Native, Expo (v52), Expo Router
+- **Frontend:** React Native, Expo (v53), Expo Router
 - **Backend:** Supabase (Authentication, Database, Edge Functions)
-- **Styling:** Standard React Native components
+- **Styling:** Design System with Atomic Design Pattern
 - **State Management:** React Context API
+
+## 📁 Project Structure
+
+The project follows a clean, modular architecture with clear separation of concerns:
+
+```
+MadraXis/
+├── app/                          # Expo Router - Routes and Layouts Only
+│   ├── (auth)/                   # Authentication routes
+│   ├── (management)/             # Management dashboard routes
+│   ├── (parent)/                 # Parent dashboard routes
+│   ├── (student)/                # Student dashboard routes
+│   ├── (teacher)/                # Teacher dashboard routes
+│   ├── _layout.tsx               # Root layout
+│   ├── index.tsx                 # App entry point
+│   └── screens/                  # Legacy screen components (to be migrated)
+├── src/                          # Source Code - Components, Logic, and Assets
+│   ├── components/               # UI Components (Atomic Design)
+│   │   ├── atoms/                # Basic UI elements (Button, Input, etc.)
+│   │   ├── molecules/            # Combined atoms (Card, ListItem, etc.)
+│   │   ├── organisms/            # Complex components (Header, Modal, etc.)
+│   │   └── templates/            # Page layouts and templates
+│   ├── context/                  # React Context providers
+│   ├── services/                 # API calls and business logic
+│   ├── styles/                   # Design tokens and theme
+│   ├── types/                    # TypeScript type definitions
+│   └── utils/                    # Helper functions and utilities
+├── assets/                       # Static assets (images, fonts, etc.)
+└── supabase/                     # Database migrations and configurations
+```
+
+### Design System
+
+The app uses a comprehensive design system built on atomic design principles:
+- **Atoms**: Basic UI elements like buttons, inputs, typography
+- **Molecules**: Combinations of atoms like cards, list items
+- **Organisms**: Complex components like headers, modals, navigation
+- **Templates**: Page-level layouts and structures
 
 ## 🚀 Getting Started
 

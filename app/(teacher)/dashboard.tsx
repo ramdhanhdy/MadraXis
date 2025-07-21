@@ -23,7 +23,7 @@ import { logoSvg } from '../../src/utils/svgPatterns';
 import { colors } from '../../src/styles/colors';
 
 // Modal Components
-import ProfileView from '../components/teacher/ProfileView';
+import TeacherProfileView from '../../src/components/organisms/TeacherProfileView';
 
 // Icon types for proper typing
 type IoniconsIcon = keyof typeof Ionicons.glyphMap;
@@ -36,7 +36,7 @@ export default function TeacherDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
-  const [upcomingSchedule, setUpcomingSchedule] = useState<ScheduleItem | null>(null);
+  const [upcomingSchedule, setUpcomingSchedule] = useState<TeacherScheduleItem | null>(null);
 
   // Data interfaces
   interface ActivityItem {
@@ -47,7 +47,7 @@ export default function TeacherDashboard() {
     icon: IoniconsIcon;
   }
 
-  interface ScheduleItem {
+  interface TeacherScheduleItem {
     day: string;
     date: string;
     time: string;
@@ -473,7 +473,7 @@ export default function TeacherDashboard() {
   );
 
   const renderProfile = () => (
-    <ProfileView profile={profile || undefined} loading={authLoading} schoolName={schoolName} />
+    <TeacherProfileView profile={profile || undefined} loading={authLoading} schoolName={schoolName} />
   );
 
   // Content mapping based on active tab
