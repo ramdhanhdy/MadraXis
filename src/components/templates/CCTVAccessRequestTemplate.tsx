@@ -31,60 +31,62 @@ export default function CCTVAccessRequest() {
     { id: 'library', name: 'Perpustakaan' },
   ];
 
-  const validateDateRange = () => {
-    if (!startDate || !endDate) return false;
+  // Validation constants - single source of truth
+  const VALIDATION_RULES = {
+    JUSTIFICATION: {
+      MIN_LENGTH: 10,
+      MAX_LENGTH: 500,
+    },
+    DATE_RANGE: {
+      MIN_DAYS: 1,
+      MAX_DAYS: 7, // Align with UI guidelines
+    },
+  } as const;
+
+  const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+  const validateDateRange = (start: Date | null, end: Date | null) => {
+    if (!start || !end) return { isValid: false, error: null };
     
-    const DAY_IN_MS = 24 * 60 * 60 * 1000;
-    const maxAllowedDays = 7;
-    const daysDifference = Math.ceil((endDate.getTime() - startDate.getTime()) / DAY_IN_MS);
+    const daysDifference = Math.ceil((end.getTime() - start.getTime()) / DAY_IN_MS);
     
-    return daysDifference > 0 && daysDifference <= maxAllowedDays;
+    if (daysDifference <= 0) {
+      return { isValid: false, error: 'Tanggal selesai harus setelah tanggal mulai' };
+    }
+    if (daysDifference > VALIDATION_RULES.DATE_RANGE.MAX_DAYS) {
+      return { isValid: false, error: `Maksimal ${VALIDATION_RULES.DATE_RANGE.MAX_DAYS} hari akses diperbolehkan` };
+    }
+    // Ensure both dates are in the past (CCTV access is for historical footage)
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    if (start.getTime() >= today.getTime()) {
+      return { isValid: false, error: 'Tanggal mulai harus di masa lalu' };
+    }
+    if (end.getTime() >= today.getTime()) {
+      return { isValid: false, error: 'Tanggal selesai harus di masa lalu' };
+    }
+    
+    return { isValid: true, error: null };
   };
 
-  const validateJustification = () => {
-    const trimmed = justification.trim();
-    return trimmed.length >= 20 && trimmed.length <= 500;
+  const validateJustification = (text: string) => {
+    const trimmed = text.trim();
+    return trimmed.length >= VALIDATION_RULES.JUSTIFICATION.MIN_LENGTH && 
+           trimmed.length <= VALIDATION_RULES.JUSTIFICATION.MAX_LENGTH;
   };
-
-  // Enhanced validation based on UI guidelines
-  const MAX_JUSTIFICATION_LENGTH = 500;
-  const MAX_DATE_RANGE_DAYS = 90; // Maximum 90 days allowed
-  const MIN_DATE_RANGE_DAYS = 1; // Minimum 1 day required
 
   const isFormValid = () => {
-    const trimmedJustification = justification.trim();
-    if (trimmedJustification.length < 10 || trimmedJustification.length > MAX_JUSTIFICATION_LENGTH) {
-      return false;
-    }
+    if (!validateJustification(justification)) return false;
     if (!selectedCamera) return false;
     
-    // Date range validation
-    if (!startDate || !endDate) return false;
-    if (new Date(startDate).getTime() > new Date(endDate).getTime()) return false;
-
-    const daysDiff = (new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24);
-    if (daysDiff < MIN_DATE_RANGE_DAYS || daysDiff > MAX_DATE_RANGE_DAYS) return false;
-
-    // Ensure dates are not in the future
-    if (new Date(startDate).getTime() > new Date().getTime()) return false;
-    if (new Date(endDate).getTime() > new Date().getTime()) return false;
-
-    return true;
+    const dateValidation = validateDateRange(startDate, endDate);
+    return dateValidation.isValid;
   };
 
   const getDateError = () => {
-    if (!startDate || !endDate) return null;
-    
-    const DAY_IN_MS = 24 * 60 * 60 * 1000;
-    const daysDifference = Math.ceil((endDate.getTime() - startDate.getTime()) / DAY_IN_MS);
-    
-    if (daysDifference <= 0) {
-      return 'Tanggal selesai harus setelah tanggal mulai';
-    }
-    if (daysDifference > 7) {
-      return 'Maksimal 7 hari akses diperbolehkan';
-    }
-    return null;
+    const dateValidation = validateDateRange(startDate, endDate);
+    return dateValidation.error;
   };
 
   const handleSubmit = () => {
@@ -212,15 +214,15 @@ export default function CCTVAccessRequest() {
               style={styles.textArea}
               value={justification}
               onChangeText={setJustification}
-              placeholder="Jelaskan alasan Anda memerlukan akses rekaman CCTV (minimal 10, maksimal 500 karakter)..."
+              placeholder={`Jelaskan alasan Anda memerlukan akses rekaman CCTV (minimal ${VALIDATION_RULES.JUSTIFICATION.MIN_LENGTH}, maksimal ${VALIDATION_RULES.JUSTIFICATION.MAX_LENGTH} karakter)...`}
               placeholderTextColor="#999999"
               multiline
               numberOfLines={4}
               textAlignVertical="top"
-              maxLength={500}
+              maxLength={VALIDATION_RULES.JUSTIFICATION.MAX_LENGTH}
             />
             <Text style={styles.characterCount}>
-              {justification.trim().length}/500 karakter (minimal 10)
+              {justification.trim().length}/{VALIDATION_RULES.JUSTIFICATION.MAX_LENGTH} karakter (minimal {VALIDATION_RULES.JUSTIFICATION.MIN_LENGTH})
             </Text>
           </View>
 
@@ -233,7 +235,7 @@ export default function CCTVAccessRequest() {
             </View>
             <View style={styles.guidelineItem}>
               <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
-              <Text style={styles.guidelineText}>Maksimal rentang waktu 7 hari</Text>
+              <Text style={styles.guidelineText}>Maksimal rentang waktu {VALIDATION_RULES.DATE_RANGE.MAX_DAYS} hari</Text>
             </View>
             <View style={styles.guidelineItem}>
               <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
