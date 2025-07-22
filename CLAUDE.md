@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Node.js (LTS version)
 - Expo CLI
 - Supabase account with credentials
+- Bun
 
 ### Installation & Environment
 ```bash
@@ -24,19 +25,19 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
 
 ### Core Commands
 ```bash
-npm run start          # Start Expo dev server
-npm run android        # Run on Android emulator/device
-npm run ios           # Run on iOS simulator/device
-npm run web           # Run web version
-npm run test          # Run Jest tests in watch mode
-npm run lint          # Run ESLint
+bun run start          # Start Expo dev server
+bun run android        # Run on Android emulator/device
+bun run ios           # Run on iOS simulator/device
+bun run web           # Run web version
+bun run test          # Run Jest tests in watch mode
+bun run lint          # Run ESLint
 ```
 
 ### Testing Commands
 ```bash
-npm run test -- --testNamePattern="Button"    # Run specific test
-npm run test -- --watchAll=false               # Run tests once
-npm run test -- --coverage                     # Generate coverage report
+npx run test -- --testNamePattern="Button"    # Run specific test
+npx run test -- --watchAll=false               # Run tests once
+npx run test -- --coverage                     # Generate coverage report
 ```
 
 ## Architecture Overview
@@ -190,6 +191,9 @@ budgets (id, category_id, month, limit_amount, school_id, updated_at, created_at
 - Maintain backward compatibility where possible
 - Update TypeScript types in `src/types/` to match schema changes
 
+### Database Tools
+- **Use Supabase MCP server instead of Supabase CLI for database operations**
+
 ## Quick Reference
 
 ### Adding New Components
@@ -198,57 +202,6 @@ budgets (id, category_id, month, limit_amount, school_id, updated_at, created_at
 3. Export from level index file
 4. Use design tokens from theme system
 
-### Database Operations
-```typescript
-// Fetch users with role details
-const { data: students } = await supabase
-  .from('profiles')
-  .select(`*, student_details(*)`)
-  .eq('role', 'student')
-  .eq('school_id', schoolId)
-
-// Count users efficiently
-const { count } = await supabase
-  .from('profiles')
-  .select('*', { count: 'exact', head: true })
-  .eq('role', 'teacher')
-
-// Class management queries
-const { data: classDetails } = await supabase
-  .from('classes')
-  .select(`*, 
-    class_schedules(*), 
-    class_students!inner(student_id), 
-    class_teachers!inner(user_id)`)
-  .eq('school_id', schoolId)
-  .eq('class_students.student_id', studentId)
-
-// Financial data queries
-const { data: monthlyExpenses } = await supabase
-  .from('expenses')
-  .select(`*, expense_categories(name)`)
-  .eq('school_id', schoolId)
-  .gte('date', startOfMonth)
-  .lte('date', endOfMonth)
-
-// Incident tracking queries
-const { data: schoolIncidents } = await supabase
-  .from('incidents')
-  .select(`*, 
-    reporter:reporter_id(full_name), 
-    student:student_id(full_name)`)
-  .eq('school_id', schoolId)
-  .order('incident_date', { ascending: false })
-
-// Performance tracking with date ranges
-const { data: studentScores } = await supabase
-  .from('student_performance')
-  .select('*')
-  .eq('user_id', studentId)
-  .gte('period_start', startDate)
-  .lte('period_end', endDate)
-  .order('period_start', { ascending: true })
-```
 
 ### Environment Variables
 - Prefix with `EXPO_PUBLIC_` for client access
