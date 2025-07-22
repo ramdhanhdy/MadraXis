@@ -202,6 +202,8 @@ budgets (id, category_id, month, limit_amount, school_id, updated_at, created_at
 3. Export from level index file
 4. Use design tokens from theme system
 
+### Design System Location
+- **design system location**: 'src/styless/'
 
 ### Environment Variables
 - Prefix with `EXPO_PUBLIC_` for client access
@@ -211,3 +213,8 @@ budgets (id, category_id, month, limit_amount, school_id, updated_at, created_at
 - Use Expo Router's `useRouter()` and `useLocalSearchParams()`
 - Role-based routing handled in `AuthContext.tsx`
 - Protected routes via auth middleware
+
+## Important Notes
+
+- **MadraXis is a mobile app only project that uses Expo and Supabase**
+- **Avoid using web tech stack like Next.js - previous implementation of a feature was wrongly using Next.js as routing**

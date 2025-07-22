@@ -1,110 +1,269 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { mockClassData, ClassData as MockClassData } from '../../mocks/classData';
+import { useAuth } from '@/src/context/AuthContext';
+import { ClassService } from '@/src/services/classService';
+import { Class } from '@/src/types/class';
+import ClassFormModal from '@/src/components/organisms/ClassFormModal';
 
 
 
 export default function ClassesList() {
   const router = useRouter();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newClassName, setNewClassName] = useState('');
-  const [newClassLevel, setNewClassLevel] = useState('');
-  const [newClassDescription, setNewClassDescription] = useState('');
-  const [classes, setClasses] = useState<MockClassData[]>(mockClassData);
+  const [editingClass, setEditingClass] = useState<Class | null>(null);
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedClasses, setSelectedClasses] = useState<number[]>([]);
+  const [bulkSelectionMode, setBulkSelectionMode] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [showFilterModal, setShowFilterModal] = useState(false);
 
-  const filteredClasses = classes.filter(
-    (classItem) => 
-      classItem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      classItem.level.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
 
-  const handleAddClass = () => {
-    if (!newClassName || !newClassLevel) {
-      alert('Mohon isi nama kelas dan tingkat');
-      return;
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch classes
+  const fetchClasses = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const classes = await ClassService.getClasses({
+        search: debouncedSearchQuery,
+        status: filterStatus === 'all' ? undefined : filterStatus,
+        sortBy,
+        sortOrder,
+        limit: 50,
+        offset: 0
+      });
+
+      setClasses(classes);
+    } catch (err) {
+      setError('Failed to load classes');
+      console.error('Error fetching classes:', err);
+    } finally {
+      setLoading(false);
     }
+  }, [user, debouncedSearchQuery, filterStatus, sortBy, sortOrder]);
 
-    const newClass: MockClassData = {
-      id: classes.length + 1,
-      name: newClassName,
-      level: newClassLevel,
-      description: newClassDescription,
-      studentCount: 0,
-      progress: 0,
-    };
+  useEffect(() => {
+    fetchClasses();
+  }, [fetchClasses]);
 
-    setClasses([...classes, newClass]);
-    setShowAddModal(false);
-    setNewClassName('');
-    setNewClassLevel('');
-    setNewClassDescription('');
+  const handleRefresh = useCallback(() => {
+    fetchClasses();
+  }, [fetchClasses]);
+
+  const handleOpenAddModal = () => {
+    setEditingClass(null);
+    setShowAddModal(true);
   };
 
-  const renderClassItem = ({ item }: { item: MockClassData }) => (
+  const handleOpenEditModal = (classItem: Class) => {
+    setEditingClass(classItem);
+    setShowAddModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setEditingClass(null);
+  };
+
+  const handleFormSuccess = () => {
+    handleCloseModal();
+    fetchClasses();
+  };
+
+  const toggleClassSelection = (classId: number) => {
+    setSelectedClasses(prev => 
+      prev.includes(classId) 
+        ? prev.filter(id => id !== classId)
+        : [...prev, classId]
+    );
+  };
+
+  const toggleBulkSelectionMode = () => {
+    setBulkSelectionMode(!bulkSelectionMode);
+    setSelectedClasses([]);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedClasses.length === 0) return;
+
+    Alert.alert(
+      'Delete Classes',
+      `Are you sure you want to delete ${selectedClasses.length} class(es)?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await ClassService.bulkDeleteClasses({ class_ids: selectedClasses });
+              setSelectedClasses([]);
+              setBulkSelectionMode(false);
+              fetchClasses();
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete classes');
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleBulkUpdateStatus = async (status: string) => {
+    if (selectedClasses.length === 0) return;
+
+    try {
+      setLoading(true);
+      await ClassService.bulkUpdateClasses({
+        class_ids: selectedClasses,
+        updates: { status }
+      });
+      setSelectedClasses([]);
+      setBulkSelectionMode(false);
+      fetchClasses();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update classes');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderClassItem = ({ item }: { item: Class }) => (
     <TouchableOpacity 
-      style={styles.classCard}
-      onPress={() => router.push({
-        pathname: '/(teacher)/class/[id]',
-        params: { id: item.id }
-      })}
+      style={[
+        styles.classCard,
+        selectedClasses.includes(item.id) && styles.selectedCard,
+        item.status === 'archived' && styles.archivedCard
+      ]}
+      onPress={() => {
+        if (bulkSelectionMode) {
+          toggleClassSelection(item.id);
+        } else {
+          router.push({
+            pathname: '/(teacher)/class/[id]',
+            params: { id: item.id }
+          });
+        }
+      }}
+      onLongPress={() => {
+        if (!bulkSelectionMode) {
+          setBulkSelectionMode(true);
+          toggleClassSelection(item.id);
+        }
+      }}
     >
+      {bulkSelectionMode && (
+        <View style={styles.checkboxContainer}>
+          <Ionicons 
+            name={selectedClasses.includes(item.id) ? "checkbox" : "square-outline"} 
+            size={24} 
+            color="#005e7a" 
+          />
+        </View>
+      )}
+      
       <View style={styles.classHeader}>
         <View style={styles.classInfo}>
           <Text style={styles.className}>{item.name}</Text>
           <Text style={styles.classLevel}>{item.level}</Text>
           <Text style={styles.classDescription}>{item.description}</Text>
+          <View style={styles.classMeta}>
+            <Text style={[styles.statusBadge, styles[`status_${item.status}`]]}>
+              {item.status}
+            </Text>
+            <Text style={styles.academicInfo}>
+              {item.academic_year} - Semester {item.semester}
+            </Text>
+          </View>
         </View>
         <View style={styles.classStats}>
           <View style={styles.statItem}>
             <Ionicons name="people" size={16} color="#666666" />
-            <Text style={styles.statText}>{item.studentCount}</Text>
+            <Text style={styles.statText}>{item.student_count || 0}</Text>
           </View>
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${item.progress || 0}%` }]} />
-            </View>
-            <Text style={styles.progressText}>{item.progress || 0}%</Text>
+          <View style={styles.statItem}>
+            <Ionicons name="book" size={16} color="#666666" />
+            <Text style={styles.statText}>{item.subject_count || 0}</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Ionicons name="person" size={16} color="#666666" />
+            <Text style={styles.statText}>{item.teacher_count || 0}</Text>
           </View>
         </View>
       </View>
       <View style={styles.classActions}>
         <TouchableOpacity 
-          style={styles.actionButton}
+          style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
+          disabled={item.status === 'archived'}
           onPress={() => router.push({
             pathname: '/(teacher)/class/[id]/students',
             params: { id: item.id }
           })}
         >
-          <Ionicons name="people" size={16} color="#005e7a" />
-          <Text style={styles.actionText}>Siswa</Text>
+          <Ionicons name="people" size={16} color={item.status === 'archived' ? '#ccc' : '#005e7a'} />
+          <Text style={[styles.actionText, item.status === 'archived' && styles.disabledActionText]}>Siswa</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={styles.actionButton}
+          style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
+          disabled={item.status === 'archived'}
           onPress={() => router.push({
-            pathname: '/(teacher)/class/[id]/schedule',
+            pathname: '/(teacher)/class/[id]/subjects',
             params: { id: item.id }
           })}
         >
-          <Ionicons name="calendar" size={16} color="#005e7a" />
-          <Text style={styles.actionText}>Jadwal</Text>
+          <Ionicons name="book" size={16} color={item.status === 'archived' ? '#ccc' : '#005e7a'} />
+          <Text style={[styles.actionText, item.status === 'archived' && styles.disabledActionText]}>Mata Pelajaran</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={styles.actionButton}
+          style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
+          disabled={item.status === 'archived'}
           onPress={() => router.push({
             pathname: '/(teacher)/class/[id]/reports',
             params: { id: item.id }
           })}
         >
-          <Ionicons name="document-text" size={16} color="#005e7a" />
-          <Text style={styles.actionText}>Laporan</Text>
+          <Ionicons name="document-text" size={16} color={item.status === 'archived' ? '#ccc' : '#005e7a'} />
+          <Text style={[styles.actionText, item.status === 'archived' && styles.disabledActionText]}>Laporan</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
+  );
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <Ionicons name="school" size={64} color="#ccc" />
+      <Text style={styles.emptyTitle}>Tidak ada kelas</Text>
+      <Text style={styles.emptyDescription}>
+        {error || 'Belum ada kelas yang dibuat. Tambahkan kelas baru untuk memulai.'}
+      </Text>
+      <TouchableOpacity style={styles.emptyButton} onPress={() => setShowAddModal(true)}>
+        <Text style={styles.emptyButtonText}>Tambah Kelas Baru</Text>
+      </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -112,107 +271,202 @@ export default function ClassesList() {
       <StatusBar style="dark" />
       
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#333333" />
+      <View style={[styles.header, bulkSelectionMode && styles.bulkHeader]}>
+        <TouchableOpacity onPress={() => {
+          if (bulkSelectionMode) {
+            setBulkSelectionMode(false);
+            setSelectedClasses([]);
+          } else {
+            router.back();
+          }
+        }}>
+          <Ionicons name={bulkSelectionMode ? "close" : "arrow-back"} size={24} color="#333333" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Daftar Kelas</Text>
-        <TouchableOpacity onPress={() => setShowAddModal(true)}>
-          <Ionicons name="add" size={24} color="#005e7a" />
-        </TouchableOpacity>
+        
+        <Text style={styles.headerTitle}>
+          {bulkSelectionMode ? `${selectedClasses.length} selected` : "Daftar Kelas"}
+        </Text>
+        
+        <View style={styles.headerActions}>
+          {bulkSelectionMode ? (
+            <View style={styles.bulkActions}>
+              <TouchableOpacity onPress={handleBulkDelete}>
+                <Ionicons name="trash" size={24} color="#ff3b30" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleBulkUpdateStatus('archived')}>
+                <Ionicons name="archive" size={24} color="#ff9500" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.headerActions}>
+              <TouchableOpacity onPress={toggleBulkSelectionMode}>
+                <Ionicons name="checkbox" size={24} color="#005e7a" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleOpenAddModal}>
+                <Ionicons name="add" size={24} color="#005e7a" />
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#666666" />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Cari kelas..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholderTextColor="#999999"
-        />
+      {/* Search and Filter Bar */}
+      <View style={styles.searchFilterContainer}>
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#666666" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Cari kelas..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#999999"
+          />
+        </View>
+        
+        <TouchableOpacity 
+          style={styles.filterButton}
+          onPress={() => setShowFilterModal(true)}
+        >
+          <Ionicons name="filter" size={20} color="#005e7a" />
+        </TouchableOpacity>
       </View>
 
       {/* Classes List */}
       <FlatList
-        data={filteredClasses}
+        data={classes}
         renderItem={renderClassItem}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={[
+          styles.listContainer,
+          classes.length === 0 && styles.emptyListContainer
+        ]}
         showsVerticalScrollIndicator={false}
+        refreshing={loading}
+        onRefresh={handleRefresh}
+        ListEmptyComponent={renderEmptyState}
       />
 
-      {/* Add Class Modal */}
+      {/* Filter Modal */}
       <Modal
-        visible={showAddModal}
+        visible={showFilterModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowAddModal(false)}
+        onRequestClose={() => setShowFilterModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Tambah Kelas Baru</Text>
-              <TouchableOpacity onPress={() => setShowAddModal(false)}>
+              <Text style={styles.modalTitle}>Filter & Sort</Text>
+              <TouchableOpacity onPress={() => setShowFilterModal(false)}>
                 <Ionicons name="close" size={24} color="#333333" />
               </TouchableOpacity>
             </View>
             
             <View style={styles.modalBody}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Nama Kelas *</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={newClassName}
-                  onChangeText={setNewClassName}
-                  placeholder="Contoh: Tahfidz Al-Baqarah"
-                  placeholderTextColor="#999999"
-                />
+              <Text style={styles.sectionTitle}>Status</Text>
+              <View style={styles.filterOptions}>
+                {['all', 'active', 'inactive', 'archived'].map((status) => (
+                  <TouchableOpacity
+                    key={status}
+                    style={[
+                      styles.filterOption,
+                      filterStatus === status && styles.selectedFilterOption
+                    ]}
+                    onPress={() => setFilterStatus(status)}
+                  >
+                    <Text style={[
+                      styles.filterOptionText,
+                      filterStatus === status && styles.selectedFilterOptionText
+                    ]}
+                    >
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
               
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Tingkat *</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={newClassLevel}
-                  onChangeText={setNewClassLevel}
-                  placeholder="Contoh: Tingkat 1"
-                  placeholderTextColor="#999999"
-                />
+              <Text style={[styles.sectionTitle, styles.sectionSpacing]}>Sort By</Text>
+              <View style={styles.filterOptions}>
+                {[
+                  { key: 'name', label: 'Name' },
+                  { key: 'level', label: 'Level' },
+                  { key: 'student_count', label: 'Student Count' },
+                  { key: 'created_at', label: 'Created Date' }
+                ].map((option) => (
+                  <TouchableOpacity
+                    key={option.key}
+                    style={[
+                      styles.filterOption,
+                      sortBy === option.key && styles.selectedFilterOption
+                    ]}
+                    onPress={() => setSortBy(option.key)}
+                  >
+                    <Text style={[
+                      styles.filterOptionText,
+                      sortBy === option.key && styles.selectedFilterOptionText
+                    ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
               
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Deskripsi</Text>
-                <TextInput
-                  style={[styles.textInput, styles.textArea]}
-                  value={newClassDescription}
-                  onChangeText={setNewClassDescription}
-                  placeholder="Deskripsi kelas..."
-                  placeholderTextColor="#999999"
-                  multiline
-                  numberOfLines={3}
-                />
+              <Text style={[styles.sectionTitle, styles.sectionSpacing]}>Sort Order</Text>
+              <View style={styles.filterOptions}>
+                {[
+                  { key: 'asc', label: 'Ascending' },
+                  { key: 'desc', label: 'Descending' }
+                ].map((option) => (
+                  <TouchableOpacity
+                    key={option.key}
+                    style={[
+                      styles.filterOption,
+                      sortOrder === option.key && styles.selectedFilterOption
+                    ]}
+                    onPress={() => setSortOrder(option.key as 'asc' | 'desc')}
+                  >
+                    <Text style={[
+                      styles.filterOptionText,
+                      sortOrder === option.key && styles.selectedFilterOptionText
+                    ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
             
             <View style={styles.modalFooter}>
               <TouchableOpacity 
                 style={styles.cancelButton}
-                onPress={() => setShowAddModal(false)}
+                onPress={() => setShowFilterModal(false)}
               >
-                <Text style={styles.cancelButtonText}>Batal</Text>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.saveButton}
-                onPress={handleAddClass}
+                onPress={() => {
+                  setShowFilterModal(false);
+                  fetchClasses();
+                }}
               >
-                <Text style={styles.saveButtonText}>Simpan</Text>
+                <Text style={styles.saveButtonText}>Apply</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
+
+      <ClassFormModal
+        visible={showAddModal}
+        onClose={handleCloseModal}
+        onSuccess={handleFormSuccess}
+        classData={editingClass}
+        authToken={authToken!}
+        schoolId={user?.school_id || 1}
+      />
     </SafeAreaView>
   );
 }
@@ -374,28 +628,6 @@ const styles = StyleSheet.create({
   modalBody: {
     padding: 16,
   },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333333',
-    marginBottom: 8,
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    backgroundColor: '#ffffff',
-  },
-  textArea: {
-    height: 80,
-    textAlignVertical: 'top',
-  },
   modalFooter: {
     flexDirection: 'row',
     borderTopWidth: 1,
@@ -421,6 +653,168 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  searchFilterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 16,
+    color: '#333333',
+  },
+  filterButton: {
+    backgroundColor: '#ffffff',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  bulkHeader: {
+    backgroundColor: '#f0f8ff',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  bulkActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  checkboxContainer: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    zIndex: 1,
+  },
+  selectedCard: {
+    borderColor: '#005e7a',
+    borderWidth: 2,
+  },
+  archivedCard: {
+    opacity: 0.7,
+  },
+  classMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 8,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  status_active: {
+    backgroundColor: '#e8f5e8',
+    color: '#2e7d32',
+  },
+  status_inactive: {
+    backgroundColor: '#fff3e0',
+    color: '#f57c00',
+  },
+  status_archived: {
+    backgroundColor: '#f5f5f5',
+    color: '#666666',
+  },
+  academicInfo: {
+    fontSize: 12,
+    color: '#666666',
+  },
+  disabledAction: {
+    opacity: 0.5,
+  },
+  disabledActionText: {
+    color: '#ccc',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginTop: 16,
+  },
+  emptyDescription: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
+    marginTop: 8,
+    lineHeight: 22,
+  },
+  emptyButton: {
+    backgroundColor: '#005e7a',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 24,
+  },
+  emptyButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  emptyListContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 12,
+  },
+  sectionSpacing: {
+    marginTop: 24,
+  },
+  filterOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  filterOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    backgroundColor: '#ffffff',
+  },
+  selectedFilterOption: {
+    backgroundColor: '#005e7a',
+    borderColor: '#005e7a',
+  },
+  filterOptionText: {
+    fontSize: 14,
+    color: '#333333',
+  },
+  selectedFilterOptionText: {
     color: '#ffffff',
   },
 });
