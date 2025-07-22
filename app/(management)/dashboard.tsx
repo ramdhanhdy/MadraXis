@@ -36,9 +36,9 @@ interface Incident {
   created_at: string;
   student?: {
     full_name: string;
-  };
+  }[];
   is_anonymous?: boolean;
-  reporter_id: string;
+  reporter_id?: string;
 }
 
 export default function ManagementDashboard() {

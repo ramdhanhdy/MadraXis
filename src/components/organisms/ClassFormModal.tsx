@@ -3,13 +3,14 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView,
 import { Ionicons } from '@expo/vector-icons';
 import { ClassService } from '@/src/services/classService';
 import { Class, CreateClassData, UpdateClassData } from '@/src/types/class';
+import { ClassWithDetails } from '@/src/services/classService';
 import { useAuth } from '@/src/context/AuthContext';
 
 interface ClassFormModalProps {
   visible: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  classData?: Class | null;
+  classData?: ClassWithDetails | null;
   schoolId: number;
 }
 

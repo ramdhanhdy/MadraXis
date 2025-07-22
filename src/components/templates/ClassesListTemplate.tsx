@@ -7,24 +7,25 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
 import { ClassService } from '@/src/services/classService';
 import { Class } from '@/src/types/class';
+import { ClassWithDetails } from '@/src/services/classService';
 import ClassFormModal from '@/src/components/organisms/ClassFormModal';
 
 
 
 export default function ClassesList() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editingClass, setEditingClass] = useState<Class | null>(null);
-  const [classes, setClasses] = useState<Class[]>([]);
+  const [editingClass, setEditingClass] = useState<ClassWithDetails | null>(null);
+  const [classes, setClasses] = useState<ClassWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedClasses, setSelectedClasses] = useState<number[]>([]);
   const [bulkSelectionMode, setBulkSelectionMode] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('name');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'archived'>('all');
+  const [sortBy, setSortBy] = useState<'name' | 'level' | 'student_count' | 'created_at'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showFilterModal, setShowFilterModal] = useState(false);
 
@@ -45,10 +46,10 @@ export default function ClassesList() {
       setLoading(true);
       setError(null);
       
-      const classes = await ClassService.getClasses({
-        search: debouncedSearchQuery,
-        status: filterStatus === 'all' ? undefined : filterStatus,
-        sortBy,
+      const classes = await ClassService.getTeacherClasses(user?.id || '', {
+          searchTerm: debouncedSearchQuery,
+          status: filterStatus === 'all' ? undefined : filterStatus,
+          sortBy,
         sortOrder,
         limit: 50,
         offset: 0
@@ -77,7 +78,12 @@ export default function ClassesList() {
   };
 
   const handleOpenEditModal = (classItem: Class) => {
-    setEditingClass(classItem);
+    // Convert Class to ClassWithDetails by adding required properties
+    const classWithDetails: ClassWithDetails = {
+      ...classItem,
+      teachers: [] // Initialize with empty array, will be populated by the modal if needed
+    };
+    setEditingClass(classWithDetails);
     setShowAddModal(true);
   };
 
@@ -118,7 +124,7 @@ export default function ClassesList() {
           onPress: async () => {
             try {
               setLoading(true);
-              await ClassService.bulkDeleteClasses({ class_ids: selectedClasses });
+              await ClassService.bulkDeleteClasses(selectedClasses, user?.id || '');
               setSelectedClasses([]);
               setBulkSelectionMode(false);
               fetchClasses();
@@ -133,7 +139,7 @@ export default function ClassesList() {
     );
   };
 
-  const handleBulkUpdateStatus = async (status: string) => {
+  const handleBulkUpdateStatus = async (status: 'active' | 'inactive' | 'archived') => {
     if (selectedClasses.length === 0) return;
 
     try {
@@ -141,7 +147,7 @@ export default function ClassesList() {
       await ClassService.bulkUpdateClasses({
         class_ids: selectedClasses,
         updates: { status }
-      });
+      }, user?.id || '');
       setSelectedClasses([]);
       setBulkSelectionMode(false);
       fetchClasses();
@@ -152,7 +158,7 @@ export default function ClassesList() {
     }
   };
 
-  const renderClassItem = ({ item }: { item: Class }) => (
+  const renderClassItem = ({ item }: { item: ClassWithDetails }) => (
     <TouchableOpacity 
       style={[
         styles.classCard,
@@ -231,7 +237,7 @@ export default function ClassesList() {
           style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
           disabled={item.status === 'archived'}
           onPress={() => router.push({
-            pathname: '/(teacher)/class/[id]/subjects',
+            pathname: '/(teacher)/class/[id]/students',
             params: { id: item.id }
           })}
         >
@@ -372,7 +378,7 @@ export default function ClassesList() {
                       styles.filterOption,
                       filterStatus === status && styles.selectedFilterOption
                     ]}
-                    onPress={() => setFilterStatus(status)}
+                    onPress={() => setFilterStatus(status as 'all' | 'active' | 'inactive' | 'archived')}
                   >
                     <Text style={[
                       styles.filterOptionText,
@@ -399,7 +405,7 @@ export default function ClassesList() {
                       styles.filterOption,
                       sortBy === option.key && styles.selectedFilterOption
                     ]}
-                    onPress={() => setSortBy(option.key)}
+                    onPress={() => setSortBy(option.key as 'name' | 'level' | 'student_count' | 'created_at')}
                   >
                     <Text style={[
                       styles.filterOptionText,
@@ -464,8 +470,7 @@ export default function ClassesList() {
         onClose={handleCloseModal}
         onSuccess={handleFormSuccess}
         classData={editingClass}
-        authToken={authToken!}
-        schoolId={user?.school_id || 1}
+        schoolId={profile?.school_id || 1}
       />
     </SafeAreaView>
   );
@@ -660,24 +665,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     marginBottom: 16,
-  },
-  searchContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    marginRight: 12,
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: 12,
-    fontSize: 16,
-    color: '#333333',
   },
   filterButton: {
     backgroundColor: '#ffffff',

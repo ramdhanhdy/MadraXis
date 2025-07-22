@@ -18,7 +18,6 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
   const [newGradingScale, setNewGradingScale] = useState<'points' | 'percentage' | 'standards'>('percentage');
   const [newStandardsAlignment, setNewStandardsAlignment] = useState('');
   const [editingSubject, setEditingSubject] = useState<ClassSubject | null>(null);
-  const [showEditModal, setShowEditModal] = useState(false);
 
   const fetchSubjects = useCallback(async () => {
     try {
@@ -26,7 +25,7 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
       const subjects = await SubjectService.getClassSubjects(classId);
       setSubjects(subjects);
       onSubjectCountChange?.(subjects.length || 0);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching subjects:', error);
     } finally {
       setLoading(false);
@@ -37,7 +36,7 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
     try {
       const subjects = await SubjectService.getAvailableSubjects();
       setAvailableSubjects(subjects);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching available subjects:', error);
     }
   }, []);
@@ -68,8 +67,9 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
       setNewStandardsAlignment('');
       setShowAddModal(false);
       fetchSubjects();
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Gagal menambahkan mata pelajaran');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Gagal menambahkan mata pelajaran';
+      Alert.alert('Error', errorMessage);
     }
   };
 
@@ -89,10 +89,10 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
 
       Alert.alert('Success', 'Mata pelajaran berhasil diperbarui');
       setEditingSubject(null);
-      setShowEditModal(false);
       fetchSubjects();
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Gagal memperbarui mata pelajaran');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Gagal memperbarui mata pelajaran';
+      Alert.alert('Error', errorMessage);
     }
   };
 
@@ -110,8 +110,9 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
               await SubjectService.removeSubjectFromClass(subjectId);
               Alert.alert('Success', 'Mata pelajaran berhasil dihapus');
               fetchSubjects();
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'Gagal menghapus mata pelajaran');
+            } catch (error: unknown) {
+              const errorMessage = error instanceof Error ? error.message : 'Gagal menghapus mata pelajaran';
+              Alert.alert('Error', errorMessage);
             }
           },
         },
@@ -132,7 +133,6 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
     setNewSubjectCode(subject.subject_code || '');
     setNewGradingScale(subject.grading_scale);
     setNewStandardsAlignment(subject.standards_alignment || '');
-    setShowEditModal(true);
   };
 
   const renderSubjectItem = ({ item }: { item: ClassSubject }) => (
@@ -203,8 +203,8 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
         />
       )}
 
-      {/* Add Subject Modal */}
-      {showAddModal && (
+      {/* Add/Edit Subject Modal */}
+      {(showAddModal || editingSubject) && (
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
@@ -238,6 +238,12 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
                 onPress={() => setNewGradingScale('points')}
               >
                 <Text style={[styles.pickerText, newGradingScale === 'points' && styles.pickerTextSelected]}>Poin</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.pickerOption, newGradingScale === 'standards' && styles.pickerSelected]}
+                onPress={() => setNewGradingScale('standards')}
+              >
+                <Text style={[styles.pickerText, newGradingScale === 'standards' && styles.pickerTextSelected]}>Standar</Text>
               </TouchableOpacity>
             </View>
             
@@ -274,7 +280,7 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
       )}
 
       {/* Available Subjects */}
-      {!showAddModal && availableSubjects.length > 0 && (
+      {!showAddModal && !editingSubject && availableSubjects.length > 0 && (
         <View style={styles.availableContainer}>
           <Text style={styles.availableTitle}>Mata Pelajaran Tersedia</Text>
           <FlatList
@@ -439,6 +445,7 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     marginBottom: 12,
   },
   pickerLabel: {

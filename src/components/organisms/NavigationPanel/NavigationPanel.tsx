@@ -366,7 +366,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
                 <View style={[styles.badge, { backgroundColor: item.badgeColor || colors.error.main }]}>
                   <Typography
                     variant="caption"
-                    style={[styles.badgeText, { color: colors.error.contrast }]}
+                    style={{ ...styles.badgeText, color: colors.error.contrast }}
                   >
                     {item.badge > 99 ? '99+' : item.badge.toString()}
                   </Typography>
@@ -410,10 +410,10 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
     return (
       <View style={getEmptyStateStyles()}>
         <Icon
-          name={emptyIcon}
+          name={emptyIcon as keyof typeof Ionicons.glyphMap}
           size="xl"
           color={colors.text.tertiary}
-          style={{ marginBottom: theme.spacing.base.md }}
+          containerStyle={{ marginBottom: theme.spacing.base.md }}
         />
         
         <Typography
@@ -458,7 +458,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
             name="hourglass"
             size="xl"
             color={colors.text.tertiary}
-            style={{ marginBottom: theme.spacing.base.md }}
+            containerStyle={{ marginBottom: theme.spacing.base.md }}
           />
           <Typography variant="body1" color="secondary" align="center">
             Loading...
@@ -521,7 +521,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
   return (
     <View
       style={[getContainerStyles(), style]}
-      accessibilityRole="region"
+      accessibilityRole="none"
       accessibilityLabel={accessibilityLabel || title || 'Navigation panel'}
       testID={testID}
     >

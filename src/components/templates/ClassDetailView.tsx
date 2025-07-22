@@ -7,18 +7,30 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
 import { ClassService } from '@/src/services/classService';
 import { Class } from '@/src/types/class';
+import { ClassWithDetails } from '@/src/services/classService';
 import SubjectManager from '@/src/components/organisms/SubjectManager';
 import ClassFormModal from '@/src/components/organisms/ClassFormModal';
 
 export default function ClassDetailView() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const { user } = useAuth();
-  const [classData, setClassData] = useState<Class | null>(null);
+  const { user, profile } = useAuth();
+  const [classData, setClassData] = useState<ClassWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'details' | 'subjects' | 'students' | 'reports'>('details');
+
+  // Handle edit modal when school_id is missing
+  useEffect(() => {
+    if (showEditModal && !profile?.school_id) {
+      Alert.alert(
+        'Error',
+        'School ID is required to edit class. Please contact administrator.',
+        [{ text: 'OK', onPress: () => setShowEditModal(false) }]
+      );
+    }
+  }, [showEditModal, profile?.school_id]);
 
   const fetchClassDetails = useCallback(async () => {
     if (!id) return;
@@ -27,7 +39,18 @@ export default function ClassDetailView() {
       setLoading(true);
       setError(null);
 
-      const classData = await ClassService.getClassById(parseInt(id as string));
+      const parsedId = parseInt(id as string);
+      if (isNaN(parsedId)) {
+        setError('Invalid class ID provided');
+        return;
+      }
+
+      if (!user?.id) {
+        setError('User not authenticated');
+        return;
+      }
+
+      const classData = await ClassService.getClassById(parsedId, user.id);
       setClassData(classData);
     } catch (error: any) {
       setError(error.message || 'Failed to load class details');
@@ -58,7 +81,11 @@ export default function ClassDetailView() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await ClassService.updateClass(classData.id, { status: 'archived' });
+              if (!user?.id) {
+                Alert.alert('Error', 'User not authenticated');
+                return;
+              }
+              await ClassService.updateClass(classData.id, { status: 'archived' }, user.id);
               Alert.alert('Success', 'Class has been archived');
               fetchClassDetails();
             } catch (error: any) {
@@ -74,7 +101,11 @@ export default function ClassDetailView() {
     if (!classData) return;
 
     try {
-      await ClassService.updateClass(classData.id, { status: 'active' });
+      if (!user?.id) {
+        Alert.alert('Error', 'User not authenticated');
+        return;
+      }
+      await ClassService.updateClass(classData.id, { status: 'active' }, user.id);
       Alert.alert('Success', 'Class has been activated');
       fetchClassDetails();
     } catch (error: any) {
@@ -95,7 +126,11 @@ export default function ClassDetailView() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await ClassService.deleteClass(classData.id);
+              if (!user?.id) {
+                Alert.alert('Error', 'User not authenticated');
+                return;
+              }
+              await ClassService.deleteClass(classData.id, user.id);
               Alert.alert('Success', 'Class has been deleted');
               router.back();
             } catch (error: any) {
@@ -330,13 +365,15 @@ export default function ClassDetailView() {
       )}
 
       {/* Edit Modal */}
-      <ClassFormModal
-        visible={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        onSuccess={handleFormSuccess}
-        classData={classData}
-        schoolId={user?.school_id || 1}
-      />
+      {profile?.school_id && (
+        <ClassFormModal
+          visible={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={handleFormSuccess}
+          classData={classData}
+          schoolId={profile.school_id}
+        />
+      )}
     </SafeAreaView>
   );
 }

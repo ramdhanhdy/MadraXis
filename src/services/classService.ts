@@ -1,5 +1,6 @@
 import { supabase } from '../utils/supabase';
 import { z } from 'zod';
+import { Class } from '../types/class';
 
 // Validation schemas
 const CreateClassSchema = z.object({
@@ -28,23 +29,6 @@ const BulkUpdateClassSchema = z.object({
 });
 
 // Type definitions
-export interface Class {
-  id: number;
-  name: string;
-  level: string;
-  description?: string;
-  school_id: number;
-  status: 'active' | 'inactive' | 'archived';
-  created_by?: string;
-  updated_by?: string;
-  deleted_at?: string;
-  student_capacity: number;
-  academic_year: string;
-  semester: '1' | '2';
-  created_at: string;
-  updated_at: string;
-}
-
 export interface CreateClassRequest {
   name: string;
   level: string;
@@ -73,17 +57,12 @@ export interface BulkUpdateRequest {
 export interface ClassWithDetails extends Class {
   student_count: number;
   subject_count: number;
+  teacher_count: number;
   teachers: Array<{
     user_id: string;
-    role: 'primary' | 'assistant' | 'co-teacher';
-    full_name?: string;
+    role: string;
+    full_name: string;
   }>;
-}
-
-export interface ClassServiceError {
-  code: string;
-  message: string;
-  details?: any;
 }
 
 export class ClassServiceError extends Error {
@@ -206,7 +185,11 @@ export class ClassService {
         .from('classes')
         .select(`
           *,
-          class_teachers!inner(*),
+          class_teachers!inner(
+            user_id,
+            role,
+            profiles!inner(full_name)
+          ),
           class_students!left(student_id),
           class_subjects!left(id)
         `)
@@ -246,26 +229,14 @@ export class ClassService {
       }
 
       // Transform data to include counts and teacher details
-      const transformedClasses = await Promise.all(
-        classes!.map(async (classItem) => {
-          // Get teacher details
-          const { data: teachers } = await supabase
-            .from('class_teachers')
-            .select(`
-              user_id,
-              role,
-              profiles!inner(full_name)
-            `)
-            .eq('class_id', classItem.id);
-
-          return {
-            ...classItem,
-            student_count: classItem.class_students?.length || 0,
-            subject_count: classItem.class_subjects?.length || 0,
-            teachers: teachers || [],
-          };
-        })
-      );
+      const transformedClasses = classes!.map((classItem) => {
+        return {
+          ...classItem,
+          student_count: classItem.class_students?.length || 0,
+          subject_count: classItem.class_subjects?.length || 0,
+          teachers: classItem.class_teachers || [],
+        };
+      });
 
       return transformedClasses;
     } catch (error) {

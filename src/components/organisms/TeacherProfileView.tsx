@@ -52,7 +52,7 @@ export default function TeacherProfileView({ profile, loading, schoolName }: Pro
     onPress?: () => void
   ) => (
     <TouchableOpacity
-      style={[styles.profileItem, { borderBottomColor: colors.border.light }]}
+      style={[styles.profileItem, { borderBottomColor: colors.border.secondary }]}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={text}
@@ -83,7 +83,7 @@ export default function TeacherProfileView({ profile, loading, schoolName }: Pro
 
       {/* Account Settings Section */}
       <Card style={styles.profileSection}>
-        <View style={[styles.sectionHeader, { borderBottomColor: colors.border.light }]}>
+        <View style={[styles.sectionHeader, { borderBottomColor: colors.border.secondary }]}>
           <Typography variant="h3" color="primary">
             Pengaturan Akun
           </Typography>
@@ -97,7 +97,7 @@ export default function TeacherProfileView({ profile, loading, schoolName }: Pro
 
       {/* Help Section */}
       <Card style={styles.profileSection}>
-        <View style={[styles.sectionHeader, { borderBottomColor: colors.border.light }]}>
+        <View style={[styles.sectionHeader, { borderBottomColor: colors.border.secondary }]}>
           <Typography variant="h3" color="primary">
             Bantuan
           </Typography>
@@ -114,7 +114,7 @@ export default function TeacherProfileView({ profile, loading, schoolName }: Pro
       </View>
 
       {/* Bottom Spacing */}
-      <View style={{ height: theme.spacing.xl }} />
+      <View style={{ height: theme.spacing.base.xl }} />
     </ScrollView>
   );
 }

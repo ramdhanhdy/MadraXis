@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { Card } from '../../../src/components/molecules/Card';
 import { ListItem } from '../../../src/components/molecules/ListItem';
 import { Typography } from '../../../src/components/atoms/Typography';
-import { Avatar } from '../../../src/components/atoms/Avatar';
+
 import { Icon } from '../../../src/components/atoms/Icon';
 
 export default function IncidentReportModal() {
@@ -24,11 +24,12 @@ export default function IncidentReportModal() {
           title="Perilaku Bullying"
           subtitle="Laporkan intimidasi atau pelecehan"
           leftComponent={
-            <Avatar
+            <Icon
+              name="warning"
               size="md"
+              background={true}
               backgroundColor="#e74c3c"
-              iconName="warning"
-              iconColor="#ffffff"
+              color="#ffffff"
             />
           }
           rightIcon="chevron-forward"
@@ -39,11 +40,12 @@ export default function IncidentReportModal() {
           title="Masalah Kesehatan"
           subtitle="Laporkan masalah kesehatan atau cedera"
           leftComponent={
-            <Avatar
+            <Icon
+              name="medkit"
               size="md"
+              background={true}
               backgroundColor="#f39c12"
-              iconName="medkit"
-              iconColor="#ffffff"
+              color="#ffffff"
             />
           }
           rightIcon="chevron-forward"
@@ -55,11 +57,12 @@ export default function IncidentReportModal() {
           title="Fasilitas & Infrastruktur"
           subtitle="Laporkan kerusakan atau masalah fasilitas"
           leftComponent={
-            <Avatar
+            <Icon
+              name="build"
               size="md"
+              background={true}
               backgroundColor="#3498db"
-              iconName="build"
-              iconColor="#ffffff"
+              color="#ffffff"
             />
           }
           rightIcon="chevron-forward"
@@ -71,11 +74,12 @@ export default function IncidentReportModal() {
           title="Masalah Lainnya"
           subtitle="Laporkan masalah lain yang perlu perhatian"
           leftComponent={
-            <Avatar
+            <Icon
+              name="chatbubbles"
               size="md"
+              background={true}
               backgroundColor="#9b59b6"
-              iconName="chatbubbles"
-              iconColor="#ffffff"
+              color="#ffffff"
             />
           }
           rightIcon="chevron-forward"

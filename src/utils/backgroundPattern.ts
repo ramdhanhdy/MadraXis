@@ -65,6 +65,7 @@ export const patternConfigs = {
   // No pattern
   none: {
     variant: 'none' as PatternVariant,
+    intensity: 'subtle' as PatternIntensity,
   },
 };
 
@@ -107,10 +108,19 @@ export const usePatternConfig = (configKey: keyof typeof patternConfigs, role?: 
   } else {
     // Handle other pattern types
     const baseConfig = patternConfigs[configKey];
-    config = {
-      ...baseConfig,
-      color: colors.primary.main,
-    };
+    if (baseConfig && typeof baseConfig === 'object' && 'variant' in baseConfig) {
+      config = {
+        ...baseConfig,
+        color: colors.primary.main,
+      };
+    } else {
+      // Fallback to default config
+      config = {
+        variant: 'geometric' as PatternVariant,
+        intensity: 'subtle' as PatternIntensity,
+        color: colors.primary.main,
+      };
+    }
   }
   
   return config;
