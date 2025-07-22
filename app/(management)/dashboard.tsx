@@ -34,11 +34,11 @@ interface Incident {
   location: string;
   status: string;
   created_at: string;
-  student_name?: string;
-  is_anonymous?: boolean;
-  reporter: {
+  student?: {
     full_name: string;
-  }[]; // Array of reporter objects
+  };
+  is_anonymous?: boolean;
+  reporter_id: string;
 }
 
 export default function ManagementDashboard() {

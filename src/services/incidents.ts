@@ -21,9 +21,9 @@ export const fetchIncidentsForSchool = async (schoolId: number, limit: number = 
       location,
       status,
       created_at,
-      student_name,
       is_anonymous,
-      reporter:reporter_id ( full_name ) 
+      student:student_id!left(full_name),
+      reporter_id
     `)
     .eq('school_id', schoolId)
     .order('created_at', { ascending: false })
