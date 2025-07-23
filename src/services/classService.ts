@@ -104,21 +104,34 @@ export class ClassService {
       }
 
       // Insert class record with proper user attribution
+      const insertData = {
+        ...validatedData,
+        created_by: teacherId,
+        updated_by: teacherId,
+        status: 'active',
+      };
+      
+      console.log('Attempting to insert class with data:', insertData);
+      
       const { data: newClass, error: insertError } = await supabase
         .from('classes')
-        .insert({
-          ...validatedData,
-          created_by: teacherId,
-          updated_by: teacherId,
-          status: 'active',
-        })
+        .insert(insertData)
         .select()
         .single();
 
       if (insertError) {
+        console.error('Class creation failed - Full error details:', {
+          error: insertError,
+          errorCode: insertError.code,
+          errorMessage: insertError.message,
+          errorDetails: insertError.details,
+          errorHint: insertError.hint,
+          insertData: insertData,
+          teacherId: teacherId
+        });
         throw new ClassServiceError(
           'CREATE_FAILED',
-          'Failed to create class',
+          `Failed to create class: ${insertError.message}`,
           insertError
         );
       }
@@ -179,7 +192,7 @@ export class ClassService {
           teacherId
         );
         console.log('Audit trail logged successfully for class:', newClass!.id);
-      } catch (auditError) {
+      } catch (auditError: any) {
         console.warn('Audit trail logging failed (non-blocking) - Full error details:', {
           error: auditError,
           errorCode: auditError?.code,

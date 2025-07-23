@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabase';
+import { Incident } from '../types';
 
 /**
  * Fetches the most recent incidents for a given school.
@@ -7,7 +8,7 @@ import { supabase } from '../utils/supabase';
  * @param limit The maximum number of incidents to fetch.
  * @returns A promise that resolves with the incidents data and any potential error.
  */
-export const fetchIncidentsForSchool = async (schoolId: number, limit: number = 5) => {
+export const fetchIncidentsForSchool = async (schoolId: number, limit: number = 5): Promise<{ data: Incident[] | null; error: any }> => {
   if (!schoolId) {
     return { data: null, error: new Error('School ID is required to fetch incidents.') };
   }
@@ -22,7 +23,8 @@ export const fetchIncidentsForSchool = async (schoolId: number, limit: number = 
       status,
       created_at,
       is_anonymous,
-      student:student_id!left(full_name),
+      student_id,
+      profiles!incidents_student_id_fkey(full_name),
       reporter_id
     `)
     .eq('school_id', schoolId)
