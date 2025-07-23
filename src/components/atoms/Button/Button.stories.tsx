@@ -160,9 +160,7 @@ export const ComplexExamples = () => (
         icon="settings"
         iconOnly
         onPress={() => console.log('Settings')}
-      >
-        Settings
-      </Button>
+      />
       
       <Button 
         variant="outline"

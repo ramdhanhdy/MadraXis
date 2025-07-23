@@ -90,7 +90,7 @@ export class ClassService {
       const validatedData = CreateClassSchema.parse(classData);
       
       // Check for duplicate class name within teacher's scope
-      const existingClass = await this.checkDuplicateClassName(
+      const existingClass = await ClassService.checkDuplicateClassName(
         validatedData.name,
         teacherId,
         validatedData.school_id
@@ -144,7 +144,7 @@ export class ClassService {
       }
 
       // Log creation in audit trail
-      await this.logAuditTrail(
+      await ClassService.logAuditTrail(
         newClass!.id,
         'create',
         null,
@@ -257,7 +257,7 @@ export class ClassService {
   static async getClassById(classId: number, teacherId: string): Promise<ClassWithDetails> {
     try {
       // Verify teacher has access to this class
-      const hasAccess = await this.verifyClassAccess(classId, teacherId);
+      const hasAccess = await ClassService.verifyClassAccess(classId, teacherId);
       if (!hasAccess) {
         throw new ClassServiceError(
           'ACCESS_DENIED',
@@ -325,7 +325,7 @@ export class ClassService {
       const validatedData = UpdateClassSchema.parse(updates);
 
       // Verify teacher has access to this class
-      const hasAccess = await this.verifyClassAccess(classId, teacherId);
+      const hasAccess = await ClassService.verifyClassAccess(classId, teacherId);
       if (!hasAccess) {
         throw new ClassServiceError(
           'ACCESS_DENIED',
@@ -349,7 +349,7 @@ export class ClassService {
 
       // Check for duplicate class name if name is being updated
       if (validatedData.name && validatedData.name !== oldClass.name) {
-        const existingClass = await this.checkDuplicateClassName(
+        const existingClass = await ClassService.checkDuplicateClassName(
           validatedData.name,
           teacherId,
           oldClass.school_id
@@ -385,7 +385,7 @@ export class ClassService {
 
       // Log changes in audit trail
       const changedFields = Object.keys(validatedData);
-      await this.logAuditTrail(
+      await ClassService.logAuditTrail(
         classId,
         'update',
         changedFields,
@@ -413,7 +413,7 @@ export class ClassService {
   static async deleteClass(classId: number, teacherId: string): Promise<void> {
     try {
       // Verify teacher has access to this class
-      const hasAccess = await this.verifyClassAccess(classId, teacherId);
+      const hasAccess = await ClassService.verifyClassAccess(classId, teacherId);
       if (!hasAccess) {
         throw new ClassServiceError(
           'ACCESS_DENIED',
@@ -468,7 +468,7 @@ export class ClassService {
       }
 
       // Log deletion in audit trail
-      await this.logAuditTrail(
+      await ClassService.logAuditTrail(
         classId,
         'delete',
         ['status', 'deleted_at'],
@@ -494,7 +494,7 @@ export class ClassService {
   static async restoreClass(classId: number, teacherId: string): Promise<Class> {
     try {
       // Verify teacher has access to this class
-      const hasAccess = await this.verifyClassAccess(classId, teacherId);
+      const hasAccess = await ClassService.verifyClassAccess(classId, teacherId);
       if (!hasAccess) {
         throw new ClassServiceError(
           'ACCESS_DENIED',
@@ -538,7 +538,7 @@ export class ClassService {
       }
 
       // Log restoration in audit trail
-      await this.logAuditTrail(
+      await ClassService.logAuditTrail(
         classId,
         'restore',
         ['status', 'deleted_at'],
@@ -566,13 +566,22 @@ export class ClassService {
   static async bulkCreateClasses(
     classes: CreateClassRequest[],
     teacherId: string
-  ): Promise<Class[]> {
+  ): Promise<{
+    results: Class[];
+    errors: Array<{
+      classData: CreateClassRequest;
+      error: string;
+    }>;
+  }> {
     const results: Class[] = [];
-    const errors: any[] = [];
+    const errors: Array<{
+      classData: CreateClassRequest;
+      error: string;
+    }> = [];
 
     for (const classData of classes) {
       try {
-        const newClass = await this.createClass(classData, teacherId);
+        const newClass = await ClassService.createClass(classData, teacherId);
         results.push(newClass);
       } catch (error) {
         errors.push({
@@ -582,23 +591,28 @@ export class ClassService {
       }
     }
 
-    if (errors.length > 0) {
-      console.warn('Some classes failed to create:', errors);
-    }
-
-    return results;
+    return { results, errors };
   }
 
   static async bulkUpdateClasses(
     request: BulkUpdateRequest,
     teacherId: string
-  ): Promise<Class[]> {
+  ): Promise<{
+    results: Class[];
+    errors: Array<{
+      classId: number;
+      error: string;
+    }>;
+  }> {
     const results: Class[] = [];
-    const errors: any[] = [];
+    const errors: Array<{
+      classId: number;
+      error: string;
+    }> = [];
 
     for (const classId of request.class_ids) {
       try {
-        const updatedClass = await this.updateClass(classId, request.updates, teacherId);
+        const updatedClass = await ClassService.updateClass(classId, request.updates, teacherId);
         results.push(updatedClass);
       } catch (error) {
         errors.push({
@@ -608,19 +622,29 @@ export class ClassService {
       }
     }
 
-    if (errors.length > 0) {
-      console.warn('Some classes failed to update:', errors);
-    }
-
-    return results;
+    return { results, errors };
   }
 
-  static async bulkDeleteClasses(classIds: number[], teacherId: string): Promise<void> {
-    const errors: any[] = [];
+  static async bulkDeleteClasses(
+    classIds: number[],
+    teacherId: string
+  ): Promise<{
+    results: number[];
+    errors: Array<{
+      classId: number;
+      error: string;
+    }>;
+  }> {
+    const results: number[] = [];
+    const errors: Array<{
+      classId: number;
+      error: string;
+    }> = [];
 
     for (const classId of classIds) {
       try {
-        await this.deleteClass(classId, teacherId);
+        await ClassService.deleteClass(classId, teacherId);
+        results.push(classId);
       } catch (error) {
         errors.push({
           classId,
@@ -629,9 +653,7 @@ export class ClassService {
       }
     }
 
-    if (errors.length > 0) {
-      console.warn('Some classes failed to delete:', errors);
-    }
+    return { results, errors };
   }
 
   /**

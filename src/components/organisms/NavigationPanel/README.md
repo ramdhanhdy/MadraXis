@@ -1,32 +1,81 @@
 # NavigationPanel Component
 
-A consistent notification panel component that provides uniform styling and interactions for displaying notifications across all user roles.
+A versatile navigation and notification panel component that provides consistent styling and interactions for different content types across all user roles.
+
+## Component Structure
+
+```
+┌─────────────────────────────────────────┐
+│ NavigationPanel                         │
+├─────────────────────────────────────────┤
+│ Header (optional)                       │
+│ ┌─────────────────────┬─────────────────┐ │
+│ │ Title & Subtitle    │ Action Buttons  │ │
+│ │ • Main title        │ • Refresh       │ │
+│ │ • Optional subtitle │ • Mark all read │ │
+│ │ • Unread count      │ • Clear all     │ │
+│ └─────────────────────┴─────────────────┘ │
+├─────────────────────────────────────────┤
+│ Content Area (scrollable)               │
+│                                         │
+│ Navigation Items:                       │
+│ ┌─────────────────────────────────────┐ │
+│ │ [Icon] Title           Badge    [>] │ │
+│ │        Subtitle                     │ │
+│ └─────────────────────────────────────┘ │
+│                                         │
+│ Notifications:                          │
+│ ┌─────────────────────────────────────┐ │
+│ │ [●] Title              [Action Btn] │ │
+│ │     Message                         │ │
+│ │     Timestamp                       │ │
+│ └─────────────────────────────────────┘ │
+│                                         │
+│ Empty State:                            │
+│ ┌─────────────────────────────────────┐ │
+│ │           [Large Icon]              │ │
+│ │           Empty Title               │ │
+│ │         Empty Message               │ │
+│ │         [Refresh Button]            │ │
+│ └─────────────────────────────────────┘ │
+└─────────────────────────────────────────┘
+
+Panel Types:
+• notifications: Shows only notification items
+• navigation: Shows only navigation items  
+• mixed: Shows navigation items + notifications
+
+Variants:
+• default: Standard background with border
+• elevated: Includes shadow/elevation
+• transparent: No background color
+```
 
 ## Features
 
-- **Consistent Layout**: Standardized notification panel structure with header and content
-- **Flexible Positioning**: Support for left or right side positioning
-- **Animation Support**: Smooth slide-in and slide-out animations
-- **Notification Types**: Support for different notification types (info, success, warning, error)
-- **Action Support**: Configurable action buttons for notifications
-- **Empty State**: Customizable empty state message
-- **Bulk Actions**: Support for mark all as read, clear all, and view all actions
-- **Accessibility**: Full accessibility support with proper roles and labels
+- **Multi-Purpose Panel**: Supports notifications, navigation items, or mixed content
+- **Flexible Content Types**: Display notifications, navigation items, or both
+- **Consistent Layout**: Standardized panel structure with header and scrollable content
+- **Visual Variants**: Default, elevated, and transparent styling options
+- **Loading States**: Built-in loading animations and refresh functionality
+- **Empty State**: Customizable empty state with icon and message
+- **Bulk Actions**: Support for mark all as read, clear all, and refresh actions
+- **Accessibility**: Full accessibility support with proper semantic roles and labels
+- **Responsive Design**: Adapts to screen size with configurable max height
 
 ## Usage
 
-### Basic Navigation Panel
+### Basic Notification Panel
 
 ```tsx
 import { NavigationPanel } from '../../../components/organisms/NavigationPanel';
 
-const [visible, setVisible] = useState(false);
 const notifications = [
   {
     id: '1',
     title: 'New Assignment',
     message: 'You have a new mathematics assignment due tomorrow.',
-    timestamp: new Date(),
+    timestamp: '2 hours ago',
     read: false,
     type: 'info',
     actionLabel: 'View',
@@ -36,56 +85,77 @@ const notifications = [
 ];
 
 <NavigationPanel
-  visible={visible}
-  onClose={() => setVisible(false)}
+  type="notifications"
+  title="Notifications"
   notifications={notifications}
-  onMarkAllAsRead={() => markAllAsRead()}
-  onViewAll={() => viewAllNotifications()}
+  onMarkAllRead={() => markAllAsRead()}
+  onClearAll={() => clearAllNotifications()}
+  onRefresh={() => refreshNotifications()}
 />
 ```
 
-### Different Positions
+### Navigation Items Panel
 
 ```tsx
-// Right side panel (default)
-<NavigationPanel
-  visible={visible}
-  onClose={() => setVisible(false)}
-  notifications={notifications}
-  position="right"
-/>
+const navigationItems = [
+  {
+    id: '1',
+    title: 'Dashboard',
+    subtitle: 'Overview and statistics',
+    icon: 'home',
+    onPress: () => navigateToDashboard(),
+  },
+  {
+    id: '2',
+    title: 'Classes',
+    subtitle: 'Manage your classes',
+    icon: 'school',
+    badge: 3,
+    onPress: () => navigateToClasses(),
+  },
+  // More navigation items...
+];
 
-// Left side panel
 <NavigationPanel
-  visible={visible}
-  onClose={() => setVisible(false)}
-  notifications={notifications}
-  position="left"
-/>
-```
-
-### Custom Styling
-
-```tsx
-<NavigationPanel
-  visible={visible}
-  onClose={() => setVisible(false)}
-  notifications={notifications}
-  backgroundColor="#1a1a1a"
-  backdropColor="rgba(0, 0, 0, 0.8)"
-  width={400}
-  title="Custom Panel"
+  type="navigation"
+  title="Quick Navigation"
+  navigationItems={navigationItems}
 />
 ```
 
-### Empty State
+### Mixed Content Panel
 
 ```tsx
 <NavigationPanel
-  visible={visible}
-  onClose={() => setVisible(false)}
-  notifications={[]}
-  emptyStateMessage="You have no notifications"
+  type="mixed"
+  title="Dashboard Panel"
+  navigationItems={navigationItems}
+  notifications={notifications}
+  onMarkAllRead={() => markAllAsRead()}
+  onRefresh={() => refreshContent()}
+/>
+```
+
+### Different Variants
+
+```tsx
+// Elevated panel with shadow
+<NavigationPanel
+  variant="elevated"
+  notifications={notifications}
+/>
+
+// Transparent panel
+<NavigationPanel
+  variant="transparent"
+  notifications={notifications}
+/>
+
+// Custom max height
+<NavigationPanel
+  notifications={notifications}
+  maxHeight={400}
+  scrollable={true}
 />
 ```
 
@@ -93,240 +163,264 @@ const notifications = [
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `visible` | `boolean` | - | Whether the panel is visible (required) |
-| `onClose` | `() => void` | - | Close handler (required) |
-| `title` | `string` | `'Notifications'` | Panel title |
-| `notifications` | `Notification[]` | `[]` | Array of notifications |
-| `emptyStateMessage` | `string` | `'No notifications'` | Empty state message |
-| `onMarkAllAsRead` | `() => void` | - | Mark all as read handler |
-| `onClearAll` | `() => void` | - | Clear all handler |
-| `onViewAll` | `() => void` | - | View all handler |
-| `position` | `'left' \| 'right'` | `'right'` | Panel position |
-| `width` | `number \| string` | `320` | Panel width |
-| `maxHeight` | `number \| string` | - | Maximum panel height |
-| `animationDuration` | `number` | `300` | Animation duration in ms |
-| `backgroundColor` | `string` | - | Custom background color |
-| `backdropColor` | `string` | - | Custom backdrop color |
-| `backdropOpacity` | `number` | `0.5` | Backdrop opacity |
+| `type` | `'notifications' \| 'navigation' \| 'mixed'` | `'notifications'` | Panel content type |
+| `title` | `string` | - | Panel title |
+| `subtitle` | `string` | - | Panel subtitle |
+| `navigationItems` | `NavigationItem[]` | `[]` | Array of navigation items |
+| `notifications` | `PanelNotification[]` | `[]` | Array of notifications |
+| `onClearAll` | `() => void` | - | Clear all items handler |
+| `onMarkAllRead` | `() => void` | - | Mark all notifications as read handler |
+| `onRefresh` | `() => void` | - | Refresh content handler |
+| `variant` | `'default' \| 'elevated' \| 'transparent'` | `'default'` | Visual variant |
+| `showHeader` | `boolean` | `true` | Whether to show header |
+| `showActions` | `boolean` | `true` | Whether to show action buttons |
+| `maxHeight` | `number` | - | Maximum panel height |
+| `scrollable` | `boolean` | `true` | Whether content is scrollable |
+| `emptyTitle` | `string` | `'No items'` | Empty state title |
+| `emptyMessage` | `string` | `'There are no items to display'` | Empty state message |
+| `emptyIcon` | `keyof typeof Ionicons.glyphMap` | `'inbox'` | Empty state icon |
+| `loading` | `boolean` | `false` | Loading state |
+| `refreshing` | `boolean` | `false` | Refreshing state |
 | `style` | `ViewStyle` | - | Additional panel styles |
-| `contentStyle` | `ViewStyle` | - | Content area styles |
 | `headerStyle` | `ViewStyle` | - | Header area styles |
+| `contentStyle` | `ViewStyle` | - | Content area styles |
 | `accessibilityLabel` | `string` | - | Accessibility label |
 | `testID` | `string` | - | Test identifier |
 
-### Notification Interface
+### NavigationItem Interface
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `string` | - | Unique identifier (required) |
+| `title` | `string` | - | Item title (required) |
+| `subtitle` | `string` | - | Item subtitle |
+| `icon` | `keyof typeof Ionicons.glyphMap` | - | Item icon |
+| `badge` | `number` | - | Badge count |
+| `badgeColor` | `string` | - | Badge background color |
+| `onPress` | `() => void` | - | Press handler (required) |
+| `disabled` | `boolean` | - | Whether item is disabled |
+| `testID` | `string` | - | Test identifier |
+
+### PanelNotification Interface
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `id` | `string` | - | Unique identifier (required) |
 | `title` | `string` | - | Notification title (required) |
 | `message` | `string` | - | Notification message (required) |
-| `timestamp` | `string \| Date` | - | Notification timestamp (required) |
-| `read` | `boolean` | - | Whether notification is read (required) |
-| `type` | `'info' \| 'success' \| 'warning' \| 'error'` | `'info'` | Notification type |
-| `actionLabel` | `string` | - | Action button label |
-| `onAction` | `() => void` | - | Action button handler |
+| `type` | `NotificationType` | - | Notification type |
+| `timestamp` | `string` | - | Notification timestamp |
+| `read` | `boolean` | - | Whether notification is read |
+| `icon` | `keyof typeof Ionicons.glyphMap` | - | Notification icon |
 | `onPress` | `() => void` | - | Press handler |
-| `image` | `string` | - | Optional image URL |
-| `sender` | `{ name: string; avatar?: string }` | - | Sender information |
-| `testID` | `string` | - | Test identifier |
+| `onDismiss` | `() => void` | - | Dismiss handler |
+| `onAction` | `() => void` | - | Action button handler |
+| `actionLabel` | `string` | - | Action button label |
 
 ## Design Specifications
 
-- **Border Radius**: Uses theme border radius values
-- **Width**: Default 320px, customizable
-- **Animation**: Slide in/out with fade effect
-- **Shadow**: Consistent with theme shadow system
-- **Backdrop**: Semi-transparent overlay
-- **Header Height**: Minimum 60px with proper padding
-- **Close Button**: 40x40px touch target
+- **Border Radius**: Uses theme border radius (lg) values
+- **Max Height**: Default 70% of screen height, customizable
+- **Animation**: Loading fade animation for content
+- **Shadow**: Elevated variant includes theme card shadows
+- **Background**: Theme surface colors with transparency support
+- **Header**: Flexible layout with title, subtitle, and action buttons
+- **Action Buttons**: 32x32px touch targets with proper spacing
 
 ## Accessibility
 
-- Uses `accessibilityViewIsModal` for proper modal behavior
+- Uses `accessibilityRole="menu"` for proper semantic navigation
 - Provides proper button roles for all interactive elements
-- Auto-generates accessibility labels from titles
+- Auto-generates accessibility labels from titles and content
 - Supports custom accessibility labels and hints
 - Includes proper focus management for screen readers
+- Badge announcements for navigation items with counts
+- Loading state announcements for screen readers
 
 ## Examples in Context
 
-### Student Notifications
+### Student Dashboard Navigation
 
 ```tsx
-const studentNotifications = [
+const studentNavigation = [
   {
     id: '1',
-    title: 'New Assignment',
-    message: 'Mathematics: Complete exercises 5-10 from Chapter 7.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    read: false,
-    type: 'info',
-    actionLabel: 'View',
-    onAction: () => viewAssignment(),
+    title: 'My Classes',
+    subtitle: 'View your enrolled classes',
+    icon: 'school',
+    badge: 3,
+    onPress: () => navigateToClasses(),
   },
   {
     id: '2',
-    title: 'Quiz Grade Posted',
-    message: 'You scored 92% on your recent Science quiz.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3), // 3 hours ago
-    read: true,
-    type: 'success',
-    actionLabel: 'View Grade',
-    onAction: () => viewGrade(),
+    title: 'Assignments',
+    subtitle: '2 pending submissions',
+    icon: 'document-text',
+    badge: 2,
+    badgeColor: '#FF6B6B',
+    onPress: () => navigateToAssignments(),
+  },
+  {
+    id: '3',
+    title: 'Grades',
+    subtitle: 'Check your academic progress',
+    icon: 'trophy',
+    onPress: () => navigateToGrades(),
   },
 ];
 
 <NavigationPanel
-  visible={visible}
-  onClose={() => setVisible(false)}
-  notifications={studentNotifications}
-  title="My Notifications"
-  onMarkAllAsRead={() => markAllAsRead()}
-  onViewAll={() => viewAllNotifications()}
+  type="navigation"
+  title="Quick Access"
+  navigationItems={studentNavigation}
+  variant="elevated"
 />
 ```
 
-### Teacher Notifications
+### Teacher Notification Center
 
 ```tsx
 const teacherNotifications = [
   {
     id: '1',
-    title: 'Assignments to Grade',
-    message: '8 new student submissions for Mathematics Chapter 7 exercises.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 minutes ago
+    title: 'New Assignment Submissions',
+    message: '8 students have submitted their Mathematics homework.',
+    timestamp: '15 minutes ago',
     read: false,
     type: 'info',
-    actionLabel: 'Grade Now',
-    onAction: () => gradeAssignments(),
+    icon: 'document',
+    actionLabel: 'Review',
+    onAction: () => reviewSubmissions(),
   },
   {
     id: '2',
-    title: 'Parent Request',
-    message: 'Ahmed\'s parent has requested a meeting to discuss his progress.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5), // 5 hours ago
-    read: true,
-    sender: {
-      name: 'Mr. Al-Rashid',
-      avatar: 'https://i.pravatar.cc/150?img=68',
-    },
+    title: 'Parent Meeting Request',
+    message: 'Ahmed\'s parent has requested a meeting to discuss progress.',
+    timestamp: '2 hours ago',
+    read: false,
+    type: 'warning',
+    icon: 'people',
     actionLabel: 'Schedule',
     onAction: () => scheduleMeeting(),
   },
 ];
 
 <NavigationPanel
-  visible={visible}
-  onClose={() => setVisible(false)}
+  type="notifications"
+  title="Teacher Notifications"
+  subtitle="Stay updated with classroom activities"
   notifications={teacherNotifications}
-  title="Notifications"
-  onMarkAllAsRead={() => markAllAsRead()}
+  onMarkAllRead={() => markAllAsRead()}
   onClearAll={() => clearAllNotifications()}
-  onViewAll={() => viewAllNotifications()}
+  onRefresh={() => refreshNotifications()}
+  showActions={true}
 />
 ```
 
-### Parent Notifications
+### Management Mixed Panel
 
 ```tsx
-const parentNotifications = [
+const managementNavigation = [
   {
     id: '1',
-    title: 'Ahmed\'s Test Result',
-    message: 'Ahmed scored 88% on his Mathematics test.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 45), // 45 minutes ago
-    read: false,
-    type: 'success',
-    actionLabel: 'View Details',
-    onAction: () => viewTestDetails(),
+    title: 'School Overview',
+    subtitle: 'Dashboard and statistics',
+    icon: 'analytics',
+    onPress: () => navigateToDashboard(),
   },
   {
     id: '2',
-    title: 'Message from Ms. Sarah',
-    message: 'I\'d like to discuss Ahmed\'s progress in Mathematics. He\'s showing great improvement!',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8), // 8 hours ago
-    read: true,
-    sender: {
-      name: 'Ms. Sarah',
-      avatar: 'https://i.pravatar.cc/150?img=32',
-    },
-    actionLabel: 'Reply',
-    onAction: () => replyToMessage(),
+    title: 'Staff Management',
+    subtitle: 'Manage teachers and staff',
+    icon: 'people',
+    onPress: () => navigateToStaff(),
   },
 ];
 
-<NavigationPanel
-  visible={visible}
-  onClose={() => setVisible(false)}
-  notifications={parentNotifications}
-  title="Ahmed's Updates"
-  onMarkAllAsRead={() => markAllAsRead()}
-  onViewAll={() => viewAllNotifications()}
-/>
-```
-
-### Management Notifications
-
-```tsx
 const managementNotifications = [
   {
     id: '1',
-    title: 'Incident Report',
-    message: 'New incident reported in Grade 10 classroom. Requires immediate attention.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 10), // 10 minutes ago
+    title: 'Urgent: Incident Report',
+    message: 'New incident reported requiring immediate attention.',
+    timestamp: '5 minutes ago',
     read: false,
     type: 'error',
+    icon: 'warning',
     actionLabel: 'Review',
     onAction: () => reviewIncident(),
-  },
-  {
-    id: '2',
-    title: 'Teacher Absence',
-    message: 'Mr. Khalid has reported sick leave for tomorrow. Substitute needed.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-    read: false,
-    type: 'warning',
-    actionLabel: 'Arrange Sub',
-    onAction: () => arrangeSubstitute(),
   },
 ];
 
 <NavigationPanel
-  visible={visible}
-  onClose={() => setVisible(false)}
+  type="mixed"
+  title="Management Center"
+  navigationItems={managementNavigation}
   notifications={managementNotifications}
-  title="School Notifications"
-  onMarkAllAsRead={() => markAllAsRead()}
-  onClearAll={() => clearAllNotifications()}
-  onViewAll={() => viewAllNotifications()}
+  onMarkAllRead={() => markAllAsRead()}
+  onRefresh={() => refreshContent()}
+  variant="elevated"
+  maxHeight={500}
 />
 ```
 
-### State Management Example
+### Loading and Empty States
 
 ```tsx
-const [visible, setVisible] = useState(false);
-const [notifications, setNotifications] = useState(initialNotifications);
-
-const handleMarkAllAsRead = () => {
-  setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-};
-
-const handleClearAll = () => {
-  setNotifications([]);
-};
-
-const handleDismissNotification = (id: string) => {
-  setNotifications(prev => prev.filter(n => n.id !== id));
-};
-
+// Loading state
 <NavigationPanel
-  visible={visible}
-  onClose={() => setVisible(false)}
+  type="notifications"
+  title="Loading Notifications"
+  notifications={[]}
+  loading={true}
+/>
+
+// Empty state with custom message
+<NavigationPanel
+  type="notifications"
+  title="Notifications"
+  notifications={[]}
+  emptyTitle="All caught up!"
+  emptyMessage="You have no new notifications at this time."
+  emptyIcon="checkmark-circle"
+  onRefresh={() => refreshNotifications()}
+/>
+
+// Refreshing state
+<NavigationPanel
+  type="notifications"
   notifications={notifications}
-  onMarkAllAsRead={handleMarkAllAsRead}
-  onClearAll={handleClearAll}
-  onViewAll={() => navigateToNotifications()}
+  refreshing={true}
+  onRefresh={() => refreshNotifications()}
+/>
+```
+
+### Custom Styling Examples
+
+```tsx
+// Transparent variant for overlay
+<NavigationPanel
+  type="navigation"
+  navigationItems={quickActions}
+  variant="transparent"
+  showHeader={false}
+  style={{
+    position: 'absolute',
+    top: 100,
+    right: 20,
+    width: 280,
+  }}
+/>
+
+// Compact panel with custom height
+<NavigationPanel
+  type="notifications"
+  notifications={recentNotifications}
+  maxHeight={300}
+  title="Recent Updates"
+  showActions={false}
+  style={{
+    borderRadius: 12,
+    margin: 16,
+  }}
 />
 ```

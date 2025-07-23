@@ -59,6 +59,39 @@ export default function ClassFormModal({
     setErrors({});
   }, [classData, schoolId, visible]);
 
+  const validateAcademicYear = (year: string): boolean => {
+    // Validate format: YYYY or YYYY-YYYY
+    const singleYear = /^\d{4}$/;
+    const rangeYear = /^\d{4}-\d{4}$/;
+    
+    if (singleYear.test(year)) {
+      const yearNum = parseInt(year);
+      const currentYear = new Date().getFullYear();
+      return yearNum >= 2000 && yearNum <= currentYear + 10;
+    }
+    
+    if (rangeYear.test(year)) {
+      const [startYear, endYear] = year.split('-').map(y => parseInt(y));
+      return startYear < endYear && (endYear - startYear) === 1;
+    }
+    
+    return false;
+  };
+
+  const formatAcademicYear = (value: string): string => {
+    // Remove non-numeric and non-dash characters
+    let cleanValue = value.replace(/[^\d-]/g, '');
+    
+    // Handle auto-formatting for range
+    if (cleanValue.length > 4 && !cleanValue.includes('-')) {
+      const year = cleanValue.substring(0, 4);
+      const nextYear = (parseInt(year) + 1).toString();
+      return `${year}-${nextYear}`;
+    }
+    
+    return cleanValue;
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -76,6 +109,8 @@ export default function ClassFormModal({
 
     if (!formData.academic_year.trim()) {
       newErrors.academic_year = 'Tahun akademik wajib diisi';
+    } else if (!validateAcademicYear(formData.academic_year)) {
+      newErrors.academic_year = 'Format tahun akademik tidak valid (YYYY atau YYYY-YYYY)';
     }
 
     if (!formData.semester.trim()) {
@@ -126,7 +161,13 @@ export default function ClassFormModal({
   };
 
   const handleInputChange = (field: keyof CreateClassData, value: string | number | '1' | '2') => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    let processedValue = value;
+    
+    if (field === 'academic_year' && typeof value === 'string') {
+      processedValue = formatAcademicYear(value);
+    }
+    
+    setFormData(prev => ({ ...prev, [field]: processedValue }));
     setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
@@ -210,11 +251,15 @@ export default function ClassFormModal({
                 style={[styles.textInput, errors.academic_year && styles.inputError]}
                 value={formData.academic_year}
                 onChangeText={(value) => handleInputChange('academic_year', value)}
-                placeholder={new Date().getFullYear().toString()}
+                placeholder="2024-2025"
                 placeholderTextColor="#999999"
                 keyboardType="numeric"
                 maxLength={9}
               />
+              
+              <Text style={styles.inputHelp}>
+                Format: YYYY atau YYYY-YYYY (contoh: 2024 atau 2024-2025)
+              </Text>
               {errors.academic_year && <Text style={styles.errorText}>{errors.academic_year}</Text>}
             </View>
 
@@ -339,6 +384,11 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 14,
     color: '#ff3b30',
+    marginTop: 4,
+  },
+  inputHelp: {
+    fontSize: 12,
+    color: '#666666',
     marginTop: 4,
   },
   semesterContainer: {

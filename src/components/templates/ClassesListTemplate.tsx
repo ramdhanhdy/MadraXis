@@ -40,13 +40,18 @@ export default function ClassesList() {
 
   // Fetch classes
   const fetchClasses = useCallback(async () => {
-    if (!user) return;
+    if (!user?.id) {
+      setError('User not authenticated');
+      setClasses([]);
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
       setError(null);
       
-      const classes = await ClassService.getTeacherClasses(user?.id || '', {
+      const classes = await ClassService.getTeacherClasses(user.id, {
           searchTerm: debouncedSearchQuery,
           status: filterStatus === 'all' ? undefined : filterStatus,
           sortBy,
@@ -73,11 +78,19 @@ export default function ClassesList() {
   }, [fetchClasses]);
 
   const handleOpenAddModal = () => {
+    if (!profile?.school_id) {
+      Alert.alert('Error', 'School ID is required to create a class');
+      return;
+    }
     setEditingClass(null);
     setShowAddModal(true);
   };
 
   const handleOpenEditModal = (classItem: Class) => {
+    if (!profile?.school_id) {
+      Alert.alert('Error', 'School ID is required to edit a class');
+      return;
+    }
     // Convert Class to ClassWithDetails by adding required properties
     const classWithDetails: ClassWithDetails = {
       ...classItem,
@@ -123,8 +136,12 @@ export default function ClassesList() {
           style: 'destructive',
           onPress: async () => {
             try {
+              if (!user?.id) {
+                Alert.alert('Error', 'User not authenticated');
+                return;
+              }
               setLoading(true);
-              await ClassService.bulkDeleteClasses(selectedClasses, user?.id || '');
+              await ClassService.bulkDeleteClasses(selectedClasses, user.id);
               setSelectedClasses([]);
               setBulkSelectionMode(false);
               fetchClasses();
@@ -142,12 +159,17 @@ export default function ClassesList() {
   const handleBulkUpdateStatus = async (status: 'active' | 'inactive' | 'archived') => {
     if (selectedClasses.length === 0) return;
 
+    if (!user?.id) {
+      Alert.alert('Error', 'User not authenticated');
+      return;
+    }
+
     try {
       setLoading(true);
       await ClassService.bulkUpdateClasses({
         class_ids: selectedClasses,
         updates: { status }
-      }, user?.id || '');
+      }, user.id);
       setSelectedClasses([]);
       setBulkSelectionMode(false);
       fetchClasses();
@@ -237,8 +259,8 @@ export default function ClassesList() {
           style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
           disabled={item.status === 'archived'}
           onPress={() => router.push({
-            pathname: '/(teacher)/class/[id]/students',
-            params: { id: item.id }
+            pathname: '/(teacher)/class/[id]',
+            params: { id: item.id, tab: 'subjects' }
           })}
         >
           <Ionicons name="book" size={16} color={item.status === 'archived' ? '#ccc' : '#005e7a'} />
@@ -248,8 +270,8 @@ export default function ClassesList() {
           style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
           disabled={item.status === 'archived'}
           onPress={() => router.push({
-            pathname: '/(teacher)/class/[id]/reports',
-            params: { id: item.id }
+            pathname: '/(teacher)/class/[id]',
+            params: { id: item.id, tab: 'reports' }
           })}
         >
           <Ionicons name="document-text" size={16} color={item.status === 'archived' ? '#ccc' : '#005e7a'} />
