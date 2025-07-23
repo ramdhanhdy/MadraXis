@@ -152,4 +152,19 @@ export interface StudentWithDetails {
   date_of_birth?: string;
   gender?: 'M' | 'F';
   boarding?: boolean;
-} 
+}
+
+// Incident interface for school incident management
+export interface Incident {
+  id: number;
+  incident_type: string;
+  description: string;
+  location: string;
+  status: string;
+  created_at: string;
+  student?: {
+    full_name: string;
+  };
+  is_anonymous?: boolean;
+  reporter_id: string; // Required field for tracking incident reporters
+}

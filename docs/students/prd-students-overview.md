@@ -10,10 +10,9 @@ This PRD outlines the student portal requirements specifically designed for boar
 Enable boarding school students to effectively manage their academic responsibilities, communicate with family during designated windows, and navigate boarding life while respecting weekend-only phone access restrictions.
 
 ### 1.2 Target Users
-- Boarding school students (ages 12-18)
+- Boarding school students (ages 12-18) having access to phones only on weekends
 - Boarding house residents
 - Students with weekend leave privileges
-- Students under 24/7 supervision
 
 ### 1.3 Key Boarding School Constraints
 - **Weekend-Only Phone Access**: Friday 6 PM - Sunday 6 PM communication windows
@@ -96,15 +95,13 @@ n
 - **Student privacy protection** for personal boarding information
 - **Family communication encryption** for private conversations
 - **Academic record security** for sensitive student data
-- **Peer interaction monitoring** for safety within boarding environment
 - **Emergency contact security** with proper authorization
 
 ### 4.3 Performance Requirements
 - **Offline capability** for 72+ hours without connectivity
 - **Real-time boarding routine updates** (< 1 minute latency)
 - **Weekend communication reliability** 99.9% uptime during windows
-- **Cross-platform compatibility** (iOS, Android, Web)
-- **Battery optimization** for extended daily boarding use
+- **Mobile Cross-platform compatibility** (iOS and Android)
 
 ## 5. User Interface/UX Requirements
 
@@ -138,22 +135,22 @@ n
 
 ## 7. Implementation Phases
 
-### Phase 1: Basic Academic Tools (Months 1-2)
+### Phase 1: Basic Academic Tools 
 - Offline homework access and submission
 - Basic family communication scheduling
 - Daily boarding routine guidance
 
-### Phase 2: Communication Enhancement (Months 3-4)
+### Phase 2: Communication Enhancement 
 - Weekend family communication features
 - Enhanced academic planning tools
 - Peer interaction coordination
 
-### Phase 3: Emotional Support Integration (Months 5-6)
+### Phase 3: Emotional Support Integration 
 - Homesickness support resources
 - Counseling service integration
 - Advanced boarding life management
 
-### Phase 4: Full Optimization (Months 7-8)
+### Phase 4: Full Optimization 
 - AI-powered academic planning
 - Advanced emotional well-being tools
 - Comprehensive boarding life integration
@@ -173,13 +170,11 @@ n
 ## 9. Future Enhancements
 
 ### 9.1 AI Integration
-- **Personalized boarding adjustment** recommendations
 - **Predictive homesickness intervention** based on behavioral patterns
 - **Intelligent study group formation** based on academic needs and personalities
 
 ### 9.2 Advanced Features
 - **Integration with boarding facility systems** (meal preferences, room comfort)
-- **Biometric mood tracking** for emotional well-being monitoring
 - **Virtual reality homesickness therapy** for immersive family connection
 
 ---

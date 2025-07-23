@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { Card } from '../../../src/components/molecules/Card';
 import { ListItem } from '../../../src/components/molecules/ListItem';
 import { Typography } from '../../../src/components/atoms/Typography';
-import { Avatar } from '../../../src/components/atoms/Avatar';
+import { Icon } from '../../../src/components/atoms/Icon';
 
 export default function CommunicationModal() {
   return (
@@ -17,11 +17,12 @@ export default function CommunicationModal() {
             title="Ustadz Ahmad"
             subtitle="Guru Tahfidz"
             leftComponent={
-              <Avatar
+              <Icon
+                name="person"
                 size="md"
+                background={true}
                 backgroundColor="#005e7a"
-                iconName="person"
-                iconColor="#ffffff"
+                color="#ffffff"
               />
             }
             rightIcon="chatbubble-outline"
@@ -32,11 +33,12 @@ export default function CommunicationModal() {
             title="Ustadzah Fatimah"
             subtitle="Guru Bahasa Arab"
             leftComponent={
-              <Avatar
+              <Icon
+                name="person"
                 size="md"
+                background={true}
                 backgroundColor="#005e7a"
-                iconName="person"
-                iconColor="#ffffff"
+                color="#ffffff"
               />
             }
             rightIcon="chatbubble-outline"
@@ -56,11 +58,12 @@ export default function CommunicationModal() {
             title="Orang Tua"
             subtitle="Ayah & Ibu"
             leftComponent={
-              <Avatar
+              <Icon
+                name="people"
                 size="md"
+                background={true}
                 backgroundColor="#f0c75e"
-                iconName="people"
-                iconColor="#ffffff"
+                color="#ffffff"
               />
             }
             rightIcon="chatbubble-outline"

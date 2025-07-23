@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import ClassDetail from '../../../../src/components/templates/ClassDetailTemplate';
+import ClassDetailView from '../../../../src/components/templates/ClassDetailView';
 
 export default function ClassDetailIndex() {
   return (
@@ -9,7 +9,7 @@ export default function ClassDetailIndex() {
         headerShown: false,
         title: "Detail Kelas"
       }} />
-      <ClassDetail />
+      <ClassDetailView />
     </>
   );
 }

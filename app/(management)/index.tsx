@@ -34,7 +34,7 @@ export default function ManagementIndex() {
           if (schoolId) {
             router.replace('/(management)/dashboard');
           } else {
-            router.replace('/management/setup');
+            router.replace('/(management)/setup');
           }
         }
       }
@@ -50,4 +50,4 @@ export default function ManagementIndex() {
       <Text>Memuat...</Text>
     </View>
   );
-} 
+}

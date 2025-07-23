@@ -188,13 +188,13 @@ export default function TeacherDashboard() {
     {
       title: 'Siswa',
       icon: 'people-outline' as IoniconsIcon,
-      onPress: () => handleNavigate('/teacher/students'),
+      onPress: () => handleNavigate('/students'),
       variant: 'primary' as const,
     },
     {
       title: 'Kelas',
       icon: 'school-outline' as IoniconsIcon,
-      onPress: () => handleNavigate('/teacher/class'),
+      onPress: () => handleNavigate('/class'),
       variant: 'secondary' as const,
     },
     {

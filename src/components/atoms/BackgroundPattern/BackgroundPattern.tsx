@@ -283,26 +283,24 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
   const patternSvg = useMemo(() => {
     try {
       switch (variant) {
-        case 'geometric':
-          return generateGeometricPattern();
-        case 'minimal':
-          return generateMinimalPattern();
-        case 'dots':
-          return generateDotsPattern();
-        case 'waves':
-          return generateWavesPattern();
-        case 'none':
-          return '';
-        default:
-          return generateGeometricPattern();
-      }
+          case 'geometric':
+            return generateGeometricPattern();
+          case 'minimal':
+            return generateMinimalPattern();
+          case 'dots':
+            return generateDotsPattern();
+          case 'waves':
+            return generateWavesPattern();
+          default:
+            return generateGeometricPattern();
+        }
     } catch (error) {
       console.warn('Failed to generate pattern SVG:', error);
       return '';
     }
   }, [variant, color, opacity, intensity, colors.primary.main]);
 
-  if (variant === 'none' || !patternSvg) {
+  if ((variant as PatternVariant) === 'none' || !patternSvg) {
     return null;
   }
 

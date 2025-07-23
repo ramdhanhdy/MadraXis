@@ -22,24 +22,13 @@ import { fetchIncidentsForSchool } from '../../src/services/incidents';
 import { fetchDashboardMetrics, DashboardMetrics } from '../../src/services/dashboard';
 import { logoSvg } from '../../src/utils/svgPatterns';
 import { colors } from '../../src/styles/colors';
+import { Incident } from '../../src/types';
 
 // Icon types for proper typing
 type IoniconsIcon = keyof typeof Ionicons.glyphMap;
 
 // Updated interface to match Supabase query result
-interface Incident {
-  id: number;
-  incident_type: string;
-  description: string;
-  location: string;
-  status: string;
-  created_at: string;
-  student?: {
-    full_name: string;
-  };
-  is_anonymous?: boolean;
-  reporter_id: string;
-}
+// Incident interface now imported from centralized types
 
 export default function ManagementDashboard() {
   const router = useRouter();

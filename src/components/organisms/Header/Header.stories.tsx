@@ -197,7 +197,7 @@ export const TitleAlignment: Story = {
           }}
           rightActions={[
             {
-              icon: 'more-vertical',
+              icon: 'ellipsis-vertical',
               onPress: () => alert('More'),
             },
           ]}
@@ -218,7 +218,7 @@ export const TitleAlignment: Story = {
           }}
           rightActions={[
             {
-              icon: 'more-vertical',
+              icon: 'ellipsis-vertical',
               onPress: () => alert('More'),
             },
           ]}
@@ -415,7 +415,7 @@ export const DetailPageHeader: Story = {
           accessibilityHint: 'Save assignment for later',
         },
         {
-          icon: 'more-vertical',
+          icon: 'ellipsis-vertical',
           onPress: () => alert('More options'),
           accessibilityLabel: 'More options',
         },

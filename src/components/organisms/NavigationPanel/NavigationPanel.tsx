@@ -52,48 +52,48 @@ export interface PanelNotification {
 export interface NavigationPanelProps {
   // Panel type
   type?: 'notifications' | 'navigation' | 'mixed';
-  
+
   // Content
   title?: string;
   subtitle?: string;
-  
+
   // Navigation items
   navigationItems?: NavigationItem[];
-  
+
   // Notifications
   notifications?: PanelNotification[];
-  
+
   // Actions
   onClearAll?: () => void;
   onMarkAllRead?: () => void;
   onRefresh?: () => void;
-  
+
   // Visual options
   variant?: 'default' | 'elevated' | 'transparent';
   showHeader?: boolean;
   showActions?: boolean;
-  
+
   // Layout
   maxHeight?: number;
   scrollable?: boolean;
-  
+
   // Empty state
   emptyTitle?: string;
   emptyMessage?: string;
   emptyIcon?: keyof typeof Ionicons.glyphMap;
-  
+
   // Loading state
   loading?: boolean;
   refreshing?: boolean;
-  
+
   // Custom styling
   style?: ViewStyle;
   headerStyle?: ViewStyle;
   contentStyle?: ViewStyle;
-  
+
   // Accessibility
   accessibilityLabel?: string;
-  
+
   // Test ID
   testID?: string;
 }
@@ -127,7 +127,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
   const { theme } = useTheme();
   const colors = useColors();
   const screenHeight = Dimensions.get('window').height;
-  
+
   // Animation for loading state
   const fadeAnim = React.useRef(new Animated.Value(1)).current;
 
@@ -237,11 +237,11 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
   // Render header
   const renderHeader = () => {
     if (!showHeader) return null;
-    
+
     const unreadCount = getUnreadCount();
     const hasNotifications = notifications.length > 0;
     const hasNavigationItems = navigationItems.length > 0;
-    
+
     return (
       <View style={[getHeaderStyles(), headerStyle]}>
         <View style={{ flex: 1 }}>
@@ -252,7 +252,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
           >
             {title || (type === 'notifications' ? 'Notifications' : 'Navigation')}
           </Typography>
-          
+
           {subtitle && (
             <Typography
               variant="body2"
@@ -262,7 +262,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
               {subtitle}
             </Typography>
           )}
-          
+
           {type === 'notifications' && unreadCount > 0 && (
             <Typography
               variant="caption"
@@ -273,7 +273,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
             </Typography>
           )}
         </View>
-        
+
         {showActions && (hasNotifications || hasNavigationItems) && (
           <View style={getActionsStyles()}>
             {onRefresh && (
@@ -292,7 +292,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
                 />
               </TouchableOpacity>
             )}
-            
+
             {type === 'notifications' && onMarkAllRead && unreadCount > 0 && (
               <TouchableOpacity
                 style={styles.actionButton}
@@ -308,7 +308,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
                 />
               </TouchableOpacity>
             )}
-            
+
             {onClearAll && (hasNotifications || hasNavigationItems) && (
               <TouchableOpacity
                 style={styles.actionButton}
@@ -361,12 +361,12 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
                 size="md"
                 color={item.disabled ? colors.text.disabled : colors.text.secondary}
               />
-              
+
               {item.badge && item.badge > 0 && (
                 <View style={[styles.badge, { backgroundColor: item.badgeColor || colors.error.main }]}>
                   <Typography
                     variant="caption"
-                    style={[styles.badgeText, { color: colors.error.contrast }]}
+                    style={{ ...styles.badgeText, color: colors.error.contrast }}
                   >
                     {item.badge > 99 ? '99+' : item.badge.toString()}
                   </Typography>
@@ -374,7 +374,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
               )}
             </View>
           )}
-          
+
           <View style={{ flex: 1 }}>
             <Typography
               variant="body1"
@@ -383,7 +383,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
             >
               {item.title}
             </Typography>
-            
+
             {item.subtitle && (
               <Typography
                 variant="body2"
@@ -394,7 +394,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
               </Typography>
             )}
           </View>
-          
+
           <Icon
             name="chevron-forward"
             size="sm"
@@ -410,12 +410,12 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
     return (
       <View style={getEmptyStateStyles()}>
         <Icon
-          name={emptyIcon}
+          name={emptyIcon as keyof typeof Ionicons.glyphMap}
           size="xl"
           color={colors.text.tertiary}
-          style={{ marginBottom: theme.spacing.base.md }}
+          containerStyle={{ marginBottom: theme.spacing.base.md }}
         />
-        
+
         <Typography
           variant="h4"
           color="secondary"
@@ -424,7 +424,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
         >
           {emptyTitle}
         </Typography>
-        
+
         <Typography
           variant="body2"
           color="tertiary"
@@ -432,7 +432,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
         >
           {emptyMessage}
         </Typography>
-        
+
         {onRefresh && (
           <Button
             variant="outline"
@@ -450,7 +450,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
   // Render content
   const renderContent = () => {
     const hasContent = notifications.length > 0 || navigationItems.length > 0;
-    
+
     if (loading && !hasContent) {
       return (
         <Animated.View style={[getEmptyStateStyles(), { opacity: fadeAnim }]}>
@@ -458,7 +458,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
             name="hourglass"
             size="xl"
             color={colors.text.tertiary}
-            style={{ marginBottom: theme.spacing.base.md }}
+            containerStyle={{ marginBottom: theme.spacing.base.md }}
           />
           <Typography variant="body1" color="secondary" align="center">
             Loading...
@@ -466,7 +466,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
         </Animated.View>
       );
     }
-    
+
     if (!hasContent) {
       return renderEmptyState();
     }
@@ -481,10 +481,10 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
     return (
       <ContentWrapper style={[getContentStyles(), contentStyle]} {...contentProps}>
         {/* Navigation items */}
-        {type !== 'notifications' && navigationItems.map((item, index) => 
+        {type !== 'notifications' && navigationItems.map((item, index) =>
           renderNavigationItem(item, index)
         )}
-        
+
         {/* Notifications */}
         {type !== 'navigation' && notifications.map((notification, index) => (
           <NotificationItem
@@ -505,7 +505,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
             }}
           />
         ))}
-        
+
         {/* Mixed content separator */}
         {type === 'mixed' && navigationItems.length > 0 && notifications.length > 0 && (
           <View style={getSeparatorStyles()}>
@@ -521,7 +521,7 @@ export const NavigationPanel: React.FC<NavigationPanelProps> = ({
   return (
     <View
       style={[getContainerStyles(), style]}
-      accessibilityRole="region"
+      accessibilityRole="menu"
       accessibilityLabel={accessibilityLabel || title || 'Navigation panel'}
       testID={testID}
     >

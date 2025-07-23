@@ -20,7 +20,7 @@ import { useTheme, useColors, useComponentTheme } from '../../../context/ThemeCo
 // Button Props Interface
 export interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
   // Content
-  children: React.ReactNode;
+  children?: React.ReactNode;
   
   // Variants
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';

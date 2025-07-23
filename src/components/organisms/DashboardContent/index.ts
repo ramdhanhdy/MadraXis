@@ -1,3 +1,3 @@
 export { DashboardContent } from './DashboardContent';
 export type { DashboardContentProps } from './DashboardContent';
-export default DashboardContent;
+export { DashboardContent as default } from './DashboardContent';
