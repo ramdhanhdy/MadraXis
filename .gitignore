@@ -57,3 +57,4 @@ repomix-output.txt.md
 repomix.config.json
 .repomixignore
 .vercel/project.json
+.roo/mcp.json
