@@ -13,7 +13,7 @@ import ClassFormModal from '@/src/components/organisms/ClassFormModal';
 
 export default function ClassDetailView() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, tab } = useLocalSearchParams();
   const { user, profile } = useAuth();
   const [classData, setClassData] = useState<ClassWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,6 +63,16 @@ export default function ClassDetailView() {
   useEffect(() => {
     fetchClassDetails();
   }, [fetchClassDetails]);
+
+  // Handle tab parameter from navigation
+  useEffect(() => {
+    if (tab) {
+      const validTabs = ['details', 'subjects', 'students', 'reports'];
+      if (validTabs.includes(tab as string)) {
+        setActiveTab(tab as 'details' | 'subjects' | 'students' | 'reports');
+      }
+    }
+  }, [tab]);
 
   const handleEditClass = () => {
     setShowEditModal(true);
@@ -322,7 +332,7 @@ export default function ClassDetailView() {
           onPress={() => handleTabChange('subjects')}
         >
           <Text style={[styles.tabText, activeTab === 'subjects' && styles.activeTabText]}>
-            Mata Pelajaran
+            Mata Pelajaran ({classData.subject_count || 0})
           </Text>
         </TouchableOpacity>
         

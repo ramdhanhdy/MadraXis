@@ -46,11 +46,14 @@ export default function ClassesList() {
       setLoading(false);
       return;
     }
+    
+    console.log('User profile:', { userId: user.id, profile, schoolId: profile?.school_id });
 
     try {
       setLoading(true);
       setError(null);
       
+      console.log('Fetching classes for user:', user.id);
       const classes = await ClassService.getTeacherClasses(user.id, {
           searchTerm: debouncedSearchQuery,
           status: filterStatus === 'all' ? undefined : filterStatus,
@@ -60,6 +63,11 @@ export default function ClassesList() {
         offset: 0
       });
 
+      console.log('Classes received:', {
+        count: classes.length,
+        classes: classes.map(c => ({ id: c.id, name: c.name }))
+      });
+      
       setClasses(classes);
     } catch (err) {
       setError('Failed to load classes');

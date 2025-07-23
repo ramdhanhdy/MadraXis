@@ -124,6 +124,13 @@ export class ClassService {
       }
 
       // Create class-teacher relationship record
+      console.log('Creating class-teacher relationship:', {
+        class_id: newClass!.id,
+        user_id: teacherId,
+        role: 'primary',
+        assigned_date: new Date().toISOString(),
+      });
+      
       const { error: teacherError } = await supabase
         .from('class_teachers')
         .insert({
@@ -134,24 +141,58 @@ export class ClassService {
         });
 
       if (teacherError) {
+        console.error('Teacher assignment failed - Full error details:', {
+          error: teacherError,
+          errorCode: teacherError.code,
+          errorMessage: teacherError.message,
+          errorDetails: teacherError.details,
+          errorHint: teacherError.hint,
+          classId: newClass!.id,
+          teacherId: teacherId,
+          teacherIdType: typeof teacherId,
+          insertData: {
+            class_id: newClass!.id,
+            user_id: teacherId,
+            role: 'primary',
+            assigned_date: new Date().toISOString(),
+          }
+        });
         // Rollback class creation if teacher assignment fails
         await supabase.from('classes').delete().eq('id', newClass!.id);
         throw new ClassServiceError(
           'TEACHER_ASSIGNMENT_FAILED',
-          'Failed to assign teacher to class',
+          `Failed to assign teacher to class: ${teacherError.message}`,
           teacherError
         );
       }
+      
+      console.log('Class and teacher assignment successful for class:', newClass!.id);
 
-      // Log creation in audit trail
-      await ClassService.logAuditTrail(
-        newClass!.id,
-        'create',
-        null,
-        null,
-        newClass,
-        teacherId
-      );
+      // Log creation in audit trail (non-blocking)
+      try {
+        await ClassService.logAuditTrail(
+          newClass!.id,
+          'create',
+          null,
+          null,
+          newClass,
+          teacherId
+        );
+        console.log('Audit trail logged successfully for class:', newClass!.id);
+      } catch (auditError) {
+        console.warn('Audit trail logging failed (non-blocking) - Full error details:', {
+          error: auditError,
+          errorCode: auditError?.code,
+          errorMessage: auditError?.message,
+          errorDetails: auditError?.details,
+          errorHint: auditError?.hint,
+          classId: newClass!.id,
+          teacherId: teacherId,
+          action: 'create',
+          oldValues: null,
+          newValues: newClass
+        });
+      }
 
       return newClass!;
     } catch (error) {
@@ -185,15 +226,17 @@ export class ClassService {
         .from('classes')
         .select(`
           *,
-          class_teachers!inner(
+          class_teachers!left(
             user_id,
             role,
             profiles!inner(full_name)
           ),
           class_students!left(student_id),
           class_subjects!left(id)
-        `)
-        .eq('class_teachers.user_id', teacherId);
+        `);
+        
+      // Filter for classes where the teacher is assigned
+      // We'll filter this in the application layer to handle the left join properly
 
       // Apply filters
       if (options?.status) {
@@ -220,7 +263,15 @@ export class ClassService {
 
       const { data: classes, error } = await query;
 
+      console.log('getTeacherClasses query result:', {
+        teacherId,
+        classesCount: classes?.length || 0,
+        error: error?.message,
+        options
+      });
+
       if (error) {
+        console.error('getTeacherClasses error:', error);
         throw new ClassServiceError(
           'FETCH_FAILED',
           'Failed to fetch classes',
@@ -228,8 +279,16 @@ export class ClassService {
         );
       }
 
+      // Filter classes to only include those where the teacher is assigned
+      const filteredClasses = classes!.filter((classItem) => {
+        if (!classItem.class_teachers) return false;
+        return classItem.class_teachers.some((teacher: any) => teacher.user_id === teacherId);
+      });
+      
+      console.log('Filtered classes count:', filteredClasses.length);
+      
       // Transform data to include counts and teacher details
-      const transformedClasses = classes!.map((classItem) => {
+      const transformedClasses = filteredClasses.map((classItem) => {
         return {
           ...classItem,
           student_count: classItem.class_students?.length || 0,
