@@ -9,10 +9,12 @@ export default {
     scheme: "madraxis",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
+    owner: "ramdhanhdy",
     ios: {
       supportsTablet: true
     },
     android: {
+      package: "com.ramdhanhdy.madraxis",
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff"
@@ -40,12 +42,21 @@ export default {
           resizeMode: "contain",
           backgroundColor: "#ffffff"
         }
+      ],
+      [
+        "expo-custom-assets",
+        {
+          assetsPaths: ["./assets/animations"]
+        }
       ]
     ],
     experiments: {
       typedRoutes: true
     },
     extra: {
+      eas: {
+        projectId: "ec6e3f49-6b99-442a-a112-d3dda628767d",
+      },
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
     }

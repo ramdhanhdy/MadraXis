@@ -1,35 +1,41 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View, ActivityIndicator } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import Rive from 'rive-react-native';
 
 interface AnimatedSplashScreenProps {
   onAnimationFinish?: () => void;
 }
 
 const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimationFinish }) => {
-  const scale = useRef(new Animated.Value(1)).current;
-
   useEffect(() => {
-    const animation = Animated.timing(scale, {
-      toValue: 0.8,
-      duration: 1000,
-      useNativeDriver: true,
-    });
-
-    animation.start(() => {
-      // Call the callback function instead of navigating directly
+    // Auto finish after 3 seconds to allow animation to complete
+    const timer = setTimeout(() => {
       onAnimationFinish?.();
-    });
+    }, 3000);
 
     return () => {
-      animation.stop();
+      clearTimeout(timer);
     };
-  }, [scale]); // Removed onAnimationFinish to prevent infinite restart
+  }, [onAnimationFinish]);
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.animationContainer, { transform: [{ scale }] }]}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </Animated.View>
+      <Rive
+        resourceName="splash_screen"
+        autoplay={true}
+        style={styles.animation}
+        onPlay={() => {
+          console.log('Rive animation started');
+        }}
+        onPause={() => {
+          console.log('Rive animation paused');
+          onAnimationFinish?.();
+        }}
+        onStop={() => {
+          console.log('Rive animation stopped');
+          onAnimationFinish?.();
+        }}
+      />
     </View>
   );
 };
@@ -39,13 +45,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000000', // Or your app's background color
+    backgroundColor: '#ffffff',
   },
-  animationContainer: {
-    width: 200,
-    height: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
+  animation: {
+    width: 300,
+    height: 300,
   },
 });
 
