@@ -35,6 +35,11 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
           console.log('Rive animation stopped');
           onAnimationFinish?.();
         }}
+        onError={(error) => {
+          console.error('Rive animation error:', error);
+          // Trigger fallback UI by finishing the animation
+          onAnimationFinish?.();
+        }}
       />
     </View>
   );
