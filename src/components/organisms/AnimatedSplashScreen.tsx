@@ -1,35 +1,58 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useCallback } from 'react';
+import { StyleSheet, View } from 'react-native';
+import Rive from 'rive-react-native';
 
 interface AnimatedSplashScreenProps {
-  onAnimationFinish?: () => void;
+  onAnimationFinish: () => void;
 }
 
 const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimationFinish }) => {
-  const scale = useRef(new Animated.Value(1)).current;
+  const hasFinished = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleFinish = useCallback(() => {
+    if (!hasFinished.current && onAnimationFinish) {
+      hasFinished.current = true;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      onAnimationFinish();
+    }
+  }, [onAnimationFinish]);
 
   useEffect(() => {
-    const animation = Animated.timing(scale, {
-      toValue: 0.8,
-      duration: 1000,
-      useNativeDriver: true,
-    });
-
-    animation.start(() => {
-      // Call the callback function instead of navigating directly
-      onAnimationFinish?.();
-    });
+    // Fallback timeout in case animation doesn't trigger completion
+    timeoutRef.current = setTimeout(() => {
+      handleFinish();
+    }, 4000); // Slightly longer to allow animation to complete naturally
 
     return () => {
-      animation.stop();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
-  }, [scale]); // Removed onAnimationFinish to prevent infinite restart
+  }, [handleFinish]);
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.animationContainer, { transform: [{ scale }] }]}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </Animated.View>
+      <Rive
+        resourceName="splash_screen"
+        autoplay={true}
+        style={styles.animation}
+        onPlay={() => {
+          console.log('Rive animation started');
+        }}
+        onStop={() => {
+          console.log('Rive animation completed');
+          handleFinish();
+        }}
+        onError={(error) => {
+          console.error('Rive animation error:', error);
+          // Trigger fallback UI by finishing the animation
+          handleFinish();
+        }}
+      />
     </View>
   );
 };
@@ -39,13 +62,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000000', // Or your app's background color
+    backgroundColor: '#ffffff',
   },
-  animationContainer: {
-    width: 200,
-    height: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
+  animation: {
+    width: 300,
+    height: 300,
   },
 });
 
