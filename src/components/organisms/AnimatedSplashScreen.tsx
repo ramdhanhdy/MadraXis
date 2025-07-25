@@ -1,22 +1,38 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Rive from 'rive-react-native';
 
 interface AnimatedSplashScreenProps {
-  onAnimationFinish?: () => void;
+  onAnimationFinish: () => void;
 }
 
 const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimationFinish }) => {
+  const hasFinished = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleFinish = useCallback(() => {
+    if (!hasFinished.current && onAnimationFinish) {
+      hasFinished.current = true;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      onAnimationFinish();
+    }
+  }, [onAnimationFinish]);
+
   useEffect(() => {
-    // Auto finish after 3 seconds to allow animation to complete
-    const timer = setTimeout(() => {
-      onAnimationFinish?.();
-    }, 3000);
+    // Fallback timeout in case animation doesn't trigger completion
+    timeoutRef.current = setTimeout(() => {
+      handleFinish();
+    }, 4000); // Slightly longer to allow animation to complete naturally
 
     return () => {
-      clearTimeout(timer);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
-  }, [onAnimationFinish]);
+  }, [handleFinish]);
 
   return (
     <View style={styles.container}>
@@ -27,18 +43,14 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
         onPlay={() => {
           console.log('Rive animation started');
         }}
-        onPause={() => {
-          console.log('Rive animation paused');
-          onAnimationFinish?.();
-        }}
         onStop={() => {
-          console.log('Rive animation stopped');
-          onAnimationFinish?.();
+          console.log('Rive animation completed');
+          handleFinish();
         }}
         onError={(error) => {
           console.error('Rive animation error:', error);
           // Trigger fallback UI by finishing the animation
-          onAnimationFinish?.();
+          handleFinish();
         }}
       />
     </View>
