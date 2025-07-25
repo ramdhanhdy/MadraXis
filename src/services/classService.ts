@@ -772,6 +772,473 @@ export class ClassService {
     return !!teacherAssignment;
   }
 
+  /**
+   * Student Enrollment Methods
+   */
+
+  /**
+   * Add multiple students to a class with validation and capacity checks
+   */
+  static async addStudentsToClass(
+    classId: number,
+    studentIds: string[],
+    teacherId: string
+  ): Promise<{
+    success: string[];
+    errors: Array<{ studentId: string; error: string }>;
+  }> {
+    try {
+      // Validate teacher access
+      const hasAccess = await ClassService.validateTeacherAccess(classId, teacherId);
+      if (!hasAccess) {
+        throw new ClassServiceError(
+          'ACCESS_DENIED',
+          'You do not have access to this class'
+        );
+      }
+
+      // Get class details and current enrollment
+      const { data: classData, error: classError } = await supabase
+        .from('classes')
+        .select('id, name, student_capacity, school_id')
+        .eq('id', classId)
+        .eq('status', 'active')
+        .single();
+
+      if (classError || !classData) {
+        throw new ClassServiceError(
+          'CLASS_NOT_FOUND',
+          'Class not found or inactive'
+        );
+      }
+
+      // Get current enrollment count
+      const { count: currentEnrollment, error: countError } = await supabase
+        .from('class_students')
+        .select('*', { count: 'exact', head: true })
+        .eq('class_id', classId);
+
+      if (countError) {
+        throw new ClassServiceError(
+          'ENROLLMENT_CHECK_FAILED',
+          'Failed to check current enrollment'
+        );
+      }
+
+      // Check capacity
+      const availableSpots = classData.student_capacity - (currentEnrollment || 0);
+      if (studentIds.length > availableSpots) {
+        throw new ClassServiceError(
+          'CAPACITY_EXCEEDED',
+          `Cannot add ${studentIds.length} students. Only ${availableSpots} spots available.`
+        );
+      }
+
+      // Validate students belong to same school and are not already enrolled
+      const { data: students, error: studentsError } = await supabase
+        .from('profiles')
+        .select('id, school_id, role')
+        .in('id', studentIds)
+        .eq('school_id', classData.school_id)
+        .eq('role', 'student');
+
+      if (studentsError) {
+        throw new ClassServiceError(
+          'STUDENT_VALIDATION_FAILED',
+          'Failed to validate students'
+        );
+      }
+
+      // Check for already enrolled students
+      const { data: alreadyEnrolled } = await supabase
+        .from('class_students')
+        .select('student_id')
+        .eq('class_id', classId)
+        .in('student_id', studentIds);
+
+      const enrolledIds = new Set(alreadyEnrolled?.map(e => e.student_id) || []);
+      const validStudentIds = students?.map(s => s.id) || [];
+      const success: string[] = [];
+      const errors: Array<{ studentId: string; error: string }> = [];
+
+      // Process each student
+      for (const studentId of studentIds) {
+        try {
+          // Check if student exists and is valid
+          if (!validStudentIds.includes(studentId)) {
+            errors.push({
+              studentId,
+              error: 'Student not found or not in same school'
+            });
+            continue;
+          }
+
+          // Check if already enrolled
+          if (enrolledIds.has(studentId)) {
+            errors.push({
+              studentId,
+              error: 'Student already enrolled in this class'
+            });
+            continue;
+          }
+
+          // Add student to class
+          const { error: enrollError } = await supabase
+            .from('class_students')
+            .insert({
+              class_id: classId,
+              student_id: studentId,
+              enrolled_date: new Date().toISOString()
+            });
+
+          if (enrollError) {
+            errors.push({
+              studentId,
+              error: `Failed to enroll: ${enrollError.message}`
+            });
+          } else {
+            success.push(studentId);
+            // Log enrollment action
+            await ClassService.logEnrollmentAction(
+              classId,
+              studentId,
+              'add',
+              teacherId
+            );
+          }
+        } catch (error: any) {
+          errors.push({
+            studentId,
+            error: error.message || 'Unknown error'
+          });
+        }
+      }
+
+      return { success, errors };
+    } catch (error) {
+      if (error instanceof ClassServiceError) {
+        throw error;
+      }
+      throw new ClassServiceError(
+        'UNEXPECTED_ERROR',
+        'An unexpected error occurred during enrollment',
+        error
+      );
+    }
+  }
+
+  /**
+   * Remove a student from a class with access validation
+   */
+  static async removeStudentFromClass(
+    classId: number,
+    studentId: string,
+    teacherId: string
+  ): Promise<void> {
+    try {
+      // Validate teacher access
+      const hasAccess = await ClassService.validateTeacherAccess(classId, teacherId);
+      if (!hasAccess) {
+        throw new ClassServiceError(
+          'ACCESS_DENIED',
+          'You do not have access to this class'
+        );
+      }
+
+      // Check if student is enrolled in the class
+      const { data: enrollment, error: checkError } = await supabase
+        .from('class_students')
+        .select('*')
+        .eq('class_id', classId)
+        .eq('student_id', studentId)
+        .single();
+
+      if (checkError || !enrollment) {
+        throw new ClassServiceError(
+          'STUDENT_NOT_ENROLLED',
+          'Student is not enrolled in this class'
+        );
+      }
+
+      // Remove student from class
+      const { error: removeError } = await supabase
+        .from('class_students')
+        .delete()
+        .eq('class_id', classId)
+        .eq('student_id', studentId);
+
+      if (removeError) {
+        throw new ClassServiceError(
+          'REMOVAL_FAILED',
+          `Failed to remove student: ${removeError.message}`
+        );
+      }
+
+      // Log removal action
+      await ClassService.logEnrollmentAction(
+        classId,
+        studentId,
+        'remove',
+        teacherId
+      );
+    } catch (error) {
+      if (error instanceof ClassServiceError) {
+        throw error;
+      }
+      throw new ClassServiceError(
+        'UNEXPECTED_ERROR',
+        'An unexpected error occurred during removal',
+        error
+      );
+    }
+  }
+
+  /**
+   * Get available students for enrollment (not yet enrolled in the class)
+   */
+  static async getAvailableStudents(
+    classId: number,
+    teacherId: string,
+    filters?: {
+      search?: string;
+      boarding?: boolean;
+      gender?: string;
+    },
+    pagination?: {
+      page?: number;
+      limit?: number;
+    }
+  ): Promise<{
+    students: Array<{
+      id: string;
+      full_name: string;
+      nis: string;
+      gender: string;
+      boarding: boolean;
+      date_of_birth: string;
+    }>;
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    try {
+      // Validate teacher access
+      const hasAccess = await ClassService.validateTeacherAccess(classId, teacherId);
+      if (!hasAccess) {
+        throw new ClassServiceError(
+          'ACCESS_DENIED',
+          'You do not have access to this class'
+        );
+      }
+
+      // Get class school_id
+      const { data: classData, error: classError } = await supabase
+        .from('classes')
+        .select('school_id')
+        .eq('id', classId)
+        .single();
+
+      if (classError || !classData) {
+        throw new ClassServiceError(
+          'CLASS_NOT_FOUND',
+          'Class not found'
+        );
+      }
+
+      // Get enrolled student IDs
+      const { data: enrolledStudents } = await supabase
+        .from('class_students')
+        .select('student_id')
+        .eq('class_id', classId);
+
+      const enrolledIds = enrolledStudents?.map(e => e.student_id) || [];
+
+      // Build query for available students
+       let query = supabase
+         .from('profiles')
+         .select(`
+           id,
+           full_name,
+           school_id,
+           student_details(
+             nis,
+             gender,
+             boarding,
+             date_of_birth
+           )
+         `)
+         .eq('role', 'student')
+         .eq('school_id', classData.school_id)
+         .not('student_details', 'is', null);
+
+       // Exclude already enrolled students
+       if (enrolledIds.length > 0) {
+         query = query.not('id', 'in', `(${enrolledIds.join(',')})`);
+       }
+
+       // Apply filters
+       if (filters?.search) {
+         query = query.or(`full_name.ilike.%${filters.search}%,student_details.nis.ilike.%${filters.search}%`);
+       }
+       if (filters?.boarding !== undefined) {
+         query = query.eq('student_details.boarding', filters.boarding);
+       }
+       if (filters?.gender) {
+         query = query.eq('student_details.gender', filters.gender);
+       }
+
+      // Get total count for pagination
+       const countQuery = supabase
+         .from('profiles')
+         .select('id', { count: 'exact', head: true })
+         .eq('role', 'student')
+         .eq('school_id', classData.school_id);
+
+       // Exclude already enrolled students from count
+       if (enrolledIds.length > 0) {
+         countQuery.not('id', 'in', `(${enrolledIds.join(',')})`);
+       }
+
+       const { count: total, error: countError } = await countQuery;
+
+      if (countError) {
+        throw new ClassServiceError(
+          'COUNT_FAILED',
+          'Failed to count available students'
+        );
+      }
+
+      // Apply pagination
+      const page = pagination?.page || 1;
+      const limit = pagination?.limit || 20;
+      const offset = (page - 1) * limit;
+
+      const { data: students, error: studentsError } = await query
+        .range(offset, offset + limit - 1)
+        .order('full_name');
+
+      if (studentsError) {
+        throw new ClassServiceError(
+          'FETCH_FAILED',
+          'Failed to fetch available students'
+        );
+      }
+
+      // Transform data
+       const transformedStudents = students?.map(student => {
+         const details = Array.isArray(student.student_details) 
+           ? student.student_details[0] 
+           : student.student_details;
+         
+         return {
+           id: student.id,
+           full_name: student.full_name,
+           nis: details?.nis || '',
+           gender: details?.gender || '',
+           boarding: details?.boarding || false,
+           date_of_birth: details?.date_of_birth || ''
+         };
+       }) || [];
+
+      return {
+        students: transformedStudents,
+        total: total || 0,
+        page,
+        limit
+      };
+    } catch (error) {
+      if (error instanceof ClassServiceError) {
+        throw error;
+      }
+      throw new ClassServiceError(
+        'UNEXPECTED_ERROR',
+        'An unexpected error occurred while fetching students',
+        error
+      );
+    }
+  }
+
+  /**
+   * Validate if a teacher has access to a specific class
+   */
+  static async validateTeacherAccess(classId: number, teacherId: string): Promise<boolean> {
+    try {
+      // Get teacher profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role, school_id')
+        .eq('id', teacherId)
+        .single();
+
+      if (profileError || !profile) {
+        return false;
+      }
+
+      // Management has access to all classes in their school
+      if (profile.role === 'management') {
+        const { data: classData } = await supabase
+          .from('classes')
+          .select('school_id')
+          .eq('id', classId)
+          .single();
+        
+        return classData?.school_id === profile.school_id;
+      }
+
+      // Teachers need to be assigned to the class
+      if (profile.role === 'teacher') {
+        const { data: assignment } = await supabase
+          .from('class_teachers')
+          .select('user_id')
+          .eq('class_id', classId)
+          .eq('user_id', teacherId)
+          .single();
+        
+        return !!assignment;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Error validating teacher access:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Log student enrollment/removal actions for auditing
+   */
+  static async logEnrollmentAction(
+    classId: number,
+    studentId: string,
+    action: 'add' | 'remove',
+    performedBy: string
+  ): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('audit_logs')
+        .insert({
+          table_name: 'class_students',
+          operation: action === 'add' ? 'INSERT' : 'DELETE',
+          record_id: `${classId},${studentId}`,
+          new_values: action === 'add' ? { class_id: classId, student_id: studentId } : null,
+          old_values: action === 'remove' ? { class_id: classId, student_id: studentId } : null,
+          user_id: performedBy,
+          metadata: {
+            action_type: 'student_enrollment',
+            class_id: classId,
+            student_id: studentId,
+            performed_action: action
+          }
+        });
+
+      if (error) {
+        console.error('Failed to log enrollment action:', error);
+      }
+    } catch (error) {
+      console.error('Error logging enrollment action:', error);
+    }
+  }
+
   private static async logAuditTrail(
     classId: number,
     action: string,

@@ -581,7 +581,7 @@ describe('NavigationPanel Component', () => {
       );
 
       const panel = getByTestId('accessible-panel');
-      expect(panel.props.accessibilityRole).toBe('region');
+      expect(panel.props.accessibilityRole).toBe('menu');
     });
 
     it('applies custom accessibility label', () => {

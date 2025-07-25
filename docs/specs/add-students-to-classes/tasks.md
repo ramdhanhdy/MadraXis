@@ -5,59 +5,59 @@
 ## 1. Database Schema Validation and Setup
 
 ### 1.1 Verify existing schema compatibility using Supabase MCP
-- [ ] 1.1.1 Use Supabase MCP to confirm `class_students` table structure
-- [ ] 1.1.2 Use Supabase MCP to verify `profiles` table has required fields
-- [ ] 1.1.3 Use Supabase MCP to check `student_details` table for grade level information
-- [ ] 1.1.4 Use Supabase MCP to validate foreign key relationships
+- [x] 1.1.1 Use Supabase MCP to confirm `class_students` table structure
+- [x] 1.1.2 Use Supabase MCP to verify `profiles` table has required fields
+- [x] 1.1.3 Use Supabase MCP to check `student_details` table for grade level information
+- [x] 1.1.4 Use Supabase MCP to validate foreign key relationships
 
 ### 1.2 Add missing indexes for performance using Supabase MCP
-- [ ] 1.2.1 Create composite index on `class_students(class_id, student_id)` via Supabase MCP
-- [ ] 1.2.2 Create composite index on `profiles(school_id, role)` via Supabase MCP
-- [ ] 1.2.3 Create composite index on `student_details(school_id, boarding)` for better selectivity via Supabase MCP
+- [x] 1.2.1 Create composite index on `class_students(class_id, student_id)` via Supabase MCP
+- [x] 1.2.2 Create composite index on `profiles(school_id, role)` via Supabase MCP
+- [x] 1.2.3 Create composite index on `student_details(school_id, boarding)` for better selectivity via Supabase MCP
 
 ### 1.3 Verify and update Row Level Security policies using Supabase MCP
-- [ ] 1.3.1 Test teacher access to class_students table via Supabase MCP
-- [ ] 1.3.2 Test student visibility restrictions via Supabase MCP
-- [ ] 1.3.3 Validate school boundary enforcement via Supabase MCP
+- [x] 1.3.1 Test teacher access to class_students table via Supabase MCP
+- [x] 1.3.2 Test student visibility restrictions via Supabase MCP
+- [x] 1.3.3 Validate school boundary enforcement via Supabase MCP
 
 ## 2. Audit Trail Implementation
 
 ### 2.1 Create audit log table using Supabase MCP
-- [ ] 2.1.1 Use Supabase MCP to create `class_enrollment_audit` table with proper schema
-- [ ] 2.1.2 Add RLS policies for audit table via Supabase MCP
-- [ ] 2.1.3 Create indexes for audit queries via Supabase MCP
+- [x] 2.1.1 Use Supabase MCP to create `class_enrollment_audit` table with proper schema
+- [x] 2.1.2 Add RLS policies for audit table via Supabase MCP
+- [x] 2.1.3 Create indexes for audit queries via Supabase MCP
 
 ## 3. ClassService Extension
 **Path**: `src/services/classService.ts` (existing file)
 
 ### 3.1 Add student enrollment methods
-- [ ] 3.1.1 Implement `addStudentsToClass(classId, studentIds, teacherId)` using Supabase MCP
-- [ ] 3.1.2 Implement `removeStudentFromClass(classId, studentId, teacherId)` using Supabase MCP
-- [ ] 3.1.3 Add batch processing for multiple students
-- [ ] 3.1.4 Include error handling for each operation
+- [x] 3.1.1 Implement `addStudentsToClass(classId, studentIds, teacherId)` using Supabase MCP
+- [x] 3.1.2 Implement `removeStudentFromClass(classId, studentId, teacherId)` using Supabase MCP
+- [x] 3.1.3 Add batch processing for multiple students
+- [x] 3.1.4 Include error handling for each operation
 
 ### 3.2 Add student query methods
-- [ ] 3.2.1 Implement `getAvailableStudents(classId, schoolId, filters)` using Supabase MCP
-- [ ] 3.2.2 Add search functionality (name, NIS)
-- [ ] 3.2.3 Add filtering (grade level, boarding status)
-- [ ] 3.2.4 Implement pagination support
+- [x] 3.2.1 Implement `getAvailableStudents(classId, schoolId, filters)` using Supabase MCP
+- [x] 3.2.2 Add search functionality (name, NIS)
+- [x] 3.2.3 Add filtering (grade level, boarding status)
+- [x] 3.2.4 Implement pagination support
 
 ### 3.3 Add validation methods
-- [ ] 3.3.1 Implement `validateTeacherAccess(classId, teacherId)` using Supabase MCP
-- [ ] 3.3.2 Add grade level compatibility validation
-- [ ] 3.3.3 Add duplicate enrollment prevention
+- [x] 3.3.1 Implement `validateTeacherAccess(classId, teacherId)` using Supabase MCP
+- [x] 3.3.2 Add grade level compatibility validation
+- [x] 3.3.3 Add duplicate enrollment prevention
 
 ## 4. Audit Trail Integration
 
 ### 4.1 Create audit logging utility
-- [ ] 4.1.1 Implement `logEnrollmentAction(action, classId, studentId, teacherId)` using Supabase MCP
+- [x] 4.1.1 Implement `logEnrollmentAction(action, classId, studentId, teacherId)` using Supabase MCP
 - [ ] 4.1.2 Add metadata capture (timestamp, IP, user agent)
 - [ ] 4.1.3 Handle audit failures gracefully
 
 ### 4.2 Integrate audit logging in ClassService
-- [ ] 4.2.1 Add audit calls to addStudentsToClass
-- [ ] 4.2.2 Add audit calls to removeStudentFromClass
-- [ ] 4.2.3 Ensure audit logging doesn't block main operations
+- [x] 4.2.1 Add audit calls to addStudentsToClass
+- [x] 4.2.2 Add audit calls to removeStudentFromClass
+- [x] 4.2.3 Ensure audit logging doesn't block main operations
 
 ## 5. Real-time Subscription Support
 
@@ -72,25 +72,25 @@
 - [ ] 5.2.3 Add cleanup on component unmount
 
 ## 6. AddStudentsToClassModal Component
-**Path**: `src/components/organisms/AddStudentsToClassModal.tsx`
+**Path**: `src/components/organisms/AddStudentsToClassModal/AddStudentsToClassModal.tsx`
 
 ### 6.1 Set up modal structure
-- [ ] 6.1.1 Create modal component with proper navigation
-- [ ] 6.1.2 Add header with title and close button
-- [ ] 6.1.3 Implement full-screen modal layout
-- [ ] 6.1.4 Add loading states and error handling
+- [x] 6.1.1 Create modal component with proper navigation
+- [x] 6.1.2 Add header with title and close button
+- [x] 6.1.3 Implement full-screen modal layout
+- [x] 6.1.4 Add loading states and error handling
 
 ### 6.2 Integrate search and filter functionality
-- [ ] 6.2.1 Add search input with debounced queries
-- [ ] 6.2.2 Add grade level filter dropdown
-- [ ] 6.2.3 Add boarding status filter toggle
-- [ ] 6.2.4 Add clear filters functionality
+- [x] 6.2.1 Add search input with debounced queries
+- [x] 6.2.2 Add grade level filter dropdown
+- [x] 6.2.3 Add boarding status filter toggle
+- [x] 6.2.4 Add clear filters functionality
 
 ### 6.3 Add student selection interface
-- [ ] 6.3.1 Implement StudentSelectionList component
-- [ ] 6.3.2 Add multi-select with checkboxes
-- [ ] 6.3.3 Show selected count in header
-- [ ] 6.3.4 Add select all/clear all functionality
+- [x] 6.3.1 Implement StudentSelectionList component
+- [x] 6.3.2 Add multi-select with checkboxes
+- [x] 6.3.3 Show selected count in header
+- [x] 6.3.4 Add select all/clear all functionality
 
 ## 7. StudentSelectionList Component
 **Path**: `src/components/molecules/StudentSelectionList/`
@@ -195,94 +195,140 @@
 - [ ] 11.4.2 Add quick navigation to parent screens
 - [ ] 11.4.3 Implement navigation history
 
-## 12. Testing Implementation
+## 12. ClassService Refactoring
+**Path**: `src/services/classService/` (new directory structure)
 
-### 12.1 Unit Tests for Services
+### 12.1 Create dedicated directories
+- [ ] 12.1.1 Create `src/services/classService/` directory
+- [ ] 12.1.2 Create subdirectories for organized code structure
+
+### 12.2 Key file splits
+- [ ] 12.2.1 Create `classSchemas.ts` - Move all Zod schemas here
+  ```typescript
+  // Move all Zod schemas here
+  export const CreateClassSchema = z.object({...});
+  ```
+- [ ] 12.2.2 Create `classTypes.ts` - Type definitions
+  ```typescript
+  // Type definitions
+  export interface CreateClassRequest {...}
+  ```
+- [ ] 12.2.3 Create `classCRUD.ts` - Core CRUD operations
+  ```typescript
+  // Core CRUD operations
+  export class ClassCRUD {
+    static async createClass() {...}
+    static async updateClass() {...}
+  }
+  ```
+- [ ] 12.2.4 Create `studentEnrollment.ts` - Student-related methods
+  ```typescript
+  // Student-related methods
+  export class StudentEnrollment {
+    static async addStudentsToClass() {...}
+    static async getAvailableStudents() {...}
+  }
+  ```
+
+### 12.3 Update imports using index.ts files
+- [ ] 12.3.1 Create `index.ts` for clean exports
+  ```typescript
+  export * from './classSchemas';
+  export * from './classTypes';
+  export * from './classCRUD';
+  export * from './studentEnrollment';
+  ```
+- [ ] 12.3.2 Update existing imports throughout the codebase
+- [ ] 12.3.3 Ensure backward compatibility during transition
+
+## 13. Testing Implementation
+
+### 13.1 Unit Tests for Services
 **Path**: `__tests__/services/classService.test.ts`
-- [ ] 12.1.1 Test addStudentsToClass with various scenarios
-- [ ] 12.1.2 Test removeStudentFromClass functionality
-- [ ] 12.1.3 Test getAvailableStudents with filters
-- [ ] 12.1.4 Test permission validation methods
-- [ ] 12.1.5 Test network error scenarios
-- [ ] 12.1.6 Test permission denied scenarios
-- [ ] 12.1.7 Test database constraint violations
-- [ ] 12.1.8 Test with empty student lists
-- [ ] 12.1.9 Test with large student datasets
-- [ ] 12.1.10 Test concurrent operations
+- [ ] 13.1.1 Test addStudentsToClass with various scenarios
+- [ ] 13.1.2 Test removeStudentFromClass functionality
+- [ ] 13.1.3 Test getAvailableStudents with filters
+- [ ] 13.1.4 Test permission validation methods
+- [ ] 13.1.5 Test network error scenarios
+- [ ] 13.1.6 Test permission denied scenarios
+- [ ] 13.1.7 Test database constraint violations
+- [ ] 13.1.8 Test with empty student lists
+- [ ] 13.1.9 Test with large student datasets
+- [ ] 13.1.10 Test concurrent operations
 
-### 12.2 Component Unit Tests
+### 13.2 Component Unit Tests
 **Path**: `__tests__/components/AddStudentsToClassModal.test.tsx`
-- [ ] 12.2.1 Test AddStudentsToClassModal opening and closing
-- [ ] 12.2.2 Test search functionality
-- [ ] 12.2.3 Test filter functionality
-- [ ] 12.2.4 Test student selection
+- [ ] 13.2.1 Test AddStudentsToClassModal opening and closing
+- [ ] 13.2.2 Test search functionality
+- [ ] 13.2.3 Test filter functionality
+- [ ] 13.2.4 Test student selection
 
 **Path**: `src/components/molecules/StudentSelectionList/StudentSelectionList.test.tsx`
-- [ ] 12.2.5 Test StudentSelectionList rendering
-- [ ] 12.2.6 Test selection state management
-- [ ] 12.2.7 Test pagination
+- [ ] 13.2.5 Test StudentSelectionList rendering
+- [ ] 13.2.6 Test selection state management
+- [ ] 13.2.7 Test pagination
 
 **Path**: `src/components/molecules/BulkActionBar/BulkActionBar.test.tsx`
-- [ ] 12.2.8 Test BulkActionBar selection count display
-- [ ] 12.2.9 Test bulk actions
-- [ ] 12.2.10 Test confirmation dialogs
+- [ ] 13.2.8 Test BulkActionBar selection count display
+- [ ] 13.2.9 Test bulk actions
+- [ ] 13.2.10 Test confirmation dialogs
 
-### 12.3 Integration Tests
+### 13.3 Integration Tests
 **Path**: `__tests__/integration/addStudentsFlow.test.ts`
-- [ ] 12.3.1 Test end-to-end add students workflow
-- [ ] 12.3.2 Test end-to-end remove students workflow
-- [ ] 12.3.3 Test real-time updates across components
-- [ ] 12.3.4 Test teacher access validation
-- [ ] 12.3.5 Test cross-school access prevention
-- [ ] 12.3.6 Test unauthorized access handling
-- [ ] 12.3.7 Test with large student lists (1000+ students)
-- [ ] 12.3.8 Test search performance
-- [ ] 12.3.9 Test concurrent user operations
+- [ ] 13.3.1 Test end-to-end add students workflow
+- [ ] 13.3.2 Test end-to-end remove students workflow
+- [ ] 13.3.3 Test real-time updates across components
+- [ ] 13.3.4 Test teacher access validation
+- [ ] 13.3.5 Test cross-school access prevention
+- [ ] 13.3.6 Test unauthorized access handling
+- [ ] 13.3.7 Test with large student lists (1000+ students)
+- [ ] 13.3.8 Test search performance
+- [ ] 13.3.9 Test concurrent user operations
 
-### 12.4 End-to-End Tests
+### 13.4 End-to-End Tests
 **Path**: `e2e/addStudentsToClass.e2e.ts`
-- [ ] 12.4.1 Configure Detox or similar framework
-- [ ] 12.4.2 Set up test data and mock scenarios using Supabase MCP
-- [ ] 12.4.3 Create test user accounts
-- [ ] 12.4.4 Test complete user journey
-- [ ] 12.4.5 Test error scenarios
-- [ ] 12.4.6 Test multi-device synchronization
-- [ ] 12.4.7 Test app performance with large datasets
-- [ ] 12.4.8 Test memory usage during operations
-- [ ] 12.4.9 Test battery usage impact
+- [ ] 13.4.1 Configure Detox or similar framework
+- [ ] 13.4.2 Set up test data and mock scenarios using Supabase MCP
+- [ ] 13.4.3 Create test user accounts
+- [ ] 13.4.4 Test complete user journey
+- [ ] 13.4.5 Test error scenarios
+- [ ] 13.4.6 Test multi-device synchronization
+- [ ] 13.4.7 Test app performance with large datasets
+- [ ] 13.4.8 Test memory usage during operations
+- [ ] 13.4.9 Test battery usage impact
 
-## 13. Documentation
+## 14. Documentation
 
-### 13.1 Technical Documentation
+### 14.1 Technical Documentation
 **Path**: `docs/technical/add-students-feature.md`
-- [ ] 13.1.1 Document new ClassService methods
-- [ ] 13.1.2 Add request/response examples
-- [ ] 13.1.3 Document error codes and handling
-- [ ] 13.1.4 Document new component props and usage
-- [ ] 13.1.5 Add code examples
+- [ ] 14.1.1 Document new ClassService methods
+- [ ] 14.1.2 Add request/response examples
+- [ ] 14.1.3 Document error codes and handling
+- [ ] 14.1.4 Document new component props and usage
+- [ ] 14.1.5 Add code examples
 
 **Path**: `src/components/organisms/AddStudentsToClassModal.stories.tsx`
-- [ ] 13.1.6 Create Storybook stories for AddStudentsToClassModal
+- [ ] 14.1.6 Create Storybook stories for AddStudentsToClassModal
 
 **Path**: `src/components/molecules/StudentSelectionList/StudentSelectionList.stories.tsx`
-- [ ] 13.1.7 Create Storybook stories for StudentSelectionList
+- [ ] 14.1.7 Create Storybook stories for StudentSelectionList
 
 **Path**: `src/components/molecules/BulkActionBar/BulkActionBar.stories.tsx`
-- [ ] 13.1.8 Create Storybook stories for BulkActionBar
+- [ ] 14.1.8 Create Storybook stories for BulkActionBar
 
 **Path**: `docs/database/schema-updates.md`
-- [ ] 13.1.7 Document schema changes
-- [ ] 13.1.8 Update ERD diagrams
-- [ ] 13.1.9 Document RLS policies
+- [ ] 14.1.9 Document schema changes
+- [ ] 14.1.10 Update ERD diagrams
+- [ ] 14.1.11 Document RLS policies
 
-### 13.2 User Documentation
+### 14.2 User Documentation
 **Path**: `docs/user-guides/teacher-add-students.md`
-- [ ] 13.2.1 Write step-by-step instructions for teachers
-- [ ] 13.2.2 Add screenshots and examples
-- [ ] 13.2.3 Create troubleshooting guide
-- [ ] 13.2.4 Update teacher training documentation
-- [ ] 13.2.5 Create video tutorials
-- [ ] 13.2.6 Add FAQ section
+- [ ] 14.2.1 Write step-by-step instructions for teachers
+- [ ] 14.2.2 Add screenshots and examples
+- [ ] 14.2.3 Create troubleshooting guide
+- [ ] 14.2.4 Update teacher training documentation
+- [ ] 14.2.5 Create video tutorials
+- [ ] 14.2.6 Add FAQ section
 
 ## Summary
 
