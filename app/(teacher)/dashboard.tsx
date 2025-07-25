@@ -24,6 +24,7 @@ import { colors } from '../../src/styles/colors';
 
 // Modal Components
 import TeacherProfileView from '../../src/components/organisms/TeacherProfileView';
+import ClassesList from '../../src/components/templates/ClassesListTemplate';
 
 // Icon types for proper typing
 type IoniconsIcon = keyof typeof Ionicons.glyphMap;
@@ -132,6 +133,7 @@ export default function TeacherDashboard() {
   const handleNavigate = (route: string) => {
     router.push(route as any);
   };
+
 
   // Handle modal opening
   const handleOpenModal = (modalType: string) => {
@@ -287,6 +289,7 @@ export default function TeacherDashboard() {
         onTabChange={setActiveTab}
         backgroundPattern={true}
         contentPadding={true}
+        scrollable={activeTab !== 'classes'}
         testID="teacher-dashboard"
       >
         {renderLoadingState()}
@@ -313,6 +316,7 @@ export default function TeacherDashboard() {
         onTabChange={setActiveTab}
         backgroundPattern={true}
         contentPadding={true}
+        scrollable={activeTab !== 'classes'}
         testID="teacher-dashboard"
       >
         {renderErrorState()}
@@ -456,13 +460,9 @@ export default function TeacherDashboard() {
     />
   );
 
-  const renderClasses = () => (
-    <EmptyState
-      title="Manajemen Kelas"
-      message="Fitur manajemen kelas akan segera hadir"
-      icon="school-outline"
-    />
-  );
+  const renderClasses = () => {
+    return <ClassesList />;
+  };
 
   const renderHafalan = () => (
     <EmptyState
@@ -511,6 +511,7 @@ export default function TeacherDashboard() {
       onTabChange={setActiveTab}
       backgroundPattern={true}
       contentPadding={true}
+      scrollable={activeTab !== 'classes'}
       testID="teacher-dashboard"
     >
       {getContent()}

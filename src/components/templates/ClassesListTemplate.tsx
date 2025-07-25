@@ -290,7 +290,7 @@ export default function ClassesList() {
   );
 
   const renderEmptyState = () => (
-    <View style={styles.emptyContainer}>
+    <View style={styles.emptyListContainer}>
       <Ionicons name="school" size={64} color="#ccc" />
       <Text style={styles.emptyTitle}>Tidak ada kelas</Text>
       <Text style={styles.emptyDescription}>
@@ -302,70 +302,108 @@ export default function ClassesList() {
     </View>
   );
 
+  const renderLoadingState = () => (
+    <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <ActivityIndicator size="large" color="#005e7a" />
+      <Text style={[styles.emptyDescription, { marginTop: 16 }]}>
+        Memuat daftar kelas...
+      </Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       
-      {/* Header */}
-      <View style={[styles.header, bulkSelectionMode && styles.bulkHeader]}>
-        <TouchableOpacity onPress={() => {
-          if (bulkSelectionMode) {
-            setBulkSelectionMode(false);
-            setSelectedClasses([]);
-          } else {
-            router.back();
-          }
-        }}>
-          <Ionicons name={bulkSelectionMode ? "close" : "arrow-back"} size={24} color="#333333" />
-        </TouchableOpacity>
-        
-        <Text style={styles.headerTitle}>
-          {bulkSelectionMode ? `${selectedClasses.length} selected` : "Daftar Kelas"}
-        </Text>
-        
-        <View style={styles.headerActions}>
-          {bulkSelectionMode ? (
-            <View style={styles.bulkActions}>
-              <TouchableOpacity onPress={handleBulkDelete}>
-                <Ionicons name="trash" size={24} color="#ff3b30" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleBulkUpdateStatus('archived')}>
-                <Ionicons name="archive" size={24} color="#ff9500" />
-              </TouchableOpacity>
-            </View>
-          ) : (
+      {loading && classes.length === 0 ? (
+        renderLoadingState()
+      ) : (
+        <>
+          {/* Header */}
+          <View style={[styles.header, bulkSelectionMode && styles.bulkHeader]}>
+            <TouchableOpacity 
+              style={styles.headerButton}
+              onPress={() => {
+                if (bulkSelectionMode) {
+                  setBulkSelectionMode(false);
+                  setSelectedClasses([]);
+                } else {
+                  router.back();
+                }
+              }}
+            >
+              <Ionicons name={bulkSelectionMode ? "close" : "arrow-back"} size={24} color="#333333" />
+            </TouchableOpacity>
+            
+            <Text style={styles.headerTitle}>
+              {bulkSelectionMode ? `${selectedClasses.length} dipilih` : "Daftar Kelas"}
+            </Text>
+            
             <View style={styles.headerActions}>
-              <TouchableOpacity onPress={toggleBulkSelectionMode}>
-                <Ionicons name="checkbox" size={24} color="#005e7a" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleOpenAddModal}>
-                <Ionicons name="add" size={24} color="#005e7a" />
-              </TouchableOpacity>
+              {bulkSelectionMode ? (
+                <View style={styles.bulkActions}>
+                  <TouchableOpacity 
+                    style={styles.bulkActionButton}
+                    onPress={handleBulkDelete}
+                    disabled={selectedClasses.length === 0}
+                  >
+                    <Ionicons name="trash" size={20} color={selectedClasses.length === 0 ? "#ccc" : "#ff3b30"} />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.bulkActionButton}
+                    onPress={() => handleBulkUpdateStatus('archived')}
+                    disabled={selectedClasses.length === 0}
+                  >
+                    <Ionicons name="archive" size={20} color={selectedClasses.length === 0 ? "#ccc" : "#ff9500"} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.headerActions}>
+                  <TouchableOpacity 
+                    style={styles.headerButton}
+                    onPress={() => setShowFilterModal(true)}
+                  >
+                    <Ionicons name="filter" size={20} color="#005e7a" />
+                    {(filterStatus !== 'all' || sortBy !== 'name' || sortOrder !== 'asc') && (
+                      <View style={styles.filterIndicator} />
+                    )}
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.headerButton}
+                    onPress={handleOpenAddModal}
+                  >
+                    <Ionicons name="add" size={24} color="#005e7a" />
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
-          )}
-        </View>
-      </View>
+          </View>
 
-      {/* Search and Filter Bar */}
-      <View style={styles.searchFilterContainer}>
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#666666" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Cari kelas..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor="#999999"
-          />
-        </View>
-        
-        <TouchableOpacity 
-          style={styles.filterButton}
-          onPress={() => setShowFilterModal(true)}
-        >
-          <Ionicons name="filter" size={20} color="#005e7a" />
-        </TouchableOpacity>
-      </View>
+          {/* Search Bar */}
+          <View style={styles.searchSection}>
+            <View style={styles.searchContainer}>
+              <View style={styles.searchInputContainer}>
+                <Ionicons name="search" size={20} color="#8E8E93" style={styles.searchIcon} />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Cari nama kelas atau tingkat..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  placeholderTextColor="#8E8E93"
+                  returnKeyType="search"
+                  clearButtonMode="while-editing"
+                />
+                {searchQuery.length > 0 && (
+                  <TouchableOpacity 
+                    style={styles.clearButton}
+                    onPress={() => setSearchQuery('')}
+                  >
+                    <Ionicons name="close-circle" size={20} color="#8E8E93" />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          </View>
 
       {/* Classes List */}
       <FlatList
@@ -374,12 +412,12 @@ export default function ClassesList() {
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={[
           styles.listContainer,
-          classes.length === 0 && styles.emptyListContainer
+          classes.length === 0 && !loading && styles.emptyListContainer
         ]}
         showsVerticalScrollIndicator={false}
         refreshing={loading}
         onRefresh={handleRefresh}
-        ListEmptyComponent={renderEmptyState}
+        ListEmptyComponent={loading ? null : renderEmptyState}
       />
 
       {/* Filter Modal */}
@@ -495,6 +533,8 @@ export default function ClassesList() {
         </View>
       </Modal>
 
+        </>
+      )}
       <ClassFormModal
         visible={showAddModal}
         onClose={handleCloseModal}
@@ -509,7 +549,7 @@ export default function ClassesList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
   },
   header: {
     flexDirection: 'row',
@@ -519,50 +559,145 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#e5e5e7',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  bulkHeader: {
+    backgroundColor: '#f0f9ff',
+    borderBottomColor: '#bfdbfe',
+  },
+  headerButton: {
+    padding: 8,
+    borderRadius: 8,
+    minWidth: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
+    fontWeight: '600',
+    color: '#1d1d1f',
+    flex: 1,
+    textAlign: 'center',
   },
-  searchContainer: {
+  headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    marginHorizontal: 20,
-    marginVertical: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    gap: 8,
+  },
+  bulkActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  bulkActionButton: {
+    padding: 8,
     borderRadius: 8,
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  selectedCount: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#007AFF',
+  },
+  bulkActionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#007AFF',
+  },
+  disabledBulkActionText: {
+    color: '#c7c7cc',
+  },
+  filterIndicator: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#007AFF',
+  },
+  searchSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e5e7',
+  },
+  searchContainer: {
+    flex: 1,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f2f2f7',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: 'transparent',
+  },
+  searchIcon: {
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 12,
     fontSize: 16,
-    color: '#333333',
+    color: '#1d1d1f',
+    fontWeight: '400',
+  },
+  clearButton: {
+    padding: 4,
+    marginLeft: 8,
   },
   listContainer: {
     paddingHorizontal: 20,
+    paddingTop: 16,
     paddingBottom: 20,
   },
   classCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 16,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+  },
+  selectedCard: {
+    borderColor: '#007AFF',
+    borderWidth: 2,
+    backgroundColor: '#f8fbff',
+  },
+  archivedCard: {
+    opacity: 0.6,
+    backgroundColor: '#f8f8f8',
+  },
+  checkboxContainer: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 1,
   },
   classHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    alignItems: 'flex-start',
+    marginBottom: 12,
   },
   classInfo: {
     flex: 1,
@@ -570,9 +705,10 @@ const styles = StyleSheet.create({
   },
   className: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
+    fontWeight: '600',
+    color: '#1d1d1f',
     marginBottom: 4,
+    lineHeight: 24,
   },
   classLevel: {
     fontSize: 14,
@@ -581,9 +717,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   classDescription: {
-    fontSize: 14,
-    color: '#666666',
+    fontSize: 15,
+    color: '#6d6d70',
     lineHeight: 20,
+    marginBottom: 16,
   },
   classStats: {
     alignItems: 'flex-end',
@@ -690,45 +827,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffffff',
   },
-  searchFilterContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 16,
-  },
-  filterButton: {
-    backgroundColor: '#ffffff',
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  bulkHeader: {
-    backgroundColor: '#f0f8ff',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  bulkActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  checkboxContainer: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    zIndex: 1,
-  },
-  selectedCard: {
-    borderColor: '#005e7a',
-    borderWidth: 2,
-  },
-  archivedCard: {
-    opacity: 0.7,
-  },
+
   classMeta: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -765,7 +864,7 @@ const styles = StyleSheet.create({
   disabledActionText: {
     color: '#ccc',
   },
-  emptyContainer: {
+  emptyListContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -795,11 +894,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  emptyListContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   sectionTitle: {
     fontSize: 16,

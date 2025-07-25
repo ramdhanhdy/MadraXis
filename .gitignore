@@ -58,3 +58,7 @@ repomix.config.json
 .repomixignore
 .vercel/project.json
 .roo/mcp.json
+.windsurfrules
+.cursor/rules/design.mdc
+.superdesign/design_iterations/default_ui_darkmode.css
+CLAUDE.md
