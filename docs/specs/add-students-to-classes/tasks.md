@@ -12,8 +12,8 @@
 
 ### 1.2 Add missing indexes for performance using Supabase MCP
 - [ ] 1.2.1 Create composite index on `class_students(class_id, student_id)` via Supabase MCP
-- [ ] 1.2.2 Create index on `profiles(school_id, role)` via Supabase MCP
-- [ ] 1.2.3 Create index on `student_details(boarding)` via Supabase MCP
+- [ ] 1.2.2 Create composite index on `profiles(school_id, role)` via Supabase MCP
+- [ ] 1.2.3 Create composite index on `student_details(school_id, boarding)` for better selectivity via Supabase MCP
 
 ### 1.3 Verify and update Row Level Security policies using Supabase MCP
 - [ ] 1.3.1 Test teacher access to class_students table via Supabase MCP

@@ -61,19 +61,19 @@ The current Supabase schema supports the required functionality:
 
 #### 1. Database Operations
 ```sql
--- Add student to class
+-- Add student to class (using parameterized queries)
 INSERT INTO class_students (class_id, student_id, enrolled_at)
-VALUES (?, ?, NOW());
+VALUES ($1, $2, now()::timestamptz);
 
--- Remove student from class
+-- Remove student from class (using parameterized queries)
 DELETE FROM class_students 
-WHERE class_id = ? AND student_id = ?;
+WHERE class_id = $1 AND student_id = $2;
 
--- Get current class enrollment count
+-- Get current class enrollment count (using parameterized queries)
 SELECT 
   COUNT(cs.student_id) as current_count
 FROM class_students cs
-WHERE cs.class_id = ?;
+WHERE cs.class_id = $1;
 ```
 
 #### 2. Service Layer Enhancement
