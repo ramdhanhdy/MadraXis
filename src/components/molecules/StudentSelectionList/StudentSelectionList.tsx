@@ -119,28 +119,18 @@ const StudentSelectionListComponent: React.FC<StudentSelectionListProps> = ({
     return () => clearTimeout(timeoutId);
   }, [searchQuery, localFilters, onFiltersChange]);
 
-  // Sync local state with external filters prop changes
+   // Sync local state with external filters prop changes
   useEffect(() => {
-    // Update searchQuery when filters.search changes externally
-    if (filters.search !== searchQuery) {
-      setSearchQuery(filters.search || '');
-    }
-    
-    // Update localFilters when filters prop changes externally
-    // This ensures local state stays synchronized with external changes
-    const shouldUpdateLocalFilters =
-      filters.gradeLevel !== localFilters.gradeLevel ||
-      filters.boarding !== localFilters.boarding ||
-      filters.search !== localFilters.search;
-    
-    if (shouldUpdateLocalFilters) {
-      setLocalFilters({
-        gradeLevel: classLevel || 'all',
-        boarding: 'all',
-        ...filters,
-      });
-    }
-  }, [filters, classLevel, searchQuery, localFilters.gradeLevel, localFilters.boarding, localFilters.search]);
+    setSearchQuery(filters.search || '');
+  }, [filters.search]);
+
+  useEffect(() => {
+    setLocalFilters(prev => ({
+      gradeLevel: classLevel || 'all',
+      boarding: 'all',
+      ...filters,
+    }));
+  }, [filters, classLevel]);
 
   // Helper function to determine student grade level
   const getStudentGradeLevel = useCallback((student: StudentWithDetails): 'SMA' | 'SMP' | null => {
@@ -454,10 +444,14 @@ const styles = StyleSheet.create({
 
 // Export memoized component to prevent unnecessary re-renders
 export const StudentSelectionList = React.memo(StudentSelectionListComponent, (prevProps, nextProps) => {
-  // Custom comparison to prevent re-renders when deep equality is needed
   const selectedIdsEqual = 
     prevProps.selectedStudentIds.size === nextProps.selectedStudentIds.size &&
     Array.from(prevProps.selectedStudentIds).every(id => nextProps.selectedStudentIds.has(id));
+  
+  const filtersEqual = 
+    prevProps.filters?.gradeLevel === nextProps.filters?.gradeLevel &&
+    prevProps.filters?.boarding === nextProps.filters?.boarding &&
+    prevProps.filters?.search === nextProps.filters?.search;
   
   return (
     prevProps.students === nextProps.students &&
@@ -468,7 +462,7 @@ export const StudentSelectionList = React.memo(StudentSelectionListComponent, (p
     prevProps.showFilters === nextProps.showFilters &&
     prevProps.enableVirtualization === nextProps.enableVirtualization &&
     prevProps.classLevel === nextProps.classLevel &&
-    JSON.stringify(prevProps.filters) === JSON.stringify(nextProps.filters)
+    filtersEqual
   );
 });
 

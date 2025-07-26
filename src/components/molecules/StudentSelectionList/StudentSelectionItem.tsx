@@ -238,7 +238,6 @@ const styles = StyleSheet.create({
   },
   badgeContainer: {
     flexDirection: 'row',
-    gap: 6,
     marginBottom: 4,
   },
   badge: {
@@ -246,6 +245,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 12,
     alignSelf: 'flex-start',
+    marginRight: 6,
   },
   badgeText: {
     fontSize: 11,

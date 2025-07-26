@@ -16,8 +16,9 @@ export function sanitizeLikeInput(input: string): string {
   return input
     .replace(/[%_\\]/g, '\\$&') // Escape %, _, and \\ characters
     .replace(/['"`;\*\+\=\<\>\!\@\#\$\^\&\*\(\)\[\]\{\}\|\:\?\~]/g, '') // Remove dangerous characters (preserving hyphens)
+    .replace(/\s+/g, ' ') // Normalize whitespace
     .trim()
-    .slice(0, 255); // Limit length to prevent buffer overflow
+    .slice(0, 100); // Limit length for security
 }
 
 /**

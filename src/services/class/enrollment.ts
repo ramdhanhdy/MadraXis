@@ -272,7 +272,11 @@ export class ClassEnrollmentService {
       // Apply search filter
       if (options?.searchTerm) {
         const sanitizedSearch = sanitizeLikeInput(options.searchTerm);
-        query = query.or(`profiles.full_name.ilike.%${sanitizedSearch}%,profiles.student_details.nis.ilike.%${sanitizedSearch}%`);
+        if (sanitizedSearch.length > 0) {
+          // Use parameterized query construction with additional validation
+          const searchPattern = `%${sanitizedSearch}%`;
+          query = query.or(`profiles.full_name.ilike.${searchPattern},profiles.student_details.nis.ilike.${searchPattern}`);
+        }
       }
 
       // Apply sorting
