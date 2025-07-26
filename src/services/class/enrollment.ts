@@ -252,9 +252,6 @@ export class ClassEnrollmentService {
       // Verify teacher has access to this class
       await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'get_class_students');
 
-      const searchTerm = options?.searchTerm;
-      const hasSearch = searchTerm && sanitizeLikeInput(searchTerm).length > 0;
-
       let query = supabase
         .from('class_students')
         .select(`
@@ -269,118 +266,75 @@ export class ClassEnrollmentService {
               boarding
             )
           )
-        `, { count: hasSearch ? undefined : 'exact' })
+        `, { count: 'exact' })
         .eq('class_id', classId);
 
+      // Apply search filter safely
+      if (options?.searchTerm) {
+        const sanitizedSearch = sanitizeLikeInput(options.searchTerm);
+        if (sanitizedSearch.length > 0) {
+          const searchPattern = `%${sanitizedSearch}%`;
+
+          // Escape the pattern for safe inclusion in Postgrest OR filter
+          // by quoting it and doubling any inner quotes
+          const escapePostgrestValue = (val: string): string => {
+            const escaped = val.replace(/"/g, '""');
+            return `"${escaped}"`;
+          };
+
+          const escapedPattern = escapePostgrestValue(searchPattern);
+          const nameCondition = `profiles.full_name.ilike.${escapedPattern}`;
+          const nisCondition = `profiles.student_details.nis.ilike.${escapedPattern}`;
+
+          // Use OR with properly escaped conditions
+          query = query.or(`${nameCondition},${nisCondition}`);
+        }
+      }
+
+      // Apply sorting
       const { sortBy, sortOrder } = sanitizeSortParams(options?.sortBy, options?.sortOrder);
+      if (sortBy === 'full_name') {
+        query = query.order('profiles.full_name', { ascending: sortOrder === 'asc' });
+      } else if (sortBy === 'nis') {
+        query = query.order('profiles.student_details.nis', { ascending: sortOrder === 'asc' });
+      } else {
+        query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+      }
+
+      // Apply pagination
       const { page, limit } = sanitizePagination(options?.offset ? Math.floor(options.offset / (options?.limit || 10)) + 1 : 1, options?.limit);
       const offset = (page - 1) * limit;
+      
+      const { data: enrollments, count: totalCount, error } = await query.range(offset, offset + limit - 1);
 
-      if (hasSearch) {
-        // Fetch all without range for client-side filtering
-        const { data: allEnrollments, error } = await query;
-
-        if (error) {
-          throw ClassServiceError.create(
-            'FETCH_FAILED',
-            'Failed to fetch class students',
-            { originalError: error, classId, teacherId }
-          );
-        }
-
-        // Transform data
-        let allStudents = allEnrollments!.map((enrollment: any) => {
-          const profile = Array.isArray(enrollment.profiles) ? enrollment.profiles[0] : enrollment.profiles;
-          const studentDetails = profile?.student_details ? (Array.isArray(profile.student_details) ? profile.student_details[0] : profile.student_details) : null;
-
-          return {
-            student_id: enrollment.student_id,
-            full_name: profile?.full_name || '',
-            nis: studentDetails?.nis || '',
-            gender: studentDetails?.gender,
-            boarding: studentDetails?.boarding,
-            enrollment_date: enrollment.enrollment_date,
-            notes: enrollment.notes,
-          };
-        });
-
-        // Apply search filter client-side
-        const sanitizedSearch = sanitizeLikeInput(searchTerm).toLowerCase();
-        allStudents = allStudents.filter(s =>
-          s.full_name.toLowerCase().includes(sanitizedSearch) ||
-          s.nis.toLowerCase().includes(sanitizedSearch)
+      if (error) {
+        throw ClassServiceError.create(
+          'FETCH_FAILED',
+          'Failed to fetch class students',
+          { originalError: error, classId, teacherId }
         );
-
-        // Apply sorting client-side
-        allStudents.sort((a, b) => {
-          let valA: any = a[sortBy as keyof typeof a];
-          let valB: any = b[sortBy as keyof typeof b];
-
-          if (sortBy === 'full_name') {
-            valA = a.full_name;
-            valB = b.full_name;
-          } else if (sortBy === 'nis') {
-            valA = a.nis;
-            valB = b.nis;
-          }
-
-          if (valA === null || valA === undefined) valA = '';
-          if (valB === null || valB === undefined) valB = '';
-
-          if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
-          if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
-          return 0;
-        });
-
-        // Apply pagination client-side
-        const paginatedStudents = allStudents.slice(offset, offset + limit);
-
-        return {
-          students: paginatedStudents,
-          total: allStudents.length
-        };
-      } else {
-        // Apply sorting
-        if (sortBy === 'full_name') {
-          query = query.order('profiles.full_name', { ascending: sortOrder === 'asc' });
-        } else if (sortBy === 'nis') {
-          query = query.order('profiles.student_details.nis', { ascending: sortOrder === 'asc' });
-        } else {
-          query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-        }
-
-        // Apply pagination
-        const { data: enrollments, count: totalCount, error } = await query.range(offset, offset + limit - 1);
-
-        if (error) {
-          throw ClassServiceError.create(
-            'FETCH_FAILED',
-            'Failed to fetch class students',
-            { originalError: error, classId, teacherId }
-          );
-        }
-
-        // Transform data
-        const students = enrollments!.map((enrollment: any) => {
-          const profile = Array.isArray(enrollment.profiles) ? enrollment.profiles[0] : enrollment.profiles;
-          const studentDetails = profile?.student_details ? (Array.isArray(profile.student_details) ? profile.student_details[0] : profile.student_details) : null;
-
-          return {
-            student_id: enrollment.student_id,
-            full_name: profile?.full_name,
-            nis: studentDetails?.nis,
-            gender: studentDetails?.gender,
-            boarding: studentDetails?.boarding,
-            enrollment_date: enrollment.enrollment_date,
-            notes: enrollment.notes,
-          };
-        });
-
-        return {
-          students,
-          total: totalCount || 0
-        };
       }
+
+      // Transform data
+      const students = enrollments!.map((enrollment: any) => {
+        const profile = Array.isArray(enrollment.profiles) ? enrollment.profiles[0] : enrollment.profiles;
+        const studentDetails = profile?.student_details ? (Array.isArray(profile.student_details) ? profile.student_details[0] : profile.student_details) : null;
+
+        return {
+          student_id: enrollment.student_id,
+          full_name: profile?.full_name,
+          nis: studentDetails?.nis,
+          gender: studentDetails?.gender,
+          boarding: studentDetails?.boarding,
+          enrollment_date: enrollment.enrollment_date,
+          notes: enrollment.notes,
+        };
+      });
+
+      return {
+        students,
+        total: totalCount || 0
+      };
     } catch (error) {
       if (error instanceof ClassServiceError) {
         throw error;
