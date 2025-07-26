@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Swipeable } from 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ClassService } from '../../services/classService';
+import { ClassService } from '../../services/class';
 import { useAuth } from '../../context/AuthContext';
 import { useClassStudentsSubscription } from '../../hooks/useClassStudentsSubscription';
 import { AddStudentsToClassModal } from '../organisms/AddStudentsToClassModal/AddStudentsToClassModal';
