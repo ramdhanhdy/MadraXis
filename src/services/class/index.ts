@@ -1,6 +1,7 @@
 import {
   CreateClassRequest,
   UpdateClassRequest,
+  BulkUpdateRequest,
   GetClassesOptions,
   GetAvailableStudentsOptions,
   GetClassStudentsOptions,
@@ -64,6 +65,8 @@ export class ClassService {
     updateData: UpdateClassRequest,
     teacherId: string
   ): Promise<ClassWithDetails> {
+    // Validate teacher access first
+    await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'update');
     return ClassRepository.update(classId, updateData, teacherId);
   }
 
@@ -74,6 +77,10 @@ export class ClassService {
     classId: number,
     teacherId: string
   ): Promise<void> {
+    // Validate teacher access first
+    await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'delete');
+    // Validate class can be deleted (no enrolled students)
+    await ClassAccessControl.validateClassDeletion(classId);
     return ClassRepository.softDelete(classId, teacherId);
   }
 
@@ -84,6 +91,8 @@ export class ClassService {
     classId: number,
     teacherId: string
   ): Promise<ClassWithDetails> {
+    // Validate teacher access first
+    await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'restore');
     return ClassRepository.restore(classId, teacherId);
   }
 
@@ -257,7 +266,7 @@ export class ClassService {
    */
   static async validateUniqueClassName(
     className: string,
-    schoolId: string,
+    schoolId: number,
     excludeClassId?: number
   ): Promise<void> {
     return ClassAccessControl.validateUniqueClassName(className, schoolId, excludeClassId);
@@ -314,7 +323,7 @@ export class ClassService {
    */
   static async checkDuplicateClassName(
     className: string,
-    schoolId: string,
+    schoolId: number,
     excludeClassId?: number
   ): Promise<boolean> {
     return ClassRepository.checkDuplicateClassName(className, schoolId, excludeClassId);

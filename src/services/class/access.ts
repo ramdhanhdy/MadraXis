@@ -8,22 +8,65 @@ import { ClassRepository } from './repository';
 export class ClassAccessControl {
   /**
    * Verify if a teacher has access to a specific class
+   * @param classId - The class ID to check access for
+   * @param teacherId - The teacher's user ID
+   * @param validateSchool - Whether to validate that the class belongs to the same school as the teacher (default: true)
    */
-  static async verifyClassAccess(classId: number, teacherId: string): Promise<boolean> {
+  static async verifyClassAccess(
+    classId: number, 
+    teacherId: string, 
+    validateSchool: boolean = true
+  ): Promise<boolean> {
     try {
-      const { data: classTeacher, error } = await supabase
-        .from('class_teachers')
-        .select('user_id')
-        .eq('class_id', classId)
-        .eq('user_id', teacherId)
-        .single();
+      if (validateSchool) {
+        // First get the teacher's school_id
+        const { data: teacherProfile, error: teacherError } = await supabase
+          .from('profiles')
+          .select('school_id')
+          .eq('id', teacherId)
+          .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error checking class access:', error);
-        return false;
+        if (teacherError || !teacherProfile) {
+          // Teacher profile not found - this is expected when teacher doesn't exist or has no access
+          return false;
+        }
+
+        // Then check class access with school validation
+        const { data: classTeacher, error } = await supabase
+          .from('class_teachers')
+          .select(`
+            user_id,
+            classes!inner(
+              school_id
+            )
+          `)
+          .eq('class_id', classId)
+          .eq('user_id', teacherId)
+          .eq('classes.school_id', teacherProfile.school_id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking class access with school validation:', error);
+          return false;
+        }
+
+        return !!classTeacher;
+      } else {
+        // Original logic without school validation
+        const { data: classTeacher, error } = await supabase
+          .from('class_teachers')
+          .select('user_id')
+          .eq('class_id', classId)
+          .eq('user_id', teacherId)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking class access:', error);
+          return false;
+        }
+
+        return !!classTeacher;
       }
-
-      return !!classTeacher;
     } catch (error) {
       console.error('Unexpected error in verifyClassAccess:', error);
       return false;
@@ -32,13 +75,18 @@ export class ClassAccessControl {
 
   /**
    * Validate teacher access and throw error if denied
+   * @param classId - The class ID to validate access for
+   * @param teacherId - The teacher's user ID
+   * @param operation - The operation being performed (for error context)
+   * @param validateSchool - Whether to validate that the class belongs to the same school as the teacher (default: true)
    */
   static async validateTeacherAccess(
     classId: number,
     teacherId: string,
-    operation: string = 'access'
+    operation: string = 'access',
+    validateSchool: boolean = true
   ): Promise<void> {
-    const hasAccess = await ClassAccessControl.verifyClassAccess(classId, teacherId);
+    const hasAccess = await ClassAccessControl.verifyClassAccess(classId, teacherId, validateSchool);
     if (!hasAccess) {
       throw ClassServiceError.create(
         'ACCESS_DENIED',
@@ -50,14 +98,19 @@ export class ClassAccessControl {
 
   /**
    * Check if a teacher can perform bulk operations on multiple classes
+   * @param classIds - Array of class IDs to validate access for
+   * @param teacherId - The teacher's user ID
+   * @param operation - The operation being performed (for error context)
+   * @param validateSchool - Whether to validate that classes belong to the same school as the teacher (default: true)
    */
   static async validateBulkAccess(
     classIds: number[],
     teacherId: string,
-    operation: string = 'bulk_operation'
+    operation: string = 'bulk_operation',
+    validateSchool: boolean = true
   ): Promise<void> {
     const accessChecks = await Promise.all(
-      classIds.map(classId => ClassAccessControl.verifyClassAccess(classId, teacherId))
+      classIds.map(classId => ClassAccessControl.verifyClassAccess(classId, teacherId, validateSchool))
     );
 
     const deniedClasses = classIds.filter((_, index) => !accessChecks[index]);
@@ -79,11 +132,16 @@ export class ClassAccessControl {
 
   /**
    * Check if a class exists and teacher has access
+   * @param classId - The class ID to validate
+   * @param teacherId - The teacher's user ID
+   * @param operation - The operation being performed (for error context)
+   * @param validateSchool - Whether to validate that the class belongs to the same school as the teacher (default: true)
    */
   static async validateClassExists(
     classId: number,
     teacherId: string,
-    operation: string = 'access'
+    operation: string = 'access',
+    validateSchool: boolean = true
   ): Promise<void> {
     const classData = await ClassRepository.getById(classId);
     
@@ -95,7 +153,7 @@ export class ClassAccessControl {
       );
     }
 
-    await ClassAccessControl.validateTeacherAccess(classId, teacherId, operation);
+    await ClassAccessControl.validateTeacherAccess(classId, teacherId, operation, validateSchool);
   }
 
   /**
@@ -131,7 +189,7 @@ export class ClassAccessControl {
    */
   static async validateUniqueClassName(
     className: string,
-    schoolId: string,
+    schoolId: number,
     excludeClassId?: number
   ): Promise<void> {
     const isDuplicate = await ClassRepository.checkDuplicateClassName(className, schoolId, excludeClassId);
@@ -159,48 +217,82 @@ export class ClassAccessControl {
     teacherId: string,
     role: string = 'primary'
   ): Promise<void> {
-    console.log('Creating class-teacher relationship:', {
-      class_id: classId,
-      user_id: teacherId,
-      role: role,
-      assigned_date: new Date().toISOString(),
-    });
-    
-    const { error: teacherError } = await supabase
-      .from('class_teachers')
-      .insert({
-        class_id: classId,
-        user_id: teacherId,
-        role: role,
-        assigned_date: new Date().toISOString(),
-      });
+    try {
+      // Validate that teacher and class belong to the same school
+      const { data: teacherProfile, error: teacherError } = await supabase
+        .from('profiles')
+        .select('school_id')
+        .eq('id', teacherId)
+        .single();
 
-    if (teacherError) {
-      console.error('Teacher assignment failed - Full error details:', {
-        error: teacherError,
-        errorCode: teacherError.code,
-        errorMessage: teacherError.message,
-        errorDetails: teacherError.details,
-        errorHint: teacherError.hint,
-        classId: classId,
-        teacherId: teacherId,
-        teacherIdType: typeof teacherId,
-        insertData: {
+      if (teacherError || !teacherProfile) {
+        throw ClassServiceError.create(
+          'SCHOOL_MISMATCH',
+          'Teacher profile not found or invalid',
+          { classId, teacherId }
+        );
+      }
+
+      const { data: classData, error: classError } = await supabase
+        .from('classes')
+        .select('school_id')
+        .eq('id', classId)
+        .single();
+
+      if (classError || !classData) {
+        throw ClassServiceError.create(
+          'SCHOOL_MISMATCH',
+          'Class not found or invalid',
+          { classId, teacherId }
+        );
+      }
+
+      if (teacherProfile.school_id !== classData.school_id) {
+        throw ClassServiceError.create(
+          'SCHOOL_MISMATCH',
+          'Teacher and class must belong to the same school',
+          { 
+            classId, 
+            teacherId,
+            additionalContext: {
+              teacherSchoolId: teacherProfile.school_id,
+              classSchoolId: classData.school_id
+            }
+          }
+        );
+      }
+
+      // Create the assignment
+      const { error: assignmentError } = await supabase
+        .from('class_teachers')
+        .insert({
           class_id: classId,
           user_id: teacherId,
           role: role,
           assigned_date: new Date().toISOString(),
-        }
-      });
+        });
+
+      if (assignmentError) {
+        console.error('Teacher assignment failed:', assignmentError.message);
+        
+        throw ClassServiceError.create(
+          'TEACHER_ASSIGNMENT_FAILED',
+          `Failed to assign teacher to class: ${assignmentError.message}`,
+          { classId, teacherId }
+        );
+      }
+    } catch (error) {
+      if (error instanceof ClassServiceError) {
+        throw error;
+      }
       
+      console.error('Unexpected error in assignTeacherToClass:', error);
       throw ClassServiceError.create(
         'TEACHER_ASSIGNMENT_FAILED',
-        `Failed to assign teacher to class: ${teacherError.message}`,
-        { originalError: teacherError, classId, teacherId }
+        'Unexpected error during teacher assignment',
+        { classId, teacherId }
       );
     }
-    
-    console.log('Teacher assignment successful for class:', classId);
   }
 
   /**

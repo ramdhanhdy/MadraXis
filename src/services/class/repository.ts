@@ -22,6 +22,35 @@ export class ClassRepository {
     // Validate input data
     const validatedData = CreateClassSchema.parse(classData);
     
+    // Security validation: Verify teacher belongs to the same school as the class being created
+    const { data: teacherProfile, error: teacherError } = await supabase
+      .from('profiles')
+      .select('school_id')
+      .eq('id', teacherId)
+      .single();
+
+    if (teacherError || !teacherProfile) {
+      throw ClassServiceError.create(
+        'AUTHORIZATION_FAILED',
+        'Teacher profile not found or invalid',
+        { originalError: teacherError, teacherId }
+      );
+    }
+
+    if (teacherProfile.school_id !== validatedData.school_id) {
+      throw ClassServiceError.create(
+        'AUTHORIZATION_FAILED',
+        'You can only create classes for your own school',
+        { 
+          teacherId,
+          additionalContext: {
+            teacherSchoolId: teacherProfile.school_id,
+            requestedSchoolId: validatedData.school_id
+          }
+        }
+      );
+    }
+    
     const insertData = {
       ...validatedData,
       created_by: teacherId,
@@ -123,43 +152,43 @@ export class ClassRepository {
     teacherId: string,
     options?: GetTeacherClassesOptions
   ): Promise<{ classes: ClassWithDetails[]; total: number }> {
-    let query = supabase
+    // Build the base query with JOIN to filter classes by teacher directly in the database
+    let queryBuilder = supabase
       .from('classes')
       .select(`
         *,
-        class_teachers!left(
+        class_teachers!inner(
           user_id,
           role,
           profiles!inner(full_name)
         ),
         class_students!left(student_id),
         class_subjects!left(id)
-      `);
+      `)
+      .eq('class_teachers.user_id', teacherId);
         
     // Apply filters
     if (options?.status) {
-      query = query.eq('status', options.status);
+      queryBuilder = queryBuilder.eq('status', options.status);
     }
 
     if (options?.searchTerm) {
       const sanitizedSearch = sanitizeLikeInput(options.searchTerm);
-      query = query.ilike('name', `%${sanitizedSearch}%`);
+      queryBuilder = queryBuilder.ilike('name', `%${sanitizedSearch}%`);
     }
 
     // Apply sorting with sanitization
     const { sortBy, sortOrder } = sanitizeSortParams(options?.sortBy, options?.sortOrder);
-    query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+    queryBuilder = queryBuilder.order(sortBy, { ascending: sortOrder === 'asc' });
 
     // Apply pagination
-    if (options?.limit) {
-      query = query.limit(options.limit);
+    if (options?.offset || options?.limit) {
+      const limit = options?.limit || 50;
+      const offset = options?.offset || 0;
+      queryBuilder = queryBuilder.range(offset, offset + limit - 1);
     }
 
-    if (options?.offset) {
-      query = query.range(options.offset, options.offset + (options.limit || 50) - 1);
-    }
-
-    const { data: classes, error } = await query;
+    const { data: classes, error } = await queryBuilder;
 
     console.log('getByTeacher query result:', {
       teacherId,
@@ -177,16 +206,17 @@ export class ClassRepository {
       );
     }
 
-    // Filter classes to only include those where the teacher is assigned
-    const filteredClasses = classes!.filter((classItem) => {
-      if (!classItem.class_teachers) return false;
-      return classItem.class_teachers.some((teacher: any) => teacher.user_id === teacherId);
-    });
-    
-    console.log('Filtered classes count:', filteredClasses.length);
-    
+    // Handle case where no classes are returned
+    if (!classes || classes.length === 0) {
+      return {
+        classes: [],
+        total: 0
+      };
+    }
+
     // Transform data to include counts and teacher details
-    const transformedClasses = filteredClasses.map((classItem) => {
+    // No need for in-memory filtering since the JOIN already filters by teacherId
+    const transformedClasses = classes.map((classItem) => {
       // Format teachers to match expected structure
       const formattedTeachers = (classItem.class_teachers || []).map((teacher: any) => ({
         user_id: teacher.user_id,
@@ -335,7 +365,7 @@ export class ClassRepository {
    */
   static async checkDuplicateClassName(
     className: string,
-    schoolId: string,
+    schoolId: number,
     excludeClassId?: number
   ): Promise<boolean> {
     let query = supabase

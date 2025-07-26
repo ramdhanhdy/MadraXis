@@ -8,7 +8,8 @@ import {
   GetClassStudentsOptions,
   ClassServiceError,
   EnrollStudentSchema,
-  BulkEnrollStudentsSchema
+  BulkEnrollStudentsSchema,
+  GetAvailableStudentsOptionsSchema
 } from './types';
 import { ClassAccessControl } from './access';
 import { ClassAuditService } from './audit';
@@ -27,6 +28,9 @@ export class ClassEnrollmentService {
     options?: GetAvailableStudentsOptions
   ): Promise<{ students: StudentWithDetails[]; total: number }> {
     try {
+      // Validate and sanitize input options
+      const validatedOptions = options ? GetAvailableStudentsOptionsSchema.parse(options) : undefined;
+      
       // Verify teacher has access to this class
       await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'get_available_students');
 
@@ -40,13 +44,13 @@ export class ClassEnrollmentService {
         );
       }
 
-      const { page, limit } = sanitizePagination(options?.page, options?.limit);
+      const { page, limit } = sanitizePagination(validatedOptions?.page, validatedOptions?.limit);
       const offset = (page - 1) * limit;
       let searchResults: StudentWithDetails[] = [];
 
       // Handle search functionality with separate queries to avoid SQL injection
-      if (options?.searchTerm) {
-        const searchPattern = `%${sanitizeLikeInput(options.searchTerm)}%`;
+      if (validatedOptions?.searchTerm) {
+        const searchPattern = `%${sanitizeLikeInput(validatedOptions.searchTerm)}%`;
         
         try {
           // Search by full_name
@@ -110,16 +114,16 @@ export class ClassEnrollmentService {
 
           // Apply additional filters
           let filteredResults = availableResults;
-          if (options?.gender) {
+          if (validatedOptions?.gender) {
             filteredResults = filteredResults.filter(s => {
               const details = Array.isArray(s.student_details) ? s.student_details[0] : s.student_details;
-              return details?.gender === options.gender;
+              return details?.gender === validatedOptions.gender;
             });
           }
-          if (options?.boarding) {
+          if (validatedOptions?.boarding) {
             filteredResults = filteredResults.filter(s => {
               const details = Array.isArray(s.student_details) ? s.student_details[0] : s.student_details;
-              return details?.boarding === options.boarding;
+              return details?.boarding === validatedOptions.boarding;
             });
           }
 
@@ -188,12 +192,12 @@ export class ClassEnrollmentService {
       }
 
       // Apply filters
-      if (options?.gender) {
-        query = query.eq('student_details.gender', options.gender);
+      if (validatedOptions?.gender) {
+        query = query.eq('student_details.gender', validatedOptions.gender);
       }
 
-      if (options?.boarding) {
-        query = query.eq('student_details.boarding', options.boarding);
+      if (validatedOptions?.boarding) {
+        query = query.eq('student_details.boarding', validatedOptions.boarding);
       }
 
       // Apply pagination and fetch data + count
@@ -329,6 +333,7 @@ export class ClassEnrollmentService {
 
   /**
    * Enroll a single student in a class
+   * Uses atomic database function to prevent race conditions and enforce capacity limits
    */
   static async enrollStudent(
     classId: number,
@@ -339,37 +344,29 @@ export class ClassEnrollmentService {
       // Validate input
       const validatedData = EnrollStudentSchema.parse(enrollmentData);
       
-      // Verify teacher has access to this class
-      await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'enroll_student');
-
-      // Check if student is already enrolled
-      const { data: existingEnrollment } = await supabase
-        .from('class_students')
-        .select('student_id')
-        .eq('class_id', classId)
-        .eq('student_id', validatedData.student_id)
+      // Get teacher's school_id for the atomic function
+      const { data: teacherProfile } = await supabase
+        .from('profiles')
+        .select('school_id')
+        .eq('id', teacherId)
         .single();
 
-      if (existingEnrollment) {
+      if (!teacherProfile) {
         throw ClassServiceError.create(
-          'STUDENT_ALREADY_ENROLLED',
-          'Student is already enrolled in this class',
-          { classId, studentId: validatedData.student_id, teacherId }
+          'TEACHER_NOT_FOUND',
+          'Teacher profile not found',
+          { teacherId, classId }
         );
       }
 
-      // Enroll the student
-      const enrollmentRecord = {
-        class_id: classId,
-        student_id: validatedData.student_id,
-        enrollment_date: validatedData.enrollment_date || new Date().toISOString(),
-        notes: validatedData.notes,
-        enrolled_by: teacherId,
-      };
-
-      const { error } = await supabase
-        .from('class_students')
-        .insert(enrollmentRecord);
+      // Use atomic function to enroll student with capacity checking
+      const { data: result, error } = await supabase
+        .rpc('add_students_to_class_atomic', {
+          p_class_id: classId,
+          p_student_ids: [validatedData.student_id],
+          p_teacher_id: teacherId,
+          p_school_id: teacherProfile.school_id
+        });
 
       if (error) {
         throw ClassServiceError.create(
@@ -379,14 +376,46 @@ export class ClassEnrollmentService {
         );
       }
 
-      // Log enrollment action
-      await ClassAuditService.logEnrollmentAction(
-        classId,
-        'enroll_student',
-        validatedData.student_id,
-        enrollmentRecord,
-        teacherId
-      );
+      // Check if enrollment was successful
+      if (!result || result.length === 0) {
+        throw ClassServiceError.create(
+          'ENROLLMENT_FAILED',
+          'Atomic enrollment function returned no results',
+          { classId, studentId: validatedData.student_id, teacherId }
+        );
+      }
+
+      const enrollmentResult = result[0];
+      
+      // Check if student was successfully enrolled
+      if (!enrollmentResult.success.includes(validatedData.student_id)) {
+        // Find the specific error for this student
+        const studentError = enrollmentResult.errors.find(
+          (err: any) => err.student_id === validatedData.student_id
+        );
+        
+        const errorMessage = studentError ? studentError.error : 'Unknown enrollment error';
+        
+        // Map specific errors to appropriate error codes
+        let errorCode = 'ENROLLMENT_FAILED';
+        if (errorMessage.includes('already enrolled')) {
+          errorCode = 'STUDENT_ALREADY_ENROLLED';
+        } else if (errorMessage.includes('capacity exceeded')) {
+          errorCode = 'CLASS_CAPACITY_EXCEEDED';
+        } else if (errorMessage.includes('not found') || errorMessage.includes('same school')) {
+          errorCode = 'STUDENT_NOT_FOUND';
+        } else if (errorMessage.includes('access denied')) {
+          errorCode = 'ACCESS_DENIED';
+        }
+        
+        throw ClassServiceError.create(
+          errorCode,
+          errorMessage,
+          { classId, studentId: validatedData.student_id, teacherId }
+        );
+      }
+
+      // Note: Audit logging is handled by the atomic function
     } catch (error) {
       if (error instanceof ClassServiceError) {
         throw error;
@@ -401,6 +430,7 @@ export class ClassEnrollmentService {
 
   /**
    * Bulk enroll multiple students in a class
+   * Uses atomic database function to prevent race conditions and enforce capacity limits
    */
   static async bulkEnrollStudents(
     classId: number,
@@ -410,33 +440,71 @@ export class ClassEnrollmentService {
     results: string[];
     errors: Array<{ studentId: string; error: string }>;
   }> {
-    // Validate input
-    const validatedData = BulkEnrollStudentsSchema.parse(enrollmentData);
-    
-    const results: string[] = [];
-    const errors: Array<{ studentId: string; error: string }> = [];
+    try {
+      // Validate input
+      const validatedData = BulkEnrollStudentsSchema.parse(enrollmentData);
+      
+      // Get teacher's school_id for the atomic function
+      const { data: teacherProfile } = await supabase
+        .from('profiles')
+        .select('school_id')
+        .eq('id', teacherId)
+        .single();
 
-    for (const studentId of validatedData.student_ids) {
-      try {
-        await ClassEnrollmentService.enrollStudent(
-          classId,
-          {
-            student_id: studentId,
-            enrollment_date: validatedData.enrollment_date,
-            notes: validatedData.notes,
-          },
-          teacherId
+      if (!teacherProfile) {
+        throw ClassServiceError.create(
+          'TEACHER_NOT_FOUND',
+          'Teacher profile not found',
+          { teacherId, classId }
         );
-        results.push(studentId);
-      } catch (error) {
-        errors.push({
-          studentId,
-          error: error instanceof ClassServiceError ? error.message : 'Unknown error',
-        });
       }
-    }
 
-    return { results, errors };
+      // Use atomic function to enroll students with capacity checking
+      const { data: result, error } = await supabase
+        .rpc('add_students_to_class_atomic', {
+          p_class_id: classId,
+          p_student_ids: validatedData.student_ids,
+          p_teacher_id: teacherId,
+          p_school_id: teacherProfile.school_id
+        });
+
+      if (error) {
+        throw ClassServiceError.create(
+          'BULK_ENROLLMENT_FAILED',
+          'Failed to bulk enroll students',
+          { originalError: error, classId, teacherId }
+        );
+      }
+
+      // Check if enrollment was successful
+      if (!result || result.length === 0) {
+        throw ClassServiceError.create(
+          'BULK_ENROLLMENT_FAILED',
+          'Atomic enrollment function returned no results',
+          { classId, teacherId }
+        );
+      }
+
+      const enrollmentResult = result[0];
+      
+      // Transform results to match expected format
+      const results = enrollmentResult.success || [];
+      const errors = (enrollmentResult.errors || []).map((err: any) => ({
+        studentId: err.student_id,
+        error: err.error
+      }));
+
+      return { results, errors };
+    } catch (error) {
+      if (error instanceof ClassServiceError) {
+        throw error;
+      }
+      throw ClassServiceError.create(
+        'UNEXPECTED_ERROR',
+        'An unexpected error occurred during bulk enrollment',
+        { originalError: error, classId, teacherId }
+      );
+    }
   }
 
   /**

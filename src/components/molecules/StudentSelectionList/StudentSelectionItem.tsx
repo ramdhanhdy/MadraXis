@@ -69,14 +69,26 @@ export const StudentSelectionItem: React.FC<StudentSelectionItemProps> = memo(({
 
   // Format student grade level
   const getGradeLevel = (): string => {
-    // This would need to be implemented based on your data structure
-    // For now, we'll use a placeholder
-    return 'SMA'; // or derive from student data
+    // Derive grade level from date of birth if available
+    if (student.date_of_birth) {
+      const birthYear = new Date(student.date_of_birth).getFullYear();
+      const currentYear = new Date().getFullYear();
+      const age = currentYear - birthYear;
+      
+      // Rough estimation: SMP (12-15 years), SMA (15-18 years)
+      if (age >= 12 && age <= 15) return 'SMP';
+      if (age >= 15 && age <= 18) return 'SMA';
+    }
+    
+    // Default fallback
+    return 'N/A';
   };
 
   // Format boarding status
   const getBoardingStatus = (): string => {
-    return student.boarding ? 'Boarding' : 'Day Student';
+    if (student.boarding === true) return 'Boarding';
+    if (student.boarding === false) return 'Day Student';
+    return 'Unknown';
   };
 
   // Get boarding status color

@@ -39,6 +39,14 @@ export const BulkEnrollStudentsSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const GetAvailableStudentsOptionsSchema = z.object({
+  searchTerm: z.string().min(1).max(100).optional(),
+  gender: z.enum(['male', 'female']).optional(),
+  boarding: z.enum(['day', 'boarding']).optional(),
+  limit: z.number().int().min(1).max(100).default(10).optional(),
+  page: z.number().int().min(1).default(1).optional(),
+});
+
 // Type definitions
 export interface CreateClassRequest {
   name: string;

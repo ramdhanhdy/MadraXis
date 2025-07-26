@@ -104,7 +104,7 @@ const StudentSelectionListComponent: React.FC<StudentSelectionListProps> = ({
     ...filters,
   });
 
-  // Debounced search effect
+  // Debounced search and filter effect
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (onFiltersChange) {
@@ -118,31 +118,52 @@ const StudentSelectionListComponent: React.FC<StudentSelectionListProps> = ({
     return () => clearTimeout(timeoutId);
   }, [searchQuery, localFilters, onFiltersChange]);
 
-  // Filter students based on current filters
+  // Helper function to determine student grade level
+  const getStudentGradeLevel = useCallback((student: StudentWithDetails): 'SMA' | 'SMP' | null => {
+    // Since grade level is not directly available in StudentWithDetails,
+    // we can derive it from the class level prop or implement logic based on age/date_of_birth
+    if (classLevel) {
+      return classLevel;
+    }
+    
+    // Alternative: derive from date of birth if available
+    if (student.date_of_birth) {
+      const birthYear = new Date(student.date_of_birth).getFullYear();
+      const currentYear = new Date().getFullYear();
+      const age = currentYear - birthYear;
+      
+      // Rough estimation: SMP (12-15 years), SMA (15-18 years)
+      if (age >= 12 && age <= 15) return 'SMP';
+      if (age >= 15 && age <= 18) return 'SMA';
+    }
+    
+    return null;
+  }, [classLevel]);
+
+  // Filter students based on current filters (client-side only for non-search filters)
   const filteredStudents = useMemo(() => {
     return students.filter(student => {
-      // Search filter
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const nameMatch = student.full_name.toLowerCase().includes(query);
-        const nisMatch = student.nis?.toLowerCase().includes(query);
-        if (!nameMatch && !nisMatch) return false;
-      }
+      // Note: Search filtering is handled server-side via onFiltersChange
+      // Only apply client-side filters that are not handled by the server
 
       // Grade level filter
       if (localFilters.gradeLevel && localFilters.gradeLevel !== 'all') {
-        // Assuming grade level is derived from student details or class association
-        // This would need to be implemented based on your data structure
+        const studentGradeLevel = getStudentGradeLevel(student);
+        if (!studentGradeLevel || studentGradeLevel !== localFilters.gradeLevel) {
+          return false;
+        }
       }
 
-      // Boarding filter
-      if (localFilters.boarding !== 'all') {
-        if (student.boarding !== localFilters.boarding) return false;
-      }
+      // Boarding filter (if not handled server-side)
+       if (localFilters.boarding !== 'all') {
+         const studentBoardingStatus = student.boarding;
+         if (localFilters.boarding === true && !studentBoardingStatus) return false;
+         if (localFilters.boarding === false && studentBoardingStatus) return false;
+       }
 
       return true;
     });
-  }, [students, searchQuery, localFilters]);
+  }, [students, localFilters, getStudentGradeLevel]);
 
   // Handle search input change
   const handleSearchChange = useCallback((text: string) => {
@@ -151,11 +172,21 @@ const StudentSelectionListComponent: React.FC<StudentSelectionListProps> = ({
 
   // Handle filter changes
   const handleFilterChange = useCallback((key: keyof StudentFilters, value: any) => {
-    setLocalFilters(prev => ({
-      ...prev,
+    const newFilters = {
+      ...localFilters,
       [key]: value,
-    }));
-  }, []);
+    };
+    
+    setLocalFilters(newFilters);
+    
+    // Trigger server-side filtering for supported filters
+    if (onFiltersChange) {
+      onFiltersChange({
+        ...newFilters,
+        search: searchQuery.trim(),
+      });
+    }
+  }, [localFilters, searchQuery, onFiltersChange]);
 
   // Handle student selection toggle
   const handleStudentToggle = useCallback((studentId: string) => {
