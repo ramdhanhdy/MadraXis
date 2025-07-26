@@ -164,6 +164,6 @@ export async function fetchDashboardMetrics(schoolId: number): Promise<DatabaseR
     return { data: metrics, error: null };
   } catch (err) {
     console.error('Service error fetching dashboard metrics:', err);
-    return { data: null, error: err };
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
-}   
+}

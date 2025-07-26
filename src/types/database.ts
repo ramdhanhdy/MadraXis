@@ -401,6 +401,14 @@ export interface Database {
         };
       };
     };
+    Enums: {
+      user_role: 'student' | 'teacher' | 'parent' | 'management';
+      class_status: 'active' | 'inactive' | 'archived';
+      gender: 'M' | 'F';
+      semester: '1' | '2';
+      incident_status: 'pending' | 'investigating' | 'resolved' | 'closed';
+      audit_operation: 'INSERT' | 'UPDATE' | 'DELETE';
+    };
     Functions: {
       add_students_to_class_atomic: {
         Args: {

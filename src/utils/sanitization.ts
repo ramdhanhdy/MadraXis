@@ -14,8 +14,8 @@ export function sanitizeLikeInput(input: string): string {
   
   // Remove SQL special characters and escape wildcards
   return input
-    .replace(/[%_\\]/g, '\\$&') // Escape %, _, and \ characters
-    .replace(/['"`;\-\-\/\*\+\=\<\>\!\@\#\$\^\&\*\(\)\[\]\{\}\|\:\?\~]/g, '') // Remove dangerous characters
+    .replace(/[%_\\]/g, '\\$&') // Escape %, _, and \\ characters
+    .replace(/['"`;\*\+\=\<\>\!\@\#\$\^\&\*\(\)\[\]\{\}\|\:\?\~]/g, '') // Remove dangerous characters (preserving hyphens)
     .trim()
     .slice(0, 255); // Limit length to prevent buffer overflow
 }

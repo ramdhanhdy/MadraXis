@@ -71,8 +71,8 @@ export async function fetchStudents(schoolId: number, limit?: number): Promise<D
 
     return { data: students, error: null };
   } catch (err) {
-    console.error('Service error fetching students:', err);
-    return { data: null, error: err };
+console.error('Service error fetching students:', err);
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
 
@@ -134,7 +134,7 @@ export async function fetchStudentById(studentId: string): Promise<DatabaseRespo
     }
 
     if (!data) {
-      return { data: null, error: { message: 'Student not found' } };
+      return { data: null, error: new Error('Student not found') };
     }
 
     // Transform to Student interface by explicitly mapping fields
@@ -150,10 +150,10 @@ export async function fetchStudentById(studentId: string): Promise<DatabaseRespo
       // Mapped-in fields for Student
       details: data.student_details?.[0] || undefined,
       performance: data.student_performance || [],
-      class_name: data.class_students?.[0]?.classes?.name,
-      parent_name: data.student_parent?.[0]?.parent_profile?.full_name,
-      parent_phone: data.student_parent?.[0]?.parent_profile?.parent_details?.[0]?.phone_number ?? undefined,
-      address: data.student_parent?.[0]?.parent_profile?.parent_details?.[0]?.address ?? undefined,
+      class_name: (data as any).class_students?.[0]?.classes?.name,
+      parent_name: (data as any).student_parent?.[0]?.parent_profile?.full_name,
+      parent_phone: (data as any).student_parent?.[0]?.parent_profile?.parent_details?.[0]?.phone_number ?? undefined,
+      address: (data as any).student_parent?.[0]?.parent_profile?.parent_details?.[0]?.address ?? undefined,
       quran_progress: {
         memorized_verses: 0,
         total_verses: 6236
@@ -163,7 +163,7 @@ export async function fetchStudentById(studentId: string): Promise<DatabaseRespo
     return { data: student, error: null };
   } catch (err) {
     console.error('Service error fetching student by ID:', err);
-    return { data: null, error: err };
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
 
@@ -219,7 +219,7 @@ export async function fetchTeachers(schoolId: number, limit?: number): Promise<D
     return { data: teachers, error: null };
   } catch (err) {
     console.error('Service error fetching teachers:', err);
-    return { data: null, error: err };
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
 
@@ -270,7 +270,7 @@ export async function fetchUserProfile(userId: string): Promise<DatabaseResponse
     return { data, error: null };
   } catch (err) {
     console.error('Service error fetching user profile:', err);
-    return { data: null, error: err };
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
 
@@ -327,7 +327,7 @@ export async function searchStudents(schoolId: number, searchTerm: string, limit
     return { data: students, error: null };
   } catch (err) {
     console.error('Service error searching students:', err);
-    return { data: null, error: err };
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
 
@@ -352,7 +352,7 @@ export async function getStudentCount(schoolId: number): Promise<DatabaseRespons
     return { data: count || 0, error: null };
   } catch (err) {
     console.error('Service error counting students:', err);
-    return { data: null, error: err };
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
 
@@ -377,6 +377,6 @@ export async function getTeacherCount(schoolId: number): Promise<DatabaseRespons
     return { data: count || 0, error: null };
   } catch (err) {
     console.error('Service error counting teachers:', err);
-    return { data: null, error: err };
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
-} 
+}

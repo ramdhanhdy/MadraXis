@@ -37,7 +37,7 @@ export async function fetchSchoolById(schoolId: number): Promise<DatabaseRespons
     return { data, error: null };
   } catch (err) {
     console.error('Service error fetching school by ID:', err);
-    return { data: null, error: err };
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
 
@@ -77,6 +77,6 @@ export async function saveSchool(schoolData: School, schoolId?: number): Promise
     return { data, error: null };
   } catch (err) {
     console.error('Service error saving school:', err);
-    return { data: null, error: err };
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
-} 
+}
