@@ -76,7 +76,7 @@ export default function ClassStudentsTemplate() {
         [{ text: 'OK' }]
       );
     }
-  }, [classId, user?.id, students.length]);
+  }, [classId, user?.id]);
 
   // Update class data when students change via real-time updates
   // Remove this useEffect as studentCount is no longer needed

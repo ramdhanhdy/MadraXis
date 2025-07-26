@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../utils/supabase';
 
 interface UseStudentCountSubscriptionProps {
   classIds: number[];

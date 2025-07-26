@@ -83,11 +83,13 @@ export class ClassBulkOperations {
         }
 
         // Log update action
+        const changedFields = Object.keys(updateFields);
+        const newData = { ...currentClass, ...updateFields };
         await ClassAuditService.logClassUpdate(
           classId,
-          updateFields,
+          changedFields,
           currentClass,
-          updateFields,
+          newData,
           teacherId
         );
 
