@@ -19,6 +19,7 @@ import { Typography } from '../../atoms/Typography';
 import { Icon } from '../../atoms/Icon';
 import { Avatar } from '../../atoms/Avatar';
 import { StudentWithDetails } from '../../../types';
+import { determineGradeLevel } from '../../../utils/dateHelpers';
 
 // Props interface
 export interface StudentSelectionItemProps {
@@ -71,7 +72,6 @@ export const StudentSelectionItem: React.FC<StudentSelectionItemProps> = memo(({
   const getGradeLevel = (): string => {
     // Use the new accurate grade level determination
     if (student.date_of_birth) {
-      const { determineGradeLevel } = require('../../../utils/dateHelpers');
       const gradeLevel = determineGradeLevel(student.date_of_birth);
       return gradeLevel || 'N/A';
     }

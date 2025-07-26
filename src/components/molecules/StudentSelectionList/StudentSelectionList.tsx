@@ -27,6 +27,7 @@ import { EmptyState } from '../EmptyState/EmptyState';
 import { StudentWithDetails } from '../../../types';
 import { StudentSelectionItem } from './StudentSelectionItem';
 import { BulkActionBar } from '../BulkActionBar';
+import { determineGradeLevel } from '../../../utils/dateHelpers';
 
 // Filter options for student selection
 export interface StudentFilters {
@@ -118,11 +119,33 @@ const StudentSelectionListComponent: React.FC<StudentSelectionListProps> = ({
     return () => clearTimeout(timeoutId);
   }, [searchQuery, localFilters, onFiltersChange]);
 
+  // Sync local state with external filters prop changes
+  useEffect(() => {
+    // Update searchQuery when filters.search changes externally
+    if (filters.search !== searchQuery) {
+      setSearchQuery(filters.search || '');
+    }
+    
+    // Update localFilters when filters prop changes externally
+    // This ensures local state stays synchronized with external changes
+    const shouldUpdateLocalFilters =
+      filters.gradeLevel !== localFilters.gradeLevel ||
+      filters.boarding !== localFilters.boarding ||
+      filters.search !== localFilters.search;
+    
+    if (shouldUpdateLocalFilters) {
+      setLocalFilters({
+        gradeLevel: classLevel || 'all',
+        boarding: 'all',
+        ...filters,
+      });
+    }
+  }, [filters, classLevel, searchQuery, localFilters.gradeLevel, localFilters.boarding, localFilters.search]);
+
   // Helper function to determine student grade level
   const getStudentGradeLevel = useCallback((student: StudentWithDetails): 'SMA' | 'SMP' | null => {
     // Use the new accurate grade level determination
     if (student.date_of_birth) {
-      const { determineGradeLevel } = require('../../../utils/dateHelpers');
       const gradeLevel = determineGradeLevel(student.date_of_birth);
       return gradeLevel as 'SMA' | 'SMP' | null;
     }
@@ -146,11 +169,15 @@ const StudentSelectionListComponent: React.FC<StudentSelectionListProps> = ({
       }
 
       // Boarding filter (if not handled server-side)
-       if (localFilters.boarding !== 'all') {
-         const studentBoardingStatus = student.boarding;
-         if (localFilters.boarding === true && !studentBoardingStatus) return false;
-         if (localFilters.boarding === false && studentBoardingStatus) return false;
-       }
+      if (localFilters.boarding !== 'all') {
+        const studentBoardingStatus = student.boarding;
+        // Explicitly handle undefined/null values
+        if (studentBoardingStatus === undefined || studentBoardingStatus === null) {
+          return false; // Exclude students with undefined boarding status from all boarding filters
+        }
+        if (localFilters.boarding === true && !studentBoardingStatus) return false;
+        if (localFilters.boarding === false && studentBoardingStatus) return false;
+      }
 
       return true;
     });
