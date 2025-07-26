@@ -54,7 +54,7 @@ export default function ClassesList() {
       setError(null);
       
       console.log('Fetching classes for user:', user.id);
-      const classes = await ClassService.getTeacherClasses(user.id, {
+      const { classes } = await ClassService.getClasses(user.id, {
           searchTerm: debouncedSearchQuery,
           status: filterStatus === 'all' ? undefined : filterStatus,
           sortBy,

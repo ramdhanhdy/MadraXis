@@ -23,7 +23,7 @@ describe('Sanitization Utilities - Security Tests', () => {
       expect(sanitizeLikeInput('test_')).toBe('test');
       expect(sanitizeLikeInput("test' OR 1=1--")).toBe('test OR 11');
       expect(sanitizeLikeInput('test"; DROP TABLE users;--')).toBe('test DROP TABLE users');
-      expect(sanitizeLikeInput('test\')).toBe('test');
+      expect(sanitizeLikeInput('test\'')).toBe('test');
     });
 
     it('should handle edge cases', () => {

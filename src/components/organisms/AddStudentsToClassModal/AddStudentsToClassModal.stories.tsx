@@ -26,44 +26,39 @@ const mockClassService = ClassService as jest.Mocked<typeof ClassService>;
 // Mock data - matching AvailableStudent interface
 const mockStudents = [
   {
-    id: '1',
+    student_id: '1',
     full_name: 'John Doe',
     nis: '12345',
-    gender: 'male',
-    boarding: true,
-    date_of_birth: '2008-05-15',
+    gender: 'male' as const,
+    boarding: 'boarding' as const,
   },
   {
-    id: '2',
+    student_id: '2',
     full_name: 'Jane Smith',
     nis: '12346',
-    gender: 'female',
-    boarding: false,
-    date_of_birth: '2008-03-22',
+    gender: 'female' as const,
+    boarding: 'day' as const,
   },
   {
-    id: '3',
+    student_id: '3',
     full_name: 'Bob Johnson',
     nis: '12347',
-    gender: 'male',
-    boarding: true,
-    date_of_birth: '2007-11-08',
+    gender: 'male' as const,
+    boarding: 'boarding' as const,
   },
   {
-    id: '4',
+    student_id: '4',
     full_name: 'Alice Brown',
     nis: '12348',
-    gender: 'female',
-    boarding: false,
-    date_of_birth: '2009-01-30',
+    gender: 'female' as const,
+    boarding: 'day' as const,
   },
   {
-    id: '5',
+    student_id: '5',
     full_name: 'Charlie Wilson',
     nis: '12349',
-    gender: 'male',
-    boarding: true,
-    date_of_birth: '2008-07-12',
+    gender: 'male' as const,
+    boarding: 'boarding' as const,
   },
 ];
 
@@ -128,8 +123,10 @@ export const Default: Story = {
     mockClassService.getAvailableStudents.mockResolvedValue({
       students: mockStudents,
       total: mockStudents.length,
-      page: 1,
-      limit: 20,
+    });
+    mockClassService.bulkEnrollStudents.mockResolvedValue({
+      results: [],
+      errors: [],
     });
   },
 };
@@ -155,8 +152,6 @@ export const EmptyState: Story = {
     mockClassService.getAvailableStudents.mockResolvedValue({
       students: [],
       total: 0,
-      page: 1,
-      limit: 20,
     });
   },
 };
@@ -180,19 +175,16 @@ export const LargeDataset: Story = {
   },
   beforeEach: () => {
     const largeStudentList = Array.from({ length: 50 }, (_, index) => ({
-      id: `${index + 1}`,
+      student_id: `${index + 1}`,
       full_name: `Student ${index + 1}`,
       nis: `${10000 + index}`,
-      gender: index % 2 === 0 ? 'male' : 'female',
-      boarding: index % 2 === 0,
-      date_of_birth: `200${8 + (index % 4)}-0${(index % 12) + 1}-15`,
+      gender: index % 2 === 0 ? ('male' as const) : ('female' as const),
+      boarding: index % 2 === 0 ? ('boarding' as const) : ('day' as const),
     }));
 
     mockClassService.getAvailableStudents.mockResolvedValue({
       students: largeStudentList.slice(0, 20), // First page
       total: largeStudentList.length,
-      page: 1,
-      limit: 20,
     });
   },
 };
@@ -219,8 +211,6 @@ export const WithSearchResults: Story = {
     mockClassService.getAvailableStudents.mockResolvedValue({
       students: searchResults,
       total: searchResults.length,
-      page: 1,
-      limit: 20,
     });
   },
 };
@@ -234,28 +224,24 @@ export const ElementaryClass: Story = {
   beforeEach: () => {
     const elementaryStudents = [
       {
-        id: '10',
+        student_id: '10',
         full_name: 'Emma Davis',
         nis: '50001',
-        gender: 'female',
-        boarding: false,
-        date_of_birth: '2013-04-10',
+        gender: 'female' as const,
+        boarding: 'day' as const,
       },
       {
-        id: '11',
+        student_id: '11',
         full_name: 'Liam Miller',
         nis: '50002',
-        gender: 'male',
-        boarding: true,
-        date_of_birth: '2013-08-22',
+        gender: 'male' as const,
+        boarding: 'boarding' as const,
       },
     ];
 
     mockClassService.getAvailableStudents.mockResolvedValue({
       students: elementaryStudents,
       total: elementaryStudents.length,
-      page: 1,
-      limit: 20,
     });
   },
 };
@@ -268,28 +254,24 @@ export const HighSchoolClass: Story = {
   beforeEach: () => {
     const highSchoolStudents = [
       {
-        id: '20',
+        student_id: '20',
         full_name: 'Sophia Anderson',
         nis: '60001',
-        gender: 'female',
-        boarding: true,
-        date_of_birth: '2006-12-05',
+        gender: 'female' as const,
+        boarding: 'boarding' as const,
       },
       {
-        id: '21',
+        student_id: '21',
         full_name: 'Mason Taylor',
         nis: '60002',
-        gender: 'male',
-        boarding: false,
-        date_of_birth: '2006-09-18',
+        gender: 'male' as const,
+        boarding: 'day' as const,
       },
     ];
 
     mockClassService.getAvailableStudents.mockResolvedValue({
       students: highSchoolStudents,
       total: highSchoolStudents.length,
-      page: 1,
-      limit: 20,
     });
   },
 };
@@ -301,50 +283,48 @@ export const Interactive: Story = {
   },
   beforeEach: () => {
     // Set up realistic mock responses for interactive testing
-    mockClassService.getAvailableStudents.mockImplementation(async (classId, userId, filters, pagination) => {
+    mockClassService.getAvailableStudents.mockImplementation(async (classId, userId, options) => {
       // Simulate search functionality
       let filteredStudents = mockStudents;
       
-      if (filters?.search) {
+      if (options?.searchTerm) {
         filteredStudents = mockStudents.filter(student =>
-          student.full_name.toLowerCase().includes(filters.search!.toLowerCase()) ||
-          student.nis.includes(filters.search!)
+          student.full_name.toLowerCase().includes(options.searchTerm!.toLowerCase()) ||
+          student.nis.includes(options.searchTerm!)
         );
       }
 
       // Simulate gender filter
-      if (filters?.gender) {
+      if (options?.gender) {
         filteredStudents = filteredStudents.filter(student =>
-          student.gender === filters.gender
+          student.gender === options.gender
         );
       }
 
       // Simulate boarding status filter
-      if (filters?.boarding !== undefined) {
+      if (options?.boarding !== undefined) {
         filteredStudents = filteredStudents.filter(student =>
-          student.boarding === filters.boarding
+          student.boarding === options.boarding
         );
       }
 
       // Simulate pagination
-      const page = pagination?.page || 1;
-      const limit = pagination?.limit || 20;
+      const page = options?.page || 1;
+      const limit = options?.limit || 20;
       const offset = (page - 1) * limit;
       const paginatedStudents = filteredStudents.slice(offset, offset + limit);
 
       return {
         students: paginatedStudents,
         total: filteredStudents.length,
-        page,
-        limit,
       };
     });
 
-    mockClassService.addStudentsToClass.mockImplementation(async (classId, studentIds, userId) => {
+    mockClassService.bulkEnrollStudents.mockImplementation(async (classId, enrollmentData, userId) => {
       // Simulate successful addition
-      console.log(`Added ${studentIds.length} students to class ${classId}`);
+      console.log(`Added ${enrollmentData.student_ids.length} students to class ${classId}`);
       return Promise.resolve({
-        success: studentIds,
+        results: enrollmentData.student_ids,
         errors: [],
       });
     });

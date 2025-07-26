@@ -40,7 +40,7 @@ const mockAddStudentsToClass = jest.fn();
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
 (ClassService.getAvailableStudents as jest.Mock) = mockGetAvailableStudents;
-(ClassService.addStudentsToClass as jest.Mock) = mockAddStudentsToClass;
+(ClassService.bulkEnrollStudents as jest.Mock) = mockAddStudentsToClass;
 
 mockUseAuth.mockReturnValue({
   user: {
@@ -72,28 +72,25 @@ const mockUser = {
 
 const mockStudents = [
   {
-    id: '1',
+    student_id: '1',
     full_name: 'John Doe',
     nis: '12345',
-    gender: 'M',
+    gender: 'male' as const,
     boarding: true,
-    date_of_birth: '2005-01-15',
   },
   {
-    id: '2',
+    student_id: '2',
     full_name: 'Jane Smith',
     nis: '12346',
-    gender: 'F',
+    gender: 'female' as const,
     boarding: false,
-    date_of_birth: '2005-03-20',
   },
   {
-    id: '3',
+    student_id: '3',
     full_name: 'Bob Johnson',
     nis: '12347',
-    gender: 'M',
+    gender: 'male' as const,
     boarding: true,
-    date_of_birth: '2005-05-10',
   },
 ];
 
@@ -111,9 +108,6 @@ describe('AddStudentsToClassModal', () => {
     mockGetAvailableStudents.mockResolvedValue({
       students: mockStudents,
       total: mockStudents.length,
-      page: 1,
-      limit: 20,
-      hasMore: false,
     });
     mockAddStudentsToClass.mockResolvedValue(undefined);
   });
@@ -173,8 +167,10 @@ expect(screen.getByText('Select students to add to this class')).toBeTruthy();
         expect(mockGetAvailableStudents).toHaveBeenCalledWith(
           1,
           'user-1',
-          {},
-          {page: 1, limit: 20}
+          expect.objectContaining({
+            page: 1,
+            limit: 20
+          })
         );
         expect(mockGetAvailableStudents).toHaveBeenCalledTimes(1);
       });
@@ -212,9 +208,6 @@ expect(screen.getByText('Select students to add to this class')).toBeTruthy();
       mockGetAvailableStudents.mockResolvedValue({
         students: [],
         total: 0,
-        page: 1,
-        limit: 20,
-        hasMore: false,
       });
 
       render(
@@ -290,8 +283,11 @@ expect(screen.getByText('Select students to add to this class')).toBeTruthy();
         expect(mockGetAvailableStudents).toHaveBeenCalledWith(
           1,
           'user-1',
-          expect.objectContaining({ search: 'John Doe' }),
-          expect.objectContaining({ limit: 20, page: 1 })
+          expect.objectContaining({ 
+            searchTerm: 'John Doe',
+            limit: 20, 
+            page: 1 
+          })
         );
       });
 

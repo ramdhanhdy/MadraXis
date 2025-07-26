@@ -1,28 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
-  Text,
-  TextInput,
-  TouchableOpacity,
   Alert,
-  ActivityIndicator,
-  RefreshControl,
-  FlatList,
+  StyleSheet,
 } from 'react-native';
 import { Modal } from '../Modal';
-import { Ionicons } from '@expo/vector-icons';
 import { ClassService } from '../../../services/classService';
 import { useAuth } from '../../../context/AuthContext';
-import { styles } from './AddStudentsToClassModal.styles';
+import { useTheme } from '../../../context/ThemeContext';
+import { StudentSelectionList, StudentFilters } from '../../molecules/StudentSelectionList/StudentSelectionList';
+import { StudentWithDetails } from '../../../types';
+import { Button } from '../../atoms/Button';
+import { Typography } from '../../atoms/Typography';
 
 // Available student type from ClassService
 interface AvailableStudent {
-  id: string;
+  student_id: string;
   full_name: string;
-  nis: string;
-  gender: string;
-  boarding: boolean;
-  date_of_birth: string;
+  nis?: string;
+  gender?: 'male' | 'female';
+  boarding?: 'day' | 'boarding';
 }
 
 // Component Props Interface
@@ -33,12 +30,20 @@ export interface AddStudentsToClassModalProps {
   onStudentsAdded?: () => void;
 }
 
-// Filter state interface
-interface FilterState {
-  search: string;
-  boarding?: boolean;
-  gender?: string;
-}
+// Data adapter to convert AvailableStudent to StudentWithDetails
+const adaptAvailableStudentToStudentWithDetails = (student: AvailableStudent): StudentWithDetails => {
+  return {
+    id: student.student_id,
+    full_name: student.full_name,
+    role: 'student' as const,
+    school_id: 0, // Will be populated by the service
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    nis: student.nis,
+    gender: student.gender === 'male' ? 'M' : student.gender === 'female' ? 'F' : undefined,
+    boarding: student.boarding === 'boarding' ? true : student.boarding === 'day' ? false : undefined,
+  };
+};
 
 export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = ({
   visible,
@@ -48,23 +53,69 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
 }) => {
   // Hooks
   const { user } = useAuth();
+  const { theme } = useTheme();
+  
+  // Create styles
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    },
+    errorContainer: {
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      backgroundColor: theme.colors.error.light,
+      borderRadius: 8,
+      marginBottom: 16,
+      alignItems: 'center',
+    },
+    errorText: {
+      fontSize: 14,
+      textAlign: 'center',
+      marginBottom: 8,
+    },
+    retryButton: {
+      marginTop: 8,
+    },
+    studentsContainer: {
+      flex: 1,
+      marginBottom: 16,
+    },
+    actions: {
+      flexDirection: 'row',
+      gap: 12,
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border.primary,
+    },
+    cancelButton: {
+      flex: 1,
+    },
+    addButton: {
+      flex: 2,
+    },
+    addButtonDisabled: {
+      opacity: 0.6,
+    },
+  });
 
   // State management
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [students, setStudents] = useState<AvailableStudent[]>([]);
+  const [students, setStudents] = useState<StudentWithDetails[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set());
-  const [filters, setFilters] = useState<FilterState>({
+  const [filters, setFilters] = useState<StudentFilters>({
     search: '',
-    boarding: undefined,
-    gender: undefined,
+    boarding: 'all',
+    gradeLevel: 'all',
   });
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
     total: 0,
+    hasMore: false,
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -80,22 +131,22 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
         classId,
         user.id,
         {
-          search: debouncedSearch || undefined,
-          boarding: filters.boarding,
-          gender: filters.gender,
-        },
-        {
+          searchTerm: filters.search || undefined,
+          boarding: filters.boarding === true ? 'boarding' : filters.boarding === false ? 'day' : undefined,
+          gender: undefined, // Grade level filtering will be handled client-side for now
           page: pagination.page,
           limit: pagination.limit,
         }
       );
       
-      setStudents(result.students);
-      setPagination({
-        page: result.page,
-        limit: result.limit,
+      // Adapt the data to StudentWithDetails format
+      const adaptedStudents = result.students.map(adaptAvailableStudentToStudentWithDetails);
+      setStudents(adaptedStudents);
+      setPagination(prev => ({
+        ...prev,
         total: result.total,
-      });
+        hasMore: result.students.length === pagination.limit,
+      }));
     } catch (err: any) {
       console.error('Error loading students:', err);
       setError(err.message || 'Failed to load students');
@@ -103,23 +154,14 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
       setLoading(false);
       setRefreshing(false);
     }
-  }, [classId, user?.id, debouncedSearch, filters.boarding, filters.gender, pagination.page, pagination.limit]);
+  }, [classId, user?.id, filters.search, filters.boarding, pagination.page, pagination.limit]);
 
-  // Debounce search query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(filters.search);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [filters.search]);
-
-  // Load students when modal opens or debounced search/filters change
+  // Load students when modal opens or filters change
   useEffect(() => {
     if (visible) {
       loadStudents();
     }
-  }, [visible, debouncedSearch, filters.boarding, filters.gender, pagination.page, pagination.limit, loadStudents]);
+  }, [visible, loadStudents]);
 
   // Reset state when modal closes
   useEffect(() => {
@@ -128,25 +170,17 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
       setError(null);
       setFilters({
         search: '',
-        boarding: undefined,
-        gender: undefined,
+        boarding: 'all',
+        gradeLevel: 'all',
       });
-      setPagination({ page: 1, limit: 20, total: 0 });
+      setPagination({ page: 1, limit: 20, total: 0, hasMore: false });
     }
   }, [visible]);
 
   // Handle filter changes
-  const handleFilterChange = useCallback((key: keyof FilterState, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+  const handleFiltersChange = useCallback((newFilters: StudentFilters) => {
+    setFilters(newFilters);
     setSelectedStudents(new Set()); // Clear selections when filters change
-    setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page
-  }, []);
-
-  // Handle search with debouncing
-  const handleSearchChange = useCallback((text: string) => {
-    // Update the search input immediately for UI responsiveness
-    setFilters(prev => ({ ...prev, search: text }));
-    setSelectedStudents(new Set()); // Clear selections when search changes
     setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page
   }, []);
 
@@ -157,26 +191,39 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
   }, [loadStudents]);
 
   // Handle student selection
-  const toggleStudentSelection = useCallback((studentId: string) => {
+  const handleStudentSelect = useCallback((studentId: string) => {
     setSelectedStudents(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(studentId)) {
-        newSet.delete(studentId);
-      } else {
-        newSet.add(studentId);
-      }
+      newSet.add(studentId);
       return newSet;
     });
   }, []);
 
-  // Handle select all
-  const handleSelectAll = useCallback(() => {
-    if (selectedStudents.size === students.length) {
-      setSelectedStudents(new Set());
-    } else {
-      setSelectedStudents(new Set(students.map(s => s.id)));
+  // Handle student deselection
+  const handleStudentDeselect = useCallback((studentId: string) => {
+    setSelectedStudents(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(studentId);
+      return newSet;
+    });
+  }, []);
+
+  // Handle bulk selection
+  const handleBulkSelect = useCallback((studentIds: string[]) => {
+    setSelectedStudents(new Set(studentIds));
+  }, []);
+
+  // Handle clear selection
+  const handleClearSelection = useCallback(() => {
+    setSelectedStudents(new Set());
+  }, []);
+
+  // Handle load more
+  const handleLoadMore = useCallback(() => {
+    if (!loading && pagination.hasMore) {
+      setPagination(prev => ({ ...prev, page: prev.page + 1 }));
     }
-  }, [students, selectedStudents.size]);
+  }, [loading, pagination.hasMore]);
 
   // Handle adding students
   const handleAddStudents = useCallback(async () => {
@@ -186,7 +233,15 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
       setSubmitting(true);
       
       const studentIds = Array.from(selectedStudents);
-      await ClassService.addStudentsToClass(classId, studentIds, user.id);
+      await ClassService.bulkEnrollStudents(
+        classId,
+        {
+          student_ids: studentIds,
+          enrollment_date: new Date().toISOString(),
+          notes: undefined
+        },
+        user.id
+      );
       
       Alert.alert(
         'Success',
@@ -208,6 +263,9 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
     }
   }, [classId, selectedStudents, user?.id, onStudentsAdded, onClose]);
 
+  // Memoize the adapted students to prevent unnecessary re-renders
+  const adaptedStudents = useMemo(() => students, [students]);
+
   return (
     <Modal
       visible={visible}
@@ -218,227 +276,70 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
       scrollable={false}
     >
       <View style={styles.container}>
-        {/* Search Section */}
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search by name or NIS..."
-            value={filters.search}
-            onChangeText={handleSearchChange}
-            autoCapitalize="none"
-            autoCorrect={false}
-            clearButtonMode="while-editing"
-            accessibilityLabel="Search students"
-          />
-        </View>
-
-        {/* Filters Section */}
-        <View style={styles.filtersContainer}>
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              filters.boarding === true && styles.activeFilterButton,
-            ]}
-            onPress={() => handleFilterChange('boarding', filters.boarding === true ? undefined : true)}
-            accessibilityRole="button"
-            accessibilityLabel="Filter boarding students"
-          >
-            <Text
-              style={[
-                styles.filterButtonText,
-                filters.boarding === true && styles.activeFilterButtonText,
-              ]}
+        {/* Error Display */}
+        {error && (
+          <View style={styles.errorContainer}>
+            <Typography variant="body2" color="error" style={styles.errorText}>
+              {error}
+            </Typography>
+            <Button
+              variant="outline"
+              size="small"
+              onPress={loadStudents}
+              style={styles.retryButton}
             >
-              Boarding
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              filters.boarding === false && styles.activeFilterButton,
-            ]}
-            onPress={() => handleFilterChange('boarding', filters.boarding === false ? undefined : false)}
-            accessibilityRole="button"
-            accessibilityLabel="Filter day students"
-          >
-            <Text
-              style={[
-                styles.filterButtonText,
-                filters.boarding === false && styles.activeFilterButtonText,
-              ]}
-            >
-              Day Student
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              filters.gender === 'M' && styles.activeFilterButton,
-            ]}
-            onPress={() => handleFilterChange('gender', filters.gender === 'M' ? undefined : 'M')}
-            accessibilityRole="button"
-            accessibilityLabel="Filter male students"
-          >
-            <Text
-              style={[
-                styles.filterButtonText,
-                filters.gender === 'M' && styles.activeFilterButtonText,
-              ]}
-            >
-              Male
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              filters.gender === 'F' && styles.activeFilterButton,
-            ]}
-            onPress={() => handleFilterChange('gender', filters.gender === 'F' ? undefined : 'F')}
-            accessibilityRole="button"
-            accessibilityLabel="Filter female students"
-          >
-            <Text
-              style={[
-                styles.filterButtonText,
-                filters.gender === 'F' && styles.activeFilterButtonText,
-              ]}
-            >
-              Female
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Selection Summary */}
-        {selectedStudents.size > 0 && (
-          <View style={styles.selectionSummary}>
-            <Text style={styles.selectionText}>
-              {selectedStudents.size} student{selectedStudents.size !== 1 ? 's' : ''} selected
-            </Text>
-            <TouchableOpacity
-              style={styles.selectAllButton}
-              onPress={handleSelectAll}
-              accessibilityRole="button"
-              accessibilityLabel="Select all students"
-            >
-              <Text style={styles.selectAllButtonText}>
-                {selectedStudents.size === students.length ? 'Deselect All' : 'Select All'}
-              </Text>
-            </TouchableOpacity>
+              Retry
+            </Button>
           </View>
         )}
 
-        {/* Students List */}
+        {/* Student Selection List */}
         <View style={styles.studentsContainer}>
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#007AFF" />
-              <Text style={styles.loadingText}>Loading students...</Text>
-            </View>
-          ) : error ? (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity
-                style={styles.retryButton}
-                onPress={loadStudents}
-                accessibilityRole="button"
-                accessibilityLabel="Retry loading students"
-                testID="retry-button"
-              >
-                <Text style={styles.retryButtonText}>Retry</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <FlatList
-              testID="flat-list"
-              data={students}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item: student }) => {
-                const isSelected = selectedStudents.has(student.id);
-                return (
-                  <TouchableOpacity
-                    style={[styles.studentItem, isSelected && styles.selectedStudentItem]}
-                    onPress={() => toggleStudentSelection(student.id)}
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked: isSelected }}
-                    accessibilityLabel={`${student.full_name}, ${student.nis || 'No NIS'}`}
-                  >
-                    <View style={styles.studentInfo}>
-                      <Text style={styles.studentName}>{student.full_name}</Text>
-                      <Text style={styles.studentDetails}>
-                        NIS: {student.nis || 'N/A'} • {student.gender || 'N/A'} • 
-                        {student.boarding ? 'Boarding' : 'Day Student'}
-                      </Text>
-                    </View>
-                    <View style={[styles.checkbox, isSelected && styles.checkedCheckbox]}>
-                      {isSelected && (
-                        <Ionicons name="checkmark" size={16} color="white" />
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                );
-              }}
-              refreshControl={
-                <RefreshControl
-                  testID="refresh-control"
-                  refreshing={refreshing}
-                  onRefresh={handleRefresh}
-                  colors={['#007AFF']}
-                  tintColor="#007AFF"
-                />
-              }
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 16 }}
-              style={styles.flatList}
-              ListEmptyComponent={
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>No available students found</Text>
-                  <Text style={styles.emptySubtext}>
-                    All students may already be enrolled in this class
-                  </Text>
-                </View>
-              }
-            />
-          )}
+          <StudentSelectionList
+            students={adaptedStudents}
+            selectedStudentIds={selectedStudents}
+            onStudentSelect={handleStudentSelect}
+            onStudentDeselect={handleStudentDeselect}
+            onBulkSelect={handleBulkSelect}
+            onClearSelection={handleClearSelection}
+            onRefresh={handleRefresh}
+            onLoadMore={handleLoadMore}
+            loading={loading}
+            refreshing={refreshing}
+            hasMore={pagination.hasMore}
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            showFilters={true}
+            enableVirtualization={true}
+            accessibilityLabel="Available students for class enrollment"
+            testID="student-selection-list"
+          />
         </View>
 
         {/* Action Buttons */}
         <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.cancelButton}
+          <Button
+            variant="outline"
             onPress={onClose}
-            accessibilityRole="button"
+            style={styles.cancelButton}
             accessibilityLabel="Cancel"
           >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
+            Cancel
+          </Button>
           
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              (selectedStudents.size === 0 || submitting) && styles.addButtonDisabled,
-            ]}
-            onPress={handleAddStudents}
-            disabled={selectedStudents.size === 0 || submitting}
-            accessibilityRole="button"
-            accessibilityLabel={`Add ${selectedStudents.size} students to class`}
-            accessibilityState={{ disabled: selectedStudents.size === 0 || submitting }}
-          >
-            {submitting ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text
-                style={[
-                  styles.addButtonText,
-                  selectedStudents.size === 0 && styles.addButtonTextDisabled,
-                ]}
-              >
-                Add {selectedStudents.size} Student{selectedStudents.size === 1 ? '' : 's'}
-              </Text>
-            )}
-          </TouchableOpacity>
+          <Button
+              variant="primary"
+              onPress={handleAddStudents}
+              disabled={selectedStudents.size === 0 || submitting}
+              loading={submitting}
+              style={{
+                ...styles.addButton,
+                ...(selectedStudents.size === 0 && styles.addButtonDisabled),
+              }}
+              accessibilityLabel={`Add ${selectedStudents.size} students to class`}
+            >
+              Add {selectedStudents.size} Student{selectedStudents.size === 1 ? '' : 's'}
+            </Button>
         </View>
       </View>
     </Modal>
