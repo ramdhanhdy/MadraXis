@@ -87,12 +87,15 @@ export function useStudentCountSubscription({
               .select('*', { count: 'exact', head: true })
               .eq('class_id', classId)
               .then(({ count, error: countError }) => {
-                if (!countError) {
-                  setCounts(prev => ({
-                    ...prev,
-                    [classId]: count || 0,
-                  }));
+                if (countError) {
+                  console.error('Error fetching student count for class', classId, ':', countError);
+                  // Optionally set error state or use cached value
+                  return;
                 }
+                setCounts(prev => ({
+                  ...prev,
+                  [classId]: count || 0,
+                }));
               });
           }
         )
