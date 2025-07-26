@@ -78,14 +78,6 @@ export default function ClassStudentsTemplate() {
     }
   }, [classId, user?.id]);
 
-  // Update class data when students change via real-time updates
-  // Remove this useEffect as studentCount is no longer needed
-  // useEffect(() => {
-  //   if (classData) {
-  //     setClassData(prev => prev ? { ...prev, studentCount: students.length } : null);
-  //   }
-  // }, [students.length]);
-
   // Load class data on mount
   useEffect(() => {
     loadClassData();
@@ -170,10 +162,6 @@ export default function ClassStudentsTemplate() {
     school_id: student.school_id,
     created_at: student.created_at,
     updated_at: student.updated_at,
-    memorizedVerses: 0,
-    totalVerses: 0,
-    lastActivity: new Date().toISOString(),
-    progress: 0,
   });
 
   // Render student item with swipe to delete

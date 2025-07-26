@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +9,8 @@ import { ClassService } from '@/src/services/classService';
 import { Class } from '@/src/types/class';
 import { ClassWithDetails } from '@/src/services/classService';
 import ClassFormModal from '@/src/components/organisms/ClassFormModal';
+import { useStudentCountSubscription } from '@/src/hooks/useStudentCountSubscription';
+import { useClassStudentBreakdown } from '@/src/hooks/useClassStudentBreakdown';
 
 
 
@@ -28,6 +30,21 @@ export default function ClassesList() {
   const [sortBy, setSortBy] = useState<'name' | 'level' | 'student_count' | 'created_at'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showFilterModal, setShowFilterModal] = useState(false);
+
+  // Get class IDs for real-time subscriptions
+  const classIds = useMemo(() => classes.map(c => c.id), [classes]);
+
+  // Real-time student count subscription
+  const { counts: realTimeCounts, loading: countsLoading, error: countsError } = useStudentCountSubscription({
+    classIds,
+    enabled: classes.length > 0
+  });
+
+  // Real-time student breakdown (boarding vs day students)
+  const { breakdowns: studentBreakdowns, loading: breakdownLoading, error: breakdownError } = useClassStudentBreakdown({
+    classIds,
+    enabled: classes.length > 0
+  });
 
   // Debounce search query
   useEffect(() => {
@@ -119,11 +136,41 @@ export default function ClassesList() {
   };
 
   const toggleClassSelection = (classId: number) => {
-    setSelectedClasses(prev => 
-      prev.includes(classId) 
+    setSelectedClasses(prev =>
+      prev.includes(classId)
         ? prev.filter(id => id !== classId)
         : [...prev, classId]
     );
+  };
+
+  // Helper function to determine enrollment status
+  const getEnrollmentStatus = (studentCount: number, capacity: number): 'empty' | 'partial' | 'full' => {
+    const percentage = (studentCount / capacity) * 100;
+    if (percentage < 10) return 'empty';
+    if (percentage > 90) return 'full';
+    return 'partial';
+  };
+
+  // Helper function to get progress bar color
+  const getProgressColor = (percentage: number): string => {
+    if (percentage < 30) return '#4CAF50'; // Green
+    if (percentage < 70) return '#FF9800'; // Orange
+    if (percentage < 90) return '#FF5722'; // Red-orange
+    return '#F44336'; // Red
+  };
+
+  // Helper function to get status badge styles
+  const getStatusBadgeStyle = (status: 'empty' | 'partial' | 'full') => {
+    switch (status) {
+      case 'empty':
+        return { backgroundColor: '#e3f2fd', color: '#1976d2' };
+      case 'partial':
+        return { backgroundColor: '#fff3e0', color: '#f57c00' };
+      case 'full':
+        return { backgroundColor: '#ffebee', color: '#d32f2f' };
+      default:
+        return { backgroundColor: '#f5f5f5', color: '#666666' };
+    }
   };
 
   const toggleBulkSelectionMode = () => {
@@ -188,105 +235,160 @@ export default function ClassesList() {
     }
   };
 
+  const EnhancedClassCard = React.memo(({ item }: { item: ClassWithDetails }) => {
+    // Use real-time counts if available, fallback to cached data
+    const realTimeCount = realTimeCounts[item.id] ?? item.student_count;
+    const breakdown = studentBreakdowns[item.id];
+    
+    const enrollmentStatus = getEnrollmentStatus(realTimeCount, item.student_capacity);
+    const capacityPercentage = Math.min((realTimeCount / item.student_capacity) * 100, 100);
+    const progressColor = getProgressColor(capacityPercentage);
+    
+    return (
+      <TouchableOpacity
+        style={[
+          styles.classCard,
+          selectedClasses.includes(item.id) && styles.selectedCard,
+          item.status === 'archived' && styles.archivedCard
+        ]}
+        onPress={() => {
+          if (bulkSelectionMode) {
+            toggleClassSelection(item.id);
+          } else {
+            router.push({
+              pathname: '/(teacher)/class/[id]',
+              params: { id: item.id }
+            });
+          }
+        }}
+        onLongPress={() => {
+          if (!bulkSelectionMode) {
+            setBulkSelectionMode(true);
+            toggleClassSelection(item.id);
+          }
+        }}
+      >
+        {bulkSelectionMode && (
+          <View style={styles.checkboxContainer}>
+            <Ionicons
+              name={selectedClasses.includes(item.id) ? "checkbox" : "square-outline"}
+              size={24}
+              color="#005e7a"
+            />
+          </View>
+        )}
+        
+        <View style={styles.classHeader}>
+          <View style={styles.classInfo}>
+            <View style={styles.classTitleRow}>
+              <Text style={styles.className}>{item.name}</Text>
+              <View style={[styles.enrollmentBadge, getStatusBadgeStyle(enrollmentStatus)]}>
+                <Text style={[styles.enrollmentBadgeText, getStatusBadgeStyle(enrollmentStatus)]}>
+                  {enrollmentStatus === 'empty' && 'Kosong'}
+                  {enrollmentStatus === 'partial' && 'Isi'}
+                  {enrollmentStatus === 'full' && 'Penuh'}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.classLevel}>{item.level}</Text>
+            <Text style={styles.classDescription}>{item.description}</Text>
+            <View style={styles.classMeta}>
+              <Text style={[styles.statusBadge, styles[`status_${item.status}`]]}>
+                {item.status}
+              </Text>
+              <Text style={styles.academicInfo}>
+                {item.academic_year} - Semester {item.semester}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Progress Bar for Capacity */}
+        <View style={styles.capacitySection}>
+          <View style={styles.capacityHeader}>
+            <Text style={styles.capacityLabel}>Kapasitas</Text>
+            <Text style={styles.capacityCount}>
+              {countsLoading || breakdownLoading ? (
+                <ActivityIndicator size="small" color="#666" />
+              ) : (
+                `${realTimeCount}/${item.student_capacity} siswa`
+              )}
+            </Text>
+          </View>
+          <View style={styles.progressBarContainer}>
+            <View style={[styles.progressBar, { backgroundColor: '#e0e0e0' }]}>
+              <View
+                style={[styles.progressFill, {
+                  width: `${capacityPercentage}%`,
+                  backgroundColor: progressColor
+                }]}
+              />
+            </View>
+            <Text style={styles.progressPercentage}>
+              {Math.round(capacityPercentage)}%
+            </Text>
+          </View>
+        </View>
+
+        {/* Boarding vs Day Student Breakdown */}
+        {breakdown && (
+          <View style={styles.breakdownSection}>
+            <View style={styles.breakdownItem}>
+              <Ionicons name="home" size={14} color="#4CAF50" />
+              <Text style={styles.breakdownText}>
+                Day: {breakdown.dayStudents}
+              </Text>
+            </View>
+            <View style={styles.breakdownItem}>
+              <Ionicons name="bed" size={14} color="#FF9800" />
+              <Text style={styles.breakdownText}>
+                Boarding: {breakdown.boardingStudents}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        <View style={styles.classActions}>
+          <TouchableOpacity
+            style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
+            disabled={item.status === 'archived'}
+            onPress={() => router.push({
+              pathname: '/(teacher)/class/[id]/students',
+              params: { id: item.id }
+            })}
+          >
+            <Ionicons name="people" size={16} color={item.status === 'archived' ? '#ccc' : '#005e7a'} />
+            <Text style={[styles.actionText, item.status === 'archived' && styles.disabledActionText]}>Siswa</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
+            disabled={item.status === 'archived'}
+            onPress={() => router.push({
+              pathname: '/(teacher)/class/[id]',
+              params: { id: item.id, tab: 'subjects' }
+            })}
+          >
+            <Ionicons name="book" size={16} color={item.status === 'archived' ? '#ccc' : '#005e7a'} />
+            <Text style={[styles.actionText, item.status === 'archived' && styles.disabledActionText]}>Mata Pelajaran</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
+            disabled={item.status === 'archived'}
+            onPress={() => router.push({
+              pathname: '/(teacher)/class/[id]',
+              params: { id: item.id, tab: 'reports' }
+            })}
+          >
+            <Ionicons name="document-text" size={16} color={item.status === 'archived' ? '#ccc' : '#005e7a'} />
+            <Text style={[styles.actionText, item.status === 'archived' && styles.disabledActionText]}>Laporan</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  });
+
   const renderClassItem = ({ item }: { item: ClassWithDetails }) => (
-    <TouchableOpacity 
-      style={[
-        styles.classCard,
-        selectedClasses.includes(item.id) && styles.selectedCard,
-        item.status === 'archived' && styles.archivedCard
-      ]}
-      onPress={() => {
-        if (bulkSelectionMode) {
-          toggleClassSelection(item.id);
-        } else {
-          router.push({
-            pathname: '/(teacher)/class/[id]',
-            params: { id: item.id }
-          });
-        }
-      }}
-      onLongPress={() => {
-        if (!bulkSelectionMode) {
-          setBulkSelectionMode(true);
-          toggleClassSelection(item.id);
-        }
-      }}
-    >
-      {bulkSelectionMode && (
-        <View style={styles.checkboxContainer}>
-          <Ionicons 
-            name={selectedClasses.includes(item.id) ? "checkbox" : "square-outline"} 
-            size={24} 
-            color="#005e7a" 
-          />
-        </View>
-      )}
-      
-      <View style={styles.classHeader}>
-        <View style={styles.classInfo}>
-          <Text style={styles.className}>{item.name}</Text>
-          <Text style={styles.classLevel}>{item.level}</Text>
-          <Text style={styles.classDescription}>{item.description}</Text>
-          <View style={styles.classMeta}>
-            <Text style={[styles.statusBadge, styles[`status_${item.status}`]]}>
-              {item.status}
-            </Text>
-            <Text style={styles.academicInfo}>
-              {item.academic_year} - Semester {item.semester}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.classStats}>
-          <View style={styles.statItem}>
-            <Ionicons name="people" size={16} color="#666666" />
-            <Text style={styles.statText}>{item.student_count || 0}</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Ionicons name="book" size={16} color="#666666" />
-            <Text style={styles.statText}>{item.subject_count || 0}</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Ionicons name="person" size={16} color="#666666" />
-            <Text style={styles.statText}>{item.teacher_count || 0}</Text>
-          </View>
-        </View>
-      </View>
-      <View style={styles.classActions}>
-        <TouchableOpacity 
-          style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
-          disabled={item.status === 'archived'}
-          onPress={() => router.push({
-            pathname: '/(teacher)/class/[id]/students',
-            params: { id: item.id }
-          })}
-        >
-          <Ionicons name="people" size={16} color={item.status === 'archived' ? '#ccc' : '#005e7a'} />
-          <Text style={[styles.actionText, item.status === 'archived' && styles.disabledActionText]}>Siswa</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
-          disabled={item.status === 'archived'}
-          onPress={() => router.push({
-            pathname: '/(teacher)/class/[id]',
-            params: { id: item.id, tab: 'subjects' }
-          })}
-        >
-          <Ionicons name="book" size={16} color={item.status === 'archived' ? '#ccc' : '#005e7a'} />
-          <Text style={[styles.actionText, item.status === 'archived' && styles.disabledActionText]}>Mata Pelajaran</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.actionButton, item.status === 'archived' && styles.disabledAction]}
-          disabled={item.status === 'archived'}
-          onPress={() => router.push({
-            pathname: '/(teacher)/class/[id]',
-            params: { id: item.id, tab: 'reports' }
-          })}
-        >
-          <Ionicons name="document-text" size={16} color={item.status === 'archived' ? '#ccc' : '#005e7a'} />
-          <Text style={[styles.actionText, item.status === 'archived' && styles.disabledActionText]}>Laporan</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
+    <EnhancedClassCard item={item} />
   );
 
   const renderEmptyState = () => (
@@ -927,5 +1029,69 @@ const styles = StyleSheet.create({
   },
   selectedFilterOptionText: {
     color: '#ffffff',
+  },
+  classTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  enrollmentBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    minWidth: 50,
+    alignItems: 'center',
+  },
+  enrollmentBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  capacitySection: {
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  capacityHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  capacityLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333333',
+  },
+  capacityCount: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  progressBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  progressPercentage: {
+    fontSize: 12,
+    color: '#666666',
+    minWidth: 35,
+  },
+  breakdownSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 12,
+    paddingVertical: 8,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+  },
+  breakdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  breakdownText: {
+    fontSize: 12,
+    color: '#666666',
   },
 });
