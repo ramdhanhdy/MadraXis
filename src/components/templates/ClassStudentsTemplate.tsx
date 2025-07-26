@@ -28,7 +28,6 @@ interface ClassData {
   id: number;
   name: string;
   level: string;
-  studentCount: number;
   schoolId: number;
 }
 
@@ -67,7 +66,6 @@ export default function ClassStudentsTemplate() {
         id: classDetails.id,
         name: classDetails.name,
         level: classDetails.level,
-        studentCount: students.length,
         schoolId: classDetails.school_id,
       });
     } catch (error) {
@@ -81,11 +79,12 @@ export default function ClassStudentsTemplate() {
   }, [classId, user?.id, students.length]);
 
   // Update class data when students change via real-time updates
-  useEffect(() => {
-    if (classData) {
-      setClassData(prev => prev ? { ...prev, studentCount: students.length } : null);
-    }
-  }, [students.length]);
+  // Remove this useEffect as studentCount is no longer needed
+  // useEffect(() => {
+  //   if (classData) {
+  //     setClassData(prev => prev ? { ...prev, studentCount: students.length } : null);
+  //   }
+  // }, [students.length]);
 
   // Load class data on mount
   useEffect(() => {
