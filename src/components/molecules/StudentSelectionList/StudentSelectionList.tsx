@@ -397,6 +397,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
+    marginHorizontal: -4,
   },
   filterLabel: {
     minWidth: 80,
@@ -405,11 +406,11 @@ const styles = StyleSheet.create({
   filterButtons: {
     flexDirection: 'row',
     flex: 1,
-    gap: 8,
   },
   filterButton: {
     flex: 1,
     minHeight: 32,
+    marginHorizontal: 4,
   },
   listContent: {
     flexGrow: 1,

@@ -13,7 +13,7 @@ export const calculateExactAge = (birthDate: string | Date): number => {
   if (!birthDate) return 0;
   
   const birth = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
-  const today = new Date();
+  const today = new Date(new Date().toISOString().split('T')[0]);
   
   // Validate the birth date
   if (isNaN(birth.getTime())) return 0;
@@ -62,7 +62,10 @@ export const getStudentAgeAndGrade = (birthDate: string | Date): {
   gradeLevel: 'SMP' | 'SMA' | null;
 } => {
   const age = calculateExactAge(birthDate);
-  const gradeLevel = determineGradeLevel(birthDate);
+  // Determine grade level from already calculated age
+  let gradeLevel: 'SMP' | 'SMA' | null = null;
+  if (age >= 12 && age < 15) gradeLevel = 'SMP';
+  else if (age >= 15 && age < 19) gradeLevel = 'SMA';
   
   return { age, gradeLevel };
 };
