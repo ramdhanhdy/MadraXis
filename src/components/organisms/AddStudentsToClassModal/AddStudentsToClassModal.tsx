@@ -31,17 +31,27 @@ export interface AddStudentsToClassModalProps {
 }
 
 // Data adapter to convert AvailableStudent to StudentWithDetails
-const adaptAvailableStudentToStudentWithDetails = (student: AvailableStudent): StudentWithDetails => {
+const adaptAvailableStudentToStudentWithDetails = (student: AvailableStudent, school_id: number): StudentWithDetails => {
+  // Handle boarding type conversion more robustly
+  let boarding: boolean | undefined;
+  if (student.boarding === 'boarding') {
+    boarding = true;
+  } else if (student.boarding === 'day') {
+    boarding = false;
+  } else {
+    boarding = undefined;
+  }
+
   return {
     id: student.student_id,
     full_name: student.full_name,
     role: 'student' as const,
-    school_id: 0, // Will be populated by the service
+    school_id, // Use the actual school_id from class data
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     nis: student.nis,
     gender: student.gender === 'male' ? 'M' : student.gender === 'female' ? 'F' : undefined,
-    boarding: student.boarding === 'boarding' ? true : student.boarding === 'day' ? false : undefined,
+    boarding,
   };
 };
 
@@ -127,6 +137,12 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
       setLoading(true);
       setError(null);
       
+      // Fetch class data to get school_id
+      const classData = await ClassService.getClassById(classId, user.id);
+      if (!classData) {
+        throw new Error('Class not found');
+      }
+      
       const result = await ClassService.getAvailableStudents(
         classId,
         user.id,
@@ -139,8 +155,10 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
         }
       );
       
-      // Adapt the data to StudentWithDetails format
-      const adaptedStudents = result.students.map(adaptAvailableStudentToStudentWithDetails);
+      // Adapt the data to StudentWithDetails format with actual school_id
+      const adaptedStudents = result.students.map(student =>
+        adaptAvailableStudentToStudentWithDetails(student, classData.school_id)
+      );
       setStudents(adaptedStudents);
       setPagination(prev => ({
         ...prev,
