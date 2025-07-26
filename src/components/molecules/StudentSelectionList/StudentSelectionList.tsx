@@ -71,8 +71,8 @@ export interface StudentSelectionListProps {
   testID?: string;
 }
 
-// Main component
-export const StudentSelectionList: React.FC<StudentSelectionListProps> = ({
+// Main component with React.memo optimization
+const StudentSelectionListComponent: React.FC<StudentSelectionListProps> = ({
   students,
   selectedStudentIds,
   onStudentSelect,
@@ -193,8 +193,16 @@ export const StudentSelectionList: React.FC<StudentSelectionListProps> = ({
   // Key extractor
   const keyExtractor = useCallback((item: StudentWithDetails) => item.id, []);
 
-  // Render filter section
-  const renderFilters = () => {
+  // Filter configurations - memoized to prevent recreation
+  const gradeLevelOptions = useMemo(() => ['all', 'SMA', 'SMP'], []);
+  const boardingOptions = useMemo(() => [
+    { key: 'all', label: 'All' },
+    { key: true, label: 'Boarding' },
+    { key: false, label: 'Day Student' },
+  ], []);
+
+  // Render filter section with useMemo
+  const renderFilters = useMemo(() => {
     if (!showFilters) return null;
 
     return (
@@ -205,7 +213,7 @@ export const StudentSelectionList: React.FC<StudentSelectionListProps> = ({
             Grade Level:
           </Typography>
           <View style={styles.filterButtons}>
-            {['all', 'SMA', 'SMP'].map((level) => (
+            {gradeLevelOptions.map((level) => (
               <Button
                 key={level}
                 variant={localFilters.gradeLevel === level ? 'primary' : 'outline'}
@@ -225,11 +233,7 @@ export const StudentSelectionList: React.FC<StudentSelectionListProps> = ({
             Boarding:
           </Typography>
           <View style={styles.filterButtons}>
-            {[
-              { key: 'all', label: 'All' },
-              { key: true, label: 'Boarding' },
-              { key: false, label: 'Day Student' },
-            ].map((option) => (
+            {boardingOptions.map((option) => (
               <Button
                 key={String(option.key)}
                 variant={localFilters.boarding === option.key ? 'primary' : 'outline'}
@@ -244,10 +248,10 @@ export const StudentSelectionList: React.FC<StudentSelectionListProps> = ({
         </View>
       </View>
     );
-  };
+  }, [showFilters, localFilters.gradeLevel, localFilters.boarding, handleFilterChange]);
 
-  // Render empty state
-  const renderEmptyState = () => {
+  // Render empty state with useMemo
+  const renderEmptyState = useMemo(() => {
     if (loading) return null;
     
     const isFiltered = searchQuery.trim() || 
@@ -265,10 +269,10 @@ export const StudentSelectionList: React.FC<StudentSelectionListProps> = ({
         icon="people-outline"
       />
     );
-  };
+  }, [loading, searchQuery, localFilters.gradeLevel, localFilters.boarding]);
 
-  // Render footer (load more)
-  const renderFooter = () => {
+  // Render footer (load more) with useMemo
+  const renderFooter = useMemo(() => {
     if (!hasMore || loading) return null;
     
     return (
@@ -282,7 +286,7 @@ export const StudentSelectionList: React.FC<StudentSelectionListProps> = ({
         </Button>
       </View>
     );
-  };
+  }, [hasMore, loading, onLoadMore]);
 
   return (
     <View 
@@ -304,7 +308,7 @@ export const StudentSelectionList: React.FC<StudentSelectionListProps> = ({
       </View>
 
       {/* Filters */}
-      {renderFilters()}
+      {renderFilters}
 
       {/* Bulk Action Bar */}
       {selectedStudentIds.size > 0 && (
@@ -398,4 +402,25 @@ const styles = StyleSheet.create({
   },
 });
 
+// Export memoized component to prevent unnecessary re-renders
+export const StudentSelectionList = React.memo(StudentSelectionListComponent, (prevProps, nextProps) => {
+  // Custom comparison to prevent re-renders when deep equality is needed
+  const selectedIdsEqual = 
+    prevProps.selectedStudentIds.size === nextProps.selectedStudentIds.size &&
+    Array.from(prevProps.selectedStudentIds).every(id => nextProps.selectedStudentIds.has(id));
+  
+  return (
+    prevProps.students === nextProps.students &&
+    selectedIdsEqual &&
+    prevProps.loading === nextProps.loading &&
+    prevProps.refreshing === nextProps.refreshing &&
+    prevProps.hasMore === nextProps.hasMore &&
+    prevProps.showFilters === nextProps.showFilters &&
+    prevProps.enableVirtualization === nextProps.enableVirtualization &&
+    prevProps.classLevel === nextProps.classLevel &&
+    JSON.stringify(prevProps.filters) === JSON.stringify(nextProps.filters)
+  );
+});
+
+// Default export for backwards compatibility
 export default StudentSelectionList;

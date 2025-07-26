@@ -177,3 +177,4 @@ src/                    # Source code
 
 - **MadraXis is a mobile app only project that uses Expo and Supabase**
 - **Avoid using web tech stack like Next.js - previous implementation of a feature was wrongly using Next.js as routing**
+- **I will be the one running the test, you just need to give me the command**

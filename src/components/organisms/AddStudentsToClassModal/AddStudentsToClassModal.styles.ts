@@ -213,4 +213,7 @@ export const styles = StyleSheet.create({
   addButtonTextDisabled: {
     color: '#999',
   },
+  flatList: {
+    flex: 1,
+  },
 });

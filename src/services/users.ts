@@ -1,11 +1,13 @@
 import { supabase } from '../utils/supabase';
 import { Student, Teacher, Profile, StudentWithDetails, LegacyStudent, StudentWithRelations } from '../types';
+import { sanitizeLikeInput } from '../utils/sanitization';
+import type { DatabaseResponse } from '../types/database';
 
 /**
  * Fetch all students for a school using the new unified schema
  * Uses the compatibility view or joins profiles + student_details
  */
-export async function fetchStudents(schoolId: number, limit?: number): Promise<{ data: Student[] | null; error: any }> {
+export async function fetchStudents(schoolId: number, limit?: number): Promise<DatabaseResponse<Student[]>> {
   try {
     if (process.env.NODE_ENV === 'development') {
       console.log('fetchStudents called with schoolId:', schoolId, 'limit:', limit);
@@ -51,14 +53,19 @@ export async function fetchStudents(schoolId: number, limit?: number): Promise<{
       return { data: null, error };
     }
 
-    // Transform to Student interface
-    const students: Student[] = data?.map((profile: any) => ({
-      ...profile,
+    // Transform to Student interface with proper typing
+    const students: Student[] = data?.map((profile) => ({
+      id: profile.id,
+      full_name: profile.full_name,
+      role: 'student',
+      school_id: profile.school_id,
+      created_at: profile.created_at,
+      updated_at: profile.updated_at,
       details: profile.student_details?.[0] || undefined,
       // For backward compatibility, map common fields
       quran_progress: {
-        memorized_verses: 0, // TODO: Get from actual progress tracking
-        total_verses: 6236   // Standard Quran verse count
+        memorized_verses: 0,
+        total_verses: 6236
       }
     })) || [];
 
@@ -72,7 +79,7 @@ export async function fetchStudents(schoolId: number, limit?: number): Promise<{
 /**
  * Fetch a single student by ID with all details
  */
-export async function fetchStudentById(studentId: string): Promise<{ data: Student | null; error: any }> {
+export async function fetchStudentById(studentId: string): Promise<DatabaseResponse<Student>> {
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -119,7 +126,7 @@ export async function fetchStudentById(studentId: string): Promise<{ data: Stude
       `)
       .eq('id', studentId)
       .eq('role', 'student')
-      .single<StudentWithRelations>();
+      .single();
 
     if (error) {
       console.error('Error fetching student by ID:', error);
@@ -148,7 +155,7 @@ export async function fetchStudentById(studentId: string): Promise<{ data: Stude
       parent_phone: data.student_parent?.[0]?.parent_profile?.parent_details?.[0]?.phone_number ?? undefined,
       address: data.student_parent?.[0]?.parent_profile?.parent_details?.[0]?.address ?? undefined,
       quran_progress: {
-        memorized_verses: 0, // TODO: Get from actual progress tracking
+        memorized_verses: 0,
         total_verses: 6236
       }
     };
@@ -163,7 +170,7 @@ export async function fetchStudentById(studentId: string): Promise<{ data: Stude
 /**
  * Fetch all teachers for a school
  */
-export async function fetchTeachers(schoolId: number, limit?: number): Promise<{ data: Teacher[] | null; error: any }> {
+export async function fetchTeachers(schoolId: number, limit?: number): Promise<DatabaseResponse<Teacher[]>> {
   try {
     let query = supabase
       .from('profiles')
@@ -198,9 +205,14 @@ export async function fetchTeachers(schoolId: number, limit?: number): Promise<{
       return { data: null, error };
     }
 
-    // Transform to Teacher interface
-    const teachers: Teacher[] = data?.map((profile: any) => ({
-      ...profile,
+    // Transform to Teacher interface with proper typing
+    const teachers: Teacher[] = data?.map((profile) => ({
+      id: profile.id,
+      full_name: profile.full_name,
+      role: 'teacher',
+      school_id: profile.school_id,
+      created_at: profile.created_at,
+      updated_at: profile.updated_at,
       details: profile.teacher_details?.[0] || undefined
     })) || [];
 
@@ -215,7 +227,7 @@ export async function fetchTeachers(schoolId: number, limit?: number): Promise<{
  * Legacy compatibility function that returns students in the old format
  * This helps ease the transition for existing components
  */
-export async function fetchStudentsLegacyFormat(schoolId: number, limit?: number): Promise<{ data: LegacyStudent[] | null; error: any }> {
+export async function fetchStudentsLegacyFormat(schoolId: number, limit?: number): Promise<DatabaseResponse<LegacyStudent[]>> {
   const { data: students, error } = await fetchStudents(schoolId, limit);
   
   if (error || !students) {
@@ -242,7 +254,7 @@ export async function fetchStudentsLegacyFormat(schoolId: number, limit?: number
 /**
  * Fetch user profile by ID (works for any role)
  */
-export async function fetchUserProfile(userId: string): Promise<{ data: Profile | null; error: any }> {
+export async function fetchUserProfile(userId: string): Promise<DatabaseResponse<Profile>> {
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -265,7 +277,7 @@ export async function fetchUserProfile(userId: string): Promise<{ data: Profile 
 /**
  * Search students by name
  */
-export async function searchStudents(schoolId: number, searchTerm: string, limit: number = 10): Promise<{ data: Student[] | null; error: any }> {
+export async function searchStudents(schoolId: number, searchTerm: string, limit: number = 10): Promise<DatabaseResponse<Student[]>> {
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -288,7 +300,7 @@ export async function searchStudents(schoolId: number, searchTerm: string, limit
       `)
       .eq('role', 'student')
       .eq('school_id', schoolId)
-      .ilike('full_name', `%${searchTerm}%`)
+      .ilike('full_name', `%${sanitizeLikeInput(searchTerm)}%`)
       .limit(limit)
       .order('full_name');
 
@@ -297,9 +309,14 @@ export async function searchStudents(schoolId: number, searchTerm: string, limit
       return { data: null, error };
     }
 
-    // Transform to Student interface
-    const students: Student[] = data?.map((profile: any) => ({
-      ...profile,
+    // Transform to Student interface with proper typing
+    const students: Student[] = data?.map((profile) => ({
+      id: profile.id,
+      full_name: profile.full_name,
+      role: 'student',
+      school_id: profile.school_id,
+      created_at: profile.created_at,
+      updated_at: profile.updated_at,
       details: profile.student_details?.[0] || undefined,
       quran_progress: {
         memorized_verses: 0,
@@ -319,7 +336,7 @@ export async function searchStudents(schoolId: number, searchTerm: string, limit
  * @param schoolId The school ID to count students for
  * @returns Promise with student count
  */
-export async function getStudentCount(schoolId: number): Promise<{ data: number | null; error: any }> {
+export async function getStudentCount(schoolId: number): Promise<DatabaseResponse<number>> {
   try {
     const { count, error } = await supabase
       .from('profiles')
@@ -344,7 +361,7 @@ export async function getStudentCount(schoolId: number): Promise<{ data: number 
  * @param schoolId The school ID to count teachers for
  * @returns Promise with teacher count
  */
-export async function getTeacherCount(schoolId: number): Promise<{ data: number | null; error: any }> {
+export async function getTeacherCount(schoolId: number): Promise<DatabaseResponse<number>> {
   try {
     const { count, error } = await supabase
       .from('profiles')

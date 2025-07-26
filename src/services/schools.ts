@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabase';
+import type { DatabaseResponse } from '../types/database';
 
 /**
  * Interface for school data
@@ -20,7 +21,7 @@ export interface School {
  * @param schoolId The ID of the school to fetch
  * @returns School data
  */
-export async function fetchSchoolById(schoolId: number): Promise<{ data: School | null; error: any }> {
+export async function fetchSchoolById(schoolId: number): Promise<DatabaseResponse<School>> {
   try {
     const { data, error } = await supabase
       .from('schools')
@@ -46,7 +47,7 @@ export async function fetchSchoolById(schoolId: number): Promise<{ data: School 
  * @param schoolId Optional ID of the school to update; if not provided, a new school will be created
  * @returns The saved school data
  */
-export async function saveSchool(schoolData: School, schoolId?: number): Promise<{ data: School | null; error: any }> {
+export async function saveSchool(schoolData: School, schoolId?: number): Promise<DatabaseResponse<School>> {
   try {
     let result;
     if (schoolId) {

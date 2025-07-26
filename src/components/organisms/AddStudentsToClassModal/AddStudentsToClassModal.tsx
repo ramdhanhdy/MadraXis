@@ -7,7 +7,7 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
-  ScrollView,
+  FlatList,
 } from 'react-native';
 import { Modal } from '../Modal';
 import { Ionicons } from '@expo/vector-icons';
@@ -350,33 +350,15 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
                 <Text style={styles.retryButtonText}>Retry</Text>
               </TouchableOpacity>
             </View>
-          ) : students.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No available students found</Text>
-              <Text style={styles.emptySubtext}>
-                All students may already be enrolled in this class
-              </Text>
-            </View>
           ) : (
-            <ScrollView
-              testID="scroll-view"
-              refreshControl={
-                <RefreshControl
-                  testID="refresh-control"
-                  refreshing={refreshing}
-                  onRefresh={handleRefresh}
-                  colors={['#007AFF']}
-                  tintColor="#007AFF"
-                />
-              }
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 16 }}
-            >
-              {students.map((student) => {
+            <FlatList
+              testID="flat-list"
+              data={students}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item: student }) => {
                 const isSelected = selectedStudents.has(student.id);
                 return (
                   <TouchableOpacity
-                    key={student.id}
                     style={[styles.studentItem, isSelected && styles.selectedStudentItem]}
                     onPress={() => toggleStudentSelection(student.id)}
                     accessibilityRole="checkbox"
@@ -397,8 +379,28 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
                     </View>
                   </TouchableOpacity>
                 );
-              })}
-            </ScrollView>
+              }}
+              refreshControl={
+                <RefreshControl
+                  testID="refresh-control"
+                  refreshing={refreshing}
+                  onRefresh={handleRefresh}
+                  colors={['#007AFF']}
+                  tintColor="#007AFF"
+                />
+              }
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 16 }}
+              style={styles.flatList}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>No available students found</Text>
+                  <Text style={styles.emptySubtext}>
+                    All students may already be enrolled in this class
+                  </Text>
+                </View>
+              }
+            />
           )}
         </View>
 
