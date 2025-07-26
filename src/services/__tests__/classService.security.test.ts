@@ -19,7 +19,6 @@ jest.mock('../../utils/supabase', () => {
       ilike: jest.fn(() => createMockChain()),
       or: jest.fn(() => createMockChain()),
       single: jest.fn(() => Promise.resolve({ data: { id: 1, school_id: 1 }, error: null })),
-      then: jest.fn((resolve) => resolve(mockResult)),
       catch: jest.fn(() => Promise.resolve(mockResult)),
     };
     
