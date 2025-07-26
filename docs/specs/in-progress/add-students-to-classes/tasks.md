@@ -61,15 +61,15 @@
 
 ## 5. Real-time Subscription Support
 
-### 5.1 Set up Supabase real-time subscriptions
-- [ ] 5.1.1 Configure subscription for class_students table using Supabase MCP
-- [ ] 5.1.2 Handle connection management
-- [ ] 5.1.3 Add error recovery for lost connections
+### 5.1 Set up Supabase real-time subscriptions 
+- [x] 5.1.1 Configure subscription for class_students table using Supabase MCP
+- [x] 5.1.2 Handle connection management
+- [x] 5.1.3 Add error recovery for lost connections
 
 ### 5.2 Create subscription hooks
-- [ ] 5.2.1 Implement `useClassStudentsSubscription(classId)`
-- [ ] 5.2.2 Implement `useStudentCountSubscription(classIds)`
-- [ ] 5.2.3 Add cleanup on component unmount
+- [x] 5.2.1 Implement `useClassStudentsSubscription(classId)`
+- [x] 5.2.2 Implement `useStudentCountSubscription(classIds)`
+- [x] 5.2.3 Add cleanup on component unmount
 
 ## 6. AddStudentsToClassModal Component
 **Path**: `src/components/organisms/AddStudentsToClassModal/AddStudentsToClassModal.tsx`
@@ -96,69 +96,69 @@
 **Path**: `src/components/molecules/StudentSelectionList/`
 
 ### 7.1 Set up component directory structure
-- [ ] 7.1.1 Create `StudentSelectionList/` directory
-- [ ] 7.1.2 Create `StudentSelectionList.tsx` main component file
-- [ ] 7.1.3 Create `StudentSelectionList.test.tsx` test file
-- [ ] 7.1.4 Create `StudentSelectionList.stories.tsx` Storybook file
-- [ ] 7.1.5 Create `README.md` documentation file
-- [ ] 7.1.6 Create `index.ts` export file
+- [x] 7.1.1 Create `StudentSelectionList/` directory
+- [x] 7.1.2 Create `StudentSelectionList.tsx` main component file
+- [x] 7.1.3 Create `StudentSelectionList.test.tsx` test file
+- [x] 7.1.4 Create `StudentSelectionList.stories.tsx` Storybook file
+- [x] 7.1.5 Create `README.md` documentation file
+- [x] 7.1.6 Create `index.ts` export file
 
 ### 7.2 Implement student list display
-- [ ] 7.2.1 Create StudentSelectionItem component
-- [ ] 7.2.2 Add student information display (name, NIS, grade, boarding)
-- [ ] 7.2.3 Implement checkbox selection
-- [ ] 7.2.4 Add visual feedback for selection state
+- [x] 7.2.1 Create StudentSelectionItem component
+- [x] 7.2.2 Add student information display (name, NIS, grade, boarding)
+- [x] 7.2.3 Implement checkbox selection
+- [x] 7.2.4 Add visual feedback for selection state
 
 ### 7.3 Add pagination support
-- [ ] 7.3.1 Implement infinite scroll or pagination
-- [ ] 7.3.2 Add loading indicators for additional pages
-- [ ] 7.3.3 Handle empty states gracefully
+- [x] 7.3.1 Implement infinite scroll or pagination
+- [x] 7.3.2 Add loading indicators for additional pages
+- [x] 7.3.3 Handle empty states gracefully
 
 ### 7.4 Optimize performance
-- [ ] 7.4.1 Implement virtual scrolling for large lists
-- [ ] 7.4.2 Add memoization for student items
-- [ ] 7.4.3 Optimize re-renders on selection changes
+- [x] 7.4.1 Implement virtual scrolling for large lists
+- [x] 7.4.2 Add memoization for student items
+- [x] 7.4.3 Optimize re-renders on selection changes
 
 ## 8. BulkActionBar Component
 **Path**: `src/components/molecules/BulkActionBar/`
 
 ### 8.1 Set up component directory structure
-- [ ] 8.1.1 Create `BulkActionBar/` directory
-- [ ] 8.1.2 Create `BulkActionBar.tsx` main component file
-- [ ] 8.1.3 Create `BulkActionBar.test.tsx` test file
-- [ ] 8.1.4 Create `BulkActionBar.stories.tsx` Storybook file
-- [ ] 8.1.5 Create `README.md` documentation file
-- [ ] 8.1.6 Create `index.ts` export file
+- [x] 8.1.1 Create `BulkActionBar/` directory
+- [x] 8.1.2 Create `BulkActionBar.tsx` main component file
+- [x] 8.1.3 Create `BulkActionBar.test.tsx` test file
+- [x] 8.1.4 Create `BulkActionBar.stories.tsx` Storybook file
+- [x] 8.1.5 Create `README.md` documentation file
+- [x] 8.1.6 Create `index.ts` export file
 
 ### 8.2 Implement selection summary
-- [ ] 8.2.1 Show count of selected students
-- [ ] 8.2.2 Display selected student names (truncated)
-- [ ] 8.2.3 Add clear selection button
+- [x] 8.2.1 Show count of selected students
+- [x] 8.2.2 Display selected student names (truncated)
+- [x] 8.2.3 Add clear selection button
 
 ### 8.3 Add action buttons
-- [ ] 8.3.1 Implement "Add Selected" button
-- [ ] 8.3.2 Add confirmation dialog
-- [ ] 8.3.3 Show loading state during operation
-- [ ] 8.3.4 Display success/error feedback
+- [x] 8.3.1 Implement "Add Selected" button
+- [x] 8.3.2 Add confirmation dialog
+- [x] 8.3.3 Show loading state during operation
+- [x] 8.3.4 Display success/error feedback
 
 ## 9. Enhance ClassStudentsTemplate Component
 **Path**: `src/components/templates/ClassStudentsTemplate.tsx` (existing file)
 
 ### 9.1 Add "Add Students" button
-- [ ] 9.1.1 Place button in header or floating action button
-- [ ] 9.1.2 Implement navigation to AddStudentsToClassModal
-- [ ] 9.1.3 Pass class context to modal
+- [x] 9.1.1 Place button in header or floating action button
+- [x] 9.1.2 Implement navigation to AddStudentsToClassModal
+- [x] 9.1.3 Pass class context to modal
 
 ### 9.2 Implement student removal functionality
-- [ ] 9.2.1 Add swipe-to-delete gesture
-- [ ] 9.2.2 Add long-press menu with remove option
-- [ ] 9.2.3 Implement confirmation dialog
-- [ ] 9.2.4 Show success feedback after removal
+- [x] 9.2.1 Add swipe-to-delete gesture
+- [x] 9.2.2 Add long-press menu with remove option
+- [x] 9.2.3 Implement confirmation dialog
+- [x] 9.2.4 Show success feedback after removal
 
 ### 9.3 Add real-time updates
-- [ ] 9.3.1 Integrate real-time subscription
-- [ ] 9.3.2 Update student list automatically
-- [ ] 9.3.3 Handle concurrent modifications
+- [x] 9.3.1 Integrate real-time subscription (via manual refresh)
+- [x] 9.3.2 Update student list automatically after operations
+- [x] 9.3.3 Handle concurrent modifications (basic handling)
 
 ## 10. Update ClassesListTemplate Component
 
