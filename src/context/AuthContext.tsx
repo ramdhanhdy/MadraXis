@@ -40,6 +40,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Function to fetch user profile from unified profiles table
   const fetchUserProfileAndNavigate = async (userId: string) => {
     try {
+      if (!userId) {
+        console.error('User ID is required to fetch profile');
+        router.replace('/(auth)/login');
+        return;
+      }
+
       const { data: userProfile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -53,8 +59,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (userProfile?.role) {
-        setProfile(userProfile as Profile);
-        navigateBasedOnRole(userProfile.role, userProfile.school_id);
+        const profile: Profile = {
+          id: userProfile.id,
+          full_name: userProfile.full_name,
+          role: userProfile.role as Profile['role'],
+          school_id: userProfile.school_id,
+          created_at: userProfile.created_at,
+          updated_at: userProfile.updated_at
+        };
+        setProfile(profile);
+        navigateBasedOnRole(profile.role, profile.school_id);
       } else {
         console.error('No role found for user');
         router.replace('/(auth)/login');
@@ -114,11 +128,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Get the initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('🔐 Initial session check:', session ? 'AUTHENTICATED' : 'NOT AUTHENTICATED');
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
+      
+      if (session?.user) {
+        // Always fetch profile from database for consistency
+        await fetchUserProfileAndNavigate(session.user.id);
+      } else {
+        setLoading(false);
+      }
     });
 
     // Listen for changes in auth state
@@ -129,21 +149,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
 
       if (event === 'SIGNED_IN' && session?.user) {
-        // Check role from user metadata and raw_user_meta_data
-        const userMetadata = session.user.user_metadata || {};
-        // Define a more specific type for the user object with raw metadata
-        const rawMetadata = (session.user as { raw_user_meta_data?: Record<string, any> }).raw_user_meta_data || {};
-        const userRole = userMetadata.role || rawMetadata.role;
+        console.log('🔐 User signed in - fetching profile from database');
         
-        console.log('🔐 User role from metadata:', userRole);
-        
-        // If no role in auth metadata, fetch from profiles table
-        if (!userRole) {
-          await fetchUserProfileAndNavigate(session.user.id);
-          return;
-        }
-        
-        navigateBasedOnRole(userRole, rawMetadata.school_id || userMetadata.school_id);
+        // Always fetch role from profiles table for consistency and security
+        await fetchUserProfileAndNavigate(session.user.id);
       } else if (event === 'SIGNED_OUT') {
         console.log('🔐 User signed out - redirecting to login');
         setProfile(null);

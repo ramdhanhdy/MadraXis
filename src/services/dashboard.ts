@@ -1,5 +1,6 @@
 import { supabase } from '../utils/supabase';
 import { getStudentCount, getTeacherCount } from './users';
+import type { DatabaseResponse } from '../types/database';
 
 /**
  * Interface for dashboard metrics
@@ -32,7 +33,7 @@ export interface DashboardMetrics {
  * @param schoolId The ID of the school to fetch metrics for
  * @returns Dashboard metrics data
  */
-export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: DashboardMetrics | null; error: any }> {
+export async function fetchDashboardMetrics(schoolId: number): Promise<DatabaseResponse<DashboardMetrics>> {
   try {
     const [
       studentCountResponse,
@@ -163,6 +164,6 @@ export async function fetchDashboardMetrics(schoolId: number): Promise<{ data: D
     return { data: metrics, error: null };
   } catch (err) {
     console.error('Service error fetching dashboard metrics:', err);
-    return { data: null, error: err };
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
-}   
+}

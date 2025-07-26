@@ -40,6 +40,8 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
         resourceName="splash_screen"
         autoplay={true}
         style={styles.animation}
+        artboardName="Artboard"
+        stateMachineName="State Machine 1"
         onPlay={() => {
           console.log('Rive animation started');
         }}
@@ -48,9 +50,11 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
           handleFinish();
         }}
         onError={(error) => {
-          console.error('Rive animation error:', error);
-          // Trigger fallback UI by finishing the animation
-          handleFinish();
+          console.warn('Rive animation error (continuing anyway):', error);
+          // Continue with a timeout fallback instead of immediately finishing
+          setTimeout(() => {
+            handleFinish();
+          }, 2000);
         }}
       />
     </View>
