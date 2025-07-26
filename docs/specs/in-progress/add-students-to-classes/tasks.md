@@ -163,14 +163,14 @@
 ## 10. Update ClassesListTemplate Component
 
 ### 10.1 Update student count display
-- [ ] 10.1.1 Integrate real-time student count updates
-- [ ] 10.1.2 Show loading state during count updates
-- [ ] 10.1.3 Handle count update errors gracefully
+- [x] 10.1.1 Integrate real-time student count updates
+- [x] 10.1.2 Show loading state during count updates
+- [x] 10.1.3 Handle count update errors gracefully
 
 ### 10.2 Add visual indicators
-- [ ] 10.2.1 Show enrollment status (full, partial, empty)
-- [ ] 10.2.2 Add boarding vs day student breakdown
-- [ ] 10.2.3 Implement progress indicators for class capacity
+- [x] 10.2.1 Show enrollment status (full, partial, empty)
+- [x] 10.2.2 Add boarding vs day student breakdown
+- [x] 10.2.3 Implement progress indicators for class capacity
 
 ## 11. Navigation Implementation
 **Path**: `app/(teacher)/class/[id]/add-students.tsx` (new modal route)
