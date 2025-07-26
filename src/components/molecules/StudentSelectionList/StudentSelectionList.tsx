@@ -120,24 +120,15 @@ const StudentSelectionListComponent: React.FC<StudentSelectionListProps> = ({
 
   // Helper function to determine student grade level
   const getStudentGradeLevel = useCallback((student: StudentWithDetails): 'SMA' | 'SMP' | null => {
-    // Since grade level is not directly available in StudentWithDetails,
-    // we can derive it from the class level prop or implement logic based on age/date_of_birth
-    if (classLevel) {
-      return classLevel;
-    }
-    
-    // Alternative: derive from date of birth if available
+    // Use the new accurate grade level determination
     if (student.date_of_birth) {
-      const birthYear = new Date(student.date_of_birth).getFullYear();
-      const currentYear = new Date().getFullYear();
-      const age = currentYear - birthYear;
-      
-      // Rough estimation: SMP (12-15 years), SMA (15-18 years)
-      if (age >= 12 && age <= 15) return 'SMP';
-      if (age >= 15 && age <= 18) return 'SMA';
+      const { determineGradeLevel } = require('../../../utils/dateHelpers');
+      const gradeLevel = determineGradeLevel(student.date_of_birth);
+      return gradeLevel as 'SMA' | 'SMP' | null;
     }
     
-    return null;
+    // Fallback to class level if no birth date available
+    return classLevel || null;
   }, [classLevel]);
 
   // Filter students based on current filters (client-side only for non-search filters)
