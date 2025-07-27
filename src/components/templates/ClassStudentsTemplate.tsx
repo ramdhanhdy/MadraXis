@@ -19,7 +19,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ClassService } from '../../services/class';
 import { useAuth } from '../../context/AuthContext';
 import { useClassStudentsSubscription } from '../../hooks/useClassStudentsSubscription';
-import { AddStudentsToClassModal } from '../organisms/AddStudentsToClassModal/AddStudentsToClassModal';
 import { EmptyState } from '../molecules/EmptyState/EmptyState';
 import { Student } from '../../types/student';
 
@@ -42,7 +41,6 @@ export default function ClassStudentsTemplate() {
 
   const [classData, setClassData] = useState<ClassData | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
   const [removeLoading, setRemoveLoading] = useState<Set<string>>(new Set());
 
   // Use real-time subscription for students
@@ -90,15 +88,11 @@ export default function ClassStudentsTemplate() {
   }, [refetch, loadClassData]);
 
   // Handle add students to class
-  const handleAddStudents = useCallback(async () => {
-    setModalVisible(true);
-  }, []);
-
-  // Handle students added successfully
-  const handleStudentsAdded = useCallback(() => {
-    // Real-time subscription will automatically update the students list
-    // No manual refetch needed
-  }, []);
+  const handleAddStudents = useCallback(() => {
+    if (classId) {
+      router.push(`/(teacher)/class/${classId}/add-students`);
+    }
+  }, [router, classId]);
 
   // Handle remove student
   const handleRemoveStudent = useCallback(async (studentId: string) => {
@@ -352,15 +346,7 @@ export default function ClassStudentsTemplate() {
           }
         />
 
-        {/* Add Students Modal */}
-        {classData && (
-          <AddStudentsToClassModal
-            visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            classId={classData.id}
-            onStudentsAdded={handleStudentsAdded}
-          />
-        )}
+        {/* Modal has been replaced with navigation */}
       </SafeAreaView>
     </GestureHandlerRootView>
   );
