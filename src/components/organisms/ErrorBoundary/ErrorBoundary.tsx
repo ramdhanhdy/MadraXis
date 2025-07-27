@@ -26,9 +26,6 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     logger.error('ErrorBoundary caught an error', { error, errorInfo });
     
-    // Log to console for debugging
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
     // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
@@ -48,18 +45,49 @@ export class ErrorBoundary extends Component<Props, State> {
 
       // Default error UI
       return (
-        <View style={styles.container}>
-          <Text style={styles.title}>Something went wrong</Text>
-          <Text style={styles.message}>
+        <View 
+          style={styles.container} 
+          accessibilityRole="alert"
+          accessibilityLabel="Error occurred"
+        >
+          <Text 
+            style={styles.title}
+            accessibilityRole="header"
+            accessibilityLabel="Error title: Something went wrong"
+          >
+            Something went wrong
+          </Text>
+          <Text 
+            style={styles.message}
+            accessibilityRole="text"
+            accessibilityLabel="Error description: We're sorry, but an unexpected error occurred."
+          >
             We're sorry, but an unexpected error occurred.
           </Text>
           {this.state.error && (
-            <Text style={styles.errorDetails} numberOfLines={3}>
+            <Text 
+              style={styles.errorDetails} 
+              numberOfLines={3}
+              accessibilityRole="text"
+              accessibilityLabel={`Error details: ${this.state.error.message}`}
+            >
               {this.state.error.message}
             </Text>
           )}
-          <TouchableOpacity style={styles.retryButton} onPress={this.handleRetry}>
-            <Text style={styles.retryButtonText}>Retry</Text>
+          <TouchableOpacity 
+            style={styles.retryButton} 
+            onPress={this.handleRetry}
+            accessibilityRole="button"
+            accessibilityLabel="Retry loading the application"
+            accessibilityHint="Double tap to attempt to reload the application"
+          >
+            <Text 
+              style={styles.retryButtonText}
+              accessibilityRole="text"
+              accessibilityLabel="Retry button text"
+            >
+              Retry
+            </Text>
           </TouchableOpacity>
         </View>
       );

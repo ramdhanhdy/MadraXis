@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../utils/supabase';
 
@@ -20,7 +21,7 @@ interface UseStudentCountSubscriptionReturn {
 
 export function useStudentCountSubscription({
   classIds,
-  enabled = true,
+  enabled = true
 }: UseStudentCountSubscriptionProps): UseStudentCountSubscriptionReturn {
   const [counts, setCounts] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
@@ -34,10 +35,10 @@ export function useStudentCountSubscription({
 
       // Fetch counts for all provided class IDs
       const promises = classIds.map(async (classId) => {
-        const { count, error: countError } = await supabase
-          .from('class_students')
-          .select('*', { count: 'exact', head: true })
-          .eq('class_id', classId);
+        const { count, error: countError } = await supabase.
+        from('class_students').
+        select('*', { count: 'exact', head: true }).
+        eq('class_id', classId);
 
         if (countError) {
           throw new Error(countError.message);
@@ -47,7 +48,7 @@ export function useStudentCountSubscription({
       });
 
       const results = await Promise.all(promises);
-      
+
       const newCounts: Record<number, number> = {};
       results.forEach(({ classId, count }) => {
         newCounts[classId] = count;
@@ -70,40 +71,43 @@ export function useStudentCountSubscription({
         return; // Already subscribed
       }
 
-      const subscription = supabase
-        .channel(`class_student_count_${classId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'class_students',
-            filter: `class_id=eq.${classId}`,
-          },
-          () => {
-            // When changes occur, re-fetch the count for this specific class
-            supabase
-              .from('class_students')
-              .select('*', { count: 'exact', head: true })
-              .eq('class_id', classId)
-              .then(({ count, error: countError }) => {
-                if (countError) {
-                  console.error('Error fetching student count for class', classId, ':', countError);
-                  // Optionally set error state or use cached value
-                  return;
-                }
-                setCounts(prev => ({
-                  ...prev,
-                  [classId]: count || 0,
-                }));
+      const subscription = supabase.
+      channel(`class_student_count_${classId}`).
+      on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'class_students',
+          filter: `class_id=eq.${classId}`
+        },
+        () => {
+          // When changes occur, re-fetch the count for this specific class
+          supabase.
+          from('class_students').
+          select('*', { count: 'exact', head: true }).
+          eq('class_id', classId).
+          then(({ count, error: countError }) => {
+            if (countError) {
+              logger.error(`Error fetching student count for class ${classId}: ${countError.message}`, {
+                classId,
+                error: countError.message
               });
-          }
-        )
-        .subscribe((status: string) => {
-          if (status === 'SUBSCRIBED') {
-            console.log(`Subscribed to student count updates for class ${classId}`);
-          }
-        });
+              // Optionally set error state or use cached value
+              return;
+            }
+            setCounts((prev) => ({
+              ...prev,
+              [classId]: count || 0
+            }));
+          });
+        }
+      ).
+      subscribe((status: string) => {
+        if (status === 'SUBSCRIBED') {
+          logger.debug(`Subscribed to student count updates for class ${classId}`);
+        }
+      });
 
       subscriptionsRef.current.set(classId, subscription);
     });
@@ -112,7 +116,7 @@ export function useStudentCountSubscription({
   const cleanupSubscriptions = useCallback(() => {
     subscriptionsRef.current.forEach((subscription, classId) => {
       supabase.removeChannel(subscription);
-      console.log(`Unsubscribed from student count updates for class ${classId}`);
+      logger.debug(`Unsubscribed from student count updates for class ${classId}`);
     });
     subscriptionsRef.current.clear();
   }, []);
@@ -140,6 +144,6 @@ export function useStudentCountSubscription({
     counts,
     loading,
     error,
-    refetch,
+    refetch
   };
 }

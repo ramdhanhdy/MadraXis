@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../utils/supabase';
 import type { Student, ClassStudent } from '../types/student';
@@ -20,7 +21,7 @@ interface ClassStudentJoin extends ClassStudent {
 
 export function useClassStudentsSubscription({
   classId,
-  enabled = true,
+  enabled = true
 }: UseClassStudentsSubscriptionProps): UseClassStudentsSubscriptionReturn {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,9 +33,9 @@ export function useClassStudentsSubscription({
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
-        .from('class_students')
-        .select(`
+      const { data, error: fetchError } = await supabase.
+      from('class_students').
+      select(`
           *,
           student:profiles!student_id(
             id,
@@ -52,8 +53,8 @@ export function useClassStudentsSubscription({
               updated_at
             )
           )
-        `)
-        .eq('class_id', classId);
+        `).
+      eq('class_id', classId);
 
       if (fetchError) {
         throw new Error(fetchError.message);
@@ -61,7 +62,7 @@ export function useClassStudentsSubscription({
 
       const formattedStudents: Student[] = data?.map((item: any) => ({
         ...item.student,
-        student_details: item.student.student_details,
+        student_details: item.student.student_details
       })) || [];
 
       setStudents(formattedStudents);
@@ -76,28 +77,28 @@ export function useClassStudentsSubscription({
     if (!enabled || classId <= 0) return;
 
     // Subscribe to changes in the class_students table
-    subscriptionRef.current = supabase
-      .channel(`class_students_${classId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'class_students',
-          filter: `class_id=eq.${classId}`,
-        },
-        () => {
-          // Re-fetch students when changes occur
-          fetchStudents();
-        }
-      )
-      .subscribe((status: string) => {
-        if (status === 'SUBSCRIBED') {
-          console.log(`Subscribed to class_students updates for class ${classId}`);
-        } else if (status === 'CHANNEL_ERROR') {
-          setError(new Error('Failed to subscribe to real-time updates'));
-        }
-      });
+    subscriptionRef.current = supabase.
+    channel(`class_students_${classId}`).
+    on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'class_students',
+        filter: `class_id=eq.${classId}`
+      },
+      () => {
+        // Re-fetch students when changes occur
+        fetchStudents();
+      }
+    ).
+    subscribe((status: string) => {
+      if (status === 'SUBSCRIBED') {
+        logger.debug(`Subscribed to class_students updates for class ${classId}`);
+      } else if (status === 'CHANNEL_ERROR') {
+        setError(new Error('Failed to subscribe to real-time updates'));
+      }
+    });
   }, [classId, enabled, fetchStudents]);
 
   useEffect(() => {
@@ -126,6 +127,6 @@ export function useClassStudentsSubscription({
     students,
     loading,
     error,
-    refetch,
+    refetch
   };
 }

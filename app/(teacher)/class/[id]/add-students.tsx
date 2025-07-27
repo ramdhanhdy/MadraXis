@@ -1,12 +1,17 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AddStudentsToClassModal } from '../../../../src/components/organisms/AddStudentsToClassModal/AddStudentsToClassModal';
 import { ErrorBoundary } from '../../../../src/components/organisms/ErrorBoundary';
+import { useNavigationGuards } from '../../../../src/hooks/useNavigationGuards';
+import { logger } from '../../../../src/utils/logger';
 
 export default function AddStudentsModal() {
   const router = useRouter();
   const { id, returnUrl } = useLocalSearchParams();
+  const [retryKey, setRetryKey] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const { hasAccess, isLoading, error, validateAccess } = useNavigationGuards();
   
   // Validate and parse class ID with error handling
   const parsedId = parseInt(typeof id === 'string' ? id : '0', 10);
@@ -24,6 +29,20 @@ export default function AddStudentsModal() {
     // After students are added, close the modal
     handleClose();
   }, [handleClose]);
+
+  const handleRetry = useCallback(() => {
+    setRetryKey(prev => prev + 1);
+    if (classId) {
+      validateAccess(classId);
+    }
+  }, [classId, validateAccess]);
+
+  // Validate teacher permissions on mount and classId change
+  useEffect(() => {
+    if (classId) {
+      validateAccess(classId);
+    }
+  }, [classId, validateAccess]);
 
   const ErrorFallback = ({ onRetry }: { onRetry: () => void }) => (
     <View style={styles.errorContainer}>
@@ -62,6 +81,45 @@ export default function AddStudentsModal() {
     );
   }
 
+  if (isLoading) {
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Verifying access permissions...</Text>
+        </View>
+      </>
+    );
+  }
+
+  if (error || !hasAccess) {
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorTitle}>Access Denied</Text>
+          <Text style={styles.errorDescription}>
+            {error || 'You do not have permission to add students to this class.'}
+          </Text>
+          <TouchableOpacity style={styles.goBackButton} onPress={handleClose}>
+            <Text style={styles.goBackButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </>
+    );
+  }
+
   return (
     <>
       <Stack.Screen 
@@ -74,8 +132,9 @@ export default function AddStudentsModal() {
         }} 
       />
       <View style={{ flex: 1 }}>
-        <ErrorBoundary fallback={<ErrorFallback onRetry={() => window.location.reload()} />}>
+        <ErrorBoundary fallback={<ErrorFallback onRetry={handleRetry} />}>
           <AddStudentsToClassModal
+            key={retryKey}
             visible={true}
             onClose={handleClose}
             classId={classId}
@@ -94,6 +153,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666666',
+    marginTop: 16,
   },
   errorTitle: {
     fontSize: 18,

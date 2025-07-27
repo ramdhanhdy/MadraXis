@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/src/utils/supabase';
@@ -15,11 +16,11 @@ interface AuthContextType {
 }
 
 // Create the context with a default value
-const AuthContext = createContext<AuthContextType>({ 
-  session: null, 
-  user: null, 
+const AuthContext = createContext<AuthContextType>({
+  session: null,
+  user: null,
   profile: null,
-  loading: true, 
+  loading: true,
   signOut: async () => {},
   clearSession: async () => {}
 });
@@ -30,7 +31,7 @@ export const useAuth = () => {
 };
 
 // AuthProvider component
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider = ({ children }: {children: React.ReactNode;}) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -41,19 +42,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchUserProfileAndNavigate = async (userId: string) => {
     try {
       if (!userId) {
-        console.error('User ID is required to fetch profile');
+        logger.error('User ID is required to fetch profile');
         router.replace('/(auth)/login');
         return;
       }
 
-      const { data: userProfile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      const { data: userProfile, error } = await supabase.
+      from('profiles').
+      select('*').
+      eq('id', userId).
+      single();
 
       if (error) {
-        console.error('Error fetching user profile:', error);
+        logger.error('Error fetching user profile', { error: error.message || error });
         router.replace('/(auth)/login');
         return;
       }
@@ -70,18 +71,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setProfile(profile);
         navigateBasedOnRole(profile.role, profile.school_id);
       } else {
-        console.error('No role found for user');
+        logger.error('No role found for user');
         router.replace('/(auth)/login');
       }
     } catch (error) {
-      console.error('Error in fetchUserProfileAndNavigate:', error);
+      logger.error('Error in fetchUserProfileAndNavigate', { error: error instanceof Error ? error.message : String(error) });
       router.replace('/(auth)/login');
     }
   };
 
   // Function to navigate based on user role
   const navigateBasedOnRole = (role: string, schoolId?: string | number) => {
-    console.log('🔐 Navigating based on role:', role, 'school_id:', schoolId);
+    logger.debug(`🔐 Navigating based on role: ${role}, school_id: ${schoolId}`);
     switch (role) {
       case 'teacher':
         router.replace('/(teacher)/dashboard');
@@ -100,7 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         router.replace('/(student)/dashboard');
         break;
       default:
-        console.error('Unknown role:', role);
+        logger.error('Unknown role', { role });
         router.replace('/(auth)/login');
         break;
     }
@@ -108,9 +109,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Function to clear session and force logout
   const clearSession = async () => {
-    console.log('🚨 Clearing session and forcing logout');
+    logger.debug('🚨 Clearing session and forcing logout');
     setLoading(true);
-    
+
     try {
       setSession(null);
       setUser(null);
@@ -118,7 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await supabase.auth.signOut();
       // Navigation handled by onAuthStateChange listener
     } catch (error) {
-      console.error('🚨 Error during session clearing:', error);
+      logger.error('🚨 Error during session clearing', { error: error instanceof Error ? error.message : String(error) });
       // Force redirect to login if signOut fails
       router.replace('/(auth)/login');
     } finally {
@@ -129,10 +130,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Get the initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('🔐 Initial session check:', session ? 'AUTHENTICATED' : 'NOT AUTHENTICATED');
+      logger.debug(`🔐 Initial session check: ${session ? 'AUTHENTICATED' : 'NOT AUTHENTICATED'}`);
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
         // Always fetch profile from database for consistency
         await fetchUserProfileAndNavigate(session.user.id);
@@ -143,18 +144,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Listen for changes in auth state
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔐 Auth state change:', event, session ? 'AUTHENTICATED' : 'NOT AUTHENTICATED');
+      logger.debug(`🔐 Auth state change: ${event}, ${session ? 'AUTHENTICATED' : 'NOT AUTHENTICATED'}`);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
 
       if (event === 'SIGNED_IN' && session?.user) {
-        console.log('🔐 User signed in - fetching profile from database');
-        
+        logger.debug('🔐 User signed in - fetching profile from database');
+
         // Always fetch role from profiles table for consistency and security
         await fetchUserProfileAndNavigate(session.user.id);
       } else if (event === 'SIGNED_OUT') {
-        console.log('🔐 User signed out - redirecting to login');
+        logger.debug('🔐 User signed out - redirecting to login');
         setProfile(null);
         router.replace('/(auth)/login');
       }
@@ -167,7 +168,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [router]);
 
   const signOut = async () => {
-    console.log('🔐 User signing out');
+    logger.debug('🔐 User signing out');
     setProfile(null);
     await supabase.auth.signOut();
   };
@@ -178,7 +179,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     profile,
     loading,
     signOut,
-    clearSession,
+    clearSession
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

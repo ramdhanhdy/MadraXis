@@ -1,3 +1,4 @@
+import { logger } from '../../utils/logger';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -8,8 +9,8 @@ import {
   TextInput,
   ActivityIndicator,
   RefreshControl,
-  Alert,
-} from 'react-native';
+  Alert } from
+'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,7 +33,7 @@ interface ClassData {
 
 export default function ClassStudentsTemplate() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams<{id: string;}>();
   const { user } = useAuth();
 
   // Validate and parse class ID
@@ -46,7 +47,7 @@ export default function ClassStudentsTemplate() {
   // Use real-time subscription for students
   const { students, loading: studentsLoading, error, refetch } = useClassStudentsSubscription({
     classId: classId || 0,
-    enabled: !!classId && !!user?.id,
+    enabled: !!classId && !!user?.id
   });
 
   // Fetch class data
@@ -64,10 +65,18 @@ export default function ClassStudentsTemplate() {
         id: classDetails.id,
         name: classDetails.name,
         level: classDetails.level,
-        schoolId: classDetails.school_id,
+        schoolId: classDetails.school_id
       });
     } catch (error) {
-      console.error('Error loading class data:', error);
+      const context = error instanceof Error ? {
+        operation: 'loadClassData',
+        error: error.message,
+        stack: error.stack
+      } : {
+        operation: 'loadClassData',
+        error: 'Unknown error occurred'
+      };
+      logger.error('Error loading class data:', context);
       Alert.alert(
         'Error',
         'Failed to load class data. Please try again.',
@@ -102,32 +111,40 @@ export default function ClassStudentsTemplate() {
       'Remove Student',
       'Are you sure you want to remove this student from the class?',
       [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setRemoveLoading(prev => new Set(prev).add(studentId));
-              await ClassService.removeStudent(classId, studentId, user.id);
-              // Real-time subscription will automatically update the students list
-            } catch (error) {
-              console.error('Error removing student:', error);
-              Alert.alert(
-                'Error',
-                'Failed to remove student. Please try again.',
-                [{ text: 'OK' }]
-              );
-            } finally {
-              setRemoveLoading(prev => {
-                const newSet = new Set(prev);
-                newSet.delete(studentId);
-                return newSet;
-              });
-            }
-          },
-        },
-      ]
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setRemoveLoading((prev) => new Set(prev).add(studentId));
+            await ClassService.removeStudent(classId, studentId, user.id);
+            // Real-time subscription will automatically update the students list
+          } catch (error) {
+            const context = error instanceof Error ? {
+              operation: 'removeStudent',
+              error: error.message,
+              stack: error.stack
+            } : {
+              operation: 'removeStudent',
+              error: 'Unknown error occurred'
+            };
+            logger.error('Error removing student:', context);
+            Alert.alert(
+              'Error',
+              'Failed to remove student. Please try again.',
+              [{ text: 'OK' }]
+            );
+          } finally {
+            setRemoveLoading((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(studentId);
+              return newSet;
+            });
+          }
+        }
+      }]
+
     );
   }, [classId, user?.id]);
 
@@ -135,14 +152,14 @@ export default function ClassStudentsTemplate() {
   const handleStudentPress = useCallback((studentId: string) => {
     router.push({
       pathname: '/(teacher)/students/[id]',
-      params: { id: studentId },
+      params: { id: studentId }
     });
   }, [router]);
 
   // Filter students based on search query
-  const filteredStudents = students.filter(student =>
-    student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (student.student_details?.nis && student.student_details.nis.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredStudents = students.filter((student) =>
+  student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  student.student_details?.nis && student.student_details.nis.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Format student for display
@@ -155,37 +172,37 @@ export default function ClassStudentsTemplate() {
     role: 'student',
     school_id: student.school_id,
     created_at: student.created_at,
-    updated_at: student.updated_at,
+    updated_at: student.updated_at
   });
 
   // Render student item with swipe to delete
-  const renderStudentItem = ({ item }: { item: Student }) => {
+  const renderStudentItem = ({ item }: {item: Student;}) => {
     const displayItem = formatStudentForDisplay(item);
     const isRemoving = removeLoading.has(item.id);
 
-    const renderRightActions = () => (
-      <View style={styles.deleteContainer}>
+    const renderRightActions = () =>
+    <View style={styles.deleteContainer}>
         <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => handleRemoveStudent(item.id)}
-          disabled={isRemoving}
-        >
+        style={styles.deleteButton}
+        onPress={() => handleRemoveStudent(item.id)}
+        disabled={isRemoving}>
+        
           <Ionicons name="trash-outline" size={24} color="#fff" />
           {isRemoving && <ActivityIndicator size="small" color="#fff" style={styles.loadingIndicator} />}
         </TouchableOpacity>
-      </View>
-    );
+      </View>;
+
 
     return (
       <Swipeable
         renderRightActions={renderRightActions}
         rightThreshold={80}
-        overshootRight={false}
-      >
+        overshootRight={false}>
+        
         <TouchableOpacity
           style={styles.studentCard}
-          onPress={() => handleStudentPress(item.id)}
-        >
+          onPress={() => handleStudentPress(item.id)}>
+          
           <View style={styles.studentHeader}>
             <View style={styles.studentAvatar}>
               <Text style={styles.studentInitial}>
@@ -194,29 +211,29 @@ export default function ClassStudentsTemplate() {
             </View>
             <View style={styles.studentInfo}>
               <Text style={styles.studentName}>{displayItem.full_name}</Text>
-              {displayItem.nis && (
-                <Text style={styles.studentNis}>NIS: {displayItem.nis}</Text>
-              )}
+              {displayItem.nis &&
+              <Text style={styles.studentNis}>NIS: {displayItem.nis}</Text>
+              }
               <View style={styles.studentDetails}>
-                {displayItem.boarding !== undefined && (
-                  <Text style={styles.studentDetail}>
+                {displayItem.boarding !== undefined &&
+                <Text style={styles.studentDetail}>
                     {displayItem.boarding ? 'Boarding' : 'Day Student'}
                   </Text>
-                )}
+                }
               </View>
             </View>
             <View style={styles.studentActions}>
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={() => handleStudentPress(item.id)}
-              >
+                onPress={() => handleStudentPress(item.id)}>
+                
                 <Ionicons name="chevron-forward" size={20} color="#666666" />
               </TouchableOpacity>
             </View>
           </View>
         </TouchableOpacity>
-      </Swipeable>
-    );
+      </Swipeable>);
+
   };
 
   // Handle invalid class ID
@@ -237,13 +254,13 @@ export default function ClassStudentsTemplate() {
           <Text style={styles.errorMessage}>ID kelas yang diberikan tidak valid atau tidak ditemukan.</Text>
           <TouchableOpacity
             style={styles.errorButton}
-            onPress={() => router.back()}
-          >
+            onPress={() => router.back()}>
+            
             <Text style={styles.errorButtonText}>Kembali</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
-    );
+      </SafeAreaView>);
+
   }
 
   // Show loading state
@@ -262,8 +279,8 @@ export default function ClassStudentsTemplate() {
           <ActivityIndicator size="large" color="#005e7a" />
           <Text style={styles.loadingText}>Memuat data siswa...</Text>
         </View>
-      </SafeAreaView>
-    );
+      </SafeAreaView>);
+
   }
 
   return (
@@ -293,13 +310,13 @@ export default function ClassStudentsTemplate() {
               placeholder="Cari siswa..."
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholderTextColor="#999999"
-            />
+              placeholderTextColor="#999999" />
+            
           </View>
           <TouchableOpacity
             style={styles.addButton}
-            onPress={handleAddStudents}
-          >
+            onPress={handleAddStudents}>
+            
             <Ionicons name="add" size={24} color="#ffffff" />
           </TouchableOpacity>
         </View>
@@ -328,34 +345,34 @@ export default function ClassStudentsTemplate() {
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl
-              refreshing={studentsLoading}
-              onRefresh={handleRefresh}
-              colors={['#005e7a']}
-              tintColor="#005e7a"
-            />
+          <RefreshControl
+            refreshing={studentsLoading}
+            onRefresh={handleRefresh}
+            colors={['#005e7a']}
+            tintColor="#005e7a" />
+
           }
           ListEmptyComponent={
-            <EmptyState
-              title="Belum ada siswa"
-              message="Tambahkan siswa pertama ke kelas ini"
-              icon="people-outline"
-              onAction={handleAddStudents}
-              actionLabel="Tambah Siswa"
-            />
-          }
-        />
+          <EmptyState
+            title="Belum ada siswa"
+            message="Tambahkan siswa pertama ke kelas ini"
+            icon="people-outline"
+            onAction={handleAddStudents}
+            actionLabel="Tambah Siswa" />
+
+          } />
+        
 
         {/* Modal has been replaced with navigation */}
       </SafeAreaView>
-    </GestureHandlerRootView>
-  );
+    </GestureHandlerRootView>);
+
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f5f5f5'
   },
   header: {
     flexDirection: 'row',
@@ -365,24 +382,24 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#e0e0e0'
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333333',
     flex: 1,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   loadingText: {
     fontSize: 16,
     color: '#666666',
-    marginTop: 12,
+    marginTop: 12
   },
   actionContainer: {
     flexDirection: 'row',
@@ -391,7 +408,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#e0e0e0'
   },
   searchContainer: {
     flex: 1,
@@ -401,13 +418,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    marginRight: 12,
+    marginRight: 12
   },
   searchInput: {
     flex: 1,
     marginLeft: 8,
     fontSize: 16,
-    color: '#333333',
+    color: '#333333'
   },
   addButton: {
     backgroundColor: '#005e7a',
@@ -416,33 +433,33 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   statsContainer: {
     flexDirection: 'row',
     backgroundColor: '#ffffff',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#e0e0e0'
   },
   statItem: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#005e7a',
-    marginBottom: 4,
+    marginBottom: 4
   },
   statLabel: {
     fontSize: 12,
     color: '#666666',
-    textAlign: 'center',
+    textAlign: 'center'
   },
   listContainer: {
     padding: 20,
-    flexGrow: 1,
+    flexGrow: 1
   },
   studentCard: {
     backgroundColor: '#ffffff',
@@ -453,11 +470,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 2
   },
   studentHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   studentAvatar: {
     width: 48,
@@ -466,48 +483,48 @@ const styles = StyleSheet.create({
     backgroundColor: '#005e7a',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 12
   },
   studentInitial: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#ffffff'
   },
   studentInfo: {
-    flex: 1,
+    flex: 1
   },
   studentName: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333333',
-    marginBottom: 4,
+    marginBottom: 4
   },
   studentNis: {
     fontSize: 14,
     color: '#666666',
-    marginBottom: 4,
+    marginBottom: 4
   },
   studentDetails: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 16
   },
   studentDetail: {
     fontSize: 12,
-    color: '#999999',
+    color: '#999999'
   },
   studentActions: {
-    flexDirection: 'row',
+    flexDirection: 'row'
   },
   actionButton: {
     padding: 8,
     borderRadius: 6,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f8f9fa'
   },
   deleteContainer: {
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
-    marginVertical: 4,
+    marginVertical: 4
   },
   deleteButton: {
     backgroundColor: '#ff4444',
@@ -515,16 +532,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 60,
     height: 60,
-    borderRadius: 12,
+    borderRadius: 12
   },
   loadingIndicator: {
-    position: 'absolute',
+    position: 'absolute'
   },
   errorContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: 40
   },
   errorTitle: {
     fontSize: 18,
@@ -532,24 +549,24 @@ const styles = StyleSheet.create({
     color: '#ff4444',
     marginTop: 16,
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   errorMessage: {
     fontSize: 14,
     color: '#666666',
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: 24,
+    marginBottom: 24
   },
   errorButton: {
     backgroundColor: '#ff4444',
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 8
   },
   errorButtonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: '600',
-  },
+    fontWeight: '600'
+  }
 });

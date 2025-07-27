@@ -1,3 +1,4 @@
+import { logger } from '../../utils/logger';
 import React, { useEffect, useRef, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Rive from 'rive-react-native';
@@ -43,22 +44,22 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
         artboardName="Artboard"
         stateMachineName="State Machine 1"
         onPlay={() => {
-          console.log('Rive animation started');
+          logger.debug('Rive animation started');
         }}
         onStop={() => {
-          console.log('Rive animation completed');
+          logger.debug('Rive animation completed');
           handleFinish();
         }}
         onError={(error) => {
-          console.warn('Rive animation error (continuing anyway):', error);
+          logger.warn('Rive animation error (continuing anyway):', error);
           // Continue with a timeout fallback instead of immediately finishing
           setTimeout(() => {
             handleFinish();
           }, 2000);
-        }}
-      />
-    </View>
-  );
+        }} />
+      
+    </View>);
+
 };
 
 const styles = StyleSheet.create({
@@ -66,12 +67,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffff'
   },
   animation: {
     width: 300,
-    height: 300,
-  },
+    height: 300
+  }
 });
 
 export default AnimatedSplashScreen;

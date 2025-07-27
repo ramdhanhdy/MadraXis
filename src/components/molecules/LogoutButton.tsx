@@ -1,3 +1,4 @@
+import { logger } from '../../utils/logger';
 /**
  * LogoutButton Component
  * A reusable logout button component with confirmation alert, loading state, and variants
@@ -28,7 +29,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
   confirmationMessage = 'Apakah Anda yakin ingin keluar dari aplikasi?',
   onLogoutStart,
   onLogoutComplete,
-  onLogoutError,
+  onLogoutError
 }) => {
   const { signOut } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -37,14 +38,17 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
     try {
       setLoading(true);
       onLogoutStart?.();
-      
+
       await signOut();
-      
+
       onLogoutComplete?.();
     } catch (error) {
-      console.error('Logout error:', error);
+      logger.error('Logout error', {
+        error: error instanceof Error ? error.message : String(error),
+        operation: 'logout'
+      });
       onLogoutError?.(error as Error);
-      
+
       Alert.alert(
         'Error',
         'Terjadi kesalahan saat logout. Silakan coba lagi.',
@@ -61,16 +65,16 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
         confirmationTitle,
         confirmationMessage,
         [
-          {
-            text: 'Batal',
-            style: 'cancel',
-          },
-          {
-            text: 'Logout',
-            style: 'destructive',
-            onPress: handleLogout,
-          },
-        ]
+        {
+          text: 'Batal',
+          style: 'cancel'
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: handleLogout
+        }]
+
       );
     } else {
       handleLogout();
@@ -89,11 +93,11 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
           onPress={confirmLogout}
           style={style}
           accessibilityLabel="Logout"
-          accessibilityHint="Keluar dari aplikasi"
-        >
+          accessibilityHint="Keluar dari aplikasi">
+          
           {null}
-        </Button>
-      );
+        </Button>);
+
 
     case 'text':
       return (
@@ -103,11 +107,11 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
           onPress={confirmLogout}
           style={style}
           accessibilityLabel="Logout"
-          accessibilityHint="Keluar dari aplikasi"
-        >
+          accessibilityHint="Keluar dari aplikasi">
+          
           Logout
-        </Button>
-      );
+        </Button>);
+
 
     default:
       return (
@@ -119,11 +123,11 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
           onPress={confirmLogout}
           style={style}
           accessibilityLabel="Logout"
-          accessibilityHint="Keluar dari aplikasi"
-        >
+          accessibilityHint="Keluar dari aplikasi">
+          
           Logout
-        </Button>
-      );
+        </Button>);
+
   }
 };
 

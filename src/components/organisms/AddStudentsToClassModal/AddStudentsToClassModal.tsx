@@ -1,14 +1,16 @@
+import { logger } from '../../../utils/logger';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Alert,
-  StyleSheet,
-} from 'react-native';
+  StyleSheet } from
+'react-native';
 import { Modal } from '../Modal';
 import { ClassService } from '../../../services/classService';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { StudentSelectionList, StudentFilters } from '../../molecules/StudentSelectionList/StudentSelectionList';
+import { BreadcrumbNavigation } from '../../molecules/BreadcrumbNavigation';
 import { StudentWithDetails } from '../../../types';
 import { Button } from '../../atoms/Button';
 import { Typography } from '../../atoms/Typography';
@@ -51,7 +53,7 @@ const adaptAvailableStudentToStudentWithDetails = (student: AvailableStudent, sc
     updated_at: new Date().toISOString(),
     nis: student.nis,
     gender: student.gender === 'male' ? 'M' : student.gender === 'female' ? 'F' : undefined,
-    boarding,
+    boarding
   };
 };
 
@@ -59,18 +61,22 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
   visible,
   onClose,
   classId,
-  onStudentsAdded,
+  onStudentsAdded
 }) => {
   // Hooks
   const { user } = useAuth();
   const { theme } = useTheme();
-  
+
   // Create styles
   const styles = StyleSheet.create({
     container: {
       flex: 1,
       paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingVertical: 8
+    },
+    breadcrumbContainer: {
+      marginBottom: 16,
+      marginHorizontal: -16,
     },
     errorContainer: {
       paddingVertical: 16,
@@ -78,36 +84,36 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
       backgroundColor: theme.colors.error.light,
       borderRadius: 8,
       marginBottom: 16,
-      alignItems: 'center',
+      alignItems: 'center'
     },
     errorText: {
       fontSize: 14,
       textAlign: 'center',
-      marginBottom: 8,
+      marginBottom: 8
     },
     retryButton: {
-      marginTop: 8,
+      marginTop: 8
     },
     studentsContainer: {
       flex: 1,
-      marginBottom: 16,
+      marginBottom: 16
     },
     actions: {
       flexDirection: 'row',
       gap: 12,
       paddingTop: 16,
       borderTopWidth: 1,
-      borderTopColor: theme.colors.border.primary,
+      borderTopColor: theme.colors.border.primary
     },
     cancelButton: {
-      flex: 1,
+      flex: 1
     },
     addButton: {
-      flex: 2,
+      flex: 2
     },
     addButtonDisabled: {
-      opacity: 0.6,
-    },
+      opacity: 0.6
+    }
   });
 
   // State management
@@ -119,30 +125,47 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
   const [filters, setFilters] = useState<StudentFilters>({
     search: '',
     boarding: 'all',
-    gradeLevel: 'all',
+    gradeLevel: 'all'
   });
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
     total: 0,
-    hasMore: false,
+    hasMore: false
   });
   const [error, setError] = useState<string | null>(null);
+  const [className, setClassName] = useState<string>('');
+  const [breadcrumbItems, setBreadcrumbItems] = useState<Array<{
+    label: string;
+    path: string;
+    params?: Record<string, any>;
+  }>>([]);
 
   // Load students function
   const loadStudents = useCallback(async () => {
     if (!user?.id) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
-      // Fetch class data to get school_id
+
+      // Fetch class data to get school_id and class name
       const classData = await ClassService.getClassById(classId, user.id);
       if (!classData) {
         throw new Error('Class not found');
       }
-      
+
+      // Set class name for breadcrumb
+      setClassName(classData.name);
+
+      // Generate breadcrumb items
+      setBreadcrumbItems([
+        { label: 'Dashboard', path: '/(teacher)/dashboard' },
+        { label: 'Classes', path: '/(teacher)/class' },
+        { label: classData.name, path: `/(teacher)/class/${classId}`, params: { id: classId } },
+        { label: 'Add Students', path: `/(teacher)/class/${classId}/add-students`, params: { id: classId } }
+      ]);
+
       const result = await ClassService.getAvailableStudents(
         classId,
         user.id,
@@ -151,22 +174,30 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
           boarding: filters.boarding === true ? 'boarding' : filters.boarding === false ? 'day' : undefined,
           gender: undefined, // Grade level filtering will be handled client-side for now
           page: pagination.page,
-          limit: pagination.limit,
+          limit: pagination.limit
         }
       );
-      
+
       // Adapt the data to StudentWithDetails format with actual school_id
-      const adaptedStudents = result.students.map(student =>
-        adaptAvailableStudentToStudentWithDetails(student, classData.school_id)
+      const adaptedStudents = result.students.map((student) =>
+      adaptAvailableStudentToStudentWithDetails(student, classData.school_id)
       );
       setStudents(adaptedStudents);
-      setPagination(prev => ({
+      setPagination((prev) => ({
         ...prev,
         total: result.total,
-        hasMore: result.students.length === pagination.limit,
+        hasMore: result.students.length === pagination.limit
       }));
     } catch (err: any) {
-      console.error('Error loading students:', err);
+      const context = err instanceof Error ? {
+        operation: 'loadStudents',
+        error: err.message,
+        stack: err.stack
+      } : {
+        operation: 'loadStudents',
+        error: 'Unknown error occurred'
+      };
+      logger.error('Error loading students:', context);
       setError(err.message || 'Failed to load students');
     } finally {
       setLoading(false);
@@ -189,7 +220,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
       setFilters({
         search: '',
         boarding: 'all',
-        gradeLevel: 'all',
+        gradeLevel: 'all'
       });
       setPagination({ page: 1, limit: 20, total: 0, hasMore: false });
     }
@@ -199,7 +230,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
   const handleFiltersChange = useCallback((newFilters: StudentFilters) => {
     setFilters(newFilters);
     setSelectedStudents(new Set()); // Clear selections when filters change
-    setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page
+    setPagination((prev) => ({ ...prev, page: 1 })); // Reset to first page
   }, []);
 
   // Handle refresh
@@ -210,7 +241,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
 
   // Handle student selection
   const handleStudentSelect = useCallback((studentId: string) => {
-    setSelectedStudents(prev => {
+    setSelectedStudents((prev) => {
       const newSet = new Set(prev);
       newSet.add(studentId);
       return newSet;
@@ -219,7 +250,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
 
   // Handle student deselection
   const handleStudentDeselect = useCallback((studentId: string) => {
-    setSelectedStudents(prev => {
+    setSelectedStudents((prev) => {
       const newSet = new Set(prev);
       newSet.delete(studentId);
       return newSet;
@@ -239,7 +270,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
   // Handle load more
   const handleLoadMore = useCallback(() => {
     if (!loading && pagination.hasMore) {
-      setPagination(prev => ({ ...prev, page: prev.page + 1 }));
+      setPagination((prev) => ({ ...prev, page: prev.page + 1 }));
     }
   }, [loading, pagination.hasMore]);
 
@@ -249,7 +280,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
 
     try {
       setSubmitting(true);
-      
+
       const studentIds = Array.from(selectedStudents);
       await ClassService.bulkEnrollStudents(
         classId,
@@ -260,17 +291,25 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
         },
         user.id
       );
-      
+
       Alert.alert(
         'Success',
         `Successfully added ${studentIds.length} student${studentIds.length !== 1 ? 's' : ''} to the class.`,
         [{ text: 'OK', onPress: () => {
-          onStudentsAdded?.();
-          onClose();
-        }}]
+            onStudentsAdded?.();
+            onClose();
+          } }]
       );
     } catch (err: any) {
-      console.error('Error adding students:', err);
+      const context = err instanceof Error ? {
+        operation: 'addStudents',
+        error: err.message,
+        stack: err.stack
+      } : {
+        operation: 'addStudents',
+        error: 'Unknown error occurred'
+      };
+      logger.error('Error adding students:', context);
       Alert.alert(
         'Error',
         err.message || 'Failed to add students to class. Please try again.',
@@ -291,9 +330,20 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
       title="Add Students to Class"
       subtitle={`Select students to add to this class`}
       size="large"
-      scrollable={false}
-    >
+      scrollable={false}>
+      
       <View style={styles.container}>
+        {/* Breadcrumb Navigation */}
+        {breadcrumbItems.length > 0 && (
+          <View style={styles.breadcrumbContainer}>
+            <BreadcrumbNavigation
+              items={breadcrumbItems}
+              onNavigate={() => {}}
+              maxVisibleItems={3}
+            />
+          </View>
+        )}
+
         {/* Error Display */}
         {error && (
           <View style={styles.errorContainer}>
@@ -330,8 +380,8 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
             showFilters={true}
             enableVirtualization={true}
             accessibilityLabel="Available students for class enrollment"
-            testID="student-selection-list"
-          />
+            testID="student-selection-list" />
+          
         </View>
 
         {/* Action Buttons */}
@@ -340,26 +390,26 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
             variant="outline"
             onPress={onClose}
             style={styles.cancelButton}
-            accessibilityLabel="Cancel"
-          >
+            accessibilityLabel="Cancel">
+            
             Cancel
           </Button>
           
           <Button
-              variant="primary"
-              onPress={handleAddStudents}
-              disabled={selectedStudents.size === 0 || submitting}
-              loading={submitting}
-              style={{
-                ...styles.addButton,
-                ...(selectedStudents.size === 0 && styles.addButtonDisabled),
-              }}
-              accessibilityLabel={`Add ${selectedStudents.size} students to class`}
-            >
+            variant="primary"
+            onPress={handleAddStudents}
+            disabled={selectedStudents.size === 0 || submitting}
+            loading={submitting}
+            style={{
+              ...styles.addButton,
+              ...(selectedStudents.size === 0 && styles.addButtonDisabled)
+            }}
+            accessibilityLabel={`Add ${selectedStudents.size} students to class`}>
+            
               Add {selectedStudents.size} Student{selectedStudents.size === 1 ? '' : 's'}
             </Button>
         </View>
       </View>
-    </Modal>
-  );
+    </Modal>);
+
 };

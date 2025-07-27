@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 /**
  * BulkActionBar Storybook Stories
  * 
@@ -30,32 +31,32 @@ A bulk action bar component that displays selection count and provides bulk acti
 
 ## Usage
 This component is typically used in conjunction with selection lists to provide bulk operations on selected items.
-        `,
-      },
-    },
+        `
+      }
+    }
   },
   argTypes: {
     selectedCount: {
       description: 'Number of currently selected items',
-      control: { type: 'number', min: 0, max: 100 },
+      control: { type: 'number', min: 0, max: 100 }
     },
     totalVisible: {
       description: 'Total number of visible items that can be selected',
-      control: { type: 'number', min: 0, max: 100 },
+      control: { type: 'number', min: 0, max: 100 }
     },
     disabled: {
       description: 'Whether the action buttons are disabled',
-      control: { type: 'boolean' },
+      control: { type: 'boolean' }
     },
     onSelectAll: {
       description: 'Callback when select all button is pressed',
-      action: 'onSelectAll',
+      action: 'onSelectAll'
     },
     onClearSelection: {
       description: 'Callback when clear selection button is pressed',
-      action: 'onClearSelection',
-    },
-  },
+      action: 'onClearSelection'
+    }
+  }
 };
 
 export default meta;
@@ -83,10 +84,10 @@ const InteractiveWrapper = (args: any) => {
         selectedCount={selectedCount}
         totalVisible={totalVisible}
         onSelectAll={handleSelectAll}
-        onClearSelection={handleClearSelection}
-      />
-    </View>
-  );
+        onClearSelection={handleClearSelection} />
+
+    </View>);
+
 };
 
 // Default story - no selections
@@ -95,8 +96,8 @@ export const Default: Story = {
   args: {
     selectedCount: 0,
     totalVisible: 10,
-    disabled: false,
-  },
+    disabled: false
+  }
 };
 
 // With some selections
@@ -105,8 +106,8 @@ export const WithSelections: Story = {
   args: {
     selectedCount: 3,
     totalVisible: 10,
-    disabled: false,
-  },
+    disabled: false
+  }
 };
 
 // All items selected
@@ -115,8 +116,8 @@ export const AllSelected: Story = {
   args: {
     selectedCount: 10,
     totalVisible: 10,
-    disabled: false,
-  },
+    disabled: false
+  }
 };
 
 // Large numbers
@@ -125,8 +126,8 @@ export const LargeNumbers: Story = {
   args: {
     selectedCount: 47,
     totalVisible: 150,
-    disabled: false,
-  },
+    disabled: false
+  }
 };
 
 // Disabled state
@@ -135,8 +136,8 @@ export const Disabled: Story = {
   args: {
     selectedCount: 5,
     totalVisible: 10,
-    disabled: true,
-  },
+    disabled: true
+  }
 };
 
 // Empty list
@@ -145,8 +146,8 @@ export const EmptyList: Story = {
   args: {
     selectedCount: 0,
     totalVisible: 0,
-    disabled: false,
-  },
+    disabled: false
+  }
 };
 
 // Single item
@@ -155,8 +156,8 @@ export const SingleItem: Story = {
   args: {
     selectedCount: 0,
     totalVisible: 1,
-    disabled: false,
-  },
+    disabled: false
+  }
 };
 
 // Single item selected
@@ -165,8 +166,8 @@ export const SingleItemSelected: Story = {
   args: {
     selectedCount: 1,
     totalVisible: 1,
-    disabled: false,
-  },
+    disabled: false
+  }
 };
 
 // Static examples (non-interactive)
@@ -175,14 +176,14 @@ export const StaticNoSelections: Story = {
     selectedCount: 0,
     totalVisible: 10,
     disabled: false,
-    onSelectAll: () => console.log('Select all clicked'),
-    onClearSelection: () => console.log('Clear selection clicked'),
+    onSelectAll: () => logger.debug('Select all clicked'),
+    onClearSelection: () => logger.debug('Clear selection clicked')
   },
-  render: (args) => (
-    <View style={{ width: 350, padding: 16, backgroundColor: '#f5f5f5' }}>
+  render: (args) =>
+  <View style={{ width: 350, padding: 16, backgroundColor: '#f5f5f5' }}>
       <BulkActionBar {...args} />
     </View>
-  ),
+
 };
 
 export const StaticWithSelections: Story = {
@@ -190,50 +191,50 @@ export const StaticWithSelections: Story = {
     selectedCount: 7,
     totalVisible: 15,
     disabled: false,
-    onSelectAll: () => console.log('Select all clicked'),
-    onClearSelection: () => console.log('Clear selection clicked'),
+    onSelectAll: () => logger.debug('Select all clicked'),
+    onClearSelection: () => logger.debug('Clear selection clicked')
   },
-  render: (args) => (
-    <View style={{ width: 350, padding: 16, backgroundColor: '#f5f5f5' }}>
+  render: (args) =>
+  <View style={{ width: 350, padding: 16, backgroundColor: '#f5f5f5' }}>
       <BulkActionBar {...args} />
     </View>
-  ),
+
 };
 
 // Mobile responsive view
 export const MobileView: Story = {
-  render: (args) => (
-    <View style={{ width: 320, padding: 12, backgroundColor: '#f5f5f5' }}>
+  render: (args) =>
+  <View style={{ width: 320, padding: 12, backgroundColor: '#f5f5f5' }}>
       <InteractiveWrapper {...args} />
-    </View>
-  ),
+    </View>,
+
   args: {
     selectedCount: 3,
     totalVisible: 8,
-    disabled: false,
+    disabled: false
   },
   parameters: {
     viewport: {
-      defaultViewport: 'mobile1',
-    },
-  },
+      defaultViewport: 'mobile1'
+    }
+  }
 };
 
 // Tablet view
 export const TabletView: Story = {
-  render: (args) => (
-    <View style={{ width: 600, padding: 20, backgroundColor: '#f5f5f5' }}>
+  render: (args) =>
+  <View style={{ width: 600, padding: 20, backgroundColor: '#f5f5f5' }}>
       <InteractiveWrapper {...args} />
-    </View>
-  ),
+    </View>,
+
   args: {
     selectedCount: 12,
     totalVisible: 25,
-    disabled: false,
+    disabled: false
   },
   parameters: {
     viewport: {
-      defaultViewport: 'tablet',
-    },
-  },
+      defaultViewport: 'tablet'
+    }
+  }
 };

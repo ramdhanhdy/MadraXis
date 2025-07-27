@@ -1,3 +1,4 @@
+import { logger } from '../../utils/logger';
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,7 +10,7 @@ export default function StudentAntiBullying() {
   const router = useRouter();
 
   const openLink = (url: string) => {
-    Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
+    Linking.openURL(url).catch((err) => logger.error("Couldn't load page", err));
   };
 
   return (
@@ -25,11 +26,11 @@ export default function StudentAntiBullying() {
 
       <ScrollView style={styles.contentContainer}>
         <View style={styles.bannerContainer}>
-          <Image 
-            source={{ uri: 'https://placehold.co/600x200/005e7a/ffffff?text=Stop+Bullying' }} 
+          <Image
+            source={{ uri: 'https://placehold.co/600x200/005e7a/ffffff?text=Stop+Bullying' }}
             style={styles.bannerImage}
-            resizeMode="cover"
-          />
+            resizeMode="cover" />
+
           <View style={styles.bannerOverlay}>
             <Text style={styles.bannerTitle}>Bersama Hentikan Perundungan</Text>
             <Text style={styles.bannerSubtitle}>Mari ciptakan lingkungan sekolah yang aman dan nyaman untuk semua</Text>
@@ -190,44 +191,44 @@ export default function StudentAntiBullying() {
         {/* Bottom Spacing */}
         <View style={{ height: 50 }} />
       </ScrollView>
-    </SafeAreaView>
-  );
+    </SafeAreaView>);
+
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f5f5f5'
   },
   header: {
     backgroundColor: '#005e7a',
     padding: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   backButton: {
-    padding: 4,
+    padding: 4
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#ffffff'
   },
   contentContainer: {
     flex: 1,
-    padding: 16,
+    padding: 16
   },
   bannerContainer: {
     position: 'relative',
     height: 180,
     borderRadius: 12,
     overflow: 'hidden',
-    marginBottom: 20,
+    marginBottom: 20
   },
   bannerImage: {
     width: '100%',
-    height: '100%',
+    height: '100%'
   },
   bannerOverlay: {
     position: 'absolute',
@@ -235,17 +236,17 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: 'rgba(0, 94, 122, 0.7)',
-    padding: 16,
+    padding: 16
   },
   bannerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#ffffff',
-    marginBottom: 4,
+    marginBottom: 4
   },
   bannerSubtitle: {
     fontSize: 14,
-    color: '#ffffff',
+    color: '#ffffff'
   },
   section: {
     backgroundColor: '#ffffff',
@@ -256,48 +257,48 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 2
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#005e7a',
-    marginBottom: 12,
+    marginBottom: 12
   },
   paragraph: {
     fontSize: 14,
     color: '#333333',
     lineHeight: 22,
-    marginBottom: 16,
+    marginBottom: 16
   },
   bulletPointContainer: {
-    marginTop: 8,
+    marginTop: 8
   },
   bulletPoint: {
     flexDirection: 'row',
     marginBottom: 16,
-    alignItems: 'flex-start',
+    alignItems: 'flex-start'
   },
   bulletIcon: {
     marginTop: 2,
-    marginRight: 12,
+    marginRight: 12
   },
   bulletTextContainer: {
-    flex: 1,
+    flex: 1
   },
   bulletTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333333',
-    marginBottom: 4,
+    marginBottom: 4
   },
   bulletText: {
     fontSize: 14,
     color: '#666666',
-    lineHeight: 20,
+    lineHeight: 20
   },
   warningSignsContainer: {
-    marginTop: 8,
+    marginTop: 8
   },
   warningSign: {
     flexDirection: 'row',
@@ -305,42 +306,42 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff5f5',
     borderRadius: 8,
     padding: 12,
-    marginBottom: 8,
+    marginBottom: 8
   },
   warningSignText: {
     fontSize: 14,
     color: '#333333',
     marginLeft: 12,
-    flex: 1,
+    flex: 1
   },
   actionCard: {
     backgroundColor: '#f8f9fa',
     borderRadius: 8,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 16
   },
   actionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 12
   },
   actionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333333',
-    marginLeft: 12,
+    marginLeft: 12
   },
   actionSteps: {
-    marginLeft: 36,
+    marginLeft: 36
   },
   actionStep: {
     fontSize: 14,
     color: '#666666',
     lineHeight: 20,
-    marginBottom: 8,
+    marginBottom: 8
   },
   emergencyContactsContainer: {
-    marginTop: 8,
+    marginTop: 8
   },
   emergencyContact: {
     flexDirection: 'row',
@@ -348,24 +349,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     borderRadius: 8,
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 12
   },
   contactInfo: {
     marginLeft: 16,
-    flex: 1,
+    flex: 1
   },
   contactTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333333',
-    marginBottom: 4,
+    marginBottom: 4
   },
   contactNumber: {
     fontSize: 14,
-    color: '#666666',
+    color: '#666666'
   },
   resourcesContainer: {
-    marginTop: 8,
+    marginTop: 8
   },
   resourceItem: {
     flexDirection: 'row',
@@ -373,32 +374,32 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     borderRadius: 8,
     padding: 16,
-    marginBottom: 8,
+    marginBottom: 8
   },
   resourceText: {
     fontSize: 14,
     color: '#333333',
     marginLeft: 12,
-    flex: 1,
+    flex: 1
   },
   motivationalSection: {
     backgroundColor: '#fff5f5',
     borderRadius: 12,
     padding: 24,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 20
   },
   motivationalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#e74c3c',
     marginTop: 12,
-    marginBottom: 8,
+    marginBottom: 8
   },
   motivationalText: {
     fontSize: 16,
     color: '#333333',
     textAlign: 'center',
-    lineHeight: 24,
-  },
+    lineHeight: 24
+  }
 });

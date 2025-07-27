@@ -229,6 +229,7 @@ export class ClassAuditService {
       performed_by: string;
       performed_at: string;
       metadata: any;
+      performed_by_name: string | null;
     }>;
     total: number;
   }> {
@@ -246,7 +247,7 @@ export class ClassAuditService {
           performed_by,
           performed_at,
           changed_fields,
-          profiles!inner(full_name)
+          profiles!left(full_name)
         `, { count: 'exact' })
         .eq('record_id', classId.toString())
         .order('performed_at', { ascending: false });
@@ -279,7 +280,8 @@ export class ClassAuditService {
         new_values: log.new_values,
         performed_by: log.performed_by,
         performed_at: log.performed_at,
-        metadata: log.changed_fields
+        metadata: log.changed_fields,
+        performed_by_name: log.profiles?.[0]?.full_name || null
       }));
 
       return {
