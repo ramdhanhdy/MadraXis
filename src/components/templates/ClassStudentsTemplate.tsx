@@ -156,10 +156,13 @@ export default function ClassStudentsTemplate() {
     });
   }, [router]);
 
+  // Sanitize search query
+  const sanitizedQuery = searchQuery.trim().slice(0, 100).toLowerCase();
+
   // Filter students based on search query
   const filteredStudents = students.filter((student) =>
-  student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  student.student_details?.nis && student.student_details.nis.toLowerCase().includes(searchQuery.toLowerCase())
+  student.full_name.toLowerCase().includes(sanitizedQuery) ||
+  student.student_details?.nis && student.student_details.nis.toLowerCase().includes(sanitizedQuery)
   );
 
   // Format student for display

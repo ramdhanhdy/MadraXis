@@ -118,10 +118,18 @@ export function parseDeepLink(url: string): ParsedDeepLink | null {
         const classId = segments[2];
         params.id = isNaN(Number(classId)) ? classId : Number(classId);
         
+        // Dynamically determine the screen based on full path
+        const remainingSegments = segments.slice(3);
+        let screen = 'teacher/class/[id]';
+        
+        if (remainingSegments.length > 0) {
+          screen += `/${remainingSegments.join('/')}`;
+        }
+        
         return {
           path: pathPart,
           params: params,
-          screen: 'teacher/class/[id]/add-students'
+          screen: screen
         };
       } else {
         // Handle case where we have teacher/class but no ID
@@ -152,11 +160,24 @@ export function generateDeepLink(route: string, params?: Record<string, string |
   
   switch (route) {
     case 'teacher/class/add-students':
-      const classId = params?.id || ':id';
-      return `${baseUrl}://teacher/class/${classId}/add-students`;
+      const addStudentsClassId = params?.id || ':id';
+      return `${baseUrl}://teacher/class/${addStudentsClassId}/add-students`;
+    
+    case 'teacher/class/students':
+      const studentsClassId = params?.id || ':id';
+      return `${baseUrl}://teacher/class/${studentsClassId}/students`;
+    
+    case 'teacher/class/schedule':
+      const scheduleClassId = params?.id || ':id';
+      return `${baseUrl}://teacher/class/${scheduleClassId}/schedule`;
+    
+    case 'teacher/class/reports':
+      const reportsClassId = params?.id || ':id';
+      return `${baseUrl}://teacher/class/${reportsClassId}/reports`;
     
     case 'teacher/class':
-      return `${baseUrl}://teacher/class`;
+      const classId = params?.id || ':id';
+      return classId === ':id' ? `${baseUrl}://teacher/class` : `${baseUrl}://teacher/class/${classId}`;
     
     case 'teacher/dashboard':
       return `${baseUrl}://teacher/dashboard`;

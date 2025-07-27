@@ -57,18 +57,16 @@ export class ErrorBoundary extends Component<Props, State> {
           >
             Something went wrong
           </Text>
-          <Text 
+          <Text
             style={styles.message}
-            accessibilityRole="text"
-            accessibilityLabel="Error description: We're sorry, but an unexpected error occurred."
+            accessibilityLabel="Error description"
           >
             We're sorry, but an unexpected error occurred.
           </Text>
           {this.state.error && (
-            <Text 
-              style={styles.errorDetails} 
+            <Text
+              style={styles.errorDetails}
               numberOfLines={3}
-              accessibilityRole="text"
               accessibilityLabel={`Error details: ${this.state.error.message}`}
             >
               {this.state.error.message}
@@ -81,9 +79,8 @@ export class ErrorBoundary extends Component<Props, State> {
             accessibilityLabel="Retry loading the application"
             accessibilityHint="Double tap to attempt to reload the application"
           >
-            <Text 
+            <Text
               style={styles.retryButtonText}
-              accessibilityRole="text"
               accessibilityLabel="Retry button text"
             >
               Retry

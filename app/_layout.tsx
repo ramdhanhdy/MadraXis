@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { ThemeProvider } from '../src/context/ThemeContext';
+import { NavigationHistoryProvider } from '../src/context/NavigationHistoryContext';
 import * as SplashScreen from 'expo-splash-screen';
 import AnimatedSplashScreen from '../src/components/organisms/AnimatedSplashScreen';
 
@@ -53,7 +54,9 @@ export default function RootLayout() {
     return (
         <ThemeProvider>
             <AuthProvider>
-                <RootLayoutNav />
+                <NavigationHistoryProvider>
+                    <RootLayoutNav />
+                </NavigationHistoryProvider>
             </AuthProvider>
         </ThemeProvider>
     );

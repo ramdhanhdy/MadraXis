@@ -5,6 +5,7 @@ import {
   Alert,
   StyleSheet } from
 'react-native';
+import { useRouter } from 'expo-router';
 import { Modal } from '../Modal';
 import { ClassService } from '../../../services/classService';
 import { useAuth } from '../../../context/AuthContext';
@@ -66,6 +67,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
   // Hooks
   const { user } = useAuth();
   const { theme } = useTheme();
+  const router = useRouter();
 
   // Create styles
   const styles = StyleSheet.create({
@@ -338,7 +340,19 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
           <View style={styles.breadcrumbContainer}>
             <BreadcrumbNavigation
               items={breadcrumbItems}
-              onNavigate={() => {}}
+              onNavigate={(path, params) => {
+                // Close the modal before navigation
+                onClose();
+                
+                // Use setTimeout to ensure modal closes before navigation
+                setTimeout(() => {
+                  if (params) {
+                    router.push({ pathname: path as any, params });
+                  } else {
+                    router.push(path as any);
+                  }
+                }, 100);
+              }}
               maxVisibleItems={3}
             />
           </View>

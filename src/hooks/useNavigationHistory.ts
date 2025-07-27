@@ -1,5 +1,10 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'expo-router';
+/**
+ * @deprecated This hook has been deprecated. Use the new NavigationHistoryContext instead.
+ * Import from '../context/NavigationHistoryContext' for shared global state.
+ */
+
+import { useEffect } from 'react';
+import { useNavigationHistory as useNavigationHistoryContext } from '../context/NavigationHistoryContext';
 
 export interface NavigationHistoryItem {
   path: string;
@@ -16,118 +21,21 @@ export interface NavigationHistoryState {
 }
 
 /**
- * Hook for managing navigation history and state
- * Tracks navigation flow and provides breadcrumb functionality
+ * @deprecated Use useNavigationHistory from '../context/NavigationHistoryContext' instead
+ * This hook now delegates to the shared context provider
  */
 export function useNavigationHistory(maxHistorySize = 10) {
-  const [history, setHistory] = useState<NavigationHistoryItem[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(-1);
-  const router = useRouter();
-
-  const canGoBack = currentIndex > 0;
-  const canGoForward = currentIndex < history.length - 1;
-
-  /**
-   * Add a new navigation entry to history
-   */
-  const addToHistory = useCallback((
-    path: string,
-    params?: Record<string, any>,
-    label?: string
-  ) => {
-    const newItem: NavigationHistoryItem = {
-      path,
-      params,
-      timestamp: Date.now(),
-      label,
-    };
-
-    setHistory(prevHistory => {
-      // Remove any forward history if we're not at the end
-      const newHistory = prevHistory.slice(0, currentIndex + 1);
-      
-      // Add new item
-      newHistory.push(newItem);
-      
-      // Limit history size
-      if (newHistory.length > maxHistorySize) {
-        newHistory.shift();
-      }
-      
-      return newHistory;
-    });
-
-    setCurrentIndex(prevIndex => Math.min(prevIndex + 1, maxHistorySize - 1));
-  }, [currentIndex, maxHistorySize]);
-
-  /**
-   * Navigate back in history
-   */
-  const goBack = useCallback(() => {
-    if (canGoBack) {
-      const previousItem = history[currentIndex - 1];
-      setCurrentIndex(prev => prev - 1);
-      router.push(previousItem.path as any);
-    }
-  }, [canGoBack, currentIndex, history, router]);
-
-  /**
-   * Navigate forward in history
-   */
-  const goForward = useCallback(() => {
-    if (canGoForward) {
-      const nextItem = history[currentIndex + 1];
-      setCurrentIndex(prev => prev + 1);
-      router.push(nextItem.path as any);
-    }
-  }, [canGoForward, currentIndex, history, router]);
-
-  /**
-   * Clear navigation history
-   */
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-    setCurrentIndex(-1);
-  }, []);
-
-  /**
-   * Get breadcrumb items for current navigation path
-   */
-  const getBreadcrumbItems = useCallback((): NavigationHistoryItem[] => {
-    return history.slice(0, currentIndex + 1);
-  }, [history, currentIndex]);
-
-  /**
-   * Navigate to a specific point in history
-   */
-  const navigateToHistoryItem = useCallback((index: number) => {
-    if (index >= 0 && index <= currentIndex) {
-      const item = history[index];
-      setCurrentIndex(index);
-      router.push(item.path as any);
-    }
-  }, [currentIndex, history, router]);
-
-  return {
-    history,
-    currentIndex,
-    canGoBack,
-    canGoForward,
-    addToHistory,
-    goBack,
-    goForward,
-    clearHistory,
-    getBreadcrumbItems,
-    navigateToHistoryItem,
-  };
+  // Delegate to the context provider
+  return useNavigationHistoryContext();
 }
 
 /**
- * Hook for tracking navigation to specific routes
+ * @deprecated Use useRouteTracking from '../context/NavigationHistoryContext' instead
+ * This hook now delegates to the shared context provider
  */
 export function useRouteTracking(route: string, label?: string) {
-  const { addToHistory } = useNavigationHistory();
-
+  const { addToHistory } = useNavigationHistoryContext();
+  
   useEffect(() => {
     addToHistory(route, {}, label);
   }, [route, label, addToHistory]);
@@ -135,6 +43,7 @@ export function useRouteTracking(route: string, label?: string) {
 
 /**
  * Hook for generating breadcrumb data for common routes
+ * This remains a utility function and doesn't need to be in context
  */
 export function useBreadcrumbData(classId?: number, className?: string) {
   const baseItems = [

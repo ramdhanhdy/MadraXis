@@ -49,15 +49,24 @@ export class ClassEnrollmentService {
       const offset = (page - 1) * limit;
       let searchResults: StudentWithDetails[] = [];
 
-      // Handle search functionality with separate queries to avoid SQL injection
+      // Handle search functionality with optimized single query
       if (validatedOptions?.searchTerm) {
         const searchPattern = `%${sanitizeLikeInput(validatedOptions.searchTerm)}%`;
 
         try {
-          // Search by full_name
-          const { data: nameResults, error: nameError } = await supabase.
-          from('profiles').
-          select(`
+          // Get enrolled student IDs first
+          const { data: enrolledStudents } = await supabase
+            .from('class_students')
+            .select('student_id')
+            .eq('class_id', classId);
+
+          const enrolledIds = enrolledStudents?.map(e => e.student_id) || [];
+
+          // Single optimized query combining name and NIS search
+          let searchQuery = supabase
+            .from('profiles')
+            .select(
+              `
               id,
               full_name,
               student_details!inner(
@@ -65,74 +74,37 @@ export class ClassEnrollmentService {
                 gender,
                 boarding
               )
-            `).
-          eq('role', 'student').
-          eq('school_id', classData.school_id).
-          ilike('full_name', searchPattern);
+            `,
+              { count: 'exact' }
+            )
+            .eq('role', 'student')
+            .eq('school_id', classData.school_id)
+            .or(`full_name.ilike.${searchPattern},student_details.nis.ilike.${searchPattern}`);
 
-          if (nameError) {
-            logger.error('Error searching by name:', { error: nameError.message });
+          // Exclude enrolled students
+          if (enrolledIds.length > 0) {
+            searchQuery = searchQuery.not('id', 'in', `(${enrolledIds.join(',')})`);
           }
-
-          // Search by NIS
-          const { data: nisResults, error: nisError } = await supabase.
-          from('profiles').
-          select(`
-              id,
-              full_name,
-              student_details!inner(
-                nis,
-                gender,
-                boarding
-              )
-            `).
-          eq('role', 'student').
-          eq('school_id', classData.school_id).
-          ilike('student_details.nis', searchPattern);
-
-          if (nisError) {
-            logger.error('Error searching by NIS:', { error: nisError.message });
-          }
-
-          // Merge and deduplicate results
-          const allResults = [...(nameResults || []), ...(nisResults || [])];
-          const uniqueResults = allResults.reduce((acc, current) => {
-            const existing = acc.find((item) => item.id === current.id);
-            if (!existing) {
-              acc.push(current);
-            }
-            return acc;
-          }, [] as any[]);
-
-          // Exclude already enrolled students
-          const { data: enrolledStudents } = await supabase.
-          from('class_students').
-          select('student_id').
-          eq('class_id', classId);
-
-          const enrolledIds = new Set(enrolledStudents?.map((e) => e.student_id) || []);
-          const availableResults = uniqueResults.filter((student) => !enrolledIds.has(student.id));
 
           // Apply additional filters
-          let filteredResults = availableResults;
           if (validatedOptions?.gender) {
-            filteredResults = filteredResults.filter((s) => {
-              const details = Array.isArray(s.student_details) ? s.student_details[0] : s.student_details;
-              return details?.gender === validatedOptions.gender;
-            });
+            searchQuery = searchQuery.eq('student_details.gender', validatedOptions.gender);
           }
-          if (validatedOptions?.boarding) {
-            filteredResults = filteredResults.filter((s) => {
-              const details = Array.isArray(s.student_details) ? s.student_details[0] : s.student_details;
-              return details?.boarding === validatedOptions.boarding;
-            });
+          if (validatedOptions?.boarding !== undefined) {
+            searchQuery = searchQuery.eq('student_details.boarding', validatedOptions.boarding);
           }
 
           // Apply pagination
-          const paginatedResults = filteredResults.slice(offset, offset + limit);
+          const { data: searchResults, error: searchError, count } = await searchQuery
+            .range(offset, offset + limit - 1);
+
+          if (searchError) {
+            logger.error('Error searching students:', { error: searchError.message });
+            throw searchError;
+          }
 
           // Transform data
-          searchResults = paginatedResults.map((student) => {
+          const availableStudents = searchResults.map((student) => {
             const details = Array.isArray(student.student_details) ? student.student_details[0] : student.student_details;
             return {
               student_id: student.id,
@@ -144,8 +116,8 @@ export class ClassEnrollmentService {
           });
 
           return {
-            students: searchResults,
-            total: filteredResults.length
+            students: availableStudents,
+            total: count || 0
           };
         } catch (error) {
           logger.error('Search operation failed:', { error: error instanceof Error ? error.message : String(error) });
@@ -270,25 +242,13 @@ export class ClassEnrollmentService {
         `, { count: 'exact' }).
       eq('class_id', classId);
 
-      // Apply search filter safely
+      // Apply search filter safely using parameterized queries
       if (options?.searchTerm) {
         const sanitizedSearch = sanitizeLikeInput(options.searchTerm);
         if (sanitizedSearch.length > 0) {
           const searchPattern = `%${sanitizedSearch}%`;
-
-          // Escape the pattern for safe inclusion in Postgrest OR filter
-          // by quoting it and doubling any inner quotes
-          const escapePostgrestValue = (val: string): string => {
-            const escaped = val.replace(/"/g, '""');
-            return `"${escaped}"`;
-          };
-
-          const escapedPattern = escapePostgrestValue(searchPattern);
-          const nameCondition = `profiles.full_name.ilike.${escapedPattern}`;
-          const nisCondition = `profiles.student_details.nis.ilike.${escapedPattern}`;
-
-          // Use OR with properly escaped conditions
-          query = query.or(`${nameCondition},${nisCondition}`);
+          // Use Supabase's or method with proper escaping
+          query = query.or(`profiles.full_name.ilike.${searchPattern},profiles.student_details.nis.ilike.${searchPattern}`);
         }
       }
 

@@ -388,6 +388,8 @@ export default function ClassesList() {
 
   });
 
+  EnhancedClassCard.displayName = 'EnhancedClassCard';
+
   const renderClassItem = ({ item }: {item: ClassWithDetails;}) =>
   <EnhancedClassCard item={item} />;
 
