@@ -1,3 +1,4 @@
+import { logger } from '../../utils/logger';
 import { supabase } from '../../utils/supabase';
 import { sanitizeLikeInput, sanitizeSortParams, sanitizePagination } from '../../utils/sanitization';
 import {
@@ -9,8 +10,8 @@ import {
   ClassServiceError,
   EnrollStudentSchema,
   BulkEnrollStudentsSchema,
-  GetAvailableStudentsOptionsSchema
-} from './types';
+  GetAvailableStudentsOptionsSchema } from
+'./types';
 import { ClassAccessControl } from './access';
 import { ClassAuditService } from './audit';
 import { ClassRepository } from './repository';
@@ -23,14 +24,14 @@ export class ClassEnrollmentService {
    * Get available students for enrollment (not already enrolled in the class)
    */
   static async getAvailableStudents(
-    classId: number,
-    teacherId: string,
-    options?: GetAvailableStudentsOptions
-  ): Promise<{ students: StudentWithDetails[]; total: number }> {
+  classId: number,
+  teacherId: string,
+  options?: GetAvailableStudentsOptions)
+  : Promise<{students: StudentWithDetails[];total: number;}> {
     try {
       // Validate and sanitize input options
       const validatedOptions = options ? GetAvailableStudentsOptionsSchema.parse(options) : undefined;
-      
+
       // Verify teacher has access to this class
       await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'get_available_students');
 
@@ -51,12 +52,12 @@ export class ClassEnrollmentService {
       // Handle search functionality with separate queries to avoid SQL injection
       if (validatedOptions?.searchTerm) {
         const searchPattern = `%${sanitizeLikeInput(validatedOptions.searchTerm)}%`;
-        
+
         try {
           // Search by full_name
-          const { data: nameResults, error: nameError } = await supabase
-            .from('profiles')
-            .select(`
+          const { data: nameResults, error: nameError } = await supabase.
+          from('profiles').
+          select(`
               id,
               full_name,
               student_details!inner(
@@ -64,19 +65,19 @@ export class ClassEnrollmentService {
                 gender,
                 boarding
               )
-            `)
-            .eq('role', 'student')
-            .eq('school_id', classData.school_id)
-            .ilike('full_name', searchPattern);
+            `).
+          eq('role', 'student').
+          eq('school_id', classData.school_id).
+          ilike('full_name', searchPattern);
 
           if (nameError) {
-            console.error('Error searching by name:', nameError);
+            logger.error('Error searching by name:', { error: nameError.message });
           }
 
           // Search by NIS
-          const { data: nisResults, error: nisError } = await supabase
-            .from('profiles')
-            .select(`
+          const { data: nisResults, error: nisError } = await supabase.
+          from('profiles').
+          select(`
               id,
               full_name,
               student_details!inner(
@@ -84,19 +85,19 @@ export class ClassEnrollmentService {
                 gender,
                 boarding
               )
-            `)
-            .eq('role', 'student')
-            .eq('school_id', classData.school_id)
-            .ilike('student_details.nis', searchPattern);
+            `).
+          eq('role', 'student').
+          eq('school_id', classData.school_id).
+          ilike('student_details.nis', searchPattern);
 
           if (nisError) {
-            console.error('Error searching by NIS:', nisError);
+            logger.error('Error searching by NIS:', { error: nisError.message });
           }
 
           // Merge and deduplicate results
           const allResults = [...(nameResults || []), ...(nisResults || [])];
           const uniqueResults = allResults.reduce((acc, current) => {
-            const existing = acc.find(item => item.id === current.id);
+            const existing = acc.find((item) => item.id === current.id);
             if (!existing) {
               acc.push(current);
             }
@@ -104,24 +105,24 @@ export class ClassEnrollmentService {
           }, [] as any[]);
 
           // Exclude already enrolled students
-          const { data: enrolledStudents } = await supabase
-            .from('class_students')
-            .select('student_id')
-            .eq('class_id', classId);
+          const { data: enrolledStudents } = await supabase.
+          from('class_students').
+          select('student_id').
+          eq('class_id', classId);
 
-          const enrolledIds = new Set(enrolledStudents?.map(e => e.student_id) || []);
-          const availableResults = uniqueResults.filter(student => !enrolledIds.has(student.id));
+          const enrolledIds = new Set(enrolledStudents?.map((e) => e.student_id) || []);
+          const availableResults = uniqueResults.filter((student) => !enrolledIds.has(student.id));
 
           // Apply additional filters
           let filteredResults = availableResults;
           if (validatedOptions?.gender) {
-            filteredResults = filteredResults.filter(s => {
+            filteredResults = filteredResults.filter((s) => {
               const details = Array.isArray(s.student_details) ? s.student_details[0] : s.student_details;
               return details?.gender === validatedOptions.gender;
             });
           }
           if (validatedOptions?.boarding) {
-            filteredResults = filteredResults.filter(s => {
+            filteredResults = filteredResults.filter((s) => {
               const details = Array.isArray(s.student_details) ? s.student_details[0] : s.student_details;
               return details?.boarding === validatedOptions.boarding;
             });
@@ -131,14 +132,14 @@ export class ClassEnrollmentService {
           const paginatedResults = filteredResults.slice(offset, offset + limit);
 
           // Transform data
-          searchResults = paginatedResults.map(student => {
+          searchResults = paginatedResults.map((student) => {
             const details = Array.isArray(student.student_details) ? student.student_details[0] : student.student_details;
             return {
               student_id: student.id,
               full_name: student.full_name,
               nis: details?.nis,
               gender: details?.gender,
-              boarding: details?.boarding,
+              boarding: details?.boarding
             };
           });
 
@@ -147,7 +148,7 @@ export class ClassEnrollmentService {
             total: filteredResults.length
           };
         } catch (error) {
-          console.error('Search operation failed:', error);
+          logger.error('Search operation failed:', { error: error instanceof Error ? error.message : String(error) });
           throw ClassServiceError.create(
             'SEARCH_FAILED',
             'Failed to search students',
@@ -157,10 +158,10 @@ export class ClassEnrollmentService {
       }
 
       // Get enrolled student IDs first to exclude them from the query
-      const { data: enrolledStudents, error: enrolledError } = await supabase
-        .from('class_students')
-        .select('student_id')
-        .eq('class_id', classId);
+      const { data: enrolledStudents, error: enrolledError } = await supabase.
+      from('class_students').
+      select('student_id').
+      eq('class_id', classId);
 
       if (enrolledError) {
         throw ClassServiceError.create(
@@ -169,12 +170,12 @@ export class ClassEnrollmentService {
           { originalError: enrolledError, classId, teacherId }
         );
       }
-      const enrolledStudentIds = enrolledStudents?.map(e => e.student_id) || [];
+      const enrolledStudentIds = enrolledStudents?.map((e) => e.student_id) || [];
 
       // Base query for available students, combining data fetch and count
-      let query = supabase
-        .from('profiles')
-        .select(`
+      let query = supabase.
+      from('profiles').
+      select(`
           id,
           full_name,
           student_details!inner(
@@ -182,9 +183,9 @@ export class ClassEnrollmentService {
             gender,
             boarding
           )
-        `, { count: 'exact' })
-        .eq('role', 'student')
-        .eq('school_id', classData.school_id);
+        `, { count: 'exact' }).
+      eq('role', 'student').
+      eq('school_id', classData.school_id);
 
       // Exclude enrolled students at the query level
       if (enrolledStudentIds.length > 0) {
@@ -201,8 +202,8 @@ export class ClassEnrollmentService {
       }
 
       // Apply pagination and fetch data + count
-      const { data: students, count: totalCount, error } = await query
-        .range(offset, offset + limit - 1);
+      const { data: students, count: totalCount, error } = await query.
+      range(offset, offset + limit - 1);
 
       if (error) {
         throw ClassServiceError.create(
@@ -211,16 +212,16 @@ export class ClassEnrollmentService {
           { originalError: error, classId, teacherId }
         );
       }
-      
+
       // Transform data
-      const availableStudents = students!.map(student => {
+      const availableStudents = students!.map((student) => {
         const details = Array.isArray(student.student_details) ? student.student_details[0] : student.student_details;
         return {
           student_id: student.id,
           full_name: student.full_name,
           nis: details?.nis,
           gender: details?.gender,
-          boarding: details?.boarding,
+          boarding: details?.boarding
         };
       });
 
@@ -244,17 +245,17 @@ export class ClassEnrollmentService {
    * Get students enrolled in a class
    */
   static async getClassStudents(
-    classId: number,
-    teacherId: string,
-    options?: GetClassStudentsOptions
-  ): Promise<{ students: StudentWithDetails[]; total: number }> {
+  classId: number,
+  teacherId: string,
+  options?: GetClassStudentsOptions)
+  : Promise<{students: StudentWithDetails[];total: number;}> {
     try {
       // Verify teacher has access to this class
       await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'get_class_students');
 
-      let query = supabase
-        .from('class_students')
-        .select(`
+      let query = supabase.
+      from('class_students').
+      select(`
           student_id,
           enrollment_date,
           notes,
@@ -266,8 +267,8 @@ export class ClassEnrollmentService {
               boarding
             )
           )
-        `, { count: 'exact' })
-        .eq('class_id', classId);
+        `, { count: 'exact' }).
+      eq('class_id', classId);
 
       // Apply search filter safely
       if (options?.searchTerm) {
@@ -304,7 +305,7 @@ export class ClassEnrollmentService {
       // Apply pagination
       const { page, limit } = sanitizePagination(options?.offset ? Math.floor(options.offset / (options?.limit || 10)) + 1 : 1, options?.limit);
       const offset = (page - 1) * limit;
-      
+
       const { data: enrollments, count: totalCount, error } = await query.range(offset, offset + limit - 1);
 
       if (error) {
@@ -318,7 +319,7 @@ export class ClassEnrollmentService {
       // Transform data
       const students = enrollments!.map((enrollment: any) => {
         const profile = Array.isArray(enrollment.profiles) ? enrollment.profiles[0] : enrollment.profiles;
-        const studentDetails = profile?.student_details ? (Array.isArray(profile.student_details) ? profile.student_details[0] : profile.student_details) : null;
+        const studentDetails = profile?.student_details ? Array.isArray(profile.student_details) ? profile.student_details[0] : profile.student_details : null;
 
         return {
           student_id: enrollment.student_id,
@@ -327,7 +328,7 @@ export class ClassEnrollmentService {
           gender: studentDetails?.gender,
           boarding: studentDetails?.boarding,
           enrollment_date: enrollment.enrollment_date,
-          notes: enrollment.notes,
+          notes: enrollment.notes
         };
       });
 
@@ -352,20 +353,20 @@ export class ClassEnrollmentService {
    * Uses atomic database function to prevent race conditions and enforce capacity limits
    */
   static async enrollStudent(
-    classId: number,
-    enrollmentData: EnrollStudentRequest,
-    teacherId: string
-  ): Promise<void> {
+  classId: number,
+  enrollmentData: EnrollStudentRequest,
+  teacherId: string)
+  : Promise<void> {
     try {
       // Validate input
       const validatedData = EnrollStudentSchema.parse(enrollmentData);
-      
+
       // Get teacher's school_id for the atomic function
-      const { data: teacherProfile } = await supabase
-        .from('profiles')
-        .select('school_id')
-        .eq('id', teacherId)
-        .single();
+      const { data: teacherProfile } = await supabase.
+      from('profiles').
+      select('school_id').
+      eq('id', teacherId).
+      single();
 
       if (!teacherProfile) {
         throw ClassServiceError.create(
@@ -376,13 +377,13 @@ export class ClassEnrollmentService {
       }
 
       // Use atomic function to enroll student with capacity checking
-      const { data: result, error } = await supabase
-        .rpc('add_students_to_class_atomic', {
-          p_class_id: classId,
-          p_student_ids: [validatedData.student_id],
-          p_teacher_id: teacherId,
-          p_school_id: teacherProfile.school_id
-        });
+      const { data: result, error } = await supabase.
+      rpc('add_students_to_class_atomic', {
+        p_class_id: classId,
+        p_student_ids: [validatedData.student_id],
+        p_teacher_id: teacherId,
+        p_school_id: teacherProfile.school_id
+      });
 
       if (error) {
         throw ClassServiceError.create(
@@ -402,16 +403,16 @@ export class ClassEnrollmentService {
       }
 
       const enrollmentResult = result[0];
-      
+
       // Check if student was successfully enrolled
       if (!enrollmentResult.success.includes(validatedData.student_id)) {
         // Find the specific error for this student
         const studentError = enrollmentResult.errors.find(
           (err: any) => err.student_id === validatedData.student_id
         );
-        
+
         const errorMessage = studentError ? studentError.error : 'Unknown enrollment error';
-        
+
         // Map specific errors to appropriate error codes
         let errorCode = 'ENROLLMENT_FAILED';
         if (errorMessage.includes('already enrolled')) {
@@ -423,7 +424,7 @@ export class ClassEnrollmentService {
         } else if (errorMessage.includes('access denied')) {
           errorCode = 'ACCESS_DENIED';
         }
-        
+
         throw ClassServiceError.create(
           errorCode,
           errorMessage,
@@ -449,23 +450,23 @@ export class ClassEnrollmentService {
    * Uses atomic database function to prevent race conditions and enforce capacity limits
    */
   static async bulkEnrollStudents(
-    classId: number,
-    enrollmentData: BulkEnrollStudentsRequest,
-    teacherId: string
-  ): Promise<{
+  classId: number,
+  enrollmentData: BulkEnrollStudentsRequest,
+  teacherId: string)
+  : Promise<{
     results: string[];
-    errors: Array<{ studentId: string; error: string }>;
+    errors: Array<{studentId: string;error: string;}>;
   }> {
     try {
       // Validate input
       const validatedData = BulkEnrollStudentsSchema.parse(enrollmentData);
-      
+
       // Get teacher's school_id for the atomic function
-      const { data: teacherProfile } = await supabase
-        .from('profiles')
-        .select('school_id')
-        .eq('id', teacherId)
-        .single();
+      const { data: teacherProfile } = await supabase.
+      from('profiles').
+      select('school_id').
+      eq('id', teacherId).
+      single();
 
       if (!teacherProfile) {
         throw ClassServiceError.create(
@@ -476,13 +477,13 @@ export class ClassEnrollmentService {
       }
 
       // Use atomic function to enroll students with capacity checking
-      const { data: result, error } = await supabase
-        .rpc('add_students_to_class_atomic', {
-          p_class_id: classId,
-          p_student_ids: validatedData.student_ids,
-          p_teacher_id: teacherId,
-          p_school_id: teacherProfile.school_id
-        });
+      const { data: result, error } = await supabase.
+      rpc('add_students_to_class_atomic', {
+        p_class_id: classId,
+        p_student_ids: validatedData.student_ids,
+        p_teacher_id: teacherId,
+        p_school_id: teacherProfile.school_id
+      });
 
       if (error) {
         throw ClassServiceError.create(
@@ -502,7 +503,7 @@ export class ClassEnrollmentService {
       }
 
       const enrollmentResult = result[0];
-      
+
       // Transform results to match expected format
       const results = enrollmentResult.success || [];
       const errors = (enrollmentResult.errors || []).map((err: any) => ({
@@ -527,21 +528,21 @@ export class ClassEnrollmentService {
    * Remove a student from a class
    */
   static async removeStudent(
-    classId: number,
-    studentId: string,
-    teacherId: string
-  ): Promise<void> {
+  classId: number,
+  studentId: string,
+  teacherId: string)
+  : Promise<void> {
     try {
       // Verify teacher has access to this class
       await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'remove_student');
 
       // Get current enrollment data for audit
-      const { data: enrollmentData } = await supabase
-        .from('class_students')
-        .select('*')
-        .eq('class_id', classId)
-        .eq('student_id', studentId)
-        .single();
+      const { data: enrollmentData } = await supabase.
+      from('class_students').
+      select('*').
+      eq('class_id', classId).
+      eq('student_id', studentId).
+      single();
 
       if (!enrollmentData) {
         throw ClassServiceError.create(
@@ -552,11 +553,11 @@ export class ClassEnrollmentService {
       }
 
       // Remove the student
-      const { error } = await supabase
-        .from('class_students')
-        .delete()
-        .eq('class_id', classId)
-        .eq('student_id', studentId);
+      const { error } = await supabase.
+      from('class_students').
+      delete().
+      eq('class_id', classId).
+      eq('student_id', studentId);
 
       if (error) {
         throw ClassServiceError.create(
@@ -590,15 +591,15 @@ export class ClassEnrollmentService {
    * Bulk remove multiple students from a class
    */
   static async bulkRemoveStudents(
-    classId: number,
-    studentIds: string[],
-    teacherId: string
-  ): Promise<{
+  classId: number,
+  studentIds: string[],
+  teacherId: string)
+  : Promise<{
     results: string[];
-    errors: Array<{ studentId: string; error: string }>;
+    errors: Array<{studentId: string;error: string;}>;
   }> {
     const results: string[] = [];
-    const errors: Array<{ studentId: string; error: string }> = [];
+    const errors: Array<{studentId: string;error: string;}> = [];
 
     for (const studentId of studentIds) {
       try {
@@ -607,7 +608,7 @@ export class ClassEnrollmentService {
       } catch (error) {
         errors.push({
           studentId,
-          error: error instanceof ClassServiceError ? error.message : 'Unknown error',
+          error: error instanceof ClassServiceError ? error.message : 'Unknown error'
         });
       }
     }
