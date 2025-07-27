@@ -90,7 +90,7 @@ export default function ClassStudentsTemplate() {
   // Handle add students to class
   const handleAddStudents = useCallback(() => {
     if (classId) {
-      router.push(`/(teacher)/class/${classId}/add-students`);
+      router.push(`/(teacher)/class/${classId}/add-students?returnUrl=${encodeURIComponent('/(teacher)/class/[id]')}`);
     }
   }, [router, classId]);
 

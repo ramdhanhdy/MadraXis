@@ -1,7 +1,8 @@
 import React, { useCallback } from 'react';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { AddStudentsToClassModal } from '../../../../src/components/organisms/AddStudentsToClassModal/AddStudentsToClassModal';
+import { ErrorBoundary } from '../../../../src/components/organisms/ErrorBoundary';
 
 export default function AddStudentsModal() {
   const router = useRouter();
@@ -24,6 +25,21 @@ export default function AddStudentsModal() {
     handleClose();
   }, [handleClose]);
 
+  const ErrorFallback = ({ onRetry }: { onRetry: () => void }) => (
+    <View style={styles.errorContainer}>
+      <Text style={styles.errorTitle}>Unable to Load Add Students</Text>
+      <Text style={styles.errorDescription}>
+        We encountered an error while preparing the add students interface.
+      </Text>
+      <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
+        <Text style={styles.retryButtonText}>Try Again</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+        <Text style={styles.closeButtonText}>Close</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   if (!classId) {
     return (
       <>
@@ -38,9 +54,9 @@ export default function AddStudentsModal() {
           <Text style={styles.errorDescription}>
             The provided class ID is invalid. Please try again.
           </Text>
-          <Text style={styles.goBackText} onPress={handleClose}>
-            Go Back
-          </Text>
+          <TouchableOpacity style={styles.goBackButton} onPress={handleClose}>
+            <Text style={styles.goBackButtonText}>Go Back</Text>
+          </TouchableOpacity>
         </View>
       </>
     );
@@ -58,14 +74,14 @@ export default function AddStudentsModal() {
         }} 
       />
       <View style={{ flex: 1 }}>
-        {classId && (
+        <ErrorBoundary fallback={<ErrorFallback onRetry={() => window.location.reload()} />}>
           <AddStudentsToClassModal
             visible={true}
             onClose={handleClose}
             classId={classId}
             onStudentsAdded={handleStudentsAdded}
           />
-        )}
+        </ErrorBoundary>
       </View>
     </>
   );
@@ -93,10 +109,38 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     lineHeight: 20,
   },
-  goBackText: {
+  goBackButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  goBackButtonText: {
+    color: '#ffffff',
     fontSize: 16,
-    color: '#007AFF',
-    textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  retryButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  closeButton: {
+    backgroundColor: '#666666',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  closeButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

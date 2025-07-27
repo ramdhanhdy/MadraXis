@@ -176,9 +176,9 @@
 **Path**: `app/(teacher)/class/[id]/add-students.tsx` (new modal route)
 
 ### 11.1 Set up modal navigation
-- [ ] 11.1.1 Configure expo-router for modal presentation
-- [ ] 11.1.2 Add proper navigation params passing
-- [ ] 11.1.3 Implement back navigation handling
+- [x] 11.1.1 Configure expo-router for modal presentation
+- [x] 11.1.2 Add proper navigation params passing
+- [x] 11.1.3 Implement back navigation handling
 
 ### 11.2 Add deep linking support
 - [ ] 11.2.1 Support direct links to add students flow
