@@ -2,10 +2,15 @@
 
 const fs = require('fs');
 const path = require('path');
+const parser = require('@babel/parser');
+const traverse = require('@babel/traverse').default;
+const generator = require('@babel/generator').default;
+const t = require('@babel/types');
 
 /**
  * Automated Fix Script for Console Logging Security Issues
- * Attempts to automatically replace console statements with secure logger
+ * Uses AST parsing to accurately replace console statements with secure logger
+ * Avoids altering console statements inside comments or strings
  * Optimized for Bun runtime
  */
 
@@ -36,31 +41,105 @@ class LoggingSecurityFixer {
       let content = await file.text();
       let modified = false;
       
-      // Add logger import if not present
-      if (!content.includes("import { logger }") && !content.includes("from '../../utils/logger'")) {
-        const importPath = this.getLoggerImportPath(filePath);
-        content = `import { logger } from '${importPath}';\n${content}`;
-        modified = true;
+      // Parse the file using Babel parser
+      let ast;
+      try {
+        ast = parser.parse(content, {
+          sourceType: 'module',
+          allowImportExportEverywhere: true,
+          allowReturnOutsideFunction: true,
+          plugins: [
+            'jsx',
+            'typescript',
+            'decorators-legacy',
+            'classProperties',
+            'objectRestSpread',
+            'asyncGenerators',
+            'dynamicImport'
+          ]
+        });
+      } catch (parseError) {
+        console.error(`❌ Failed to parse ${filePath}: ${parseError.message}`);
+        return;
       }
-      
-      // Replace console statements
-      const replacements = [
-        { from: /console\.log\(/g, to: 'logger.debug(' },
-        { from: /console\.info\(/g, to: 'logger.info(' },
-        { from: /console\.warn\(/g, to: 'logger.warn(' },
-        { from: /console\.error\(/g, to: 'logger.error(' },
-        { from: /console\.debug\(/g, to: 'logger.debug(' }
-      ];
-      
-      replacements.forEach(({ from, to }) => {
-        if (from.test(content)) {
-          content = content.replace(from, to);
-          modified = true;
+
+      // Track if we need to add logger import
+      let needsLoggerImport = true;
+      let hasConsoleCalls = false;
+
+      // Check for existing logger import
+      traverse(ast, {
+        ImportDeclaration(path) {
+          const importPath = path.node.source.value;
+          if (importPath.includes('logger') || importPath.includes('utils/logger')) {
+            path.node.specifiers.forEach(specifier => {
+              if (specifier.imported && specifier.imported.name === 'logger') {
+                needsLoggerImport = false;
+              } else if (specifier.local && specifier.local.name === 'logger') {
+                needsLoggerImport = false;
+              }
+            });
+          }
+        },
+
+        // Find console calls that need replacement
+        MemberExpression(path) {
+          if (
+            t.isIdentifier(path.node.object, { name: 'console' }) &&
+            ['log', 'info', 'warn', 'error', 'debug'].includes(path.node.property.name)
+          ) {
+            const parent = path.parent;
+            if (t.isCallExpression(parent) && path === parent.callee) {
+              hasConsoleCalls = true;
+            }
+          }
         }
       });
-      
-      if (modified) {
-        await Bun.write(filePath, content);
+
+      if (!hasConsoleCalls && !needsLoggerImport) {
+        // No changes needed
+        return;
+      }
+
+      // Transform the AST
+      traverse(ast, {
+        CallExpression(path) {
+          if (
+            t.isMemberExpression(path.node.callee) &&
+            t.isIdentifier(path.node.callee.object, { name: 'console' }) &&
+            t.isIdentifier(path.node.callee.property) &&
+            ['log', 'info', 'warn', 'error', 'debug'].includes(path.node.callee.property.name)
+          ) {
+            // Replace console.method with logger.method
+            const methodName = path.node.callee.property.name;
+            const loggerMethod = methodName === 'log' ? 'debug' : methodName;
+            
+            path.node.callee = t.memberExpression(
+              t.identifier('logger'),
+              t.identifier(loggerMethod)
+            );
+            
+            modified = true;
+          }
+        }
+      });
+
+      // Generate new code from AST
+      const newContent = generator(ast, {
+        retainLines: true,
+        compact: false,
+        concise: false
+      }).code;
+
+      // Add logger import if needed
+      let finalContent = newContent;
+      if (needsLoggerImport) {
+        const importPath = this.getLoggerImportPath(filePath);
+        finalContent = `import { logger } from '${importPath}';\n${newContent}`;
+      }
+
+      if (modified || needsLoggerImport) {
+        await Bun.write(filePath, finalContent);
         this.fixedFiles.add(filePath);
         console.log(`✅ Fixed: ${filePath}`);
       }
@@ -71,8 +150,30 @@ class LoggingSecurityFixer {
   }
 
   getLoggerImportPath(filePath) {
-    const depth = filePath.split('/').length - 2; // Subtract 2 for src and filename
-    return '../'.repeat(depth) + 'utils/logger';
+    // Normalize path for both Windows and Unix systems
+    const normalizedPath = filePath.replace(/\\/g, '/');
+    
+    // Get the directory of the current file
+    const fileDir = path.dirname(normalizedPath);
+    
+    // Get the project root directory (where package.json is located)
+    const projectRoot = process.cwd().replace(/\\/g, '/');
+    
+    // Calculate the relative path from file directory to utils/logger
+    let relativePath = path.relative(fileDir, path.join(projectRoot, 'src', 'utils', 'logger'));
+    
+    // Ensure forward slashes for consistency
+    relativePath = relativePath.replace(/\\/g, '/');
+    
+    // Ensure the path starts with ./ for relative imports when needed
+    if (!relativePath.startsWith('.')) {
+      relativePath = './' + relativePath;
+    }
+    
+    // Remove the .ts extension if present
+    relativePath = relativePath.replace(/\.ts$/, '');
+    
+    return relativePath;
   }
 
   async run() {
@@ -119,8 +220,7 @@ class LoggingSecurityFixer {
 // Run the fixer
 if (import.meta.main) {
   const fixer = new LoggingSecurityFixer();
-  await fixer.run();
+  fixer.run();
 }
 
 export default LoggingSecurityFixer;
-
