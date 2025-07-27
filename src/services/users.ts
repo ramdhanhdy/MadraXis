@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import { supabase } from '../utils/supabase';
 import { Student, Teacher, Profile, StudentWithDetails, LegacyStudent, StudentWithRelations } from '../types';
 import { sanitizeLikeInput } from '../utils/sanitization';
@@ -10,12 +11,12 @@ import type { DatabaseResponse } from '../types/database';
 export async function fetchStudents(schoolId: number, limit?: number): Promise<DatabaseResponse<Student[]>> {
   try {
     if (process.env.NODE_ENV === 'development') {
-      console.log('fetchStudents called with schoolId:', schoolId, 'limit:', limit);
+      logger.debug('fetchStudents called', { schoolId, limit, operation: 'fetchStudents' });
     }
-    
-    let query = supabase
-      .from('profiles')
-      .select(`
+
+    let query = supabase.
+    from('profiles').
+    select(`
         id,
         full_name,
         role,
@@ -31,25 +32,25 @@ export async function fetchStudents(schoolId: number, limit?: number): Promise<D
           created_at,
           updated_at
         )
-      `)
-      .eq('role', 'student')
-      .eq('school_id', schoolId)
-      .order('full_name');
+      `).
+    eq('role', 'student').
+    eq('school_id', schoolId).
+    order('full_name');
 
     if (limit) {
       query = query.limit(limit);
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('About to execute supabase query...');
+      logger.debug('About to execute supabase query', { operation: 'fetchStudents' });
     }
     const { data, error } = await query;
     if (process.env.NODE_ENV === 'development') {
-      console.log('Raw supabase response - data:', data, 'error:', error);
+      logger.debug('Raw supabase response received', { dataLength: data?.length, error, operation: 'fetchStudents' });
     }
 
     if (error) {
-      console.error('Error fetching students:', error);
+      logger.error('Error fetching students', { error: error.message, code: error.code, operation: 'fetchStudents' });
       return { data: null, error };
     }
 
@@ -71,7 +72,10 @@ export async function fetchStudents(schoolId: number, limit?: number): Promise<D
 
     return { data: students, error: null };
   } catch (err) {
-console.error('Service error fetching students:', err);
+    logger.error('Service error fetching students', { 
+      error: err instanceof Error ? err.message : String(err),
+      operation: 'fetchStudents'
+    });
     return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
@@ -81,9 +85,9 @@ console.error('Service error fetching students:', err);
  */
 export async function fetchStudentById(studentId: string): Promise<DatabaseResponse<Student>> {
   try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select(`
+    const { data, error } = await supabase.
+    from('profiles').
+    select(`
         id,
         full_name,
         role,
@@ -123,13 +127,13 @@ export async function fetchStudentById(studentId: string): Promise<DatabaseRespo
             )
           )
         )
-      `)
-      .eq('id', studentId)
-      .eq('role', 'student')
-      .single();
+      `).
+    eq('id', studentId).
+    eq('role', 'student').
+    single();
 
     if (error) {
-      console.error('Error fetching student by ID:', error);
+      logger.error('Error fetching student by ID', { error: error.message, code: error.code, studentId, operation: 'fetchStudentById' });
       return { data: null, error };
     }
 
@@ -146,7 +150,7 @@ export async function fetchStudentById(studentId: string): Promise<DatabaseRespo
       school_id: data.school_id,
       created_at: data.created_at,
       updated_at: data.updated_at,
-      
+
       // Mapped-in fields for Student
       details: data.student_details?.[0] || undefined,
       performance: data.student_performance || [],
@@ -162,7 +166,11 @@ export async function fetchStudentById(studentId: string): Promise<DatabaseRespo
 
     return { data: student, error: null };
   } catch (err) {
-    console.error('Service error fetching student by ID:', err);
+    logger.error('Service error fetching student by ID', { 
+      error: err instanceof Error ? err.message : String(err),
+      studentId,
+      operation: 'fetchStudentById'
+    });
     return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
@@ -172,9 +180,9 @@ export async function fetchStudentById(studentId: string): Promise<DatabaseRespo
  */
 export async function fetchTeachers(schoolId: number, limit?: number): Promise<DatabaseResponse<Teacher[]>> {
   try {
-    let query = supabase
-      .from('profiles')
-      .select(`
+    let query = supabase.
+    from('profiles').
+    select(`
         id,
         full_name,
         role,
@@ -189,10 +197,10 @@ export async function fetchTeachers(schoolId: number, limit?: number): Promise<D
           created_at,
           updated_at
         )
-      `)
-      .eq('role', 'teacher')
-      .eq('school_id', schoolId)
-      .order('full_name');
+      `).
+    eq('role', 'teacher').
+    eq('school_id', schoolId).
+    order('full_name');
 
     if (limit) {
       query = query.limit(limit);
@@ -201,7 +209,7 @@ export async function fetchTeachers(schoolId: number, limit?: number): Promise<D
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching teachers:', error);
+      logger.error('Error fetching teachers', { error: error.message, code: error.code, schoolId, operation: 'fetchTeachers' });
       return { data: null, error };
     }
 
@@ -218,7 +226,11 @@ export async function fetchTeachers(schoolId: number, limit?: number): Promise<D
 
     return { data: teachers, error: null };
   } catch (err) {
-    console.error('Service error fetching teachers:', err);
+    logger.error('Service error fetching teachers', { 
+      error: err instanceof Error ? err.message : String(err),
+      schoolId,
+      operation: 'fetchTeachers'
+    });
     return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
@@ -229,13 +241,13 @@ export async function fetchTeachers(schoolId: number, limit?: number): Promise<D
  */
 export async function fetchStudentsLegacyFormat(schoolId: number, limit?: number): Promise<DatabaseResponse<LegacyStudent[]>> {
   const { data: students, error } = await fetchStudents(schoolId, limit);
-  
+
   if (error || !students) {
     return { data: null, error };
   }
 
   // Transform to legacy format
-  const legacyStudents: LegacyStudent[] = students.map(student => ({
+  const legacyStudents: LegacyStudent[] = students.map((student) => ({
     id: student.id,
     name: student.full_name,
     class: '', // TODO: Get class assignment from class_students table
@@ -256,20 +268,24 @@ export async function fetchStudentsLegacyFormat(schoolId: number, limit?: number
  */
 export async function fetchUserProfile(userId: string): Promise<DatabaseResponse<Profile>> {
   try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    const { data, error } = await supabase.
+    from('profiles').
+    select('*').
+    eq('id', userId).
+    single();
 
     if (error) {
-      console.error('Error fetching user profile:', error);
+      logger.error('Error fetching user profile', { error: error.message, code: error.code, userId, operation: 'fetchUserProfile' });
       return { data: null, error };
     }
 
     return { data, error: null };
   } catch (err) {
-    console.error('Service error fetching user profile:', err);
+    logger.error('Service error fetching user profile', { 
+      error: err instanceof Error ? err.message : String(err),
+      userId,
+      operation: 'fetchUserProfile'
+    });
     return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
@@ -279,9 +295,9 @@ export async function fetchUserProfile(userId: string): Promise<DatabaseResponse
  */
 export async function searchStudents(schoolId: number, searchTerm: string, limit: number = 10): Promise<DatabaseResponse<Student[]>> {
   try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select(`
+    const { data, error } = await supabase.
+    from('profiles').
+    select(`
         id,
         full_name,
         role,
@@ -297,15 +313,21 @@ export async function searchStudents(schoolId: number, searchTerm: string, limit
           created_at,
           updated_at
         )
-      `)
-      .eq('role', 'student')
-      .eq('school_id', schoolId)
-      .ilike('full_name', `%${sanitizeLikeInput(searchTerm)}%`)
-      .limit(limit)
-      .order('full_name');
+      `).
+    eq('role', 'student').
+    eq('school_id', schoolId).
+    ilike('full_name', `%${sanitizeLikeInput(searchTerm)}%`).
+    limit(limit).
+    order('full_name');
 
     if (error) {
-      console.error('Error searching students:', error);
+      logger.error('Error searching students', { 
+        error: error.message, 
+        code: error.code, 
+        schoolId, 
+        searchTerm,
+        operation: 'searchStudents' 
+      });
       return { data: null, error };
     }
 
@@ -326,7 +348,12 @@ export async function searchStudents(schoolId: number, searchTerm: string, limit
 
     return { data: students, error: null };
   } catch (err) {
-    console.error('Service error searching students:', err);
+    logger.error('Service error searching students', { 
+      error: err instanceof Error ? err.message : String(err),
+      schoolId,
+      searchTerm,
+      operation: 'searchStudents'
+    });
     return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
@@ -338,20 +365,24 @@ export async function searchStudents(schoolId: number, searchTerm: string, limit
  */
 export async function getStudentCount(schoolId: number): Promise<DatabaseResponse<number>> {
   try {
-    const { count, error } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'student')
-      .eq('school_id', schoolId);
+    const { count, error } = await supabase.
+    from('profiles').
+    select('*', { count: 'exact', head: true }).
+    eq('role', 'student').
+    eq('school_id', schoolId);
 
     if (error) {
-      console.error('Error counting students:', error);
+      logger.error('Error counting students', { error: error.message, code: error.code, schoolId, operation: 'getStudentCount' });
       return { data: null, error };
     }
 
     return { data: count || 0, error: null };
   } catch (err) {
-    console.error('Service error counting students:', err);
+    logger.error('Service error counting students', { 
+      error: err instanceof Error ? err.message : String(err),
+      schoolId,
+      operation: 'getStudentCount'
+    });
     return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
@@ -363,20 +394,24 @@ export async function getStudentCount(schoolId: number): Promise<DatabaseRespons
  */
 export async function getTeacherCount(schoolId: number): Promise<DatabaseResponse<number>> {
   try {
-    const { count, error } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'teacher')
-      .eq('school_id', schoolId);
+    const { count, error } = await supabase.
+    from('profiles').
+    select('*', { count: 'exact', head: true }).
+    eq('role', 'teacher').
+    eq('school_id', schoolId);
 
     if (error) {
-      console.error('Error counting teachers:', error);
+      logger.error('Error counting teachers', { error: error.message, code: error.code, schoolId, operation: 'getTeacherCount' });
       return { data: null, error };
     }
 
     return { data: count || 0, error: null };
   } catch (err) {
-    console.error('Service error counting teachers:', err);
+    logger.error('Service error counting teachers', { 
+      error: err instanceof Error ? err.message : String(err),
+      schoolId,
+      operation: 'getTeacherCount'
+    });
     return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }

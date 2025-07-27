@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import { supabase } from '../utils/supabase';
 import { getStudentCount, getTeacherCount } from './users';
 import type { DatabaseResponse } from '../types/database';
@@ -36,53 +37,53 @@ export interface DashboardMetrics {
 export async function fetchDashboardMetrics(schoolId: number): Promise<DatabaseResponse<DashboardMetrics>> {
   try {
     const [
-      studentCountResponse,
-      teacherCountResponse,
-      incidentsResponse,
-      academicResponse,
-      teacherPerfResponse,
-      attendanceResponse
-    ] = await Promise.all([
-      // Fetch student count (optimized - count only, no full records)
-      getStudentCount(schoolId),
-      
-      // Fetch teacher count (optimized - count only, no full records)
-      getTeacherCount(schoolId),
-      
-      // Fetch incident summary
-      supabase
-        .from('incidents')
-        .select('id, status')
-        .eq('school_id', schoolId),
-      
-      // Fetch academic performance (average across student_performance joined with profiles)
-      supabase
-        .from('student_performance')
-        .select(`
+    studentCountResponse,
+    teacherCountResponse,
+    incidentsResponse,
+    academicResponse,
+    teacherPerfResponse,
+    attendanceResponse] =
+    await Promise.all([
+    // Fetch student count (optimized - count only, no full records)
+    getStudentCount(schoolId),
+
+    // Fetch teacher count (optimized - count only, no full records)
+    getTeacherCount(schoolId),
+
+    // Fetch incident summary
+    supabase.
+    from('incidents').
+    select('id, status').
+    eq('school_id', schoolId),
+
+    // Fetch academic performance (average across student_performance joined with profiles)
+    supabase.
+    from('student_performance').
+    select(`
           academic_score,
           profiles!inner(school_id)
-        `)
-        .eq('profiles.school_id', schoolId),
-      
-      // Fetch teacher performance (average across teacher_performance joined with profiles)
-      supabase
-        .from('teacher_performance')
-        .select(`
+        `).
+    eq('profiles.school_id', schoolId),
+
+    // Fetch teacher performance (average across teacher_performance joined with profiles)
+    supabase.
+    from('teacher_performance').
+    select(`
           class_observation,
           punctuality_score,
           profiles!inner(school_id)
-        `)
-        .eq('profiles.school_id', schoolId),
-      
-      // Fetch student attendance (average across student_performance joined with profiles)
-      supabase
-        .from('student_performance')
-        .select(`
+        `).
+    eq('profiles.school_id', schoolId),
+
+    // Fetch student attendance (average across student_performance joined with profiles)
+    supabase.
+    from('student_performance').
+    select(`
           attendance_pct,
           profiles!inner(school_id)
-        `)
-        .eq('profiles.school_id', schoolId)
-    ]);
+        `).
+    eq('profiles.school_id', schoolId)]
+    );
 
     if (studentCountResponse.error) {
       throw new Error(`Failed to fetch student count: ${studentCountResponse.error.message}`);
@@ -107,33 +108,33 @@ export async function fetchDashboardMetrics(schoolId: number): Promise<DatabaseR
     const teacherCount = teacherCountResponse.data || 0;
 
     // Calculate teacher-to-student ratio (students per teacher)
-    const teacherToStudentRatio = teacherCount > 0
-      ? parseFloat((studentCount / teacherCount).toFixed(2))
-      : 0;
+    const teacherToStudentRatio = teacherCount > 0 ?
+    parseFloat((studentCount / teacherCount).toFixed(2)) :
+    0;
 
     const incidents = incidentsResponse.data || [];
     const totalIncidents = incidents.length;
-    const pendingIncidents = incidents.filter(i => i.status === 'pending').length;
-    const resolvedIncidents = incidents.filter(i => i.status !== 'pending').length;
+    const pendingIncidents = incidents.filter((i) => i.status === 'pending').length;
+    const resolvedIncidents = incidents.filter((i) => i.status !== 'pending').length;
 
-    const academicScores = academicResponse.data?.map(p => p.academic_score).filter(score => score !== null) || [];
-    const averageAcademicScore = academicScores.length > 0 
-      ? parseFloat((academicScores.reduce((a, b) => a + b, 0) / academicScores.length).toFixed(2)) 
-      : 0;
+    const academicScores = academicResponse.data?.map((p) => p.academic_score).filter((score) => score !== null) || [];
+    const averageAcademicScore = academicScores.length > 0 ?
+    parseFloat((academicScores.reduce((a, b) => a + b, 0) / academicScores.length).toFixed(2)) :
+    0;
 
-    const teacherScores = teacherPerfResponse.data?.map(p => {
+    const teacherScores = teacherPerfResponse.data?.map((p) => {
       const obs = p.class_observation || 0;
       const punct = p.punctuality_score || 0;
       return (obs + punct) / 2; // Simple average of the two metrics
-    }).filter(score => score > 0) || [];
-    const averageTeacherScore = teacherScores.length > 0 
-      ? parseFloat((teacherScores.reduce((a, b) => a + b, 0) / teacherScores.length).toFixed(2)) 
-      : 0;
+    }).filter((score) => score > 0) || [];
+    const averageTeacherScore = teacherScores.length > 0 ?
+    parseFloat((teacherScores.reduce((a, b) => a + b, 0) / teacherScores.length).toFixed(2)) :
+    0;
 
-    const attendanceRates = attendanceResponse.data?.map(p => p.attendance_pct).filter(rate => rate !== null) || [];
-    const averageAttendance = attendanceRates.length > 0 
-      ? parseFloat((attendanceRates.reduce((a, b) => a + b, 0) / attendanceRates.length).toFixed(2)) 
-      : 0;
+    const attendanceRates = attendanceResponse.data?.map((p) => p.attendance_pct).filter((rate) => rate !== null) || [];
+    const averageAttendance = attendanceRates.length > 0 ?
+    parseFloat((attendanceRates.reduce((a, b) => a + b, 0) / attendanceRates.length).toFixed(2)) :
+    0;
 
     // Placeholder for parent engagement (mock data until real data source is available)
     const parentEngagement = {
@@ -163,7 +164,7 @@ export async function fetchDashboardMetrics(schoolId: number): Promise<DatabaseR
 
     return { data: metrics, error: null };
   } catch (err) {
-    console.error('Service error fetching dashboard metrics:', err);
+    logger.error('Service error fetching dashboard metrics:', { error: err instanceof Error ? err.message : String(err) });
     return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
   }
 }
