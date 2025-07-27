@@ -17,7 +17,7 @@ const str1 = "console.log('This should NOT be replaced')";
 const str2 = 'console.error("This should NOT be replaced")';
 const templateStr = `console.warn('This should NOT be replaced')`;
 
-// Console statements in template literals (should NOT be replaced)
+// Console statements in template literal expressions (should be replaced)
 const template = `This is a template with ${console.log('This should be replaced')} inside`;
 
 // Console statements in object properties (should NOT be replaced)
@@ -41,5 +41,5 @@ class TestClass {
 }
 
 // Already has logger import - should not add duplicate
-import { logger } from '../utils/logger';
+import { logger } from '../../src/utils/logger';
 logger.info('This should remain as logger');

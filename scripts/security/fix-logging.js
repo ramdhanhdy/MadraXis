@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+/* global Bun */
 
 const fs = require('fs');
 const path = require('path');
