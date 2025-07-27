@@ -9,7 +9,12 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "security:audit-logging": "bun run ./scripts/security/audit-logging.js",
+    "security:audit-input": "bun run ./scripts/security/audit-input.js",
+    "security:audit-auth": "bun run ./scripts/security/audit-auth.js",
+    "security:fix-logging": "bun run ./scripts/security/fix-logging.js",
+    "security:audit": "bun run security:audit-logging && bun run security:audit-input && bun run security:audit-auth"
   },
   "jest": {
     "preset": "jest-expo",
@@ -100,3 +105,10 @@
   },
   "private": true
 }
+
+
+
+
+
+
+

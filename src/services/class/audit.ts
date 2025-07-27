@@ -1,5 +1,6 @@
 import { supabase } from '../../utils/supabase';
 import { ClassServiceError } from './types';
+import { logger } from '../../utils/logger';
 
 /**
  * ClassAuditService handles audit trail logging for class operations
@@ -28,32 +29,42 @@ export class ClassAuditService {
         performed_at: new Date().toISOString(),
       };
 
-      console.log('Logging audit trail:', auditData);
+      logger.debug('Creating audit trail entry', {
+        operation: 'audit_log',
+        userId: performedBy,
+        classId,
+        action
+      });
 
       const { error } = await supabase
         .from('audit_logs')
         .insert(auditData);
 
       if (error) {
-        console.error('Audit trail logging failed:', {
-          error,
-          auditData,
+        logger.error('Audit trail logging failed', {
+          operation: 'audit_log',
+          userId: performedBy,
           classId,
           action,
-          performedBy
+          errorCode: error.code,
+          errorMessage: error.message
         });
-        // Don't throw error for audit failures - they shouldn't block operations
       } else {
-        console.log('Audit trail logged successfully for class:', classId);
+        logger.info('Audit trail logged successfully', {
+          operation: 'audit_log',
+          userId: performedBy,
+          classId,
+          action
+        });
       }
-    } catch (error) {
-      console.warn('Audit trail logging failed (non-blocking):', {
-        error,
+    } catch (error: any) {
+      logger.warn('Audit trail logging failed (non-blocking)', {
+        operation: 'audit_log',
+        userId: performedBy,
         classId,
         action,
-        performedBy
+        errorMessage: error?.message
       });
-      // Audit failures should not block the main operation
     }
   }
 
@@ -154,29 +165,45 @@ export class ClassAuditService {
         performed_at: new Date().toISOString(),
       };
 
-      console.log('Logging enrollment action:', auditData);
+      logger.debug('Creating enrollment audit entry', {
+        operation: 'enrollment_audit',
+        userId: teacherId,
+        classId,
+        studentId,
+        action
+      });
 
       const { error } = await supabase
         .from('audit_logs')
         .insert(auditData);
 
       if (error) {
-        console.error('Enrollment audit logging failed:', {
-          error,
-          auditData,
+        logger.error('Enrollment audit logging failed', {
+          operation: 'enrollment_audit',
+          userId: teacherId,
+          classId,
+          studentId,
+          action,
+          errorCode: error.code,
+          errorMessage: error.message
+        });
+      } else {
+        logger.info('Enrollment audit logged successfully', {
+          operation: 'enrollment_audit',
+          userId: teacherId,
           classId,
           studentId,
           action
         });
-      } else {
-        console.log('Enrollment audit logged successfully');
       }
-    } catch (error) {
-      console.warn('Enrollment audit logging failed (non-blocking):', {
-        error,
+    } catch (error: any) {
+      logger.warn('Enrollment audit logging failed (non-blocking)', {
+        operation: 'enrollment_audit',
+        userId: teacherId,
         classId,
         studentId,
-        action
+        action,
+        errorMessage: error?.message
       });
     }
   }
@@ -271,3 +298,5 @@ export class ClassAuditService {
     }
   }
 }
+
+

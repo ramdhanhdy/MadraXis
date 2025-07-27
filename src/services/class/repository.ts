@@ -10,6 +10,7 @@ import {
   CreateClassSchema,
   UpdateClassSchema
 } from './types';
+import { logger } from '../../utils/logger';
 
 /**
  * ClassRepository handles direct database operations for classes
@@ -58,7 +59,11 @@ export class ClassRepository {
       status: 'active',
     };
     
-    console.log('Attempting to insert class with data:', insertData);
+    logger.debug('Attempting to create class', {
+      operation: 'class_create',
+      userId: teacherId,
+      schoolId: validatedData.school_id
+    });
     
     const { data: newClass, error: insertError } = await supabase
       .from('classes')
@@ -67,21 +72,25 @@ export class ClassRepository {
       .single();
 
     if (insertError) {
-      console.error('Class creation failed - Full error details:', {
-        error: insertError,
+      logger.error('Class creation failed', {
+        operation: 'class_create',
+        userId: teacherId,
         errorCode: insertError.code,
-        errorMessage: insertError.message,
-        errorDetails: insertError.details,
-        errorHint: insertError.hint,
-        insertData: insertData,
-        teacherId: teacherId
+        errorMessage: insertError.message
       });
+      
       throw ClassServiceError.create(
         'CREATE_FAILED',
         `Failed to create class: ${insertError.message}`,
         { originalError: insertError }
       );
     }
+
+    logger.info('Class created successfully', {
+      operation: 'class_create',
+      userId: teacherId,
+      classId: newClass!.id
+    });
 
     // Transform to ClassWithDetails format
     return {
@@ -190,15 +199,21 @@ export class ClassRepository {
 
     const { data: classes, error } = await queryBuilder;
 
-    console.log('getByTeacher query result:', {
-      teacherId,
+    logger.debug('Teacher classes query completed', {
+      operation: 'get_teacher_classes',
+      userId: teacherId,
       classesCount: classes?.length || 0,
-      error: error?.message,
-      options
+      hasError: !!error
     });
 
     if (error) {
-      console.error('getByTeacher error:', error);
+      logger.error('Failed to fetch teacher classes', {
+        operation: 'get_teacher_classes',
+        userId: teacherId,
+        errorCode: error.code,
+        errorMessage: error.message
+      });
+      
       throw ClassServiceError.create(
         'FETCH_FAILED',
         'Failed to fetch classes',
@@ -395,3 +410,4 @@ export class ClassRepository {
     return enrolledStudents?.length || 0;
   }
 }
+
