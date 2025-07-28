@@ -62,15 +62,15 @@ type Story = StoryObj<typeof Modal>;
 
 // Basic modal
 export const Default: Story = {
-  render: () => {
+  render: function DefaultRender() {
     const [visible, setVisible] = React.useState(false);
-    
+
     return (
       <View>
         <Button onPress={() => setVisible(true)}>
           Open Modal
         </Button>
-        
+
         <Modal
           visible={visible}
           onClose={() => setVisible(false)}
@@ -80,7 +80,7 @@ export const Default: Story = {
           <Typography variant="body1">
             This is the modal content. You can put any content here including text, forms, lists, or other components.
           </Typography>
-          
+
           <Typography variant="body2" color="secondary" style={{ marginTop: 16 }}>
             The modal will close when you tap the close button, press the back button, or tap outside the modal area.
           </Typography>
@@ -92,9 +92,9 @@ export const Default: Story = {
 
 // Modal with actions
 export const WithActions: Story = {
-  render: () => {
+  render: function WithActionsRender() {
     const [visible, setVisible] = React.useState(false);
-    
+
     const actions = [
       {
         label: 'Cancel',
@@ -110,13 +110,13 @@ export const WithActions: Story = {
         variant: 'primary' as const,
       },
     ];
-    
+
     return (
       <View>
         <Button onPress={() => setVisible(true)}>
           Open Modal with Actions
         </Button>
-        
+
         <Modal
           visible={visible}
           onClose={() => setVisible(false)}
@@ -142,30 +142,30 @@ export const WithActions: Story = {
 
 // Different sizes
 export const DifferentSizes: Story = {
-  render: () => {
+  render: function DifferentSizesRender() {
     const [smallVisible, setSmallVisible] = React.useState(false);
     const [mediumVisible, setMediumVisible] = React.useState(false);
     const [largeVisible, setLargeVisible] = React.useState(false);
     const [fullscreenVisible, setFullscreenVisible] = React.useState(false);
-    
+
     return (
       <View style={{ gap: 12 }}>
         <Button onPress={() => setSmallVisible(true)}>
           Small Modal
         </Button>
-        
+
         <Button onPress={() => setMediumVisible(true)}>
           Medium Modal
         </Button>
-        
+
         <Button onPress={() => setLargeVisible(true)}>
           Large Modal
         </Button>
-        
+
         <Button onPress={() => setFullscreenVisible(true)}>
           Fullscreen Modal
         </Button>
-        
+
         <Modal
           visible={smallVisible}
           onClose={() => setSmallVisible(false)}
@@ -176,7 +176,7 @@ export const DifferentSizes: Story = {
             This is a small modal, perfect for simple confirmations or brief messages.
           </Typography>
         </Modal>
-        
+
         <Modal
           visible={mediumVisible}
           onClose={() => setMediumVisible(false)}
@@ -187,7 +187,7 @@ export const DifferentSizes: Story = {
             This is a medium modal, good for forms and detailed content.
           </Typography>
         </Modal>
-        
+
         <Modal
           visible={largeVisible}
           onClose={() => setLargeVisible(false)}
@@ -198,7 +198,7 @@ export const DifferentSizes: Story = {
             This is a large modal, suitable for complex forms or detailed information displays.
           </Typography>
         </Modal>
-        
+
         <Modal
           visible={fullscreenVisible}
           onClose={() => setFullscreenVisible(false)}
@@ -223,12 +223,12 @@ export const DifferentSizes: Story = {
 
 // Form modal example
 export const FormModal: Story = {
-  render: () => {
+  render: function FormModalRender() {
     const [visible, setVisible] = React.useState(false);
     const [name, setName] = React.useState('');
     const [email, setEmail] = React.useState('');
     const [message, setMessage] = React.useState('');
-    
+
     const handleSubmit = () => {
       alert(`Form submitted!\nName: ${name}\nEmail: ${email}\nMessage: ${message}`);
       setVisible(false);
@@ -237,7 +237,7 @@ export const FormModal: Story = {
       setEmail('');
       setMessage('');
     };
-    
+
     const actions = [
       {
         label: 'Cancel',
@@ -251,13 +251,13 @@ export const FormModal: Story = {
         disabled: !name || !email,
       },
     ];
-    
+
     return (
       <View>
         <Button onPress={() => setVisible(true)}>
           Open Contact Form
         </Button>
-        
+
         <Modal
           visible={visible}
           onClose={() => setVisible(false)}
@@ -273,14 +273,14 @@ export const FormModal: Story = {
               value={name}
               onChangeText={setName}
             />
-            
+
             <Input
               label="Email"
               placeholder="Enter your email"
               value={email}
               onChangeText={setEmail}
             />
-            
+
             <Input
               label="Message"
               placeholder="Enter your message"
@@ -304,9 +304,9 @@ export const FormModal: Story = {
 
 // Confirmation modal
 export const ConfirmationModal: Story = {
-  render: () => {
+  render: function ConfirmationModalRender() {
     const [visible, setVisible] = React.useState(false);
-    
+
     const actions = [
       {
         label: 'Cancel',
@@ -322,13 +322,13 @@ export const ConfirmationModal: Story = {
         variant: 'danger' as const,
       },
     ];
-    
+
     return (
       <View>
         <Button variant="danger" onPress={() => setVisible(true)}>
           Delete Item
         </Button>
-        
+
         <Modal
           visible={visible}
           onClose={() => setVisible(false)}
@@ -354,10 +354,9 @@ export const ConfirmationModal: Story = {
 
 // List modal
 export const ListModal: Story = {
-  render: () => {
+  render: function ListModalRender() {
     const [visible, setVisible] = React.useState(false);
-    const [selectedItem, setSelectedItem] = React.useState<string | null>(null);
-    
+
     const items = [
       { id: '1', title: 'Mathematics', subtitle: 'Grade 10A - Room 201' },
       { id: '2', title: 'Science', subtitle: 'Grade 10A - Room 105' },
@@ -365,20 +364,19 @@ export const ListModal: Story = {
       { id: '4', title: 'History', subtitle: 'Grade 10A - Room 205' },
       { id: '5', title: 'Islamic Studies', subtitle: 'Grade 10A - Room 101' },
     ];
-    
+
     const handleSelect = (itemId: string) => {
-      setSelectedItem(itemId);
       const item = items.find(i => i.id === itemId);
       alert(`Selected: ${item?.title}`);
       setVisible(false);
     };
-    
+
     return (
       <View>
         <Button onPress={() => setVisible(true)}>
           Select Subject
         </Button>
-        
+
         <Modal
           visible={visible}
           onClose={() => setVisible(false)}
@@ -413,25 +411,25 @@ export const ListModal: Story = {
 
 // Animation types
 export const AnimationTypes: Story = {
-  render: () => {
+  render: function AnimationTypesRender() {
     const [slideVisible, setSlideVisible] = React.useState(false);
     const [fadeVisible, setFadeVisible] = React.useState(false);
     const [noneVisible, setNoneVisible] = React.useState(false);
-    
+
     return (
       <View style={{ gap: 12 }}>
         <Button onPress={() => setSlideVisible(true)}>
           Slide Animation
         </Button>
-        
+
         <Button onPress={() => setFadeVisible(true)}>
           Fade Animation
         </Button>
-        
+
         <Button onPress={() => setNoneVisible(true)}>
           No Animation
         </Button>
-        
+
         <Modal
           visible={slideVisible}
           onClose={() => setSlideVisible(false)}
@@ -442,7 +440,7 @@ export const AnimationTypes: Story = {
             This modal slides up from the bottom with a smooth animation.
           </Typography>
         </Modal>
-        
+
         <Modal
           visible={fadeVisible}
           onClose={() => setFadeVisible(false)}
@@ -453,7 +451,7 @@ export const AnimationTypes: Story = {
             This modal fades in and out with opacity animation.
           </Typography>
         </Modal>
-        
+
         <Modal
           visible={noneVisible}
           onClose={() => setNoneVisible(false)}
@@ -478,9 +476,9 @@ export const AnimationTypes: Story = {
 
 // Student assignment modal
 export const StudentAssignmentModal: Story = {
-  render: () => {
+  render: function StudentAssignmentModalRender() {
     const [visible, setVisible] = React.useState(false);
-    
+
     const actions = [
       {
         label: 'Save Draft',
@@ -499,13 +497,13 @@ export const StudentAssignmentModal: Story = {
         variant: 'primary' as const,
       },
     ];
-    
+
     return (
       <View>
         <Button onPress={() => setVisible(true)}>
           View Assignment
         </Button>
-        
+
         <Modal
           visible={visible}
           onClose={() => setVisible(false)}
@@ -526,11 +524,11 @@ export const StudentAssignmentModal: Story = {
                 Points: 100
               </Typography>
             </Card>
-            
+
             <Typography variant="body1" style={{ marginBottom: 16 }}>
               Complete the following problems from Chapter 5 of your textbook:
             </Typography>
-            
+
             <Typography variant="body1" style={{ marginBottom: 8 }}>
               1. Solve the quadratic equation: x² + 5x + 6 = 0
             </Typography>
@@ -540,13 +538,13 @@ export const StudentAssignmentModal: Story = {
             <Typography variant="body1" style={{ marginBottom: 16 }}>
               3. Graph the function: f(x) = x² - 4x + 3
             </Typography>
-            
+
             <Input
               label="Your Answer"
               placeholder="Type your answers here..."
               multiline
               value=""
-              onChangeText={() => {}}
+              onChangeText={() => { }}
             />
           </ScrollView>
         </Modal>
@@ -564,11 +562,11 @@ export const StudentAssignmentModal: Story = {
 
 // Teacher grade modal
 export const TeacherGradeModal: Story = {
-  render: () => {
+  render: function TeacherGradeModalRender() {
     const [visible, setVisible] = React.useState(false);
     const [grade, setGrade] = React.useState('');
     const [feedback, setFeedback] = React.useState('');
-    
+
     const actions = [
       {
         label: 'Cancel',
@@ -585,13 +583,13 @@ export const TeacherGradeModal: Story = {
         disabled: !grade,
       },
     ];
-    
+
     return (
       <View>
         <Button onPress={() => setVisible(true)}>
           Grade Assignment
         </Button>
-        
+
         <Modal
           visible={visible}
           onClose={() => setVisible(false)}
@@ -606,17 +604,17 @@ export const TeacherGradeModal: Story = {
                 Student Answer:
               </Typography>
               <Typography variant="body1">
-                "The solutions to x² + 5x + 6 = 0 are x = -2 and x = -3, found using the quadratic formula."
+                &quot;The solutions to x² + 5x + 6 = 0 are x = -2 and x = -3, found using the quadratic formula.&quot;
               </Typography>
             </Card>
-            
+
             <Input
               label="Grade (0-100)"
               placeholder="Enter grade"
               value={grade}
               onChangeText={setGrade}
             />
-            
+
             <Input
               label="Feedback"
               placeholder="Enter feedback for the student"
@@ -640,9 +638,9 @@ export const TeacherGradeModal: Story = {
 
 // Parent meeting modal
 export const ParentMeetingModal: Story = {
-  render: () => {
+  render: function ParentMeetingModalRender() {
     const [visible, setVisible] = React.useState(false);
-    
+
     const actions = [
       {
         label: 'Decline',
@@ -661,13 +659,13 @@ export const ParentMeetingModal: Story = {
         variant: 'primary' as const,
       },
     ];
-    
+
     return (
       <View>
         <Button onPress={() => setVisible(true)}>
           Meeting Invitation
         </Button>
-        
+
         <Modal
           visible={visible}
           onClose={() => setVisible(false)}
@@ -691,12 +689,12 @@ export const ParentMeetingModal: Story = {
                 Location: Classroom 10A
               </Typography>
             </Card>
-            
+
             <Typography variant="body1">
-              I would like to discuss Ahmed's progress in Mathematics and his recent improvement in problem-solving skills. 
+              I would like to discuss Ahmed&apos;s progress in Mathematics and his recent improvement in problem-solving skills.
               We can also talk about upcoming projects and how to support his learning at home.
             </Typography>
-            
+
             <Typography variant="body2" color="secondary">
               Please confirm your attendance by responding to this invitation.
             </Typography>
@@ -716,20 +714,20 @@ export const ParentMeetingModal: Story = {
 
 // Custom styling
 export const CustomStyling: Story = {
-  render: () => {
+  render: function CustomStylingRender() {
     const [visible1, setVisible1] = React.useState(false);
     const [visible2, setVisible2] = React.useState(false);
-    
+
     return (
       <View style={{ gap: 12 }}>
         <Button onPress={() => setVisible1(true)}>
           Dark Theme Modal
         </Button>
-        
+
         <Button onPress={() => setVisible2(true)}>
           Custom Colors Modal
         </Button>
-        
+
         <Modal
           visible={visible1}
           onClose={() => setVisible1(false)}
@@ -742,7 +740,7 @@ export const CustomStyling: Story = {
             This modal uses a dark theme with custom background and backdrop colors.
           </Typography>
         </Modal>
-        
+
         <Modal
           visible={visible2}
           onClose={() => setVisible2(false)}

@@ -63,12 +63,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <>{children}</>
 );
 
-// Mock data
-const mockUser = {
-  id: 1,
-  email: 'teacher@test.com',
-  role: 'teacher' as const,
-};
+// Mock data - removed unused mockUser
 
 const mockStudents = [
   {

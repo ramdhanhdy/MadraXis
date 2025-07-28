@@ -136,12 +136,11 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
     hasMore: false
   });
   const [error, setError] = useState<string | null>(null);
-  const [className, setClassName] = useState<string>('');
-  const [breadcrumbItems, setBreadcrumbItems] = useState<Array<{
+  const [breadcrumbItems, setBreadcrumbItems] = useState<{
     label: string;
     path: string;
     params?: Record<string, any>;
-  }>>([]);
+  }[]>([]);
 
   // Load students function
   const loadStudents = useCallback(async () => {
@@ -157,8 +156,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
         throw new Error('Class not found');
       }
 
-      // Set class name for breadcrumb
-      setClassName(classData.name);
+      // Class name is used in breadcrumb generation below
 
       // Generate breadcrumb items
       setBreadcrumbItems([

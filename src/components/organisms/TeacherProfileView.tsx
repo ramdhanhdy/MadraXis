@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useColors } from '../../context/ThemeContext';
 import { Typography } from '../atoms/Typography';
 import { Card } from '../molecules/Card';
-import LogoutButton from '../molecules/LogoutButton';
+import { LogoutButton } from '../molecules/LogoutButton';
 
 interface Profile {
   full_name?: string;

@@ -8,7 +8,6 @@ import {
   View,
   TouchableOpacity,
   ViewStyle,
-  StyleSheet,
   Animated,
   Dimensions,
 } from 'react-native';

@@ -45,7 +45,7 @@ type Story = StoryObj<typeof TabBar>;
 
 // Basic tab bar
 export const Default: Story = {
-  render: () => {
+  render: function DefaultRender() {
     const [activeTab, setActiveTab] = React.useState('home');
     
     const tabs = [
@@ -67,7 +67,7 @@ export const Default: Story = {
 
 // Tab bar with badges
 export const WithBadges: Story = {
-  render: () => {
+  render: function WithBadgesRender() {
     const [activeTab, setActiveTab] = React.useState('home');
     
     const tabs = [
@@ -96,7 +96,7 @@ export const WithBadges: Story = {
 
 // Different variants
 export const Variants: Story = {
-  render: () => {
+  render: function VariantsRender() {
     const [activeTab1, setActiveTab1] = React.useState('home');
     const [activeTab2, setActiveTab2] = React.useState('home');
     const [activeTab3, setActiveTab3] = React.useState('home');
@@ -159,7 +159,7 @@ export const Variants: Story = {
 
 // Without labels
 export const WithoutLabels: Story = {
-  render: () => {
+  render: function WithoutLabelsRender() {
     const [activeTab, setActiveTab] = React.useState('home');
     
     const tabs = [
@@ -189,7 +189,7 @@ export const WithoutLabels: Story = {
 
 // Student dashboard tabs
 export const StudentDashboard: Story = {
-  render: () => {
+  render: function StudentDashboardRender() {
     const [activeTab, setActiveTab] = React.useState('dashboard');
     
     const tabs = [
@@ -256,7 +256,7 @@ export const StudentDashboard: Story = {
 
 // Teacher dashboard tabs
 export const TeacherDashboard: Story = {
-  render: () => {
+  render: function TeacherDashboardRender() {
     const [activeTab, setActiveTab] = React.useState('dashboard');
     
     const tabs = [
@@ -323,7 +323,7 @@ export const TeacherDashboard: Story = {
 
 // Parent dashboard tabs
 export const ParentDashboard: Story = {
-  render: () => {
+  render: function ParentDashboardRender() {
     const [activeTab, setActiveTab] = React.useState('dashboard');
     
     const tabs = [
@@ -390,7 +390,7 @@ export const ParentDashboard: Story = {
 
 // Management dashboard tabs
 export const ManagementDashboard: Story = {
-  render: () => {
+  render: function ManagementDashboardRender() {
     const [activeTab, setActiveTab] = React.useState('dashboard');
     
     const tabs = [
@@ -458,7 +458,7 @@ export const ManagementDashboard: Story = {
 
 // Disabled tabs
 export const DisabledTabs: Story = {
-  render: () => {
+  render: function DisabledTabsRender() {
     const [activeTab, setActiveTab] = React.useState('home');
     
     const tabs = [
@@ -487,7 +487,7 @@ export const DisabledTabs: Story = {
 
 // Custom colors
 export const CustomColors: Story = {
-  render: () => {
+  render: function CustomColorsRender() {
     const [activeTab1, setActiveTab1] = React.useState('home');
     const [activeTab2, setActiveTab2] = React.useState('home');
     
@@ -541,7 +541,7 @@ export const CustomColors: Story = {
 
 // Badge overflow
 export const BadgeOverflow: Story = {
-  render: () => {
+  render: function BadgeOverflowRender() {
     const [activeTab, setActiveTab] = React.useState('home');
     
     const tabs = [
@@ -575,7 +575,7 @@ export const BadgeOverflow: Story = {
 
 // Animation comparison
 export const AnimationComparison: Story = {
-  render: () => {
+  render: function AnimationComparisonRender() {
     const [activeTab1, setActiveTab1] = React.useState('home');
     const [activeTab2, setActiveTab2] = React.useState('home');
     
