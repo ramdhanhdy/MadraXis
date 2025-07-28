@@ -18,7 +18,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Swipeable } from 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ClassService } from '../../services/class';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useSafeToQuery } from '../../utils/navigationGuard';
 import { useClassStudentsSubscription } from '../../hooks/useClassStudentsSubscription';
 import { EmptyState } from '../molecules/EmptyState/EmptyState';

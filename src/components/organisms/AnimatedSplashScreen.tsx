@@ -1,6 +1,6 @@
 import { logger } from '../../utils/logger';
-import React, { useEffect, useRef, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
+import { StyleSheet, View, Text } from 'react-native';
 import Rive from 'rive-react-native';
 
 interface AnimatedSplashScreenProps {
@@ -10,6 +10,7 @@ interface AnimatedSplashScreenProps {
 const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimationFinish }) => {
   const hasFinished = useRef(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [animationError, setAnimationError] = useState(false);
 
   const handleFinish = useCallback(() => {
     if (hasFinished.current) return; // Prevent multiple calls
@@ -18,6 +19,7 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    logger.debug('🎬 Animation finishing, calling onAnimationFinish');
     onAnimationFinish?.();
   }, [onAnimationFinish]);
 
@@ -25,7 +27,7 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
     // Fallback timeout in case animation doesn't trigger completion
     timeoutRef.current = setTimeout(() => {
       handleFinish();
-    }, 4000); // Slightly longer to allow animation to complete naturally
+    }, 3000); // 3 second timeout for better UX
 
     return () => {
       if (timeoutRef.current) {
@@ -33,6 +35,18 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
       }
     };
   }, [handleFinish]);
+
+  // Render fallback UI if animation fails
+  if (animationError) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.fallbackContainer}>
+          <Text style={styles.fallbackText}>MadraXis</Text>
+          <Text style={styles.fallbackSubtext}>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -51,12 +65,13 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
         }}
         onError={(error) => {
           logger.warn('Rive animation error (continuing anyway):', error);
+          setAnimationError(true);
           // Continue with a timeout fallback instead of immediately finishing
           setTimeout(() => {
             handleFinish();
-          }, 2000);
+          }, 1500); // Shorter timeout for error case
         }} />
-      
+
     </View>);
 
 };
@@ -71,6 +86,20 @@ const styles = StyleSheet.create({
   animation: {
     width: 300,
     height: 300
+  },
+  fallbackContainer: {
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  fallbackText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#005e7a',
+    marginBottom: 8
+  },
+  fallbackSubtext: {
+    fontSize: 16,
+    color: '#666666'
   }
 });
 

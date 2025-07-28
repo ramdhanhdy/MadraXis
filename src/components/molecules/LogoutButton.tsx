@@ -8,7 +8,7 @@ import { logger } from '../../utils/logger';
 import React, { useState } from 'react';
 import { Alert, ViewStyle } from 'react-native';
 import { Button } from '../atoms/Button';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 export interface LogoutButtonProps {
   variant?: 'button' | 'text' | 'icon';

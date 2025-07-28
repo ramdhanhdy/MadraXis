@@ -6,6 +6,7 @@ import { ThemeProvider } from '../src/context/ThemeContext';
 import { NavigationHistoryProvider } from '../src/context/NavigationHistoryContext';
 import * as SplashScreen from 'expo-splash-screen';
 import AnimatedSplashScreen from '../src/components/organisms/AnimatedSplashScreen';
+import { logger } from '../src/utils/logger';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -16,23 +17,26 @@ const RootLayoutNav = () => {
     const [splashHidden, setSplashHidden] = useState(false);
 
     const handleAnimationFinish = useCallback(() => {
-        console.log('🎬 Animation finished');
+        logger.debug('🎬 Animation finished');
         setSplashAnimationComplete(true);
     }, []);
 
     useEffect(() => {
-        console.log(`🔄 Splash state: authLoading=${authLoading}, animComplete=${splashAnimationComplete}, hidden=${splashHidden}`);
+        logger.debug(`🔄 Splash state: authLoading=${authLoading}, animComplete=${splashAnimationComplete}, hidden=${splashHidden}`);
         if (!authLoading && splashAnimationComplete && !splashHidden) {
-            console.log('🎬 Hiding splash screen');
+            logger.debug('🎬 Hiding splash screen');
             SplashScreen.hideAsync().then(() => {
                 setSplashHidden(true);
+            }).catch((error) => {
+                logger.error('Failed to hide splash screen:', error);
+                setSplashHidden(true); // Set anyway to prevent infinite loading
             });
         }
     }, [authLoading, splashAnimationComplete, splashHidden]);
 
     // Show animated splash screen until both auth loading and animation are complete
     if (authLoading || !splashAnimationComplete) {
-        console.log(`🎬 Showing splash: authLoading=${authLoading}, animComplete=${splashAnimationComplete}`);
+        logger.debug(`🎬 Showing splash: authLoading=${authLoading}, animComplete=${splashAnimationComplete}`);
         return <AnimatedSplashScreen onAnimationFinish={handleAnimationFinish} />;
     }
 
