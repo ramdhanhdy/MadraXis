@@ -15,7 +15,7 @@ import { theme } from '../../../styles/theme';
 jest.mock('../../../context/ThemeContext');
 jest.mock('../../atoms/Typography', () => ({
   Typography: ({ children, ...props }: any) => (
-    <text {...props}>{children}</text>
+    <span {...props}>{children}</span>
   ),
 }));
 jest.mock('../../atoms/Button', () => ({
@@ -53,8 +53,8 @@ describe('BulkActionBar', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('0 selected')).toBeTruthy();
-      expect(screen.getByText('Select all')).toBeTruthy();
+      expect(screen.getByText('No students selected', { exact: false })).toBeTruthy();
+      expect(screen.getByText('Select all (10)')).toBeTruthy();
       expect(screen.queryByText('Clear')).toBeFalsy();
     });
 
@@ -65,8 +65,8 @@ describe('BulkActionBar', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('3 selected')).toBeTruthy();
-      expect(screen.getByText('Select all')).toBeTruthy();
+      expect(screen.getByText('3 students selected', { exact: false })).toBeTruthy();
+      expect(screen.getByText('Select all (10)')).toBeTruthy();
       expect(screen.getByText('Clear')).toBeTruthy();
     });
 
@@ -77,8 +77,8 @@ describe('BulkActionBar', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('10 selected')).toBeTruthy();
-      expect(screen.getByText('Select all')).toBeTruthy();
+      expect(screen.getByText('10 students selected', { exact: false })).toBeTruthy();
+      expect(screen.getByText('All selected')).toBeTruthy();
       expect(screen.getByText('Clear')).toBeTruthy();
     });
 
@@ -153,7 +153,7 @@ describe('BulkActionBar', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('Select all')).toBeTruthy();
+      expect(screen.getByText('Select all (10)')).toBeTruthy();
     });
 
     it('shows Select all button even when all items are selected', () => {
@@ -163,7 +163,7 @@ describe('BulkActionBar', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('Select all')).toBeTruthy();
+      expect(screen.getByText('All selected')).toBeTruthy();
     });
 
     it('shows Clear button only when items are selected', () => {
@@ -193,7 +193,7 @@ describe('BulkActionBar', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('1 selected')).toBeTruthy();
+      expect(screen.getByText('1 student selected', { exact: false })).toBeTruthy();
     });
 
     it('displays correct count for multiple selections', () => {
@@ -203,7 +203,7 @@ describe('BulkActionBar', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('25 selected')).toBeTruthy();
+      expect(screen.getByText('25 students selected', { exact: false })).toBeTruthy();
     });
 
     it('displays zero count correctly', () => {
@@ -213,7 +213,7 @@ describe('BulkActionBar', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('0 selected')).toBeTruthy();
+      expect(screen.getByText(/No students? selected/)).toBeTruthy();
     });
   });
 
@@ -253,8 +253,8 @@ describe('BulkActionBar', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('0 selected')).toBeTruthy();
-      expect(screen.getByText('Select all')).toBeTruthy();
+      expect(screen.getByText(/No students? selected/)).toBeTruthy();
+      expect(screen.queryByText('Select all')).toBeFalsy();
     });
 
     it('handles negative selected count gracefully', () => {
@@ -264,7 +264,7 @@ describe('BulkActionBar', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('0 selected')).toBeTruthy();
+      expect(screen.getByText('No students selected')).toBeTruthy();
     });
 
     it('handles selected count greater than total visible', () => {
@@ -274,7 +274,7 @@ describe('BulkActionBar', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('15 selected')).toBeTruthy();
+      expect(screen.getByText('15 students selected', { exact: false })).toBeTruthy();
     });
   });
 
@@ -307,7 +307,7 @@ describe('BulkActionBar', () => {
       );
 
       // Component should still be functional
-      expect(screen.getByText('3 selected')).toBeTruthy();
+      expect(screen.getByText('3 students selected', { exact: false })).toBeTruthy();
     });
   });
 });

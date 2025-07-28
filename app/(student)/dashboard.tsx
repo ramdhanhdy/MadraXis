@@ -9,7 +9,8 @@ import LogoutButton from '@/src/components/molecules/LogoutButton';
 import BoardingInfoModal from '@/src/components/organisms/StudentBoardingInfoModal';
 import CommunicationModal from '@/src/components/organisms/StudentCommunicationModal';
 import IncidentReportModal from '@/src/components/organisms/StudentIncidentReportModal';
-import { useAuth } from '@/src/context/AuthContext';
+import { useAuth } from '@/src/hooks/useAuth';
+import { useSafeToQuery } from '@/src/utils/navigationGuard';
 import { DashboardTemplate } from '@/src/components/templates/DashboardTemplate';
 import type { TabConfig, HeaderAction } from '@/src/components/templates/DashboardTemplate';
 import { Card } from '@/src/components/molecules/Card';
@@ -25,6 +26,7 @@ import { spacing } from '@/src/styles/spacing';
 export default function StudentDashboard() {
   const router = useRouter();
   const { profile, loading } = useAuth();
+  const isSafeToQuery = useSafeToQuery();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState<{
     title: string;

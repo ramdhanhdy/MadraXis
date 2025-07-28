@@ -87,9 +87,9 @@ describe('Add Students to Classes - Integration Tests', () => {
     it('should handle concurrent enrollment requests with proper validation', async () => {
       const teacher = createMockTeacher();
       const students = generateLargeStudentList(50);
-      const classData = createMockClass({ 
-        teacher_id: teacher.id, 
-        max_students: 30 
+      const classData = createMockClass({
+        teacher_id: teacher.id,
+        max_students: 30
       });
 
       const teacherProfileQuery = {
@@ -133,13 +133,13 @@ describe('Add Students to Classes - Integration Tests', () => {
       ];
 
       const results = await Promise.allSettled(concurrentRequests);
-      
+
       // Verify atomic behavior
       const successfulEnrollments = results.filter(r => r.status === 'fulfilled');
-      const totalEnrolled = successfulEnrollments.reduce((sum, r) => 
+      const totalEnrolled = successfulEnrollments.reduce((sum, r) =>
         sum + (r.status === 'fulfilled' ? r.value.results.length : 0), 0
       );
-      
+
       expect(totalEnrolled).toBeLessThanOrEqual(30);
     });
   });
@@ -175,8 +175,8 @@ describe('Add Students to Classes - Integration Tests', () => {
       });
 
       await expect(ClassService.bulkEnrollStudents(
-        classFromSchoolB.id, 
-        { student_ids: [studentFromSchoolA.id] }, 
+        classFromSchoolB.id,
+        { student_ids: [studentFromSchoolA.id] },
         teacherFromSchoolA.id
       )).rejects.toThrow('CROSS_SCHOOL_ENROLLMENT');
     });
@@ -310,7 +310,7 @@ describe('Add Students to Classes - Integration Tests', () => {
       }
 
       const results = await Promise.all(
-        batches.map(batch => 
+        batches.map(batch =>
           ClassService.bulkEnrollStudents(classData.id, { student_ids: batch }, teacher.id)
         )
       );
@@ -321,44 +321,142 @@ describe('Add Students to Classes - Integration Tests', () => {
   });
 
   describe('Error recovery and resilience tests', () => {
-    it('should recover from network failures with retry', async () => {
+    it('should recover from network failures with retry logic', async () => {
       const teacher = createMockTeacher();
       const student = createMockStudent();
       const classData = createMockClass({ school_id: teacher.school_id });
 
-      let attemptCount = 0;
-      mockSupabase.from.mockImplementation(() => {
-        attemptCount++;
-        if (attemptCount <= 2) {
+      let accessCheckAttempt = 0;
+      let enrollmentAttempt = 0;
+
+      // Mock access control to succeed
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'teacher_profiles') {
+          accessCheckAttempt++;
           return {
             select: jest.fn().mockReturnThis(),
             eq: jest.fn().mockReturnThis(),
-            single: jest.fn().mockRejectedValue(new Error('Network timeout'))
+            single: jest.fn().mockResolvedValue({
+              data: { school_id: teacher.school_id },
+              error: null
+            })
           } as any;
         }
+
+        if (table === 'classes') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({
+              data: { ...classData, school_id: teacher.school_id },
+              error: null
+            })
+          } as any;
+        }
+
+        if (table === 'class_teachers') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({
+              data: { class_id: classData.id, teacher_id: teacher.id },
+              error: null
+            })
+          } as any;
+        }
+
         return {
           select: jest.fn().mockReturnThis(),
           eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
-            data: { school_id: teacher.school_id },
-            error: null
-          })
+          single: jest.fn().mockResolvedValue({ data: null, error: null })
         } as any;
       });
 
-      mockSupabase.rpc.mockResolvedValue({
-        data: [{
-          results: [student.id],
-          errors: [],
-          enrolled_count: 1
-        }],
-        error: null
-      } as any);
+      // Mock RPC to fail twice, then succeed (testing retry logic)
+      mockSupabase.rpc.mockImplementation(() => {
+        enrollmentAttempt++;
+        if (enrollmentAttempt <= 2) {
+          // Simulate network timeout for first two attempts
+          const networkError = new Error('Network timeout');
+          (networkError as any).code = 'NETWORK_ERROR';
+          return Promise.reject(networkError) as any;
+        }
+        // Third attempt succeeds
+        return Promise.resolve({
+          data: [{
+            results: [student.id],
+            errors: [],
+            enrolled_count: 1
+          }],
+          error: null
+        }) as any;
+      });
 
-      // This test demonstrates the need for retry logic in the service layer
-      // In a real implementation, this would use exponential backoff
+      // The service should now succeed after retries
+      const result = await ClassService.bulkEnrollStudents(classData.id, { student_ids: [student.id] }, teacher.id);
+
+      expect(result.results).toContain(student.id);
+      expect(result.errors).toHaveLength(0);
+      expect(enrollmentAttempt).toBe(3); // Should have retried twice before succeeding
+    });
+
+    it('should fail after exhausting all retry attempts', async () => {
+      const teacher = createMockTeacher();
+      const student = createMockStudent();
+      const classData = createMockClass({ school_id: teacher.school_id });
+
+      // Mock access control to succeed
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'teacher_profiles') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({
+              data: { school_id: teacher.school_id },
+              error: null
+            })
+          } as any;
+        }
+
+        if (table === 'classes') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({
+              data: { ...classData, school_id: teacher.school_id },
+              error: null
+            })
+          } as any;
+        }
+
+        if (table === 'class_teachers') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            single: jest.fn().mockResolvedValue({
+              data: { class_id: classData.id, teacher_id: teacher.id },
+              error: null
+            })
+          } as any;
+        }
+
+        return {
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({ data: null, error: null })
+        } as any;
+      });
+
+      // Mock RPC to always fail (testing retry exhaustion)
+      mockSupabase.rpc.mockImplementation(() => {
+        const networkError = new Error('Network timeout');
+        (networkError as any).code = 'NETWORK_ERROR';
+        return Promise.reject(networkError) as any;
+      });
+
+      // Should fail with NETWORK_ERROR after all retries are exhausted
       await expect(ClassService.bulkEnrollStudents(classData.id, { student_ids: [student.id] }, teacher.id))
-        .rejects.toThrow('NETWORK_ERROR');
+        .rejects.toThrow('Network connection failed after retries');
     });
 
     it('should maintain data consistency during partial failures', async () => {
@@ -403,8 +501,8 @@ describe('Add Students to Classes - Integration Tests', () => {
       } as any);
 
       const result = await ClassService.bulkEnrollStudents(
-        classData.id, 
-        { student_ids: students.map(s => s.id) }, 
+        classData.id,
+        { student_ids: students.map(s => s.id) },
         teacher.id
       );
 

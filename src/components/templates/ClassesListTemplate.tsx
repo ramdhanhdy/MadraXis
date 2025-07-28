@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/src/context/AuthContext';
+import { useAuth } from '@/src/hooks/useAuth';
 import { ClassService } from '@/src/services/classService';
 import { Class } from '@/src/types/class';
 import { ClassWithDetails } from '@/src/services/classService';

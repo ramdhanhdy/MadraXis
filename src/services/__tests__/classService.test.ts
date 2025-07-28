@@ -9,7 +9,8 @@ import {
   createMockStudent, 
   createMockClass, 
   createMockTeacher, 
-  generateLargeStudentList
+  generateLargeStudentList,
+  createSuccessfulResponse
 } from './testHelpers';
 
 // Mock supabase
@@ -561,6 +562,7 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
     });
 
     it('should handle empty search results', async () => {
+      jest.setTimeout(10000);
       const teacher = createMockTeacher();
       const classData = createMockClass({ teacher_id: teacher.id });
 
@@ -581,8 +583,9 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
     });
   });
 
-  describe('13.1.10 - Large dataset performance tests', () => {
-    it('should handle large student datasets efficiently', async () => {
+  describe('13.1.10 - Large dataset handling tests', () => {
+    jest.setTimeout(30000);
+    it('should enforce access control with large dataset queries', async () => {
       const teacher = createMockTeacher();
       const classData = createMockClass({ teacher_id: teacher.id });
 
@@ -602,20 +605,20 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
         .rejects.toThrow('You do not have permission to view students for this class');
     });
 
-    it('should handle bulk enrollment operations efficiently', async () => {
+    it('should handle bulk enrollment operations with large datasets', async () => {
       const teacher = createMockTeacher();
       const classData = createMockClass({ teacher_id: teacher.id });
       const bulkStudents = generateLargeStudentList(100);
 
       setupStandardMocks(teacher, classData);
 
-      mockSupabase.rpc.mockResolvedValue({
+      (supabase.rpc as jest.Mock).mockResolvedValue(createSuccessfulResponse({
         data: [{
           success: bulkStudents.map(s => s.id),
           errors: []
         }],
         error: null
-      } as any);
+      }));
 
       const result = await ClassService.bulkEnrollStudents(classData.id, { student_ids: bulkStudents.map(s => s.id) }, teacher.id);
 

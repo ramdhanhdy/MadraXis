@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { useAuth } from '../src/hooks/useAuth';
 import { ThemeProvider } from '../src/context/ThemeContext';
 import { NavigationHistoryProvider } from '../src/context/NavigationHistoryContext';
 import * as SplashScreen from 'expo-splash-screen';
@@ -13,25 +13,26 @@ SplashScreen.preventAutoHideAsync();
 const RootLayoutNav = () => {
     const { loading: authLoading } = useAuth();
     const [splashAnimationComplete, setSplashAnimationComplete] = useState(false);
+    const [splashHidden, setSplashHidden] = useState(false);
 
-    const handleAnimationFinish = () => {
-        requestAnimationFrame(() => {
-            setSplashAnimationComplete(true);
-        });
-    };
-
-    const onLayoutRootView = useCallback(async () => {
-        if (!authLoading && splashAnimationComplete) {
-            await SplashScreen.hideAsync();
-        }
-    }, [authLoading, splashAnimationComplete]);
+    const handleAnimationFinish = useCallback(() => {
+        console.log('🎬 Animation finished');
+        setSplashAnimationComplete(true);
+    }, []);
 
     useEffect(() => {
-        onLayoutRootView();
-    }, [onLayoutRootView]);
+        console.log(`🔄 Splash state: authLoading=${authLoading}, animComplete=${splashAnimationComplete}, hidden=${splashHidden}`);
+        if (!authLoading && splashAnimationComplete && !splashHidden) {
+            console.log('🎬 Hiding splash screen');
+            SplashScreen.hideAsync().then(() => {
+                setSplashHidden(true);
+            });
+        }
+    }, [authLoading, splashAnimationComplete, splashHidden]);
 
     // Show animated splash screen until both auth loading and animation are complete
     if (authLoading || !splashAnimationComplete) {
+        console.log(`🎬 Showing splash: authLoading=${authLoading}, animComplete=${splashAnimationComplete}`);
         return <AnimatedSplashScreen onAnimationFinish={handleAnimationFinish} />;
     }
 
@@ -53,11 +54,9 @@ const RootLayoutNav = () => {
 export default function RootLayout() {
     return (
         <ThemeProvider>
-            <AuthProvider>
-                <NavigationHistoryProvider>
-                    <RootLayoutNav />
-                </NavigationHistoryProvider>
-            </AuthProvider>
+            <NavigationHistoryProvider>
+                <RootLayoutNav />
+            </NavigationHistoryProvider>
         </ThemeProvider>
     );
 }

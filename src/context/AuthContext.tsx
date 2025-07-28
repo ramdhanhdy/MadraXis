@@ -5,6 +5,9 @@ import { supabase } from '@/src/utils/supabase';
 import { useRouter } from 'expo-router';
 import { Profile } from '../types';
 
+// Global flag to prevent multiple auth initializations
+let authInitialized = false;
+
 // Define the shape of the context
 interface AuthContextType {
   session: Session | null;
@@ -37,13 +40,22 @@ export const AuthProvider = ({ children }: {children: React.ReactNode;}) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [navigationInProgress, setNavigationInProgress] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Function to fetch user profile from unified profiles table
   const fetchUserProfileAndNavigate = async (userId: string) => {
+    if (navigationInProgress) {
+      logger.debug('🔄 Navigation already in progress, skipping profile fetch');
+      return;
+    }
+
     try {
       if (!userId) {
         logger.error('User ID is required to fetch profile');
-        router.replace('/(auth)/login');
+        if (!navigationInProgress) {
+          router.replace('/(auth)/login');
+        }
         return;
       }
 
@@ -55,7 +67,9 @@ export const AuthProvider = ({ children }: {children: React.ReactNode;}) => {
 
       if (error) {
         logger.error('Error fetching user profile', { error: error.message || error });
-        router.replace('/(auth)/login');
+        if (!navigationInProgress) {
+          router.replace('/(auth)/login');
+        }
         return;
       }
 
@@ -69,42 +83,72 @@ export const AuthProvider = ({ children }: {children: React.ReactNode;}) => {
           updated_at: userProfile.updated_at
         };
         setProfile(profile);
+        setLoading(false);
         navigateBasedOnRole(profile.role, profile.school_id);
       } else {
         logger.error('No role found for user');
-        router.replace('/(auth)/login');
+        setLoading(false);
+        if (!navigationInProgress) {
+          router.replace('/(auth)/login');
+        }
       }
     } catch (error) {
       logger.error('Error in fetchUserProfileAndNavigate', { error: error instanceof Error ? error.message : String(error) });
-      router.replace('/(auth)/login');
+      setLoading(false);
+      if (!navigationInProgress) {
+        router.replace('/(auth)/login');
+      }
     }
   };
 
   // Function to navigate based on user role
   const navigateBasedOnRole = (role: string, schoolId?: string | number) => {
-    logger.debug(`🔐 Navigating based on role: ${role}, school_id: ${schoolId}`);
-    switch (role) {
-      case 'teacher':
-        router.replace('/(teacher)/dashboard');
-        break;
-      case 'management':
-        if (schoolId) {
-          router.replace('/(management)/dashboard');
-        } else {
-          router.replace('/(management)/setup');
-        }
-        break;
-      case 'parent':
-        router.replace('/(parent)/dashboard');
-        break;
-      case 'student':
-        router.replace('/(student)/dashboard');
-        break;
-      default:
-        logger.error('Unknown role', { role });
-        router.replace('/(auth)/login');
-        break;
+    if (navigationInProgress) {
+      logger.debug('🔄 Navigation already in progress, skipping duplicate navigation');
+      return;
     }
+
+    // Don't navigate if we're still loading
+    if (loading) {
+      logger.debug('🔄 Still loading, deferring navigation');
+      return;
+    }
+
+    setNavigationInProgress(true);
+    logger.debug(`🔐 Navigating based on role: ${role}, school_id: ${schoolId}`);
+
+    // Use setTimeout to ensure navigation happens after current render cycle
+    setTimeout(() => {
+      try {
+        switch (role) {
+          case 'teacher':
+            router.replace('/(teacher)/dashboard');
+            break;
+          case 'management':
+            if (schoolId) {
+              router.replace('/(management)/dashboard');
+            } else {
+              router.replace('/(management)/setup');
+            }
+            break;
+          case 'parent':
+            router.replace('/(parent)/dashboard');
+            break;
+          case 'student':
+            router.replace('/(student)/dashboard');
+            break;
+          default:
+            logger.error('Unknown role', { role });
+            router.replace('/(auth)/login');
+            break;
+        }
+      } catch (error) {
+        logger.error('Navigation error', { error });
+      }
+    }, 100);
+
+    // Reset navigation flag after a longer delay to prevent rapid re-navigation
+    setTimeout(() => setNavigationInProgress(false), 3000);
   };
 
   // Function to clear session and force logout
@@ -128,6 +172,15 @@ export const AuthProvider = ({ children }: {children: React.ReactNode;}) => {
   };
 
   useEffect(() => {
+    // Prevent multiple auth initializations
+    if (authInitialized) {
+      logger.debug('🔄 Auth already initialized, skipping');
+      return;
+    }
+
+    authInitialized = true;
+    logger.debug('🔐 Initializing auth context');
+
     // Get the initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       logger.debug(`🔐 Initial session check: ${session ? 'AUTHENTICATED' : 'NOT AUTHENTICATED'}`);
@@ -147,25 +200,28 @@ export const AuthProvider = ({ children }: {children: React.ReactNode;}) => {
       logger.debug(`🔐 Auth state change: ${event}, ${session ? 'AUTHENTICATED' : 'NOT AUTHENTICATED'}`);
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
 
       if (event === 'SIGNED_IN' && session?.user) {
         logger.debug('🔐 User signed in - fetching profile from database');
-
         // Always fetch role from profiles table for consistency and security
         await fetchUserProfileAndNavigate(session.user.id);
       } else if (event === 'SIGNED_OUT') {
         logger.debug('🔐 User signed out - redirecting to login');
         setProfile(null);
+        setLoading(false);
+        authInitialized = false; // Reset flag on sign out
         router.replace('/(auth)/login');
+      } else {
+        setLoading(false);
       }
     });
 
     // Cleanup the listener on component unmount
     return () => {
       authListener.subscription.unsubscribe();
+      authInitialized = false; // Reset flag on unmount
     };
-  }, [router]);
+  }, []); // Remove router dependency to prevent re-initialization
 
   const signOut = async () => {
     logger.debug('🔐 User signing out');

@@ -35,8 +35,8 @@ class TestRunner {
   private testFiles: string[] = [
     'classService.test.ts',
     'classService.security.test.ts',
-    'class/__tests__/enrollment.test.ts',
-    'class/__tests__/access.test.ts',
+    '../class/__tests__/enrollment.test.ts',
+    '../class/__tests__/access.test.ts',
     'integration.test.ts'
   ];
 
@@ -63,7 +63,8 @@ class TestRunner {
         const startTime = Date.now();
         
         // Run individual test file
-        const output = execSync(`bun test ${filePath} --verbose`, { 
+        const commandPath = filePath.replace(/\\/g, '/');
+        const output = execSync(`bun test "${commandPath}" --verbose`, { 
           encoding: 'utf8',
           cwd: process.cwd()
         });

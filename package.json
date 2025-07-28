@@ -88,8 +88,10 @@
     "react-native-web": "^0.20.0",
     "react-native-webview": "13.13.5",
     "rive-react-native": "^9.3.4",
+    "supabase": "^2.31.8",
     "uuid": "^11.1.0",
-    "zod": "^4.0.5"
+    "zod": "^4.0.5",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",

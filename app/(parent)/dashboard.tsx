@@ -17,10 +17,11 @@ import { ErrorMessage } from '../../src/components/molecules/ErrorMessage/ErrorM
 import { EmptyState } from '../../src/components/molecules/EmptyState/EmptyState';
 
 // Context and Services
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../src/hooks/useAuth';
 import { supabase } from '../../src/utils/supabase';
 import { logoSvg } from '../../src/utils/svgPatterns';
 import { colors } from '../../src/styles/colors';
+import { useSafeToQuery } from '../../src/utils/navigationGuard';
 
 // Icon types for proper typing
 type IoniconsIcon = keyof typeof Ionicons.glyphMap;
@@ -58,6 +59,7 @@ interface StudentData {
 export default function ParentDashboard() {
   const router = useRouter();
   const { profile, loading } = useAuth();
+  const isSafeToQuery = useSafeToQuery();
   const [schoolName, setSchoolName] = useState('Zaid Bin Tsabit');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
@@ -122,6 +124,11 @@ export default function ParentDashboard() {
   // Fetch school name from database
   useEffect(() => {
     const fetchSchoolName = async () => {
+      if (!isSafeToQuery) {
+        console.log('Skipping school name fetch - navigation in progress');
+        return;
+      }
+
       if (profile?.school_id) {
         try {
           const { data, error } = await supabase

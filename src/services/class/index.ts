@@ -16,6 +16,7 @@ import { ClassAccessControl } from './access';
 import { ClassAuditService } from './audit';
 import { ClassEnrollmentService } from './enrollment';
 import { ClassBulkOperations } from './bulk';
+import { withRetry } from '../../utils/retry';
 
 /**
  * Main ClassService orchestrator that provides a unified interface
@@ -98,7 +99,7 @@ export class ClassService {
   // ==================== STUDENT ENROLLMENT OPERATIONS ====================
 
   /**
-   * Get available students for enrollment
+   * Get available students for enrollment with retry logic
    */
   static async getAvailableStudents(
     classId: number,
@@ -106,9 +107,21 @@ export class ClassService {
     options?: GetAvailableStudentsOptions
   ): Promise<{ students: StudentWithDetails[]; total: number }> {
     try {
-      // Validate teacher access first
+      // Validate teacher access first (no retry needed for access validation)
       await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'view_students');
-      return ClassEnrollmentService.getAvailableStudents(classId, teacherId, options);
+      
+      // Use retry logic for the actual data retrieval
+      const retryResult = await withRetry(
+        () => ClassEnrollmentService.getAvailableStudents(classId, teacherId, options),
+        {
+          maxAttempts: 3,
+          baseDelay: 1000,
+          maxDelay: 5000,
+          backoffFactor: 2
+        }
+      );
+      
+      return retryResult.result;
     } catch (error) {
       if (error instanceof ClassServiceError) {
         // Map ACCESS_DENIED to UNAUTHORIZED_ACCESS for consistency with tests
@@ -127,7 +140,7 @@ export class ClassService {
         if (errorCode === 'NETWORK_ERROR' || errorCode === 'ECONNREFUSED' || errorCode === 'ETIMEDOUT') {
           throw ClassServiceError.create(
             'NETWORK_ERROR',
-            'Network connection failed',
+            'Network connection failed after retries',
             { originalError: error, classId, teacherId }
           );
         }
@@ -195,7 +208,7 @@ export class ClassService {
   }
 
   /**
-   * Bulk enroll multiple students
+   * Bulk enroll multiple students with retry logic
    */
   static async bulkEnrollStudents(
     classId: number,
@@ -206,9 +219,21 @@ export class ClassService {
     errors: { studentId: string; error: string }[];
   }> {
     try {
-      // Validate teacher access first
+      // Validate teacher access first (no retry needed for access validation)
       await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'enroll_students');
-      return ClassEnrollmentService.bulkEnrollStudents(classId, enrollmentData, teacherId);
+      
+      // Use retry logic for the actual enrollment operation
+      const retryResult = await withRetry(
+        () => ClassEnrollmentService.bulkEnrollStudents(classId, enrollmentData, teacherId),
+        {
+          maxAttempts: 3,
+          baseDelay: 1000,
+          maxDelay: 5000,
+          backoffFactor: 2
+        }
+      );
+      
+      return retryResult.result;
     } catch (error) {
       if (error instanceof ClassServiceError) {
         // Map ACCESS_DENIED to UNAUTHORIZED_ACCESS for consistency with tests
@@ -227,7 +252,7 @@ export class ClassService {
         if (errorCode === 'NETWORK_ERROR' || errorCode === 'ECONNREFUSED' || errorCode === 'ETIMEDOUT') {
           throw ClassServiceError.create(
             'NETWORK_ERROR',
-            'Network connection failed',
+            'Network connection failed after retries',
             { originalError: error, classId, teacherId }
           );
         }

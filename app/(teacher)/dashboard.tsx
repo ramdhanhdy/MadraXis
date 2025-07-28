@@ -17,10 +17,11 @@ import { EmptyState } from '../../src/components/molecules/EmptyState/EmptyState
 import { SkeletonCard } from '../../src/components/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../src/hooks/useAuth';
 import { supabase } from '../../src/utils/supabase';
 import { logoSvg } from '../../src/utils/svgPatterns';
 import { colors } from '../../src/styles/colors';
+import { useSafeToQuery } from '../../src/utils/navigationGuard';
 
 // Modal Components
 import TeacherProfileView from '../../src/components/organisms/TeacherProfileView';
@@ -32,6 +33,7 @@ type IoniconsIcon = keyof typeof Ionicons.glyphMap;
 export default function TeacherDashboard() {
   const router = useRouter();
   const { profile, loading: authLoading } = useAuth();
+  const isSafeToQuery = useSafeToQuery();
   const [schoolName, setSchoolName] = useState('Zaid Bin Tsabit');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
@@ -63,9 +65,15 @@ export default function TeacherDashboard() {
   // Fetch data from database
   useEffect(() => {
     const fetchData = async () => {
+      // Don't fetch data if navigation is in progress
+      if (!isSafeToQuery) {
+        console.log('Skipping teacher dashboard data fetch - navigation in progress');
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
-      
+
       try {
         // Fetch school name
         if (profile?.school_id) {
@@ -127,7 +135,7 @@ export default function TeacherDashboard() {
     };
 
     fetchData();
-  }, [profile?.school_id]);
+  }, [profile?.school_id, isSafeToQuery]);
 
   // Handle navigation
   const handleNavigate = (route: string) => {

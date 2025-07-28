@@ -5,7 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useAuth } from '@/src/context/AuthContext';
+import { useAuth } from '@/src/hooks/useAuth';
+import { useSafeToQuery } from '@/src/utils/navigationGuard';
 import { ClassService } from '@/src/services/classService';
 import { Class } from '@/src/types/class';
 import { ClassWithDetails } from '@/src/services/classService';
@@ -16,6 +17,7 @@ export default function ClassDetailView() {
   const router = useRouter();
   const { id, tab } = useLocalSearchParams();
   const { user, profile } = useAuth();
+  const isSafeToQuery = useSafeToQuery();
   const [classData, setClassData] = useState<ClassWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,12 @@ export default function ClassDetailView() {
   }, [showEditModal, profile?.school_id]);
 
   const fetchClassDetails = useCallback(async () => {
-    if (!id) return;
+    if (!id || !isSafeToQuery) {
+      if (!isSafeToQuery) {
+        logger.debug('Skipping class details fetch - navigation in progress');
+      }
+      return;
+    }
 
     try {
       setLoading(true);
@@ -51,15 +58,17 @@ export default function ClassDetailView() {
         return;
       }
 
+      logger.debug(`Fetching class details for ID: ${parsedId}`);
       const classData = await ClassService.getClassById(parsedId, user.id);
       setClassData(classData);
+      logger.debug(`Class details loaded: ${classData?.name}`);
     } catch (error: any) {
       setError(error.message || 'Failed to load class details');
       logger.error('Error fetching class details:', error);
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, user?.id, isSafeToQuery]);
 
   useEffect(() => {
     fetchClassDetails();

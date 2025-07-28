@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../src/hooks/useAuth';
 import { fetchStudents, fetchTeachers } from '../../src/services/users';
 import { Student, Teacher } from '../../src/types';
 

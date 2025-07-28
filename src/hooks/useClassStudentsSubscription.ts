@@ -2,6 +2,7 @@ import { logger } from '../utils/logger';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../utils/supabase';
 import type { Student, ClassStudent } from '../types/student';
+import { isSafeToQuery } from '../utils/navigationGuard';
 
 interface UseClassStudentsSubscriptionProps {
   classId: number;
@@ -29,6 +30,12 @@ export function useClassStudentsSubscription({
   const subscriptionRef = useRef<any>(null);
 
   const fetchStudents = useCallback(async () => {
+    // Don't fetch if navigation is in progress
+    if (!isSafeToQuery()) {
+      logger.debug('Skipping class students fetch - navigation in progress');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -117,7 +124,7 @@ export function useClassStudentsSubscription({
         subscriptionRef.current = null;
       }
     };
-  }, [classId, enabled, fetchStudents, setupSubscription]);
+  }, [classId, enabled]); // Remove function dependencies to prevent infinite loops
 
   const refetch = useCallback(() => {
     fetchStudents();

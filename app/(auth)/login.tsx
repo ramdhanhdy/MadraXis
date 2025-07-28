@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
+import { useAuth } from '../../src/hooks/useAuth';
 import AuthForm from '../../src/components/organisms/AuthForm';
+import { LoadingSpinner } from '../../src/components/atoms/LoadingSpinner';
 
 const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -22,6 +24,33 @@ const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
 
 export default function LoginScreen() {
   const { role } = useLocalSearchParams<{ role: string }>();
+  const { session, loading } = useAuth();
+  const router = useRouter();
+
+  // Redirect authenticated users away from login
+  useEffect(() => {
+    if (!loading && session) {
+      // User is already logged in, redirect to appropriate dashboard
+      router.replace('/');
+    }
+  }, [session, loading, router]);
+
+  // Show loading while checking auth state
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.loadingContainer}>
+          <LoadingSpinner size="large" />
+        </View>
+      </View>
+    );
+  }
+
+  // Don't render login form if user is authenticated
+  if (session) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>
@@ -138,5 +167,10 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

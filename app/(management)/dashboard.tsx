@@ -17,11 +17,12 @@ import { EmptyState } from '../../src/components/molecules/EmptyState/EmptyState
 import { SkeletonCard } from '../../src/components/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../src/hooks/useAuth';
 import { fetchIncidentsForSchool } from '../../src/services/incidents';
 import { fetchDashboardMetrics, DashboardMetrics } from '../../src/services/dashboard';
 import { logoSvg } from '../../src/utils/svgPatterns';
 import { colors } from '../../src/styles/colors';
+import { useSafeToQuery } from '../../src/utils/navigationGuard';
 import { Incident } from '../../src/types';
 
 // Icon types for proper typing
@@ -33,6 +34,7 @@ type IoniconsIcon = keyof typeof Ionicons.glyphMap;
 export default function ManagementDashboard() {
   const router = useRouter();
   const { user, profile, signOut, loading: authLoading } = useAuth();
+  const isSafeToQuery = useSafeToQuery();
   const [schoolName, setSchoolName] = useState('Zaid Bin Tsabit');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -76,6 +78,12 @@ export default function ManagementDashboard() {
 
   // Unified data fetching function to prevent loading state race conditions
   const fetchDashboardData = async () => {
+    // Don't fetch data if navigation is in progress
+    if (!isSafeToQuery) {
+      console.log('Skipping dashboard data fetch - navigation in progress');
+      return;
+    }
+
     if (!user) {
       setError('User not authenticated.');
       return;
@@ -216,10 +224,10 @@ export default function ManagementDashboard() {
 
   // Load data when component mounts or user/profile changes
   useEffect(() => {
-    if (user && !authLoading) {
+    if (user && !authLoading && isSafeToQuery) {
       fetchDashboardData();
     }
-  }, [user, profile, authLoading]);
+  }, [user, profile, authLoading, isSafeToQuery]);
 
   // No additional refresh needed - data loads on mount and user change
 

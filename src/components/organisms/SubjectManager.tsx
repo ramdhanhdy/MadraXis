@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SubjectService, ClassSubject, Subject } from '@/src/services/subjectService';
+import { useSafeToQuery } from '@/src/utils/navigationGuard';
 
 interface SubjectManagerProps {
   classId: number;
@@ -10,6 +11,7 @@ interface SubjectManagerProps {
 }
 
 export default function SubjectManager({ classId, onSubjectCountChange }: SubjectManagerProps) {
+  const isSafeToQuery = useSafeToQuery();
   const [subjects, setSubjects] = useState<ClassSubject[]>([]);
   const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,11 +23,18 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
   const [editingSubject, setEditingSubject] = useState<ClassSubject | null>(null);
 
   const fetchSubjects = useCallback(async () => {
+    if (!isSafeToQuery) {
+      logger.debug('Skipping subjects fetch - navigation in progress');
+      return;
+    }
+
     try {
       setLoading(true);
+      logger.debug(`Fetching subjects for class ID: ${classId}`);
       const subjects = await SubjectService.getClassSubjects(classId);
       setSubjects(subjects);
       onSubjectCountChange?.(subjects.length || 0);
+      logger.debug(`Subjects loaded: ${subjects.length} subjects found`);
     } catch (error: unknown) {
       const context = error instanceof Error ? {
         operation: 'fetchSubjects',
@@ -39,9 +48,13 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
     } finally {
       setLoading(false);
     }
-  }, [classId, onSubjectCountChange]);
+  }, [classId, onSubjectCountChange, isSafeToQuery]);
 
   const fetchAvailableSubjects = useCallback(async () => {
+    if (!isSafeToQuery) {
+      return;
+    }
+
     try {
       const subjects = await SubjectService.getAvailableSubjects();
       setAvailableSubjects(subjects);
@@ -56,12 +69,12 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
       };
       logger.error('Error fetching available subjects:', context);
     }
-  }, []);
+  }, [isSafeToQuery]);
 
   useEffect(() => {
     fetchSubjects();
     fetchAvailableSubjects();
-  }, [fetchSubjects, fetchAvailableSubjects]);
+  }, [classId]); // Only depend on classId to prevent infinite loops
 
   const handleAddSubject = async () => {
     if (!newSubjectName.trim() || !newSubjectCode.trim()) {

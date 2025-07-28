@@ -64,40 +64,63 @@ export const createConstraintError = (constraint: string) => ({
   details: 'Key already exists'
 });
 
-// Mock query builders
+// Mock query builder factory
 export const createMockQueryBuilder = (mockResponse?: any) => {
   const builder = {
     select: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    neq: jest.fn().mockReturnThis(),
+    gt: jest.fn().mockReturnThis(),
+    gte: jest.fn().mockReturnThis(),
+    lt: jest.fn().mockReturnThis(),
+    lte: jest.fn().mockReturnThis(),
+    is: jest.fn().mockReturnThis(),
+    in: jest.fn().mockReturnThis(),
+    or: jest.fn().mockReturnThis(),
+    order: jest.fn().mockReturnThis(),
+    range: jest.fn().mockReturnThis(),
+    single: jest.fn().mockReturnThis(),
+    maybeSingle: jest.fn().mockReturnThis(),
     insert: jest.fn().mockReturnThis(),
     update: jest.fn().mockReturnThis(),
     delete: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    neq: jest.fn().mockReturnThis(),
-    in: jest.fn().mockReturnThis(),
-    not: jest.fn().mockReturnThis(),
-    like: jest.fn().mockReturnThis(),
-    ilike: jest.fn().mockReturnThis(),
-    or: jest.fn().mockReturnThis(),
-    and: jest.fn().mockReturnThis(),
-    order: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnThis(),
-    offset: jest.fn().mockReturnThis(),
-    range: jest.fn().mockReturnThis(),
-    single: jest.fn(),
-    maybeSingle: jest.fn(),
-    csv: jest.fn().mockReturnThis(),
-    then: jest.fn(),
-    catch: jest.fn()
+    upsert: jest.fn().mockReturnThis(),
+    execute: jest.fn().mockResolvedValue(mockResponse || createSuccessfulResponse([]))
   };
 
-  // Configure single() and maybeSingle() to return promises
   builder.single.mockResolvedValue(mockResponse || createSuccessfulResponse(null));
   builder.maybeSingle.mockResolvedValue(mockResponse || createSuccessfulResponse(null));
-
+  
   return builder;
 };
 
 // Enhanced Supabase mock factory
+export const createEnhancedSupabaseMock = () => ({
+  from: jest.fn().mockReturnValue({
+    select: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    neq: jest.fn().mockReturnThis(),
+    gt: jest.fn().mockReturnThis(),
+    gte: jest.fn().mockReturnThis(),
+    lt: jest.fn().mockReturnThis(),
+    lte: jest.fn().mockReturnThis(),
+    is: jest.fn().mockReturnThis(),
+    in: jest.fn().mockReturnThis(),
+    or: jest.fn().mockReturnThis(),
+    order: jest.fn().mockReturnThis(),
+    range: jest.fn().mockResolvedValue({ data: [], error: null }),
+    single: jest.fn().mockResolvedValue({ data: null, error: null }),
+    insert: jest.fn().mockResolvedValue({ data: [], error: null }),
+    update: jest.fn().mockResolvedValue({ data: [], error: null }),
+    delete: jest.fn().mockResolvedValue({ data: [], error: null }),
+  }),
+  rpc: jest.fn().mockResolvedValue({ data: null, error: null }),
+  channel: jest.fn().mockReturnValue({
+    on: jest.fn().mockReturnThis(),
+    subscribe: jest.fn().mockResolvedValue(undefined),
+  }),
+});
+
 export const createSupabaseMock = (responses: Record<string, any> = {}) => {
   const createTableMock = (tableName: string) => {
     const queryBuilder = createMockQueryBuilder(responses[tableName]);

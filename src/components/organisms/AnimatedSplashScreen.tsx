@@ -12,14 +12,13 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleFinish = useCallback(() => {
-    if (!hasFinished.current && onAnimationFinish) {
-      hasFinished.current = true;
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-      onAnimationFinish();
+    if (hasFinished.current) return; // Prevent multiple calls
+    hasFinished.current = true;
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
+    onAnimationFinish?.();
   }, [onAnimationFinish]);
 
   useEffect(() => {

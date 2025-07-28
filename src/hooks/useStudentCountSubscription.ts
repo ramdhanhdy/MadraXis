@@ -1,6 +1,7 @@
 import { logger } from '../utils/logger';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../utils/supabase';
+import { isSafeToQuery } from '../utils/navigationGuard';
 
 interface UseStudentCountSubscriptionProps {
   classIds: number[];
@@ -29,6 +30,12 @@ export function useStudentCountSubscription({
   const subscriptionsRef = useRef<Map<number, any>>(new Map());
 
   const fetchCounts = useCallback(async () => {
+    // Don't fetch if navigation is in progress
+    if (!isSafeToQuery()) {
+      logger.debug('Skipping student count fetch - navigation in progress');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -134,7 +141,7 @@ export function useStudentCountSubscription({
     return () => {
       cleanupSubscriptions();
     };
-  }, [classIds.join(','), enabled, fetchCounts, setupSubscriptions, cleanupSubscriptions]);
+  }, [classIds.join(','), enabled]); // Remove function dependencies to prevent infinite loops
 
   const refetch = useCallback(() => {
     fetchCounts();

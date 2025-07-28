@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView,
 import { Ionicons } from '@expo/vector-icons';
 import { ClassService, ClassWithDetails } from '@/src/services/classService';
 import { CreateClassData, UpdateClassData } from '@/src/types/class';
-import { useAuth } from '@/src/context/AuthContext';
+import { useAuth } from '@/src/hooks/useAuth';
 
 interface ClassFormModalProps {
   visible: boolean;

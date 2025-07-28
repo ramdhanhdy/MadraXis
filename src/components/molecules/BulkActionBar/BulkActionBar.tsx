@@ -59,7 +59,7 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
   return (
     <View 
       style={[styles.container, style]}
-      testID={testID}
+      testID={testID || 'bulk-action-bar'}
     >
       {/* Selection Count */}
       <View style={styles.countContainer}>
@@ -93,6 +93,8 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
             disabled={disabled || allSelected}
             style={styles.actionButton}
             icon={allSelected ? 'checkmark-done' : 'checkmark-circle-outline'}
+            testID="bulk-action-bar-select-all"
+            accessibilityHint={`Select all ${totalVisible} visible students`}
           >
             {getSelectAllText()}
           </Button>
@@ -107,6 +109,8 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
             disabled={disabled}
             style={styles.actionButton}
             icon="close-circle-outline"
+            testID="bulk-action-bar-clear"
+            accessibilityHint="Clear all selected students"
           >
             Clear
           </Button>
