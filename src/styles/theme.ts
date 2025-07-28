@@ -155,7 +155,7 @@ export const createComponentThemes = (currentTheme: Omit<Theme, 'componentThemes
   },
 });
 
-const baseTheme = {
+export const baseTheme = {
   colors,
   typography,
   spacing: spacingTokens,

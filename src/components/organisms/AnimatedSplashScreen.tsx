@@ -1,6 +1,6 @@
+import { logger } from '../../utils/logger';
 import React, { useEffect, useRef, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
-import Rive from 'rive-react-native';
+import { StyleSheet, View, Text, Animated } from 'react-native';
 
 interface AnimatedSplashScreenProps {
   onAnimationFinish: () => void;
@@ -9,50 +9,63 @@ interface AnimatedSplashScreenProps {
 const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimationFinish }) => {
   const hasFinished = useRef(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   const handleFinish = useCallback(() => {
-    if (!hasFinished.current && onAnimationFinish) {
-      hasFinished.current = true;
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-      onAnimationFinish();
+    if (hasFinished.current) return; // Prevent multiple calls
+    hasFinished.current = true;
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
+    logger.debug('🎬 Simple animation finished, calling onAnimationFinish');
+    onAnimationFinish?.();
   }, [onAnimationFinish]);
 
   useEffect(() => {
-    // Fallback timeout in case animation doesn't trigger completion
+    // Start the simple animation
+    logger.debug('🎬 Starting simple splash animation');
+
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Auto-finish after animation completes
     timeoutRef.current = setTimeout(() => {
       handleFinish();
-    }, 4000); // Slightly longer to allow animation to complete naturally
+    }, 1500); // 1.5 second total duration
 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [handleFinish]);
+  }, [handleFinish, fadeAnim, scaleAnim]);
 
   return (
     <View style={styles.container}>
-      <Rive
-        resourceName="splash_screen"
-        autoplay={true}
-        style={styles.animation}
-        onPlay={() => {
-          console.log('Rive animation started');
-        }}
-        onStop={() => {
-          console.log('Rive animation completed');
-          handleFinish();
-        }}
-        onError={(error) => {
-          console.error('Rive animation error:', error);
-          // Trigger fallback UI by finishing the animation
-          handleFinish();
-        }}
-      />
+      <Animated.View
+        style={[
+          styles.logoContainer,
+          {
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }]
+          }
+        ]}
+      >
+        <Text style={styles.logoText}>MadraXis</Text>
+        <Text style={styles.taglineText}>Sistem Manajemen Madrasah</Text>
+      </Animated.View>
     </View>
   );
 };
@@ -62,12 +75,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffff'
   },
-  animation: {
-    width: 300,
-    height: 300,
+  logoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center'
   },
+  logoText: {
+    fontSize: 42,
+    fontWeight: 'bold',
+    color: '#005e7a',
+    marginBottom: 12,
+    letterSpacing: 1
+  },
+  taglineText: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
+    fontWeight: '300'
+  }
 });
 
 export default AnimatedSplashScreen;

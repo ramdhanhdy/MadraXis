@@ -3,10 +3,10 @@
  * Islamic geometric background pattern with design token integration
  */
 
-import React, { useState, useMemo } from 'react';
-import { View, ViewStyle, StyleSheet, Text, DimensionValue } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, ViewStyle, DimensionValue } from 'react-native';
 import { SvgXml } from 'react-native-svg';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useColors } from '../../../context/ThemeContext';
 
 // Pattern variant types
 export type PatternVariant = 'geometric' | 'minimal' | 'dots' | 'waves' | 'none';
@@ -19,41 +19,41 @@ export interface BackgroundPatternProps {
   // Pattern configuration
   variant?: PatternVariant;
   intensity?: PatternIntensity;
-  
+
   // Color customization
   color?: string;
   opacity?: number;
-  
+
   // Layout
   width?: number | string;
   height?: number | string;
-  
+
   // Custom styling
   style?: ViewStyle;
-  
+
   // Accessibility
   accessibilityLabel?: string;
-  
+
   // Test ID
   testID?: string;
 }
 
 // Error boundary component for SVG rendering
-class SvgErrorBoundary extends React.Component<{ 
-  children: React.ReactNode; 
-  fallback?: React.ReactNode 
-}, { hasError: boolean }> {
-  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
+class SvgErrorBoundary extends React.Component<{
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}, {hasError: boolean;}> {
+  constructor(props: {children: React.ReactNode;fallback?: React.ReactNode;}) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean } {
+  static getDerivedStateFromError(error: Error): {hasError: boolean;} {
     return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.warn('SVG rendering error:', error, errorInfo);
+    console.warn('SVG rendering error', { error: error.message, errorInfo: errorInfo.componentStack });
   }
 
   render() {
@@ -75,9 +75,8 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
   height = '100%',
   style,
   accessibilityLabel,
-  testID,
+  testID
 }) => {
-  const { theme } = useTheme();
   const colors = useColors();
 
   // Get pattern color
@@ -89,7 +88,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
   // Get pattern opacity based on intensity
   const getPatternOpacity = (): number => {
     if (opacity !== undefined) return opacity;
-    
+
     switch (intensity) {
       case 'subtle':
         return 0.03;
@@ -108,7 +107,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
   const generateGeometricPattern = (): string => {
     const patternColor = getPatternColor();
     const patternOpacity = getPatternOpacity();
-    
+
     return `
       <svg width="100%" height="100%" viewBox="0 0 375 812" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="375" height="812" fill="none"/>
@@ -195,7 +194,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
   const generateMinimalPattern = (): string => {
     const patternColor = getPatternColor();
     const patternOpacity = getPatternOpacity();
-    
+
     return `
       <svg width="100%" height="100%" viewBox="0 0 375 812" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="375" height="812" fill="none"/>
@@ -229,7 +228,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
   const generateDotsPattern = (): string => {
     const patternColor = getPatternColor();
     const patternOpacity = getPatternOpacity();
-    
+
     return `
       <svg width="100%" height="100%" viewBox="0 0 375 812" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="375" height="812" fill="none"/>
@@ -238,10 +237,10 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
         <g opacity="${patternOpacity}">
           <g fill="${patternColor}">
             ${Array.from({ length: 15 }, (_, row) =>
-              Array.from({ length: 8 }, (_, col) => 
-                `<circle cx="${col * 50 + 25}" cy="${row * 50 + 25}" r="1.5" />`
-              ).join('')
-            ).join('')}
+    Array.from({ length: 8 }, (_, col) =>
+    `<circle cx="${col * 50 + 25}" cy="${row * 50 + 25}" r="1.5" />`
+    ).join('')
+    ).join('')}
           </g>
         </g>
       </svg>
@@ -252,7 +251,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
   const generateWavesPattern = (): string => {
     const patternColor = getPatternColor();
     const patternOpacity = getPatternOpacity();
-    
+
     return `
       <svg width="100%" height="100%" viewBox="0 0 375 812" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="375" height="812" fill="none"/>
@@ -274,65 +273,63 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
   };
 
 
-  // Don't render anything for 'none' variant
-  if (variant === 'none') {
-    return null;
-  }
-
   // Memoize the pattern SVG generation
   const patternSvg = useMemo(() => {
+    if (variant === 'none') {
+      return null;
+    }
+    
     try {
       switch (variant) {
-          case 'geometric':
-            return generateGeometricPattern();
-          case 'minimal':
-            return generateMinimalPattern();
-          case 'dots':
-            return generateDotsPattern();
-          case 'waves':
-            return generateWavesPattern();
-          default:
-            return generateGeometricPattern();
-        }
+        case 'geometric':
+          return generateGeometricPattern();
+        case 'minimal':
+          return generateMinimalPattern();
+        case 'dots':
+          return generateDotsPattern();
+        case 'waves':
+          return generateWavesPattern();
+        default:
+          return generateGeometricPattern();
+      }
     } catch (error) {
-      console.warn('Failed to generate pattern SVG:', error);
+      console.warn('Failed to generate pattern SVG', { error: error instanceof Error ? error.message : String(error) });
       return '';
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [variant, color, opacity, intensity, colors.primary.main]);
 
-  if ((variant as PatternVariant) === 'none' || !patternSvg) {
+  if (variant === 'none' || !patternSvg) {
     return null;
   }
 
   return (
     <View
       style={[
-        {
-          width: width as DimensionValue,
-          height: height as DimensionValue,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        },
-        style,
-      ]}
+      {
+        width: width as DimensionValue,
+        height: height as DimensionValue,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0
+      },
+      style]
+      }
       accessibilityLabel={accessibilityLabel}
       testID={testID}
-      pointerEvents="none"
-    >
+      pointerEvents="none">
+      
       <SvgErrorBoundary fallback={null}>
         <SvgXml xml={patternSvg} width="100%" height="100%" />
       </SvgErrorBoundary>
-    </View>
-  );
+    </View>);
+
 });
 
-// Internal styles
-const styles = StyleSheet.create({
-  // Add any internal styles if needed
-});
+// Add display name
+BackgroundPattern.displayName = 'BackgroundPattern';
 
 // Export default
 export default BackgroundPattern;

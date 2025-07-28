@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -74,8 +74,8 @@ export default function StudentsList() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedClass, setSelectedClass] = useState('Semua');
   const [selectedSort, setSelectedSort] = useState('Nama (A-Z)');
-  const [students, setStudents] = useState<StudentsListItem[]>(sampleStudents);
-  const [isLoading, setIsLoading] = useState(false);
+  const [students] = useState<StudentsListItem[]>(sampleStudents);
+  const [isLoading] = useState(false);
 
   // Filter and sort students
   const filteredAndSortedStudents = students

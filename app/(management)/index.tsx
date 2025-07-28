@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../src/hooks/useAuth';
 import { Text, View } from 'react-native';
 
 export default function ManagementIndex() {

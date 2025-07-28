@@ -5,7 +5,6 @@
 
 import React, { useState } from 'react';
 import { View, Image, Text, TouchableOpacity, ViewStyle, TextStyle, ImageStyle } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useColors } from '../../../context/ThemeContext';
 
 // Avatar Props Interface

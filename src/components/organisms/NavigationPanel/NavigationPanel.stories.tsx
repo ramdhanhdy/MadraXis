@@ -627,7 +627,7 @@ export const CompactPanel: Story = {
 
 // Interactive example
 export const InteractiveExample: Story = {
-  render: () => {
+  render: function InteractiveExampleRender() {
     const [notifications, setNotifications] = React.useState(mockNotifications);
     const [refreshing, setRefreshing] = React.useState(false);
     

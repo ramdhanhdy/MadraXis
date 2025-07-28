@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   View,
   ViewStyle,
-  StyleSheet,
   TouchableOpacityProps,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

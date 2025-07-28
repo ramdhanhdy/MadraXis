@@ -59,6 +59,77 @@ export default {
       },
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+    },
+    linking: {
+      prefixes: ["madraxis://"],
+      config: {
+        screens: {
+          "(auth)": {
+            path: "auth",
+            screens: {
+              "login": "login",
+              "reset-password": "reset-password"
+            }
+          },
+          "(teacher)": {
+            path: "teacher",
+            screens: {
+              "dashboard": "dashboard",
+              "students": {
+                path: "students",
+                screens: {
+                  "index": "",
+                  "[id]": ":id"
+                }
+              },
+              "class": {
+                path: "class",
+                screens: {
+                  "index": "",
+                  "[id]": {
+                    path: ":id",
+                    screens: {
+                      "index": "",
+                      "add-students": "add-students",
+                      "students": "students",
+                      "schedule": "schedule",
+                      "reports": "reports"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "(management)": {
+            path: "management",
+            screens: {
+              "dashboard": "dashboard",
+              "setup": "setup",
+              "user-management": "user-management"
+            }
+          },
+          "(parent)": {
+            path: "parent",
+            screens: {
+              "dashboard": "dashboard",
+              "anti-bullying": "anti-bullying",
+              "cctv-request": "cctv-request",
+              "incident-report": "incident-report"
+            }
+          },
+          "(student)": {
+            path: "student",
+            screens: {
+              "dashboard": "dashboard",
+              "anti-bullying": "anti-bullying",
+              "boarding-info": "boarding-info",
+              "schedule": "schedule",
+              "quran-progress": "quran-progress",
+              "incident-report": "incident-report"
+            }
+          }
+        }
+      }
     }
   }
 };

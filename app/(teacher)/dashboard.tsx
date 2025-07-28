@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
@@ -11,16 +10,16 @@ import { Card } from '../../src/components/molecules/Card';
 import { QuickAction } from '../../src/components/molecules/QuickAction';
 import { ListItem } from '../../src/components/molecules/ListItem';
 import { Typography } from '../../src/components/atoms/Typography';
-import { LoadingSpinner } from '../../src/components/atoms/LoadingSpinner/LoadingSpinner';
 import { ErrorMessage } from '../../src/components/molecules/ErrorMessage/ErrorMessage';
 import { EmptyState } from '../../src/components/molecules/EmptyState/EmptyState';
 import { SkeletonCard } from '../../src/components/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../src/hooks/useAuth';
 import { supabase } from '../../src/utils/supabase';
 import { logoSvg } from '../../src/utils/svgPatterns';
 import { colors } from '../../src/styles/colors';
+import { useSafeToQuery } from '../../src/utils/navigationGuard';
 
 // Modal Components
 import TeacherProfileView from '../../src/components/organisms/TeacherProfileView';
@@ -32,6 +31,7 @@ type IoniconsIcon = keyof typeof Ionicons.glyphMap;
 export default function TeacherDashboard() {
   const router = useRouter();
   const { profile, loading: authLoading } = useAuth();
+  const isSafeToQuery = useSafeToQuery();
   const [schoolName, setSchoolName] = useState('Zaid Bin Tsabit');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
@@ -63,9 +63,16 @@ export default function TeacherDashboard() {
   // Fetch data from database
   useEffect(() => {
     const fetchData = async () => {
+      // Don't fetch data if navigation is in progress
+      if (!isSafeToQuery) {
+        console.log('Skipping teacher dashboard data fetch - navigation in progress');
+        setIsLoading(false); // Ensure loading state is reset
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
-      
+
       try {
         // Fetch school name
         if (profile?.school_id) {
@@ -127,7 +134,7 @@ export default function TeacherDashboard() {
     };
 
     fetchData();
-  }, [profile?.school_id]);
+  }, [profile?.school_id, isSafeToQuery]);
 
   // Handle navigation
   const handleNavigate = (route: string) => {
@@ -261,15 +268,6 @@ export default function TeacherDashboard() {
     />
   );
 
-  // Empty state renderer
-  const renderEmptyState = () => (
-    <EmptyState
-      title="Belum Ada Aktivitas"
-      message="Belum ada aktivitas terbaru untuk ditampilkan"
-      icon="time-outline"
-    />
-  );
-
   // Loading state
   if (authLoading || isLoading) {
     return (
@@ -331,7 +329,7 @@ export default function TeacherDashboard() {
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <View style={{ flex: 1 }}>
             <Typography variant="h4" style={{ marginBottom: 4 }}>
-              Assalamu'alaikum,
+              Assalamu&apos;alaikum,
             </Typography>
             <Typography variant="h3" weight="bold" color="primary" style={{ marginBottom: 4 }}>
               {teacherData.name}

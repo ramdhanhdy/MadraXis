@@ -407,7 +407,7 @@ export const AllVariants: Story = {
               {variant.charAt(0).toUpperCase() + variant.slice(1)} Pattern
             </Typography>
             <Typography variant="caption" color="secondary">
-              variant="{variant}"
+              variant=&quot;{variant}&quot;
             </Typography>
           </View>
         </View>

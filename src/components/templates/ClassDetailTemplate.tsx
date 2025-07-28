@@ -6,17 +6,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Student as GlobalStudent } from '../../types';
 import { convertNumberToString } from '../../utils/idConversion';
-import { mockClassData, ClassData as MockClassData, Student as MockStudent, ClassScheduleItem, Activity } from '../../mocks/classData';
+import { mockClassData, ClassData as MockClassData } from '../../mocks/classData';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
 // Types - extending global Student type for local component needs
-interface Student extends Omit<GlobalStudent, 'id'> {
-  id: number; // Local component uses number for internal operations
-  name: string; // Alias for full_name for backward compatibility
-  memorizedVerses: number;
-  totalVerses: number;
-}
+// interface Student extends Omit<GlobalStudent, 'id'> {
+//   id: number; // Local component uses number for internal operations
+//   name: string; // Alias for full_name for backward compatibility
+//   memorizedVerses: number;
+//   totalVerses: number;
+// }
 
 
 

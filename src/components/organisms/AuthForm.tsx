@@ -4,7 +4,7 @@ import { supabase } from '@/src/utils/supabase';
 import { Button } from '@/src/components/atoms/Button';
 import { Input } from '@/src/components/atoms/Input';
 import { Typography } from '@/src/components/atoms/Typography';
-import { useColors } from '@/src/context/ThemeContext';
+// Theme colors are used via baseColors import
 import { baseColors } from '@/src/styles/colors';
 
 interface AuthFormProps {
@@ -20,7 +20,7 @@ export default function AuthForm({ role, isManagementScreen = false }: AuthFormP
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const colors = useColors();
+  // Theme colors are used via baseColors import
 
   async function handleLogin() {
     if (!email || !password) {

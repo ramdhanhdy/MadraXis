@@ -1,10 +1,12 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { useAuth } from '../src/hooks/useAuth';
 import { ThemeProvider } from '../src/context/ThemeContext';
+import { NavigationHistoryProvider } from '../src/context/NavigationHistoryContext';
 import * as SplashScreen from 'expo-splash-screen';
 import AnimatedSplashScreen from '../src/components/organisms/AnimatedSplashScreen';
+import { logger } from '../src/utils/logger';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -12,26 +14,36 @@ SplashScreen.preventAutoHideAsync();
 const RootLayoutNav = () => {
     const { loading: authLoading } = useAuth();
     const [splashAnimationComplete, setSplashAnimationComplete] = useState(false);
+    const [splashHidden, setSplashHidden] = useState(false);
 
-    const handleAnimationFinish = () => {
-        requestAnimationFrame(() => {
-            setSplashAnimationComplete(true);
-        });
-    };
+    const handleAnimationFinish = useCallback(() => {
+        logger.debug('🎬 Animation finished');
+        setSplashAnimationComplete(true);
+    }, []);
 
-    const onLayoutRootView = useCallback(async () => {
-        if (!authLoading && splashAnimationComplete) {
-            await SplashScreen.hideAsync();
-        }
-    }, [authLoading, splashAnimationComplete]);
+    // Memoize the splash screen to prevent re-mounting
+    const splashScreen = useMemo(() => {
+        logger.debug('🎬 Creating splash screen component');
+        return <AnimatedSplashScreen onAnimationFinish={handleAnimationFinish} />;
+    }, [handleAnimationFinish]);
 
     useEffect(() => {
-        onLayoutRootView();
-    }, [onLayoutRootView]);
+        logger.debug(`🔄 Splash state: authLoading=${authLoading}, animComplete=${splashAnimationComplete}, hidden=${splashHidden}`);
+        if (!authLoading && splashAnimationComplete && !splashHidden) {
+            logger.debug('🎬 Hiding splash screen');
+            SplashScreen.hideAsync().then(() => {
+                setSplashHidden(true);
+            }).catch((error) => {
+                logger.error('Failed to hide splash screen:', error);
+                setSplashHidden(true); // Set anyway to prevent infinite loading
+            });
+        }
+    }, [authLoading, splashAnimationComplete, splashHidden]);
 
     // Show animated splash screen until both auth loading and animation are complete
-    if (authLoading || !splashAnimationComplete) {
-        return <AnimatedSplashScreen onAnimationFinish={handleAnimationFinish} />;
+    if ((authLoading || !splashAnimationComplete) && !splashHidden) {
+        logger.debug(`🎬 Showing splash: authLoading=${authLoading}, animComplete=${splashAnimationComplete}`);
+        return splashScreen;
     }
 
     return (
@@ -52,9 +64,9 @@ const RootLayoutNav = () => {
 export default function RootLayout() {
     return (
         <ThemeProvider>
-            <AuthProvider>
+            <NavigationHistoryProvider>
                 <RootLayoutNav />
-            </AuthProvider>
+            </NavigationHistoryProvider>
         </ThemeProvider>
     );
 }

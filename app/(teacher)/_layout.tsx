@@ -14,6 +14,17 @@ export default function TeacherLayout() {
             <Stack.Screen name="class/[id]/students/index" />
             <Stack.Screen name="class/[id]/schedule/index" />
             <Stack.Screen name="class/[id]/reports/index" />
+            <Stack.Screen
+                name="class/[id]/add-students"
+                options={{
+                    presentation: 'modal',
+                    headerShown: false,
+                    contentStyle: { backgroundColor: 'transparent' },
+                    animation: 'slide_from_bottom',
+                    gestureEnabled: true,
+                    fullScreenGestureEnabled: true,
+                }}
+            />
         </Stack>
     );
 }

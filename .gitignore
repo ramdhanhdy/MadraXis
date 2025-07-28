@@ -1,3 +1,6 @@
+# Security backups (created by fix scripts)
+.security-backups/
+
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
 # dependencies
@@ -63,3 +66,5 @@ repomix.config.json
 .superdesign/design_iterations/default_ui_darkmode.css
 CLAUDE.md
 CLAUDE.md
+.claude/agents/expo-code-reviewer.md
+supabase/.temp/cli-latest

@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-07-28T08:18:21.931Z",
+  "totalTests": 3,
+  "totalPassed": 0,
+  "totalFailed": 3,
+  "totalDuration": 0,
+  "files": [
+    {
+      "file": "classService.test.ts",
+      "passed": 0,
+      "failed": 1,
+      "total": 1,
+      "duration": 0
+    },
+    {
+      "file": "classService.security.test.ts",
+      "passed": 0,
+      "failed": 1,
+      "total": 1,
+      "duration": 0
+    },
+    {
+      "file": "integration.test.ts",
+      "passed": 0,
+      "failed": 1,
+      "total": 1,
+      "duration": 0
+    }
+  ],
+  "coverage": {
+    "statements": 0,
+    "branches": 0,
+    "functions": 0,
+    "lines": 0
+  }
+}

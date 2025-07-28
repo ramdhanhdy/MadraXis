@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { View, ViewStyle, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, ViewStyle, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useColors } from '../../../context/ThemeContext';
 import { Typography } from '../../atoms/Typography';
@@ -218,10 +218,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   );
 };
 
-// Internal styles
-const styles = StyleSheet.create({
-  // Add any internal styles if needed
-});
+// Styles are defined inline for better maintainability
 
 // Export default
 export default ErrorMessage;

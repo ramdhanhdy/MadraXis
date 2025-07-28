@@ -34,9 +34,8 @@ export const isScreenSize = (size: keyof typeof screenSizes): boolean => {
 
 // Check if screen is at least a certain size
 export const isScreenAtLeast = (size: keyof typeof screenSizes): boolean => {
-  const currentSize = getCurrentScreenSize();
   const sizeOrder: (keyof typeof screenSizes)[] = ['xs', 'sm', 'md', 'lg', 'xl'];
-  const currentIndex = sizeOrder.indexOf(currentSize);
+  const currentIndex = sizeOrder.indexOf(getCurrentScreenSize());
   const targetIndex = sizeOrder.indexOf(size);
   return currentIndex >= targetIndex;
 };
@@ -45,21 +44,21 @@ export const isScreenAtLeast = (size: keyof typeof screenSizes): boolean => {
 export const getResponsiveValue = <T>(values: Partial<Record<keyof typeof screenSizes, T>>): T | undefined => {
   const currentSize = getCurrentScreenSize();
   const sizeOrder: (keyof typeof screenSizes)[] = ['xl', 'lg', 'md', 'sm', 'xs'];
-  
+
   // Find the first available value for current or smaller screen size
   for (const size of sizeOrder) {
     if (values[size] !== undefined && screenWidth >= screenSizes[size]) {
       return values[size];
     }
   }
-  
+
   // Fallback to the smallest available value
   for (const size of ['xs', 'sm', 'md', 'lg', 'xl'] as const) {
     if (values[size] !== undefined) {
       return values[size];
     }
   }
-  
+
   return undefined;
 };
 
@@ -91,7 +90,7 @@ export const getResponsivePadding = (
   direction?: 'horizontal' | 'vertical' | 'top' | 'bottom' | 'left' | 'right'
 ) => {
   const value = getResponsiveSpacing(size);
-  
+
   switch (direction) {
     case 'horizontal':
       return { paddingHorizontal: value };
@@ -115,7 +114,7 @@ export const getResponsiveMargin = (
   direction?: 'horizontal' | 'vertical' | 'top' | 'bottom' | 'left' | 'right'
 ) => {
   const value = getResponsiveSpacing(size);
-  
+
   switch (direction) {
     case 'horizontal':
       return { marginHorizontal: value };
@@ -181,7 +180,7 @@ export const getResponsiveTypography = (
 ) => {
   const baseStyle = theme.typography.variants[variant];
   const scale = getResponsiveValue(scaleFactor || {}) || 1;
-  
+
   return {
     ...baseStyle,
     fontSize: scaleFontSize(baseStyle.fontSize * scale),

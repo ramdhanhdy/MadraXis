@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  View,
   Text,
   TextInput,
   TouchableOpacity,
@@ -10,12 +9,10 @@ import {
   ActivityIndicator,
   SafeAreaView
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { supabase } from '../../src/utils/supabase';
 import { saveSchool, School } from '../../src/services/schools';
 
 export default function SchoolSetupScreen() {
-  const router = useRouter();
 
   const [schoolName, setSchoolName] = useState('');
   const [npsn, setNpsn] = useState('');

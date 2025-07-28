@@ -52,7 +52,7 @@ const [showDatePicker, setShowDatePicker] = useState(false);
       setTimeout(() => {
         router.back();
       }, 3000);
-    } catch (error) {
+    } catch {
       Alert.alert(
         'Error',
         'Terjadi kesalahan saat mengirim laporan. Silakan coba lagi.',

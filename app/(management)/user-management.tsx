@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../src/hooks/useAuth';
 import { fetchStudents, fetchTeachers } from '../../src/services/users';
 import { Student, Teacher } from '../../src/types';
 
@@ -39,7 +39,7 @@ export default function UserManagementScreen() {
   );
 
   // Fetch data based on school ID
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!user) return;
 
     // Check both user metadata and profile for school_id
@@ -91,7 +91,7 @@ export default function UserManagementScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, profile]);
 
   // Handle user selection
   const handleUserSelect = (userId: string, userType: 'student' | 'teacher') => {
@@ -108,7 +108,7 @@ export default function UserManagementScreen() {
     if (!authLoading && user) {
       fetchData();
     }
-  }, [authLoading, user, profile]);
+  }, [authLoading, user, profile, fetchData]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>

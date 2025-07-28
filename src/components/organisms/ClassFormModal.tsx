@@ -1,10 +1,10 @@
+import { logger } from '../../utils/logger';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ClassService } from '@/src/services/classService';
-import { Class, CreateClassData, UpdateClassData } from '@/src/types/class';
-import { ClassWithDetails } from '@/src/services/classService';
-import { useAuth } from '@/src/context/AuthContext';
+import { ClassService, ClassWithDetails } from '@/src/services/classService';
+import { CreateClassData, UpdateClassData } from '@/src/types/class';
+import { useAuth } from '@/src/hooks/useAuth';
 
 interface ClassFormModalProps {
   visible: boolean;
@@ -19,7 +19,7 @@ export default function ClassFormModal({
   onClose,
   onSuccess,
   classData,
-  schoolId,
+  schoolId
 }: ClassFormModalProps) {
   const { user } = useAuth();
   const [formData, setFormData] = useState<CreateClassData>({
@@ -29,7 +29,7 @@ export default function ClassFormModal({
     school_id: schoolId,
     student_capacity: 30,
     academic_year: new Date().getFullYear().toString(),
-    semester: '1',
+    semester: '1'
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -43,7 +43,7 @@ export default function ClassFormModal({
         school_id: classData.school_id,
         student_capacity: classData.student_capacity,
         academic_year: classData.academic_year,
-        semester: classData.semester,
+        semester: classData.semester
       });
     } else {
       setFormData({
@@ -53,7 +53,7 @@ export default function ClassFormModal({
         school_id: schoolId,
         student_capacity: 30,
         academic_year: new Date().getFullYear().toString(),
-        semester: '1',
+        semester: '1'
       });
     }
     setErrors({});
@@ -63,32 +63,32 @@ export default function ClassFormModal({
     // Validate format: YYYY or YYYY-YYYY
     const singleYear = /^\d{4}$/;
     const rangeYear = /^\d{4}-\d{4}$/;
-    
+
     if (singleYear.test(year)) {
       const yearNum = parseInt(year);
       const currentYear = new Date().getFullYear();
       return yearNum >= 2000 && yearNum <= currentYear + 10;
     }
-    
+
     if (rangeYear.test(year)) {
-      const [startYear, endYear] = year.split('-').map(y => parseInt(y));
-      return startYear < endYear && (endYear - startYear) === 1;
+      const [startYear, endYear] = year.split('-').map((y) => parseInt(y));
+      return startYear < endYear && endYear - startYear === 1;
     }
-    
+
     return false;
   };
 
   const formatAcademicYear = (value: string): string => {
     // Remove non-numeric and non-dash characters
     let cleanValue = value.replace(/[^\d-]/g, '');
-    
+
     // Handle auto-formatting for range
     if (cleanValue.length > 4 && !cleanValue.includes('-')) {
       const year = cleanValue.substring(0, 4);
       const nextYear = (parseInt(year) + 1).toString();
       return `${year}-${nextYear}`;
     }
-    
+
     return cleanValue;
   };
 
@@ -140,7 +140,7 @@ export default function ClassFormModal({
           description: formData.description,
           student_capacity: formData.student_capacity,
           academic_year: formData.academic_year,
-          semester: formData.semester,
+          semester: formData.semester
         };
 
         await ClassService.updateClass(classData.id, updateData, user.id);
@@ -154,7 +154,11 @@ export default function ClassFormModal({
       }
     } catch (error) {
       Alert.alert('Error', 'Terjadi kesalahan saat menyimpan kelas');
-      console.error('Error saving class:', error);
+      logger.error('Error saving class', {
+        error: error instanceof Error ? error.message : String(error),
+        operation: classData ? 'update_class' : 'create_class',
+        classId: classData?.id
+      });
     } finally {
       setLoading(false);
     }
@@ -162,13 +166,13 @@ export default function ClassFormModal({
 
   const handleInputChange = (field: keyof CreateClassData, value: string | number | '1' | '2') => {
     let processedValue = value;
-    
+
     if (field === 'academic_year' && typeof value === 'string') {
       processedValue = formatAcademicYear(value);
     }
-    
-    setFormData(prev => ({ ...prev, [field]: processedValue }));
-    setErrors(prev => ({ ...prev, [field]: '' }));
+
+    setFormData((prev) => ({ ...prev, [field]: processedValue }));
+    setErrors((prev) => ({ ...prev, [field]: '' }));
   };
 
   return (
@@ -176,8 +180,8 @@ export default function ClassFormModal({
       visible={visible}
       animationType="slide"
       transparent={true}
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
+      
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
@@ -198,8 +202,8 @@ export default function ClassFormModal({
                 onChangeText={(value) => handleInputChange('name', value)}
                 placeholder="Contoh: Tahfidz Al-Baqarah"
                 placeholderTextColor="#999999"
-                maxLength={100}
-              />
+                maxLength={100} />
+              
               {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
             </View>
 
@@ -211,8 +215,8 @@ export default function ClassFormModal({
                 onChangeText={(value) => handleInputChange('level', value)}
                 placeholder="Contoh: Tingkat 1"
                 placeholderTextColor="#999999"
-                maxLength={50}
-              />
+                maxLength={50} />
+              
               {errors.level && <Text style={styles.errorText}>{errors.level}</Text>}
             </View>
 
@@ -226,8 +230,8 @@ export default function ClassFormModal({
                 placeholderTextColor="#999999"
                 multiline
                 numberOfLines={4}
-                maxLength={500}
-              />
+                maxLength={500} />
+              
               {errors.description && <Text style={styles.errorText}>{errors.description}</Text>}
             </View>
 
@@ -240,8 +244,8 @@ export default function ClassFormModal({
                 placeholder="30"
                 placeholderTextColor="#999999"
                 keyboardType="numeric"
-                maxLength={3}
-              />
+                maxLength={3} />
+              
               {errors.student_capacity && <Text style={styles.errorText}>{errors.student_capacity}</Text>}
             </View>
 
@@ -254,8 +258,8 @@ export default function ClassFormModal({
                 placeholder="2024-2025"
                 placeholderTextColor="#999999"
                 keyboardType="numeric"
-                maxLength={9}
-              />
+                maxLength={9} />
+              
               
               <Text style={styles.inputHelp}>
                 Format: YYYY atau YYYY-YYYY (contoh: 2024 atau 2024-2025)
@@ -266,56 +270,56 @@ export default function ClassFormModal({
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Semester *</Text>
               <View style={styles.semesterContainer}>
-                {['1', '2'].map((semester) => (
-                  <TouchableOpacity
-                    key={semester}
-                    style={[
-                      styles.semesterOption,
-                      formData.semester === semester && styles.selectedSemester,
-                    ]}
-                    onPress={() => handleInputChange('semester', semester as '1' | '2')}
-                  >
+                {['1', '2'].map((semester) =>
+                <TouchableOpacity
+                  key={semester}
+                  style={[
+                  styles.semesterOption,
+                  formData.semester === semester && styles.selectedSemester]
+                  }
+                  onPress={() => handleInputChange('semester', semester as '1' | '2')}>
+                  
                     <Text
-                      style={[
-                        styles.semesterText,
-                        formData.semester === semester && styles.selectedSemesterText,
-                      ]}
-                    >
+                    style={[
+                    styles.semesterText,
+                    formData.semester === semester && styles.selectedSemesterText]
+                    }>
+                    
                       Semester {semester}
                     </Text>
                   </TouchableOpacity>
-                ))}
+                )}
               </View>
               {errors.semester && <Text style={styles.errorText}>{errors.semester}</Text>}
             </View>
           </ScrollView>
 
           <View style={styles.modalFooter}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.cancelButton, loading && styles.disabledButton]}
               onPress={onClose}
-              disabled={loading}
-            >
+              disabled={loading}>
+              
               <Text style={styles.cancelButtonText}>Batal</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.saveButton, loading && styles.disabledButton]}
               onPress={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator size="small" color="#ffffff" />
-              ) : (
-                <Text style={styles.saveButtonText}>
+              disabled={loading}>
+              
+              {loading ?
+              <ActivityIndicator size="small" color="#ffffff" /> :
+
+              <Text style={styles.saveButtonText}>
                   {classData ? 'Update' : 'Simpan'}
                 </Text>
-              )}
+              }
             </TouchableOpacity>
           </View>
         </View>
       </View>
-    </Modal>
-  );
+    </Modal>);
+
 }
 
 const styles = StyleSheet.create({
@@ -323,7 +327,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   modalContent: {
     width: '90%',
@@ -335,7 +339,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 5
   },
   modalHeader: {
     flexDirection: 'row',
@@ -343,27 +347,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#e0e0e0'
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333333',
+    color: '#333333'
   },
   closeButton: {
-    padding: 4,
+    padding: 4
   },
   modalBody: {
-    padding: 20,
+    padding: 20
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 20
   },
   inputLabel: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333333',
-    marginBottom: 8,
+    marginBottom: 8
   },
   textInput: {
     borderWidth: 1,
@@ -372,29 +376,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffff'
   },
   textArea: {
     height: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: 'top'
   },
   inputError: {
-    borderColor: '#ff3b30',
+    borderColor: '#ff3b30'
   },
   errorText: {
     fontSize: 14,
     color: '#ff3b30',
-    marginTop: 4,
+    marginTop: 4
   },
   inputHelp: {
     fontSize: 12,
     color: '#666666',
-    marginTop: 4,
+    marginTop: 4
   },
   semesterContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 8
   },
   semesterOption: {
     paddingHorizontal: 16,
@@ -402,47 +406,47 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#e0e0e0',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffff'
   },
   selectedSemester: {
     backgroundColor: '#005e7a',
-    borderColor: '#005e7a',
+    borderColor: '#005e7a'
   },
   semesterText: {
     fontSize: 14,
-    color: '#333333',
+    color: '#333333'
   },
   selectedSemesterText: {
-    color: '#ffffff',
+    color: '#ffffff'
   },
   modalFooter: {
     flexDirection: 'row',
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: '#e0e0e0'
   },
   cancelButton: {
     flex: 1,
     paddingVertical: 16,
     alignItems: 'center',
     borderRightWidth: 0.5,
-    borderRightColor: '#e0e0e0',
+    borderRightColor: '#e0e0e0'
   },
   cancelButtonText: {
     fontSize: 16,
-    color: '#666666',
+    color: '#666666'
   },
   saveButton: {
     flex: 1,
     paddingVertical: 16,
     alignItems: 'center',
-    backgroundColor: '#005e7a',
+    backgroundColor: '#005e7a'
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#ffffff'
   },
   disabledButton: {
-    opacity: 0.5,
-  },
+    opacity: 0.5
+  }
 });

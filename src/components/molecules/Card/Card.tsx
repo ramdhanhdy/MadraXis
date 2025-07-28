@@ -8,7 +8,6 @@ import {
   View,
   TouchableOpacity,
   ViewStyle,
-  StyleSheet,
   TouchableOpacityProps,
 } from 'react-native';
 import { useTheme, useColors } from '../../../context/ThemeContext';

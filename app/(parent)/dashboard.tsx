@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 
@@ -17,10 +17,11 @@ import { ErrorMessage } from '../../src/components/molecules/ErrorMessage/ErrorM
 import { EmptyState } from '../../src/components/molecules/EmptyState/EmptyState';
 
 // Context and Services
-import { useAuth } from '../../src/context/AuthContext';
+import { useAuth } from '../../src/hooks/useAuth';
 import { supabase } from '../../src/utils/supabase';
 import { logoSvg } from '../../src/utils/svgPatterns';
 import { colors } from '../../src/styles/colors';
+import { useSafeToQuery } from '../../src/utils/navigationGuard';
 
 // Icon types for proper typing
 type IoniconsIcon = keyof typeof Ionicons.glyphMap;
@@ -58,6 +59,7 @@ interface StudentData {
 export default function ParentDashboard() {
   const router = useRouter();
   const { profile, loading } = useAuth();
+  const isSafeToQuery = useSafeToQuery();
   const [schoolName, setSchoolName] = useState('Zaid Bin Tsabit');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
@@ -122,6 +124,12 @@ export default function ParentDashboard() {
   // Fetch school name from database
   useEffect(() => {
     const fetchSchoolName = async () => {
+      if (!isSafeToQuery) {
+        console.log('Skipping school name fetch - navigation in progress');
+        setIsLoading(false); // Ensure loading state is reset
+        return;
+      }
+
       if (profile?.school_id) {
         try {
           const { data, error } = await supabase
@@ -142,7 +150,7 @@ export default function ParentDashboard() {
     };
 
     fetchSchoolName();
-  }, [profile?.school_id]);
+  }, [profile?.school_id, isSafeToQuery]);
 
   // Handle navigation
   const handleNavigate = (route: string) => {
@@ -244,15 +252,6 @@ export default function ParentDashboard() {
         return 'home-outline';
       default:
         return 'information-circle-outline';
-    }
-  };
-
-  const getActivityColor = (type: string) => {
-    switch (type) {
-      case 'academic': return colors.success.main;
-      case 'quran': return colors.primary.main;
-      case 'dorm': return colors.warning.main;
-      default: return colors.neutral[500];
     }
   };
 

@@ -1,26 +1,22 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
-import LogoutButton from '@/src/components/molecules/LogoutButton';
-import BoardingInfoModal from '@/src/components/organisms/StudentBoardingInfoModal';
+import { LogoutButton } from '@/src/components/molecules/LogoutButton';
 import CommunicationModal from '@/src/components/organisms/StudentCommunicationModal';
-import IncidentReportModal from '@/src/components/organisms/StudentIncidentReportModal';
-import { useAuth } from '@/src/context/AuthContext';
+import { useAuth } from '@/src/hooks/useAuth';
 import { DashboardTemplate } from '@/src/components/templates/DashboardTemplate';
 import type { TabConfig, HeaderAction } from '@/src/components/templates/DashboardTemplate';
 import { Card } from '@/src/components/molecules/Card';
 import { QuickAction } from '@/src/components/molecules/QuickAction';
 import { ProgressBar } from '@/src/components/molecules/ProgressBar';
 import { ListItem } from '@/src/components/molecules/ListItem';
-import { Button } from '@/src/components/atoms/Button';
 import { Typography } from '@/src/components/atoms/Typography';
 import { Modal } from '@/src/components/organisms/Modal';
 import { colors } from '@/src/styles/colors';
 import { spacing } from '@/src/styles/spacing';
+import { logoSvg } from '@/src/utils/svgPatterns';
 
 export default function StudentDashboard() {
   const router = useRouter();
@@ -117,7 +113,7 @@ export default function StudentDashboard() {
       >
         <View style={styles.welcomeContent}>
           <Typography variant="body2" color={colors.text.inverse}>
-            Assalamu'alaikum,
+            Assalamu&apos;alaikum,
           </Typography>
           <Typography variant="h3" color={colors.text.inverse} weight="bold" style={{ marginVertical: spacing.xs }}>
             {profile?.full_name || 'Ahmad Fauzi'}
@@ -468,128 +464,6 @@ export default function StudentDashboard() {
     </>
   );
 }
-
-// Background Pattern SVG
-const backgroundPatternSvg = `
-<svg width="100%" height="100%" viewBox="0 0 800 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="800" height="1600" fill="${colors.background.primary}"/>
-  
-  <!-- Islamic Geometric Pattern -->
-  <!-- Pattern 1: Top section -->
-  <g opacity="0.05">
-    <g transform="translate(0, 0)">
-      ${generateGeometricPattern(8, 8, 50)}
-    </g>
-  </g>
-  
-  <!-- Pattern 2: Middle section -->
-  <g opacity="0.05">
-    <g transform="translate(0, 800)">
-      ${generateStarPattern(8, 4, 100)}
-    </g>
-  </g>
-  
-  <!-- Pattern 3: Bottom section -->
-  <g opacity="0.05">
-    <g transform="translate(0, 1200)">
-      ${generateArabicPattern(8, 4, 100)}
-    </g>
-  </g>
-</svg>
-`;
-
-// Helper function to generate geometric pattern
-function generateGeometricPattern(rows: number, cols: number, size: number): string {
-  let pattern = '';
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      const x = j * size;
-      const y = i * size;
-      pattern += `
-        <path d="M${x} ${y} L${x + size/2} ${y + size/2} L${x} ${y + size} L${x - size/2} ${y + size/2} Z" fill="${colors.role.student.primary}"/>
-        <path d="M${x + size} ${y} L${x + size/2} ${y + size/2} L${x + size} ${y + size} L${x + size*1.5} ${y + size/2} Z" fill="${colors.role.student.primary}"/>
-        <path d="M${x} ${y + size} L${x + size/2} ${y + size/2} L${x + size} ${y + size} L${x + size/2} ${y + size*1.5} Z" fill="${colors.role.student.primary}"/>
-        <path d="M${x} ${y} L${x + size/2} ${y + size/2} L${x + size} ${y} L${x + size/2} ${y - size/2} Z" fill="${colors.role.student.primary}"/>
-      `;
-    }
-  }
-  return pattern;
-}
-
-// Helper function to generate star pattern
-function generateStarPattern(rows: number, cols: number, size: number): string {
-  let pattern = '';
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      const x = j * size * 2;
-      const y = i * size * 2;
-      const centerX = x + size;
-      const centerY = y + size;
-      
-      // 8-point star
-      pattern += `
-        <path d="M${centerX} ${centerY - size} L${centerX + size/3} ${centerY - size/3} L${centerX + size} ${centerY} L${centerX + size/3} ${centerY + size/3} L${centerX} ${centerY + size} L${centerX - size/3} ${centerY + size/3} L${centerX - size} ${centerY} L${centerX - size/3} ${centerY - size/3} Z" fill="${colors.role.student.primary}"/>
-      `;
-      
-      // Connecting lines
-      pattern += `
-        <path d="M${centerX - size} ${centerY} L${centerX - size*2} ${centerY}" stroke="${colors.role.student.primary}" stroke-width="1"/>
-        <path d="M${centerX + size} ${centerY} L${centerX + size*2} ${centerY}" stroke="${colors.role.student.primary}" stroke-width="1"/>
-        <path d="M${centerX} ${centerY - size} L${centerX} ${centerY - size*2}" stroke="${colors.role.student.primary}" stroke-width="1"/>
-        <path d="M${centerX} ${centerY + size} L${centerX} ${centerY + size*2}" stroke="${colors.role.student.primary}" stroke-width="1"/>
-      `;
-    }
-  }
-  return pattern;
-}
-
-// Helper function to generate Arabic-inspired pattern
-function generateArabicPattern(rows: number, cols: number, size: number): string {
-  let pattern = '';
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      const centerX = j * size * 3 + size * 1.5;
-      const centerY = i * size * 3 + size * 1.5;
-      
-      pattern += `
-        <path d="M${centerX - size} ${centerY - size} L${centerX} ${centerY - size*1.5} L${centerX + size} ${centerY - size} L${centerX + size} ${centerY + size/2} L${centerX} ${centerY + size} L${centerX - size} ${centerY + size/2} Z" stroke="${colors.role.student.primary}" stroke-width="1" fill="none"/>
-        <path d="M${centerX - size} ${centerY - size} L${centerX - size} ${centerY + size/2}" stroke="${colors.role.student.primary}" stroke-width="1"/>
-        <path d="M${centerX + size} ${centerY - size} L${centerX + size} ${centerY + size/2}" stroke="${colors.role.student.primary}" stroke-width="1"/>
-        <path d="M${centerX - size} ${centerY + size/2} L${centerX - size} ${centerY + size}" stroke="${colors.role.student.primary}" stroke-width="1"/>
-        <path d="M${centerX + size} ${centerY + size/2} L${centerX + size} ${centerY + size}" stroke="${colors.role.student.primary}" stroke-width="1"/>
-        <path d="M${centerX - size} ${centerY + size} Q${centerX} ${centerY + size*1.2}, ${centerX + size} ${centerY + size}" stroke="${colors.role.student.primary}" stroke-width="1" fill="none"/>
-      `;
-    }
-  }
-  return pattern;
-}
-
-// Logo SVG
-const logoSvg = `
-<svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="60" cy="60" r="60" fill="${colors.role.student.primary}"/>
-  <circle cx="60" cy="60" r="50" fill="${colors.role.student.primary}" stroke="${colors.secondary.main}" stroke-width="2"/>
-  
-  <!-- Open Book -->
-  <path d="M30 45 L30 75 L60 65 L90 75 L90 45 L60 35 L30 45Z" fill="${colors.secondary.main}"/>
-  <path d="M30 45 L60 35 L60 65 L30 75 L30 45Z" fill="${colors.secondary.main}" stroke="${colors.role.student.primary}" stroke-width="1"/>
-  <path d="M60 35 L90 45 L90 75 L60 65 L60 35Z" fill="${colors.white}" stroke="${colors.role.student.primary}" stroke-width="1"/>
-  
-  <!-- Book Pages Lines -->
-  <path d="M40 48 L50 45" stroke="${colors.role.student.primary}" stroke-width="1"/>
-  <path d="M40 53 L50 50" stroke="${colors.role.student.primary}" stroke-width="1"/>
-  <path d="M40 58 L50 55" stroke="${colors.role.student.primary}" stroke-width="1"/>
-  <path d="M70 45 L80 48" stroke="${colors.role.student.primary}" stroke-width="1"/>
-  <path d="M70 50 L80 53" stroke="${colors.role.student.primary}" stroke-width="1"/>
-  <path d="M70 55 L80 58" stroke="${colors.role.student.primary}" stroke-width="1"/>
-  
-  <!-- Decorative Elements -->
-  <circle cx="60" cy="85" r="5" fill="${colors.secondary.main}"/>
-  <path d="M55 25 Q60 15 65 25" stroke="${colors.secondary.main}" stroke-width="2" fill="none"/>
-  <path d="M50 28 Q60 15 70 28" stroke="${colors.secondary.main}" stroke-width="2" fill="none"/>
-</svg>
-`;
 
 const styles = StyleSheet.create({
   // Core layout styles

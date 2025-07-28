@@ -60,10 +60,6 @@ export interface BulkUpdateClassesData {
   updates: Partial<UpdateClassData>;
 }
 
-export interface BulkCreateClassesData {
-  classes: CreateClassData[];
-}
-
 export interface BulkDeleteClassesData {
   class_ids: number[];
 }

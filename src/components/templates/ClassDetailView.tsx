@@ -1,10 +1,12 @@
+import { logger } from '../../utils/logger';
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useAuth } from '@/src/context/AuthContext';
+import { useAuth } from '@/src/hooks/useAuth';
+import { useSafeToQuery } from '@/src/utils/navigationGuard';
 import { ClassService } from '@/src/services/classService';
 import { Class } from '@/src/types/class';
 import { ClassWithDetails } from '@/src/services/classService';
@@ -15,6 +17,7 @@ export default function ClassDetailView() {
   const router = useRouter();
   const { id, tab } = useLocalSearchParams();
   const { user, profile } = useAuth();
+  const isSafeToQuery = useSafeToQuery();
   const [classData, setClassData] = useState<ClassWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +36,13 @@ export default function ClassDetailView() {
   }, [showEditModal, profile?.school_id]);
 
   const fetchClassDetails = useCallback(async () => {
-    if (!id) return;
+    if (!id || !isSafeToQuery) {
+      if (!isSafeToQuery) {
+        logger.debug('Skipping class details fetch - navigation in progress');
+        setLoading(false); // Ensure loading state is reset
+      }
+      return;
+    }
 
     try {
       setLoading(true);
@@ -50,15 +59,17 @@ export default function ClassDetailView() {
         return;
       }
 
+      logger.debug(`Fetching class details for ID: ${parsedId}`);
       const classData = await ClassService.getClassById(parsedId, user.id);
       setClassData(classData);
+      logger.debug(`Class details loaded: ${classData?.name}`);
     } catch (error: any) {
       setError(error.message || 'Failed to load class details');
-      console.error('Error fetching class details:', error);
+      logger.error('Error fetching class details:', error);
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, user?.id, isSafeToQuery]);
 
   useEffect(() => {
     fetchClassDetails();
@@ -85,25 +96,25 @@ export default function ClassDetailView() {
       'Archive Class',
       'Are you sure you want to archive this class? This action can be undone.',
       [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Archive',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              if (!user?.id) {
-                Alert.alert('Error', 'User not authenticated');
-                return;
-              }
-              await ClassService.updateClass(classData.id, { status: 'archived' }, user.id);
-              Alert.alert('Success', 'Class has been archived');
-              fetchClassDetails();
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to archive class');
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Archive',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            if (!user?.id) {
+              Alert.alert('Error', 'User not authenticated');
+              return;
             }
-          },
-        },
-      ]
+            await ClassService.updateClass(classData.id, { status: 'archived' }, user.id);
+            Alert.alert('Success', 'Class has been archived');
+            fetchClassDetails();
+          } catch (error: any) {
+            Alert.alert('Error', error.message || 'Failed to archive class');
+          }
+        }
+      }]
+
     );
   };
 
@@ -130,25 +141,25 @@ export default function ClassDetailView() {
       'Delete Class',
       'Are you sure you want to permanently delete this class? This action cannot be undone.',
       [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              if (!user?.id) {
-                Alert.alert('Error', 'User not authenticated');
-                return;
-              }
-              await ClassService.deleteClass(classData.id, user.id);
-              Alert.alert('Success', 'Class has been deleted');
-              router.back();
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete class');
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            if (!user?.id) {
+              Alert.alert('Error', 'User not authenticated');
+              return;
             }
-          },
-        },
-      ]
+            await ClassService.deleteClass(classData.id, user.id);
+            Alert.alert('Success', 'Class has been deleted');
+            router.back();
+          } catch (error: any) {
+            Alert.alert('Error', error.message || 'Failed to delete class');
+          }
+        }
+      }]
+
     );
   };
 
@@ -174,8 +185,8 @@ export default function ClassDetailView() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#005e7a" />
         </View>
-      </SafeAreaView>
-    );
+      </SafeAreaView>);
+
   }
 
   if (error || !classData) {
@@ -189,12 +200,12 @@ export default function ClassDetailView() {
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
-    );
+      </SafeAreaView>);
+
   }
 
-  const renderDetails = () => (
-    <ScrollView style={styles.content}>
+  const renderDetails = () =>
+  <ScrollView style={styles.content}>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Informasi Kelas</Text>
         <View style={styles.infoCard}>
@@ -232,12 +243,12 @@ export default function ClassDetailView() {
             <Text style={styles.infoValue}>{classData.semester}</Text>
           </View>
           
-          {classData.description && (
-            <View style={styles.descriptionSection}>
+          {classData.description &&
+        <View style={styles.descriptionSection}>
               <Text style={styles.infoLabel}>Deskripsi</Text>
               <Text style={styles.descriptionText}>{classData.description}</Text>
             </View>
-          )}
+        }
         </View>
       </View>
 
@@ -278,8 +289,8 @@ export default function ClassDetailView() {
           </View>
         </View>
       </View>
-    </ScrollView>
-  );
+    </ScrollView>;
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -298,17 +309,17 @@ export default function ClassDetailView() {
             <Ionicons name="create-outline" size={20} color="#005e7a" />
           </TouchableOpacity>
           
-          {classData.status === 'active' && (
-            <TouchableOpacity onPress={handleArchiveClass} style={styles.actionButton}>
+          {classData.status === 'active' &&
+          <TouchableOpacity onPress={handleArchiveClass} style={styles.actionButton}>
               <Ionicons name="archive-outline" size={20} color="#ff9500" />
             </TouchableOpacity>
-          )}
+          }
           
-          {classData.status === 'archived' && (
-            <TouchableOpacity onPress={handleActivateClass} style={styles.actionButton}>
+          {classData.status === 'archived' &&
+          <TouchableOpacity onPress={handleActivateClass} style={styles.actionButton}>
               <Ionicons name="refresh-outline" size={20} color="#4CAF50" />
             </TouchableOpacity>
-          )}
+          }
           
           <TouchableOpacity onPress={handleDeleteClass} style={styles.actionButton}>
             <Ionicons name="trash-outline" size={20} color="#ff3b30" />
@@ -320,8 +331,8 @@ export default function ClassDetailView() {
       <View style={styles.tabs}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'details' && styles.activeTab]}
-          onPress={() => handleTabChange('details')}
-        >
+          onPress={() => handleTabChange('details')}>
+          
           <Text style={[styles.tabText, activeTab === 'details' && styles.activeTabText]}>
             Detail
           </Text>
@@ -329,8 +340,8 @@ export default function ClassDetailView() {
         
         <TouchableOpacity
           style={[styles.tab, activeTab === 'subjects' && styles.activeTab]}
-          onPress={() => handleTabChange('subjects')}
-        >
+          onPress={() => handleTabChange('subjects')}>
+          
           <Text style={[styles.tabText, activeTab === 'subjects' && styles.activeTabText]}>
             Mata Pelajaran ({classData.subject_count || 0})
           </Text>
@@ -338,8 +349,8 @@ export default function ClassDetailView() {
         
         <TouchableOpacity
           style={[styles.tab, activeTab === 'students' && styles.activeTab]}
-          onPress={() => handleTabChange('students')}
-        >
+          onPress={() => handleTabChange('students')}>
+          
           <Text style={[styles.tabText, activeTab === 'students' && styles.activeTabText]}>
             Siswa
           </Text>
@@ -347,8 +358,8 @@ export default function ClassDetailView() {
         
         <TouchableOpacity
           style={[styles.tab, activeTab === 'reports' && styles.activeTab]}
-          onPress={() => handleTabChange('reports')}
-        >
+          onPress={() => handleTabChange('reports')}>
+          
           <Text style={[styles.tabText, activeTab === 'reports' && styles.activeTabText]}>
             Laporan
           </Text>
@@ -357,41 +368,41 @@ export default function ClassDetailView() {
 
       {/* Content */}
       {activeTab === 'details' && renderDetails()}
-      {activeTab === 'subjects' && (
-        <SubjectManager
-          classId={classData.id}
-          onSubjectCountChange={handleSubjectCountChange}
-        />
-      )}
-      {activeTab === 'students' && (
-        <View style={styles.content}>
+      {activeTab === 'subjects' &&
+      <SubjectManager
+        classId={classData.id}
+        onSubjectCountChange={handleSubjectCountChange} />
+
+      }
+      {activeTab === 'students' &&
+      <View style={styles.content}>
           <Text style={styles.comingSoon}>Fitur Manajemen Siswa akan segera hadir</Text>
         </View>
-      )}
-      {activeTab === 'reports' && (
-        <View style={styles.content}>
+      }
+      {activeTab === 'reports' &&
+      <View style={styles.content}>
           <Text style={styles.comingSoon}>Fitur Laporan akan segera hadir</Text>
         </View>
-      )}
+      }
 
       {/* Edit Modal */}
-      {profile?.school_id && (
-        <ClassFormModal
-          visible={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          onSuccess={handleFormSuccess}
-          classData={classData}
-          schoolId={profile.school_id}
-        />
-      )}
-    </SafeAreaView>
-  );
+      {profile?.school_id &&
+      <ClassFormModal
+        visible={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSuccess={handleFormSuccess}
+        classData={classData}
+        schoolId={profile.school_id} />
+
+      }
+    </SafeAreaView>);
+
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f5f5f5'
   },
   header: {
     flexDirection: 'row',
@@ -401,88 +412,88 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#e0e0e0'
   },
   backButton: {
-    padding: 4,
+    padding: 4
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333333',
     flex: 1,
-    marginHorizontal: 16,
+    marginHorizontal: 16
   },
   headerActions: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 16
   },
   actionButton: {
-    padding: 4,
+    padding: 4
   },
   tabs: {
     flexDirection: 'row',
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#e0e0e0'
   },
   tab: {
     flex: 1,
     paddingVertical: 12,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#005e7a',
+    borderBottomColor: '#005e7a'
   },
   tabText: {
     fontSize: 14,
-    color: '#666666',
+    color: '#666666'
   },
   activeTabText: {
     color: '#005e7a',
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   content: {
-    flex: 1,
+    flex: 1
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 20
   },
   errorText: {
     fontSize: 16,
     color: '#ff3b30',
     textAlign: 'center',
-    marginVertical: 16,
+    marginVertical: 16
   },
   retryButton: {
     backgroundColor: '#005e7a',
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 8
   },
   retryButtonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   section: {
-    marginBottom: 20,
+    marginBottom: 20
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333333',
     marginHorizontal: 16,
-    marginVertical: 12,
+    marginVertical: 12
   },
   infoCard: {
     backgroundColor: '#ffffff',
@@ -493,7 +504,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 2
   },
   infoRow: {
     flexDirection: 'row',
@@ -501,49 +512,49 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#f0f0f0'
   },
   descriptionSection: {
-    marginTop: 16,
+    marginTop: 16
   },
   descriptionText: {
     fontSize: 14,
     color: '#666666',
     lineHeight: 20,
-    marginTop: 4,
+    marginTop: 4
   },
   infoLabel: {
     fontSize: 14,
     color: '#666666',
-    fontWeight: '600',
+    fontWeight: '600'
   },
   infoValue: {
     fontSize: 14,
     color: '#333333',
-    fontWeight: '600',
+    fontWeight: '600'
   },
   statusBadge: {
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 12
   },
   status_active: {
-    backgroundColor: '#e8f5e8',
+    backgroundColor: '#e8f5e8'
   },
   status_inactive: {
-    backgroundColor: '#fff3e0',
+    backgroundColor: '#fff3e0'
   },
   status_archived: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f5f5f5'
   },
   statusText: {
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginHorizontal: 16,
+    marginHorizontal: 16
   },
   statCard: {
     backgroundColor: '#ffffff',
@@ -556,23 +567,23 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 2
   },
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#005e7a',
-    marginTop: 8,
+    marginTop: 8
   },
   statLabel: {
     fontSize: 12,
     color: '#666666',
-    marginTop: 4,
+    marginTop: 4
   },
   comingSoon: {
     fontSize: 16,
     color: '#666666',
     textAlign: 'center',
-    marginTop: 50,
-  },
+    marginTop: 50
+  }
 });

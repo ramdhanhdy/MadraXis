@@ -8,6 +8,8 @@ export interface Profile {
   updated_at: string;
 }
 
+// Database types are exported via exports.ts to avoid duplicate exports
+
 // Role-specific detail interfaces
 export interface StudentDetails {
   user_id: string;  // FK to profiles.id

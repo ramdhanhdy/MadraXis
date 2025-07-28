@@ -180,7 +180,9 @@ jest.mock('../../../context/ThemeContext', () => ({
 
 // Mock ActivityIndicator to provide proper testID and props
 jest.mock('react-native/Libraries/Components/ActivityIndicator/ActivityIndicator', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { View } = require('react-native');
   return {
     __esModule: true,
@@ -198,7 +200,9 @@ jest.mock('react-native/Libraries/Components/ActivityIndicator/ActivityIndicator
 
 // Mock Typography component
 jest.mock('../../atoms/Typography/Typography', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { Text } = require('react-native');
   const TypographyComponent = ({ children, style, testID, ...props }: any) => {
     return React.createElement(Text, {
@@ -207,7 +211,7 @@ jest.mock('../../atoms/Typography/Typography', () => {
       testID: testID || 'typography',
     }, children);
   };
-  
+
   return {
     __esModule: true,
     Typography: TypographyComponent,
@@ -222,7 +226,7 @@ describe('LoadingSpinner', () => {
         <LoadingSpinner />
       </ThemeProvider>
     );
-    
+
     expect(screen.getByTestId('loading-spinner')).toBeTruthy();
   });
 
@@ -232,10 +236,10 @@ describe('LoadingSpinner', () => {
         <LoadingSpinner size="small" />
       </ThemeProvider>
     );
-    
+
     const spinner = getByTestId('loading-spinner');
     expect(spinner).toBeTruthy();
-    
+
     // Verify the ActivityIndicator has the correct size prop
     const activityIndicator = getByTestId('loading-spinner-spinner');
     expect(activityIndicator.props.size).toBe('small');
@@ -247,7 +251,7 @@ describe('LoadingSpinner', () => {
         <LoadingSpinner size="large" />
       </ThemeProvider>
     );
-    
+
     const activityIndicator = getByTestId('loading-spinner-spinner');
     expect(activityIndicator.props.size).toBe('large');
   });
@@ -258,17 +262,17 @@ describe('LoadingSpinner', () => {
         <LoadingSpinner message="Loading..." />
       </ThemeProvider>
     );
-    
+
     const spinnerContainer = getByTestId('loading-spinner');
     // Style is an array, so we need to check the first element or flatten it
-    const containerStyle = Array.isArray(spinnerContainer.props.style) 
-      ? spinnerContainer.props.style[0] 
+    const containerStyle = Array.isArray(spinnerContainer.props.style)
+      ? spinnerContainer.props.style[0]
       : spinnerContainer.props.style;
     expect(containerStyle.padding).toBe(24); // theme.spacing.base.lg
-    
+
     const message = getByTestId('loading-message');
-    const messageStyle = Array.isArray(message.props.style) 
-      ? message.props.style[0] 
+    const messageStyle = Array.isArray(message.props.style)
+      ? message.props.style[0]
       : message.props.style;
     expect(messageStyle.marginTop).toBe(8); // theme.spacing.base.sm
   });
@@ -279,7 +283,7 @@ describe('LoadingSpinner', () => {
         <LoadingSpinner message="Loading data..." />
       </ThemeProvider>
     );
-    
+
     expect(screen.getByText('Loading data...')).toBeTruthy();
   });
 
@@ -289,7 +293,7 @@ describe('LoadingSpinner', () => {
         <LoadingSpinner message="Loading" vertical={false} />
       </ThemeProvider>
     );
-    
+
     expect(screen.getByTestId('loading-spinner')).toBeTruthy();
     expect(screen.getByText('Loading')).toBeTruthy();
   });
@@ -300,7 +304,7 @@ describe('LoadingSpinner', () => {
         <LoadingSpinner accessibilityLabel="Custom loading label" />
       </ThemeProvider>
     );
-    
+
     expect(screen.getByLabelText('Custom loading label')).toBeTruthy();
   });
 
@@ -310,7 +314,7 @@ describe('LoadingSpinner', () => {
         <LoadingSpinner testID="custom-spinner" />
       </ThemeProvider>
     );
-    
+
     expect(screen.getByTestId('custom-spinner')).toBeTruthy();
     expect(screen.getByTestId('custom-spinner-spinner')).toBeTruthy();
   });

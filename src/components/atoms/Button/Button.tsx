@@ -15,7 +15,7 @@ import {
   TouchableOpacityProps,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors, useComponentTheme } from '../../../context/ThemeContext';
+import { useTheme, useColors } from '../../../context/ThemeContext';
 
 // Button Props Interface
 export interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
