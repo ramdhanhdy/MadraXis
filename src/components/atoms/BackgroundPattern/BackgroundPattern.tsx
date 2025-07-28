@@ -1,13 +1,12 @@
-import { logger } from '../../../utils/logger';
 /**
  * BackgroundPattern Component
  * Islamic geometric background pattern with design token integration
  */
 
-import React, { useState, useMemo } from 'react';
-import { View, ViewStyle, StyleSheet, Text, DimensionValue } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, ViewStyle, DimensionValue } from 'react-native';
 import { SvgXml } from 'react-native-svg';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useColors } from '../../../context/ThemeContext';
 
 // Pattern variant types
 export type PatternVariant = 'geometric' | 'minimal' | 'dots' | 'waves' | 'none';
@@ -54,7 +53,7 @@ class SvgErrorBoundary extends React.Component<{
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    logger.warn('SVG rendering error', { error: error.message, errorInfo: errorInfo.componentStack });
+    console.warn('SVG rendering error', { error: error.message, errorInfo: errorInfo.componentStack });
   }
 
   render() {
@@ -78,7 +77,6 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
   accessibilityLabel,
   testID
 }) => {
-  const { theme } = useTheme();
   const colors = useColors();
 
   // Get pattern color
@@ -275,13 +273,12 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
   };
 
 
-  // Don't render anything for 'none' variant
-  if (variant === 'none') {
-    return null;
-  }
-
   // Memoize the pattern SVG generation
   const patternSvg = useMemo(() => {
+    if (variant === 'none') {
+      return null;
+    }
+    
     try {
       switch (variant) {
         case 'geometric':
@@ -296,12 +293,13 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
           return generateGeometricPattern();
       }
     } catch (error) {
-      logger.warn('Failed to generate pattern SVG', { error: error instanceof Error ? error.message : String(error) });
+      console.warn('Failed to generate pattern SVG', { error: error instanceof Error ? error.message : String(error) });
       return '';
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [variant, color, opacity, intensity, colors.primary.main]);
 
-  if (variant as PatternVariant === 'none' || !patternSvg) {
+  if (variant === 'none' || !patternSvg) {
     return null;
   }
 
@@ -330,10 +328,8 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = React.memo(({
 
 });
 
-// Internal styles
-const styles = StyleSheet.create({
+// Add display name
+BackgroundPattern.displayName = 'BackgroundPattern';
 
-  // Add any internal styles if needed
-});
 // Export default
 export default BackgroundPattern;

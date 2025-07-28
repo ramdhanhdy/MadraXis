@@ -62,19 +62,17 @@ describe('ClassService - Security Tests', () => {
     });
 
     it('should prevent SQL injection in gender filter', async () => {
-      const maliciousGender = "male'; DROP TABLE students; --";
       const teacherId = 'teacher-123';
       const classId = 1;
 
       await ClassService.getAvailableStudents(classId, teacherId, {
-        // gender: maliciousGender, // Commented out as it's not a valid gender value
+        // gender: "male'; DROP TABLE students; --", // Commented out as it's not a valid gender value
       });
 
       expect(supabase.from).toHaveBeenCalled();
     });
 
     it('should handle array injection attempts', async () => {
-      const maliciousIds = ["1'; DROP TABLE students; --", "2'; OR 1=1 --"];
       const teacherId = 'teacher-123';
       const classId = 1;
 

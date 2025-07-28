@@ -1,6 +1,6 @@
 import { logger } from '../utils/logger';
 import { supabase } from '../utils/supabase';
-import { Student, Teacher, Profile, StudentWithDetails, LegacyStudent, StudentWithRelations } from '../types';
+import { Student, Teacher, Profile, LegacyStudent } from '../types';
 import { sanitizeLikeInput } from '../utils/sanitization';
 import type { DatabaseResponse } from '../types/database';
 

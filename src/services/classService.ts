@@ -1,4 +1,5 @@
 // Re-export everything from the new modular class service
+import { ClassService } from './class';
 export {
   ClassService,
   CreateClassRequest,
@@ -7,9 +8,6 @@ export {
   ClassWithDetails,
   ClassServiceError
 } from './class';
-
-// Maintain backward compatibility by providing the old interface
-import { ClassService } from './class';
 
 // Legacy exports for backward compatibility
 export const createClass = ClassService.createClass;

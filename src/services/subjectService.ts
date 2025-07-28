@@ -69,30 +69,22 @@ export class SubjectService {
    * Get available predefined subjects
    */
   static async getAvailableSubjects(): Promise<Subject[]> {
-    try {
-      // Return a predefined list of common subjects
-      // In a real implementation, this could come from a school curriculum database
-      return [
-        { id: -1, subject_name: 'Mathematics', subject_code: 'MATH', grading_scale: 'percentage' },
-        { id: -2, subject_name: 'Science', subject_code: 'SCI', grading_scale: 'percentage' },
-        { id: -3, subject_name: 'English', subject_code: 'ENG', grading_scale: 'percentage' },
-        { id: -4, subject_name: 'History', subject_code: 'HIST', grading_scale: 'percentage' },
-        { id: -5, subject_name: 'Geography', subject_code: 'GEO', grading_scale: 'percentage' },
-        { id: -6, subject_name: 'Art', subject_code: 'ART', grading_scale: 'standards' },
-        { id: -7, subject_name: 'Music', subject_code: 'MUS', grading_scale: 'standards' },
-        { id: -8, subject_name: 'Physical Education', subject_code: 'PE', grading_scale: 'standards' },
-        { id: -9, subject_name: 'Computer Science', subject_code: 'CS', grading_scale: 'percentage' },
-        { id: -10, subject_name: 'Religious Studies', subject_code: 'REL', grading_scale: 'standards' },
-        { id: -11, subject_name: 'Arabic', subject_code: 'ARB', grading_scale: 'percentage' },
-        { id: -12, subject_name: 'Quran', subject_code: 'QUR', grading_scale: 'standards' },
-      ];
-    } catch (error) {
-      throw new SubjectServiceError(
-        'FETCH_FAILED',
-        'Failed to fetch available subjects',
-        error
-      );
-    }
+    // Return a predefined list of common subjects
+    // In a real implementation, this could come from a school curriculum database
+    return [
+      { id: -1, subject_name: 'Mathematics', subject_code: 'MATH', grading_scale: 'percentage' },
+      { id: -2, subject_name: 'Science', subject_code: 'SCI', grading_scale: 'percentage' },
+      { id: -3, subject_name: 'English', subject_code: 'ENG', grading_scale: 'percentage' },
+      { id: -4, subject_name: 'History', subject_code: 'HIST', grading_scale: 'percentage' },
+      { id: -5, subject_name: 'Geography', subject_code: 'GEO', grading_scale: 'percentage' },
+      { id: -6, subject_name: 'Art', subject_code: 'ART', grading_scale: 'standards' },
+      { id: -7, subject_name: 'Music', subject_code: 'MUS', grading_scale: 'standards' },
+      { id: -8, subject_name: 'Physical Education', subject_code: 'PE', grading_scale: 'standards' },
+      { id: -9, subject_name: 'Computer Science', subject_code: 'CS', grading_scale: 'percentage' },
+      { id: -10, subject_name: 'Religious Studies', subject_code: 'REL', grading_scale: 'standards' },
+      { id: -11, subject_name: 'Arabic', subject_code: 'ARB', grading_scale: 'percentage' },
+      { id: -12, subject_name: 'Quran', subject_code: 'QUR', grading_scale: 'standards' },
+    ];
   }
 
   /**
