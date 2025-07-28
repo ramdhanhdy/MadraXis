@@ -413,10 +413,9 @@ export const ActivityFeed: Story = {
 };
 
 // Settings list example
-export const SettingsList: Story = {
-  render: () => {
-    const [notifications, setNotifications] = React.useState(true);
-    const [darkMode, setDarkMode] = React.useState(false);
+const SettingsListComponent = () => {
+  const [notifications, setNotifications] = React.useState(true);
+  const [darkMode, setDarkMode] = React.useState(false);
     
     return (
       <Card padding="none">
@@ -461,7 +460,10 @@ export const SettingsList: Story = {
         />
       </Card>
     );
-  },
+};
+
+export const SettingsList: Story = {
+  render: () => <SettingsListComponent />,
   parameters: {
     docs: {
       description: {

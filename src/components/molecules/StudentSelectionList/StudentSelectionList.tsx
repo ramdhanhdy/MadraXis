@@ -19,7 +19,7 @@ import {
   ListRenderItem,
   RefreshControl,
 } from 'react-native';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useColors } from '../../../context/ThemeContext';
 import { Typography } from '../../atoms/Typography';
 import { Input } from '../../atoms/Input';
 import { Button } from '../../atoms/Button';
@@ -94,7 +94,6 @@ const StudentSelectionListComponent: React.FC<StudentSelectionListProps> = ({
   accessibilityLabel,
   testID,
 }) => {
-  const { theme } = useTheme();
   const colors = useColors();
   
   // Local state for search input
@@ -287,7 +286,7 @@ const StudentSelectionListComponent: React.FC<StudentSelectionListProps> = ({
         </View>
       </View>
     );
-  }, [showFilters, localFilters.gradeLevel, localFilters.boarding, handleFilterChange]);
+  }, [showFilters, localFilters.gradeLevel, localFilters.boarding, handleFilterChange, boardingOptions, gradeLevelOptions]);
 
   // Render empty state with useMemo
   const renderEmptyState = useMemo(() => {

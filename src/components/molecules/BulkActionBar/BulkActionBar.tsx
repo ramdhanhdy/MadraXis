@@ -14,7 +14,7 @@ import {
   StyleSheet,
   ViewStyle,
 } from 'react-native';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+// Theme context is available but not used in current implementation
 import { Typography } from '../../atoms/Typography';
 import { Button } from '../../atoms/Button';
 
@@ -39,8 +39,7 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({
   style,
   testID,
 }) => {
-  const { theme } = useTheme();
-  const colors = useColors();
+  // Theme context is available but not used in current implementation
 
   // Check if all visible students are selected
   const allSelected = selectedCount === totalVisible && totalVisible > 0;

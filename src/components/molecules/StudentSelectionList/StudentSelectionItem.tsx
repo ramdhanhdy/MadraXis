@@ -14,7 +14,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useColors } from '../../../context/ThemeContext';
 import { Typography } from '../../atoms/Typography';
 import { Icon } from '../../atoms/Icon';
 import { Avatar } from '../../atoms/Avatar';
@@ -40,7 +40,6 @@ export const StudentSelectionItem: React.FC<StudentSelectionItemProps> = memo(({
   style,
   testID,
 }) => {
-  const { theme } = useTheme();
   const colors = useColors();
 
   // Get container styles based on selection state

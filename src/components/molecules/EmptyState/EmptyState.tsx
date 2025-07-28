@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { View, ViewStyle, StyleSheet } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { useTheme, useColors } from '../../../context/ThemeContext';
 import { Typography } from '../../atoms/Typography';
 import { Icon } from '../../atoms/Icon';
@@ -150,10 +150,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   );
 };
 
-// Internal styles
-const styles = StyleSheet.create({
-  // Add any internal styles if needed
-});
+// Styles are defined inline for better maintainability
 
 // Export default
 export default EmptyState;

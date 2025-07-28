@@ -3,8 +3,8 @@
  * Content placeholder for cards with consistent loading states
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { View, ViewStyle, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, ViewStyle } from 'react-native';
 import { useTheme, useColors } from '../../../context/ThemeContext';
 
 // SkeletonCard Props Interface
@@ -183,10 +183,7 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({
   );
 };
 
-// Internal styles
-const styles = StyleSheet.create({
-  // Add any internal styles if needed
-});
+// Styles are defined inline for better maintainability
 
 // Export default
 export default SkeletonCard;

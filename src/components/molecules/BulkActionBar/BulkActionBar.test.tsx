@@ -20,7 +20,7 @@ jest.mock('../../atoms/Typography', () => ({
 }));
 jest.mock('../../atoms/Button', () => ({
   Button: ({ children, onPress, testID, ...props }: any) => (
-    <button onPress={onPress} testID={testID} {...props}>
+    <button onClick={onPress} data-testid={testID} {...props}>
       {children}
     </button>
   ),

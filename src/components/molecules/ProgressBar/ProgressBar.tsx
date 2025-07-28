@@ -7,7 +7,6 @@ import React from 'react';
 import {
   View,
   ViewStyle,
-  StyleSheet,
   Animated,
 } from 'react-native';
 import { useTheme, useColors } from '../../../context/ThemeContext';

@@ -12,7 +12,6 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react-native';
-import { Text } from 'react-native';
 import { StudentSelectionList } from './StudentSelectionList';
 import { StudentWithDetails } from '../../../types';
 
@@ -38,63 +37,57 @@ jest.mock('../../../context/ThemeContext', () => ({
   }),
 }));
 
-jest.mock('../../atoms/Typography', () => {
-  const { Text } = require('react-native');
-  return {
-    Typography: ({ children }: any) => (
-      <Text>{children}</Text>
-    ),
-  };
-});
+jest.mock('../../atoms/Typography', () => ({
+  Typography: ({ children }: any) => {
+    const React = jest.requireActual('react');
+    const { Text } = jest.requireActual('react-native');
+    return React.createElement(Text, {}, children);
+  },
+}));
 
-jest.mock('../../atoms/Input', () => {
-  const { Text } = require('react-native');
-  return {
-    Input: ({ placeholder, onChangeText }: any) => (
-      <Text onPress={() => onChangeText && onChangeText('test')}>{placeholder}</Text>
-    ),
-  };
-});
+jest.mock('../../atoms/Input', () => ({
+  Input: ({ placeholder, onChangeText }: any) => {
+    const React = jest.requireActual('react');
+    const { Text } = jest.requireActual('react-native');
+    return React.createElement(Text, { onPress: () => onChangeText && onChangeText('test') }, placeholder);
+  },
+}));
 
-jest.mock('../../atoms/Button', () => {
-  const { Text } = require('react-native');
-  return {
-    Button: ({ children, onPress }: any) => (
-      <Text onPress={onPress}>{children}</Text>
-    ),
-  };
-});
+jest.mock('../../atoms/Button', () => ({
+  Button: ({ children, onPress }: any) => {
+    const React = jest.requireActual('react');
+    const { Text } = jest.requireActual('react-native');
+    return React.createElement(Text, { onPress }, children);
+  },
+}));
 
-jest.mock('../EmptyState/EmptyState', () => {
-  const { Text } = require('react-native');
-  return {
-    EmptyState: ({ title, subtitle }: any) => (
-      <Text>{title} {subtitle}</Text>
-    ),
-  };
-});
+jest.mock('../EmptyState/EmptyState', () => ({
+  EmptyState: ({ title, subtitle }: any) => {
+    const React = jest.requireActual('react');
+    const { Text } = jest.requireActual('react-native');
+    return React.createElement(Text, {}, `${title} ${subtitle}`);
+  },
+}));
 
-jest.mock('./StudentSelectionItem', () => {
-  const { Text } = require('react-native');
-  return {
-    StudentSelectionItem: ({ student, selected, onToggle }: any) => (
-      <Text onPress={onToggle}>{student.full_name} {selected ? 'Selected' : 'Not Selected'}</Text>
-    ),
-  };
-});
+jest.mock('./StudentSelectionItem', () => ({
+  StudentSelectionItem: ({ student, selected, onToggle }: any) => {
+    const React = jest.requireActual('react');
+    const { Text } = jest.requireActual('react-native');
+    return React.createElement(Text, { onPress: onToggle }, `${student.full_name} ${selected ? 'Selected' : 'Not Selected'}`);
+  },
+}));
 
-jest.mock('../BulkActionBar', () => {
-  const { Text } = require('react-native');
-  return {
-    BulkActionBar: ({ selectedCount, onSelectAll, onClearSelection }: any) => (
-      <Text>
-        Selected: {selectedCount}
-        <Text onPress={onSelectAll}>Select All</Text>
-        <Text onPress={onClearSelection}>Clear</Text>
-      </Text>
-    ),
-  };
-});
+jest.mock('../BulkActionBar', () => ({
+  BulkActionBar: ({ selectedCount, onSelectAll, onClearSelection }: any) => {
+    const React = jest.requireActual('react');
+    const { Text } = jest.requireActual('react-native');
+    return React.createElement(Text, {}, [
+      `Selected: ${selectedCount}`,
+      React.createElement(Text, { onPress: onSelectAll, key: 'select' }, 'Select All'),
+      React.createElement(Text, { onPress: onClearSelection, key: 'clear' }, 'Clear')
+    ]);
+  },
+}));
 
 // Mock data
 const mockStudents: StudentWithDetails[] = [

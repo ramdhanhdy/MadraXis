@@ -8,9 +8,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { StudentSelectionList } from './StudentSelectionList';
+import { StudentSelectionList, StudentFilters } from './StudentSelectionList';
 import { StudentWithDetails } from '../../../types';
-import { StudentFilters } from './StudentSelectionList';
 
 // Mock student data
 const mockStudents: StudentWithDetails[] = [
@@ -239,10 +238,9 @@ export const LoadingState: Story = {
 };
 
 // With selections story
-export const WithSelections: Story = {
-  render: (args) => {
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(['1', '3', '5']));
-    const [filters, setFilters] = useState<StudentFilters>({});
+const WithSelectionsComponent = (args: any) => {
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(['1', '3', '5']));
+  const [filters, setFilters] = useState<StudentFilters>({});
 
     const handleStudentSelect = (studentId: string) => {
       setSelectedIds(prev => new Set([...prev, studentId]));
@@ -278,7 +276,10 @@ export const WithSelections: Story = {
         />
       </View>
     );
-  },
+};
+
+export const WithSelections: Story = {
+  render: (args) => <WithSelectionsComponent {...args} />,
   args: {
     students: mockStudents,
     loading: false,

@@ -198,7 +198,7 @@ export const StudentProgressCard: Story = {
   render: () => (
     <Card>
       <Typography variant="h4" style={{ marginBottom: 16 }}>
-        Ahmed's Semester Progress
+        Ahmed&apos;s Semester Progress
       </Typography>
       
       <View style={{ gap: 12 }}>
@@ -312,11 +312,10 @@ export const ClassPerformanceOverview: Story = {
 };
 
 // Loading progress example
-export const LoadingProgress: Story = {
-  render: () => {
-    const [progress, setProgress] = React.useState(0);
-    
-    React.useEffect(() => {
+const LoadingProgressComponent = () => {
+  const [progress, setProgress] = React.useState(0);
+  
+  React.useEffect(() => {
       const interval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 100) {
@@ -348,7 +347,10 @@ export const LoadingProgress: Story = {
         </Typography>
       </Card>
     );
-  },
+};
+
+export const LoadingProgress: Story = {
+  render: () => <LoadingProgressComponent />,
   parameters: {
     docs: {
       description: {
@@ -409,9 +411,8 @@ export const CustomColors: Story = {
 };
 
 // Without animation
-export const WithoutAnimation: Story = {
-  render: () => {
-    const [value, setValue] = React.useState(25);
+const WithoutAnimationComponent = () => {
+  const [value, setValue] = React.useState(25);
     
     return (
       <View style={{ gap: 16 }}>
@@ -464,7 +465,10 @@ export const WithoutAnimation: Story = {
         </Card>
       </View>
     );
-  },
+};
+
+export const WithoutAnimation: Story = {
+  render: () => <WithoutAnimationComponent />,
   parameters: {
     docs: {
       description: {
