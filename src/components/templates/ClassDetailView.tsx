@@ -39,6 +39,7 @@ export default function ClassDetailView() {
     if (!id || !isSafeToQuery) {
       if (!isSafeToQuery) {
         logger.debug('Skipping class details fetch - navigation in progress');
+        setLoading(false); // Ensure loading state is reset
       }
       return;
     }

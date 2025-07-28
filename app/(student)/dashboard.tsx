@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 import LogoutButton from '@/src/components/molecules/LogoutButton';
-import BoardingInfoModal from '@/src/components/organisms/StudentBoardingInfoModal';
 import CommunicationModal from '@/src/components/organisms/StudentCommunicationModal';
-import IncidentReportModal from '@/src/components/organisms/StudentIncidentReportModal';
 import { useAuth } from '@/src/hooks/useAuth';
 import { useSafeToQuery } from '@/src/utils/navigationGuard';
 import { DashboardTemplate } from '@/src/components/templates/DashboardTemplate';

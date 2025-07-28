@@ -75,11 +75,10 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
       ilike: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
       range: jest.fn().mockReturnThis(),
-      delete: jest.fn().mockReturnThis(),
-      insert: jest.fn().mockReturnThis(),
-      update: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue(finalResponse || { data: null, error: null }),
-      then: jest.fn().mockResolvedValue(finalResponse || { data: [], error: null })
+      delete: jest.fn().mockResolvedValue(finalResponse || { data: null, error: null }),
+      insert: jest.fn().mockResolvedValue(finalResponse || { data: null, error: null }),
+      update: jest.fn().mockResolvedValue(finalResponse || { data: null, error: null }),
+      single: jest.fn().mockResolvedValue(finalResponse || { data: null, error: null })
     });
     
     mockSupabase.from.mockImplementation((table: string) => {
@@ -304,15 +303,11 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
         }
       ];
 
-      const classesQuery = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        then: jest.fn().mockResolvedValue({
-          data: classes,
-          error: null
-        })
-      };
+      // Mock the repository method directly since getClasses uses ClassRepository.getByTeacher
+      jest.spyOn(require('../class/repository').ClassRepository, 'getByTeacher').mockResolvedValue({
+        classes: classes,
+        total: classes.length
+      });
 
       setupStandardMocks(teacher, null, { classes: classesQuery });
 
@@ -331,16 +326,11 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
         class_subjects: []
       }));
 
-      const classesQuery = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        range: jest.fn().mockReturnThis(),
-        then: jest.fn().mockResolvedValue({
-          data: classes.slice(0, 10),
-          error: null
-        })
-      };
+      // Mock the repository method directly since getClasses uses ClassRepository.getByTeacher
+      jest.spyOn(require('../class/repository').ClassRepository, 'getByTeacher').mockResolvedValue({
+        classes: classes.slice(0, 10),
+        total: classes.length
+      });
 
       setupStandardMocks(teacher, null, { classes: classesQuery });
 

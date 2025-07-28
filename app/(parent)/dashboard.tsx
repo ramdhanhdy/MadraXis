@@ -126,6 +126,7 @@ export default function ParentDashboard() {
     const fetchSchoolName = async () => {
       if (!isSafeToQuery) {
         console.log('Skipping school name fetch - navigation in progress');
+        setIsLoading(false); // Ensure loading state is reset
         return;
       }
 

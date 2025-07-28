@@ -25,6 +25,7 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
   const fetchSubjects = useCallback(async () => {
     if (!isSafeToQuery) {
       logger.debug('Skipping subjects fetch - navigation in progress');
+      setLoading(false); // Ensure loading state is reset
       return;
     }
 

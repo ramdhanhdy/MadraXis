@@ -11,7 +11,7 @@ jest.mock('../../utils/supabase', () => {
   const mockResult = { data: [], error: null };
   
   const createMockChain = (): any => {
-    const chain = {
+    return {
       eq: jest.fn(() => createMockChain()),
       not: jest.fn(() => createMockChain()),
       order: jest.fn(() => createMockChain()),
@@ -20,10 +20,10 @@ jest.mock('../../utils/supabase', () => {
       or: jest.fn(() => createMockChain()),
       single: jest.fn(() => Promise.resolve({ data: { id: 1, school_id: 1 }, error: null })),
       catch: jest.fn(() => Promise.resolve(mockResult)),
+      // Terminating operations that return promises
+      execute: jest.fn(() => Promise.resolve(mockResult)),
+      then: undefined // Explicitly remove thenable behavior
     };
-    
-    // Make it thenable (awaitable)
-    return Object.assign(Promise.resolve(mockResult), chain);
   };
 
   return {

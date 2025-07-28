@@ -69,6 +69,7 @@ export default function ClassesList() {
 
     if (!isSafeToQuery) {
       logger.debug('Skipping classes fetch - navigation in progress');
+      setLoading(false); // Ensure loading state is reset
       return;
     }
 

@@ -58,30 +58,29 @@ class TestRunner {
       }
 
       console.log(`📋 Running ${testFile}...`);
-      
+
+      const startTime = Date.now();
       try {
-        const startTime = Date.now();
-        
         // Run individual test file
         const commandPath = filePath.replace(/\\/g, '/');
-        const output = execSync(`bun test "${commandPath}" --verbose`, { 
+        const output = execSync(`bun test "${commandPath}" --verbose`, {
           encoding: 'utf8',
           cwd: process.cwd()
         });
-        
+
         const duration = Date.now() - startTime;
         const result = this.parseTestOutput(output, testFile, duration);
-        
+
         results.push(result);
-        
+
         totalTests += result.total;
         totalPassed += result.passed;
         totalFailed += result.failed;
         totalDuration += result.duration;
-        
+
         console.log(`✅ ${result.passed} passed, ❌ ${result.failed} failed (${duration}ms)\n`);
       } catch (error) {
-        const duration = Date.now() - Date.now();
+        const duration = Date.now() - startTime;
         const result = this.parseErrorOutput(error as Error, testFile, duration);
         
         results.push(result);
@@ -113,18 +112,29 @@ class TestRunner {
   }
 
   private parseTestOutput(output: string, file: string, duration: number): TestResult {
-    const lines = output.split('\n');
     let passed = 0;
     let failed = 0;
     let total = 0;
 
-    for (const line of lines) {
-      if (line.includes('✓') || line.includes('pass')) {
-        passed++;
-        total++;
-      } else if (line.includes('✗') || line.includes('fail')) {
-        failed++;
-        total++;
+    // Try to extract test summary from Jest/Bun output
+    // Look for patterns like "Tests: 5 passed, 2 failed, 7 total"
+    const summaryMatch = output.match(/Tests:\s*(?:(\d+)\s+passed)?(?:,\s*)?(?:(\d+)\s+failed)?(?:,\s*)?(\d+)\s+total/i);
+    if (summaryMatch) {
+      passed = parseInt(summaryMatch[1] || '0', 10);
+      failed = parseInt(summaryMatch[2] || '0', 10);
+      total = parseInt(summaryMatch[3] || '0', 10);
+    } else {
+      // Fallback: count individual test results with more specific patterns
+      const lines = output.split('\n');
+      for (const line of lines) {
+        // Match lines that start with test indicators (more specific than just containing symbols)
+        if (/^\s*✓/.test(line) || /^\s*PASS/.test(line) || line.trim().startsWith('✓')) {
+          passed++;
+          total++;
+        } else if (/^\s*✗/.test(line) || /^\s*FAIL/.test(line) || line.trim().startsWith('✗')) {
+          failed++;
+          total++;
+        }
       }
     }
 
@@ -133,14 +143,13 @@ class TestRunner {
 
   private parseErrorOutput(error: Error, file: string, duration: number): TestResult {
     const output = error.message || '';
-    const lines = output.split('\n');
-    
+
     // Try to extract test counts from error output
     const testCountMatch = output.match(/(\d+) tests?/);
-    const total = parseInt(testCountMatch?.[1] || '1');
-    
+    const total = parseInt(testCountMatch?.[1] || '1', 10);
+
     const failMatch = output.match(/(\d+) failing/);
-    const failed = parseInt(failMatch?.[1] || '1');
+    const failed = parseInt(failMatch?.[1] || '1', 10);
     
     return {
       file,
@@ -154,7 +163,7 @@ class TestRunner {
   private async generateCoverageReport() {
     try {
       // Run coverage command
-      const coverageOutput = execSync('bun test --coverage --coverageReporters=json', { 
+      execSync('bun test --coverage --coverageReporters=json', {
         encoding: 'utf8',
         cwd: process.cwd()
       });
@@ -180,14 +189,33 @@ class TestRunner {
 
         serviceFiles.forEach(file => {
           const data = coverageData[file];
-          totalStatements += data.s.total;
-          coveredStatements += data.s.covered;
-          totalBranches += data.b.total;
-          coveredBranches += data.b.covered;
-          totalFunctions += data.f.total;
-          coveredFunctions += data.f.covered;
-          totalLines += data.l.total;
-          coveredLines += data.l.covered;
+          if (data && typeof data === 'object') {
+            // Add comprehensive null checks for each coverage metric
+            if (data.s && typeof data.s === 'object') {
+              const total = typeof data.s.total === 'number' ? data.s.total : 0;
+              const covered = typeof data.s.covered === 'number' ? data.s.covered : 0;
+              totalStatements += total;
+              coveredStatements += covered;
+            }
+            if (data.b && typeof data.b === 'object') {
+              const total = typeof data.b.total === 'number' ? data.b.total : 0;
+              const covered = typeof data.b.covered === 'number' ? data.b.covered : 0;
+              totalBranches += total;
+              coveredBranches += covered;
+            }
+            if (data.f && typeof data.f === 'object') {
+              const total = typeof data.f.total === 'number' ? data.f.total : 0;
+              const covered = typeof data.f.covered === 'number' ? data.f.covered : 0;
+              totalFunctions += total;
+              coveredFunctions += covered;
+            }
+            if (data.l && typeof data.l === 'object') {
+              const total = typeof data.l.total === 'number' ? data.l.total : 0;
+              const covered = typeof data.l.covered === 'number' ? data.l.covered : 0;
+              totalLines += total;
+              coveredLines += covered;
+            }
+          }
         });
 
         return {

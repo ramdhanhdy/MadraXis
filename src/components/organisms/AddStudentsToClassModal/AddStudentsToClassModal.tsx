@@ -150,6 +150,8 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
 
     if (!isSafeToQuery) {
       logger.debug('Skipping students load - navigation in progress');
+      setLoading(false); // Ensure loading state is reset
+      setRefreshing(false); // Ensure refreshing state is reset
       return;
     }
 

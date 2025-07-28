@@ -68,6 +68,7 @@ export default function TeacherDashboard() {
       // Don't fetch data if navigation is in progress
       if (!isSafeToQuery) {
         console.log('Skipping teacher dashboard data fetch - navigation in progress');
+        setIsLoading(false); // Ensure loading state is reset
         return;
       }
 

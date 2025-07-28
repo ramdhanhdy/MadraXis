@@ -13,6 +13,7 @@ interface AuthState {
   navigationInProgress: boolean;
   isInitialized: boolean;
   hasNavigated: boolean;
+  lastNavigationTime: number;
 
   // Actions
   setSession: (session: Session | null) => void;
@@ -21,6 +22,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
   setNavigationInProgress: (inProgress: boolean) => void;
   setHasNavigated: (hasNavigated: boolean) => void;
+  setLastNavigationTime: (time: number) => void;
   fetchUserProfile: (userId: string) => Promise<void>;
   signOut: () => Promise<void>;
   clearSession: () => Promise<void>;
@@ -30,7 +32,6 @@ interface AuthState {
 // Global flags to prevent multiple initializations and excessive DB calls
 let authInitialized = false;
 let profileFetchInProgress = false;
-let lastNavigationTime = 0;
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   // Initial state
@@ -41,6 +42,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   navigationInProgress: false,
   isInitialized: false,
   hasNavigated: false,
+  lastNavigationTime: 0,
 
   // Actions
   setSession: (session) => set({ session }),
@@ -49,6 +51,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
   setNavigationInProgress: (inProgress) => set({ navigationInProgress: inProgress }),
   setHasNavigated: (hasNavigated) => set({ hasNavigated }),
+  setLastNavigationTime: (time) => set({ lastNavigationTime: time }),
 
   // Fetch user profile from database
   fetchUserProfile: async (userId: string) => {

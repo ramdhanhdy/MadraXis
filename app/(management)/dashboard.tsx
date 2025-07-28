@@ -81,6 +81,7 @@ export default function ManagementDashboard() {
     // Don't fetch data if navigation is in progress
     if (!isSafeToQuery) {
       console.log('Skipping dashboard data fetch - navigation in progress');
+      setLoading(false); // Ensure loading state is reset
       return;
     }
 

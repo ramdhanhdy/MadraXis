@@ -134,8 +134,7 @@ describe('ClassService - Simplified Tests', () => {
                     data: { user_id: 'teacher-123', classes: { school_id: 'school-123' } },
                     error: null
                 }),
-                delete: jest.fn().mockReturnThis(),
-                then: jest.fn().mockResolvedValue({ error: null })
+                delete: jest.fn().mockResolvedValue({ error: null })
             };
 
             mockSupabase.from.mockReturnValue(mockQuery as any);
@@ -233,17 +232,11 @@ describe('ClassService - Simplified Tests', () => {
                 }
             ];
 
-            const mockQuery = {
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                order: jest.fn().mockReturnThis(),
-                then: jest.fn().mockResolvedValue({
-                    data: mockClasses,
-                    error: null
-                })
-            };
-
-            mockSupabase.from.mockReturnValue(mockQuery as any);
+            // Mock the repository method directly since getClasses uses ClassRepository.getByTeacher
+            jest.spyOn(require('../class/repository').ClassRepository, 'getByTeacher').mockResolvedValue({
+                classes: mockClasses,
+                total: 1
+            });
 
             const result = await ClassService.getClasses('teacher-123');
 

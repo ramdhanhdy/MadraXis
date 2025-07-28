@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../stores/authStore';
 import { logger } from '../utils/logger';
+import { UserRole } from '../styles/colors';
 
 export const useAuth = () => {
   const router = useRouter();
@@ -13,8 +14,10 @@ export const useAuth = () => {
     navigationInProgress,
     isInitialized,
     hasNavigated,
+    lastNavigationTime,
     setNavigationInProgress,
     setHasNavigated,
+    setLastNavigationTime,
     signOut,
     clearSession
   } = useAuthStore();
@@ -41,15 +44,14 @@ export const useAuth = () => {
       if (!isOnTargetRoute) {
         // Add cooldown to prevent rapid navigation attempts
         const now = Date.now();
-        const lastNavTime = (window as any).lastNavigationTime || 0;
-        const timeSinceLastNav = lastNavTime > 0 ? now - lastNavTime : 2000; // Allow first navigation
+        const timeSinceLastNav = lastNavigationTime > 0 ? now - lastNavigationTime : 2000; // Allow first navigation
 
-        if (timeSinceLastNav < 500 && lastNavTime > 0) { // 500ms cooldown, but only after first nav
+        if (timeSinceLastNav < 500 && lastNavigationTime > 0) { // 500ms cooldown, but only after first nav
           logger.debug(`🔄 Navigation cooldown active, skipping (${timeSinceLastNav}ms ago)`);
           return;
         }
 
-        (window as any).lastNavigationTime = now;
+        setLastNavigationTime(now);
         setNavigationInProgress(true);
         setHasNavigated(true);
         logger.debug(`🔐 Navigating to: ${targetRoute} (current: ${currentPath})`);
@@ -71,7 +73,11 @@ export const useAuth = () => {
       }
     }
     // If user is not authenticated and not on auth routes, redirect to login
-    else if (!session && !currentPath.includes('auth')) {
+    // Use precise regex to match only legitimate auth routes:
+    // - /(auth)/login, /(auth)/reset-password (Expo Router grouped routes)
+    // - /auth/login, /auth (standard auth routes)
+    const isOnAuthRoute = /^\/(\(auth\)\/|\(auth\)$|auth\/|auth$)/.test(currentPath);
+    if (!session && !isOnAuthRoute) {
       logger.debug('🔐 User not authenticated, redirecting to login');
       setHasNavigated(true);
       router.replace('/(auth)/login');
@@ -115,7 +121,7 @@ function isCurrentRouteTarget(currentPath: string, targetRoute: string): boolean
 }
 
 // Helper function to get route based on user role
-function getRouteForRole(role: string, schoolId?: string | number): string {
+function getRouteForRole(role: UserRole, schoolId?: string | number): string {
   switch (role) {
     case 'teacher':
       return '/(teacher)/dashboard';
@@ -126,6 +132,7 @@ function getRouteForRole(role: string, schoolId?: string | number): string {
     case 'student':
       return '/(student)/dashboard';
     default:
+      // This case should never be reached due to TypeScript checking
       logger.error('Unknown role', { role });
       return '/(auth)/login';
   }

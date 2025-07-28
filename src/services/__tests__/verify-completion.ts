@@ -21,9 +21,9 @@ class TestCompletionVerifier {
     'src/services/class/__tests__/enrollment.test.ts',
     'src/services/class/__tests__/access.test.ts',
     'src/services/__tests__/integration.test.ts',
-    'testHelpers.ts',
-    'runTests.ts',
-    'README.md'
+    'src/services/__tests__/testHelpers.ts',
+    'src/services/__tests__/runTests.ts',
+    'src/services/__tests__/README.md'
   ];
 
   private requirements: TestRequirement[] = [

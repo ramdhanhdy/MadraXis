@@ -25,15 +25,6 @@ const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
 export default function LoginScreen() {
   const { role } = useLocalSearchParams<{ role: string }>();
   const { session, loading } = useAuth();
-  const router = useRouter();
-
-  // Redirect authenticated users away from login
-  useEffect(() => {
-    if (!loading && session) {
-      // User is already logged in, redirect to appropriate dashboard
-      router.replace('/');
-    }
-  }, [session, loading, router]);
 
   // Show loading while checking auth state
   if (loading) {

@@ -30,9 +30,10 @@ export function useClassStudentsSubscription({
   const subscriptionRef = useRef<any>(null);
 
   const fetchStudents = useCallback(async () => {
-    // Don't fetch if navigation is in progress
+    // Don't fetch if navigation is in progress, but ensure loading state is reset
     if (!isSafeToQuery()) {
       logger.debug('Skipping class students fetch - navigation in progress');
+      setLoading(false); // Ensure loading state is reset
       return;
     }
 
