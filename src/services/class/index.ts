@@ -8,7 +8,8 @@ import {
   BulkEnrollStudentsRequest,
   BulkUpdateClassesRequest,
   ClassWithDetails,
-  StudentWithDetails
+  StudentWithDetails,
+  ClassServiceError
 } from './types';
 import { ClassRepository } from './repository';
 import { ClassAccessControl } from './access';
@@ -104,7 +105,39 @@ export class ClassService {
     teacherId: string,
     options?: GetAvailableStudentsOptions
   ): Promise<{ students: StudentWithDetails[]; total: number }> {
-    return ClassEnrollmentService.getAvailableStudents(classId, teacherId, options);
+    try {
+      // Validate teacher access first
+      await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'view_students');
+      return ClassEnrollmentService.getAvailableStudents(classId, teacherId, options);
+    } catch (error) {
+      if (error instanceof ClassServiceError) {
+        // Map ACCESS_DENIED to UNAUTHORIZED_ACCESS for consistency with tests
+        if (error.code === 'ACCESS_DENIED') {
+          throw ClassServiceError.create(
+            'UNAUTHORIZED_ACCESS',
+            'You do not have permission to view students for this class',
+            { classId, teacherId, operation: 'view_students' }
+          );
+        }
+        throw error;
+      }
+      // Handle network errors
+      if (error && typeof error === 'object' && 'code' in error) {
+        const errorCode = (error as any).code;
+        if (errorCode === 'NETWORK_ERROR' || errorCode === 'ECONNREFUSED' || errorCode === 'ETIMEDOUT') {
+          throw ClassServiceError.create(
+            'NETWORK_ERROR',
+            'Network connection failed',
+            { originalError: error, classId, teacherId }
+          );
+        }
+      }
+      throw ClassServiceError.create(
+        'UNEXPECTED_ERROR',
+        'An unexpected error occurred',
+        { originalError: error, classId, teacherId }
+      );
+    }
   }
 
   /**
@@ -126,7 +159,39 @@ export class ClassService {
     enrollmentData: EnrollStudentRequest,
     teacherId: string
   ): Promise<void> {
-    return ClassEnrollmentService.enrollStudent(classId, enrollmentData, teacherId);
+    try {
+      // Validate teacher access first
+      await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'enroll_student');
+      return ClassEnrollmentService.enrollStudent(classId, enrollmentData, teacherId);
+    } catch (error) {
+      if (error instanceof ClassServiceError) {
+        // Map ACCESS_DENIED to UNAUTHORIZED_ACCESS for consistency with tests
+        if (error.code === 'ACCESS_DENIED') {
+          throw ClassServiceError.create(
+            'UNAUTHORIZED_ACCESS',
+            'You do not have permission to enroll students in this class',
+            { classId, teacherId, operation: 'enroll_student' }
+          );
+        }
+        throw error;
+      }
+      // Handle network errors
+      if (error && typeof error === 'object' && 'code' in error) {
+        const errorCode = (error as any).code;
+        if (errorCode === 'NETWORK_ERROR' || errorCode === 'ECONNREFUSED' || errorCode === 'ETIMEDOUT') {
+          throw ClassServiceError.create(
+            'NETWORK_ERROR',
+            'Network connection failed',
+            { originalError: error, classId, teacherId }
+          );
+        }
+      }
+      throw ClassServiceError.create(
+        'UNEXPECTED_ERROR',
+        'An unexpected error occurred',
+        { originalError: error, classId, teacherId }
+      );
+    }
   }
 
   /**
@@ -140,7 +205,39 @@ export class ClassService {
     results: string[];
     errors: { studentId: string; error: string }[];
   }> {
-    return ClassEnrollmentService.bulkEnrollStudents(classId, enrollmentData, teacherId);
+    try {
+      // Validate teacher access first
+      await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'enroll_students');
+      return ClassEnrollmentService.bulkEnrollStudents(classId, enrollmentData, teacherId);
+    } catch (error) {
+      if (error instanceof ClassServiceError) {
+        // Map ACCESS_DENIED to UNAUTHORIZED_ACCESS for consistency with tests
+        if (error.code === 'ACCESS_DENIED') {
+          throw ClassServiceError.create(
+            'UNAUTHORIZED_ACCESS',
+            'You do not have permission to enroll students in this class',
+            { classId, teacherId, operation: 'enroll_students' }
+          );
+        }
+        throw error;
+      }
+      // Handle network errors
+      if (error && typeof error === 'object' && 'code' in error) {
+        const errorCode = (error as any).code;
+        if (errorCode === 'NETWORK_ERROR' || errorCode === 'ECONNREFUSED' || errorCode === 'ETIMEDOUT') {
+          throw ClassServiceError.create(
+            'NETWORK_ERROR',
+            'Network connection failed',
+            { originalError: error, classId, teacherId }
+          );
+        }
+      }
+      throw ClassServiceError.create(
+        'UNEXPECTED_ERROR',
+        'An unexpected error occurred',
+        { originalError: error, classId, teacherId }
+      );
+    }
   }
 
   /**

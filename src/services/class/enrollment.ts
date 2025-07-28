@@ -266,9 +266,9 @@ export class ClassEnrollmentService {
       // Apply sorting
       const { sortBy, sortOrder } = sanitizeSortParams(options?.sortBy, options?.sortOrder);
       if (sortBy === 'full_name') {
-        query = query.order('profiles.full_name', { ascending: sortOrder === 'asc' });
+        query = query.order('full_name', { foreignTable: 'profiles', ascending: sortOrder === 'asc' });
       } else if (sortBy === 'nis') {
-        query = query.order('profiles.student_details.nis', { ascending: sortOrder === 'asc' });
+        query = query.order('nis', { foreignTable: 'student_details', ascending: sortOrder === 'asc' });
       } else {
         query = query.order(sortBy, { ascending: sortOrder === 'asc' });
       }

@@ -156,7 +156,15 @@ export class ClassAccessControl {
       );
     }
 
-    await ClassAccessControl.validateTeacherAccess(classId, teacherId, operation, validateSchool);
+    // Use verifyClassAccess directly to avoid infinite recursion
+    const hasAccess = await ClassAccessControl.verifyClassAccess(classId, teacherId, validateSchool);
+    if (!hasAccess) {
+      throw ClassServiceError.create(
+        'ACCESS_DENIED',
+        'You do not have access to this class',
+        { operation, classId, teacherId }
+      );
+    }
   }
 
   /**

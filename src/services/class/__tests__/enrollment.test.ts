@@ -37,6 +37,10 @@ describe('ClassEnrollmentService', () => {
           data: [],
           count: 0,
           error: null
+        }),
+        single: jest.fn().mockResolvedValue({
+          data: null,
+          error: null
         })
       };
 
@@ -81,6 +85,10 @@ describe('ClassEnrollmentService', () => {
         range: jest.fn().mockResolvedValue({
           data: [],
           count: 0,
+          error: null
+        }),
+        single: jest.fn().mockResolvedValue({
+          data: null,
           error: null
         })
       };
