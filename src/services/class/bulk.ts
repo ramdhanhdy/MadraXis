@@ -244,7 +244,14 @@ export class ClassBulkOperations {
         }
 
         // Log restoration action
-        await ClassAuditService.logClassRestoration(classId, currentClass, currentClass, teacherId);
+        const restoredClassData = {
+          ...currentClass,
+          deleted_at: null,
+          deleted_by: null,
+          updated_at: new Date().toISOString(),
+          updated_by: teacherId,
+        };
+        await ClassAuditService.logClassRestoration(classId, currentClass, restoredClassData, teacherId);
 
         results.push(classId);
       } catch (error) {

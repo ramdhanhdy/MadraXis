@@ -208,7 +208,8 @@ export default function ClassesList() {
             setSelectedClasses([]);
             setBulkSelectionMode(false);
             fetchClasses();
-          } catch {
+          } catch (error) {
+            logger.error('Failed to delete classes', { error, selectedClasses, userId: user?.id });
             Alert.alert('Error', 'Failed to delete classes');
           } finally {
             setLoading(false);
@@ -236,7 +237,8 @@ export default function ClassesList() {
       setSelectedClasses([]);
       setBulkSelectionMode(false);
       fetchClasses();
-    } catch {
+    } catch (error) {
+      logger.error('Failed to update classes', { error, selectedClasses, status, userId: user?.id });
       Alert.alert('Error', 'Failed to update classes');
     } finally {
       setLoading(false);
