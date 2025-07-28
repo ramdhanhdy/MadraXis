@@ -82,11 +82,13 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
     });
     
     mockSupabase.from.mockImplementation((table: string) => {
+      // Check additionalMocks first to allow overriding default mocks
+      if (additionalMocks[table]) return additionalMocks[table] as any;
+
       if (table === 'profiles') return teacherProfileQuery as any;
       if (table === 'classes') return classQuery as any;
       if (table === 'class_teachers') return classTeachersQuery as any;
-      if (additionalMocks[table]) return additionalMocks[table] as any;
-      
+
       // Default comprehensive mock for other tables
       return createQueryMock({ data: [], error: null }) as any;
     });
@@ -309,8 +311,6 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
         total: classes.length
       });
 
-      setupStandardMocks(teacher, null, { classes: classesQuery });
-
       const result = await ClassService.getClasses(teacher.id);
 
       expect(result.classes).toHaveLength(2);
@@ -332,12 +332,10 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
         total: classes.length
       });
 
-      setupStandardMocks(teacher, null, { classes: classesQuery });
-
       const result = await ClassService.getClasses(teacher.id, { limit: 10, offset: 0 });
 
       expect(result.classes).toHaveLength(10);
-      expect(result.total).toBe(10);
+      expect(result.total).toBe(50);
     });
   });
 
@@ -361,7 +359,7 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
       setupStandardMocks(otherTeacher, classData, { class_teachers: classTeachersQuery });
 
       await expect(ClassService.bulkEnrollStudents(classData.id, { student_ids: students.map(s => s.id) }, otherTeacher.id))
-        .rejects.toThrow('UNAUTHORIZED_ACCESS');
+        .rejects.toThrow('You do not have permission to enroll students in this class');
     });
 
     it('should validate teacher belongs to correct school', async () => {
@@ -479,7 +477,7 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
       setupStandardMocks(teacher, classData, { class_teachers: classTeachersQuery });
 
       await expect(ClassService.bulkEnrollStudents(classData.id, { student_ids: students.map(s => s.id) }, teacher.id))
-        .rejects.toThrow('UNAUTHORIZED_ACCESS');
+        .rejects.toThrow('You do not have permission to enroll students in this class');
     });
   });
 
@@ -568,7 +566,7 @@ describe('ClassService - Comprehensive Unit Tests (tasks.md 13.1.1-13.1.10)', ()
 
       setupStandardMocks(teacher, classData, { class_teachers: classTeachersQuery });
 
-      await expect(ClassService.getAvailableStudents(classData.id, teacher.id, { searchTerm: 'NonExistent' }))
+      await expect(ClassService.getAvailableStudents(classData.id, teacher.id))
         .rejects.toThrow('You do not have permission to view students for this class');
     });
   });

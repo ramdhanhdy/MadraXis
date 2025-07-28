@@ -5,6 +5,15 @@
 
 import { ClassService } from '../classService';
 import { supabase } from '../../utils/supabase';
+import { ClassAccessControl } from '../class/access';
+
+// Mock access control
+jest.mock('../class/access', () => ({
+  ClassAccessControl: {
+    validateTeacherAccess: jest.fn().mockResolvedValue(undefined), // Successful access
+    verifyClassAccess: jest.fn().mockResolvedValue(true)
+  }
+}));
 
 // Mock supabase
 jest.mock('../../utils/supabase', () => {
@@ -53,37 +62,209 @@ describe('ClassService - Security Tests', () => {
       const teacherId = 'teacher-123';
       const classId = 1;
 
+      // Create mock chain to capture method calls
+      const mockOrMethod = jest.fn(() => ({ range: jest.fn(() => Promise.resolve({ data: [], count: 0, error: null })) }));
+      const mockSelectChain = {
+        eq: jest.fn(() => mockSelectChain),
+        or: mockOrMethod,
+        not: jest.fn(() => mockSelectChain),
+        range: jest.fn(() => Promise.resolve({ data: [], count: 0, error: null }))
+      };
+
+      // Mock the supabase chain for the specific queries we need to test
+      (supabase.from as jest.Mock).mockImplementation((table: string) => {
+        if (table === 'profiles') {
+          return {
+            select: jest.fn(() => mockSelectChain)
+          };
+        }
+        if (table === 'class_students') {
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => Promise.resolve({ data: [], error: null }))
+            }))
+          };
+        }
+        if (table === 'classes') {
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => Promise.resolve({ data: { id: 1, school_id: 1 }, error: null }))
+              }))
+            }))
+          };
+        }
+        // Default mock for other tables
+        return {
+          select: jest.fn(() => ({
+            eq: jest.fn(() => ({
+              single: jest.fn(() => Promise.resolve({ data: { id: 1, school_id: 1 }, error: null }))
+            }))
+          }))
+        };
+      });
+
       await ClassService.getAvailableStudents(classId, teacherId, {
         searchTerm: maliciousSearch,
       });
 
-      // Verify the search parameter is sanitized
-      expect(supabase.from).toHaveBeenCalled();
+      // Verify that the malicious input was sanitized before being passed to the query
+      expect(mockOrMethod).toHaveBeenCalled();
+      const orCallArgs = mockOrMethod.mock.calls[0][0];
+
+      // The sanitized search should not contain the most dangerous SQL injection characters
+      // These are the characters that sanitizeLikeInput actually removes
+      expect(orCallArgs).not.toContain("'"); // Single quotes should be removed
+      expect(orCallArgs).not.toContain(";"); // Semicolons should be removed
+
+      // Verify the sanitized pattern is used in ilike queries
+      expect(orCallArgs).toContain('full_name.ilike.%');
+      expect(orCallArgs).toContain('student_details.nis.ilike.%');
+
+      // Verify that the original malicious pattern "' OR 1=1" is broken up
+      expect(orCallArgs).not.toContain("' OR 1=1"); // The dangerous pattern should be broken
     });
 
-    it('should prevent SQL injection in gender filter', async () => {
+    it('should sanitize multiple malicious search patterns', async () => {
       const teacherId = 'teacher-123';
       const classId = 1;
 
-      await ClassService.getAvailableStudents(classId, teacherId, {
-        // gender: "male'; DROP TABLE students; --", // Commented out as it's not a valid gender value
+      const maliciousInputs = [
+        "'; DROP TABLE students; --",
+        '" OR "1"="1',
+        "test'; INSERT INTO profiles VALUES ('hacker'); --",
+        "admin'/**/OR/**/1=1--",
+        "' UNION SELECT * FROM profiles --"
+      ];
+
+      // Create mock chain to capture method calls
+      const mockOrMethod = jest.fn(() => ({ range: jest.fn(() => Promise.resolve({ data: [], count: 0, error: null })) }));
+      const mockSelectChain = {
+        eq: jest.fn(() => mockSelectChain),
+        or: mockOrMethod,
+        not: jest.fn(() => mockSelectChain),
+        range: jest.fn(() => Promise.resolve({ data: [], count: 0, error: null }))
+      };
+
+      // Mock the supabase chain
+      (supabase.from as jest.Mock).mockImplementation((table: string) => {
+        if (table === 'profiles') {
+          return { select: jest.fn(() => mockSelectChain) };
+        }
+        if (table === 'class_students') {
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => Promise.resolve({ data: [], error: null }))
+            }))
+          };
+        }
+        if (table === 'classes') {
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => Promise.resolve({ data: { id: 1, school_id: 1 }, error: null }))
+              }))
+            }))
+          };
+        }
+
+        return {
+          select: jest.fn(() => ({
+            eq: jest.fn(() => ({
+              single: jest.fn(() => Promise.resolve({ data: { id: 1, school_id: 1 }, error: null }))
+            }))
+          }))
+        };
       });
 
-      expect(supabase.from).toHaveBeenCalled();
+      for (const maliciousInput of maliciousInputs) {
+        // Reset mocks for each test
+        jest.clearAllMocks();
+
+        await ClassService.getAvailableStudents(classId, teacherId, {
+          searchTerm: maliciousInput,
+        });
+
+        // Verify that the most dangerous SQL injection characters are removed/escaped
+        expect(mockOrMethod).toHaveBeenCalled();
+        const orCallArgs = mockOrMethod.mock.calls[0][0];
+
+        // Verify the most critical SQL injection characters are removed
+        // These are the characters that sanitizeLikeInput actually removes
+        expect(orCallArgs).not.toContain("'"); // Single quotes removed
+        expect(orCallArgs).not.toContain('"'); // Double quotes removed
+        expect(orCallArgs).not.toContain(";"); // Semicolons removed
+        expect(orCallArgs).not.toContain("*"); // Asterisks removed
+        expect(orCallArgs).not.toContain("="); // Equals signs removed
+
+        // Verify the query structure is maintained
+        expect(orCallArgs).toContain('full_name.ilike.%');
+        expect(orCallArgs).toContain('student_details.nis.ilike.%');
+      }
     });
 
-    it('should handle array injection attempts', async () => {
+    it('should preserve legitimate search terms while sanitizing', async () => {
       const teacherId = 'teacher-123';
       const classId = 1;
+      const legitimateSearch = 'John Doe';
 
-      // This test verifies that the service handles malicious input safely
-      // The actual SQL injection prevention is handled by the sanitization functions
-      // and Supabase's parameterized queries, so we just need to ensure the service
-      // doesn't crash when processing potentially malicious data
-      
-      await ClassService.getAvailableStudents(classId, teacherId);
+      // Create mock chain to capture method calls
+      const mockOrMethod = jest.fn(() => ({ range: jest.fn(() => Promise.resolve({ data: [], count: 0, error: null })) }));
+      const mockSelectChain = {
+        eq: jest.fn(() => mockSelectChain),
+        or: mockOrMethod,
+        not: jest.fn(() => mockSelectChain),
+        range: jest.fn(() => Promise.resolve({ data: [], count: 0, error: null }))
+      };
 
-      expect(supabase.from).toHaveBeenCalled();
+      // Mock the supabase chain
+      (supabase.from as jest.Mock).mockImplementation((table: string) => {
+        if (table === 'profiles') {
+          return { select: jest.fn(() => mockSelectChain) };
+        }
+        if (table === 'class_students') {
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => Promise.resolve({ data: [], error: null }))
+            }))
+          };
+        }
+        if (table === 'classes') {
+          return {
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => Promise.resolve({ data: { id: 1, school_id: 1 }, error: null }))
+              }))
+            }))
+          };
+        }
+
+        return {
+          select: jest.fn(() => ({
+            eq: jest.fn(() => ({
+              single: jest.fn(() => Promise.resolve({ data: { id: 1, school_id: 1 }, error: null }))
+            }))
+          }))
+        };
+      });
+
+      await ClassService.getAvailableStudents(classId, teacherId, {
+        searchTerm: legitimateSearch,
+      });
+
+      // Verify that legitimate search terms are preserved in the query
+      expect(mockOrMethod).toHaveBeenCalled();
+      const orCallArgs = mockOrMethod.mock.calls[0][0];
+
+      // Should contain the legitimate search term
+      expect(orCallArgs).toContain('John Doe');
+      expect(orCallArgs).toContain('full_name.ilike.%John Doe%');
+      expect(orCallArgs).toContain('student_details.nis.ilike.%John Doe%');
+
+      // Should still be safe (no dangerous characters)
+      expect(orCallArgs).not.toContain("'");
+      expect(orCallArgs).not.toContain('"');
+      expect(orCallArgs).not.toContain(";");
     });
   });
 
