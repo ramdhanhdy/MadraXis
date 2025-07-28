@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/hooks/useAuth';
+import { useSafeToQuery } from '@/src/utils/navigationGuard';
 import { ClassService } from '@/src/services/classService';
 import { Class } from '@/src/types/class';
 import { ClassWithDetails } from '@/src/services/classService';
@@ -18,6 +19,7 @@ import { useClassStudentBreakdown } from '@/src/hooks/useClassStudentBreakdown';
 export default function ClassesList() {
   const router = useRouter();
   const { user, profile } = useAuth();
+  const isSafeToQuery = useSafeToQuery();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -65,6 +67,11 @@ export default function ClassesList() {
       return;
     }
 
+    if (!isSafeToQuery) {
+      logger.debug('Skipping classes fetch - navigation in progress');
+      return;
+    }
+
     logger.debug('User profile:', { userId: user.id, profile, schoolId: profile?.school_id });
 
     try {
@@ -93,11 +100,11 @@ export default function ClassesList() {
     } finally {
       setLoading(false);
     }
-  }, [user, debouncedSearchQuery, filterStatus, sortBy, sortOrder]);
+  }, [user, debouncedSearchQuery, filterStatus, sortBy, sortOrder, isSafeToQuery]);
 
   useEffect(() => {
     fetchClasses();
-  }, [fetchClasses]);
+  }, [user?.id, debouncedSearchQuery, filterStatus, sortBy, sortOrder, isSafeToQuery]); // Remove function dependency
 
   const handleRefresh = useCallback(() => {
     fetchClasses();

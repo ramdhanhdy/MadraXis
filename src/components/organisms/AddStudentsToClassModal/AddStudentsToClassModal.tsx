@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import { Modal } from '../Modal';
 import { ClassService } from '../../../services/classService';
 import { useAuth } from '../../../context/AuthContext';
+import { useSafeToQuery } from '../../../utils/navigationGuard';
 import { useTheme } from '../../../context/ThemeContext';
 import { StudentSelectionList, StudentFilters } from '../../molecules/StudentSelectionList/StudentSelectionList';
 import { BreadcrumbNavigation } from '../../molecules/BreadcrumbNavigation';
@@ -66,6 +67,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
 }) => {
   // Hooks
   const { user } = useAuth();
+  const isSafeToQuery = useSafeToQuery();
   const { theme } = useTheme();
   const router = useRouter();
 
@@ -146,6 +148,11 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
   const loadStudents = useCallback(async () => {
     if (!user?.id) return;
 
+    if (!isSafeToQuery) {
+      logger.debug('Skipping students load - navigation in progress');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -203,14 +210,14 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
       setLoading(false);
       setRefreshing(false);
     }
-  }, [classId, user?.id, filters.search, filters.boarding, pagination.page, pagination.limit]);
+  }, [classId, user?.id, filters.search, filters.boarding, pagination.page, pagination.limit, isSafeToQuery]);
 
   // Load students when modal opens or filters change
   useEffect(() => {
     if (visible) {
       loadStudents();
     }
-  }, [visible, loadStudents]);
+  }, [visible, classId, user?.id, filters.search, filters.boarding, pagination.page, pagination.limit, isSafeToQuery]); // Remove function dependency
 
   // Reset state when modal closes
   useEffect(() => {

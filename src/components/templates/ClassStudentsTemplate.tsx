@@ -19,6 +19,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ClassService } from '../../services/class';
 import { useAuth } from '../../context/AuthContext';
+import { useSafeToQuery } from '../../utils/navigationGuard';
 import { useClassStudentsSubscription } from '../../hooks/useClassStudentsSubscription';
 import { EmptyState } from '../molecules/EmptyState/EmptyState';
 import { Student } from '../../types/student';
@@ -35,6 +36,7 @@ export default function ClassStudentsTemplate() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{id: string;}>();
   const { user } = useAuth();
+  const isSafeToQuery = useSafeToQuery();
 
   // Validate and parse class ID
   const parsedId = parseInt(id || '0', 10);
@@ -53,6 +55,11 @@ export default function ClassStudentsTemplate() {
   // Fetch class data
   const loadClassData = useCallback(async () => {
     if (!classId || !user?.id) return;
+
+    if (!isSafeToQuery) {
+      logger.debug('Skipping class data fetch - navigation in progress');
+      return;
+    }
 
     try {
       // Fetch class details
@@ -83,7 +90,7 @@ export default function ClassStudentsTemplate() {
         [{ text: 'OK' }]
       );
     }
-  }, [classId, user?.id]);
+  }, [classId, user?.id, isSafeToQuery]);
 
   // Load class data on mount
   useEffect(() => {
