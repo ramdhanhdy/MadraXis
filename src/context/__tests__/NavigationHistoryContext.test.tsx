@@ -78,4 +78,26 @@ describe('NavigationHistoryContext', () => {
     expect(result.current.history).toEqual([]);
     expect(result.current.currentIndex).toBe(-1);
   });
+
+  it('should adjust currentIndex when history exceeds maxHistorySize', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <NavigationHistoryProvider maxHistorySize={3}>{children}</NavigationHistoryProvider>
+    );
+
+    const { result } = renderHook(() => useNavigationHistory(), { wrapper });
+
+    act(() => {
+      result.current.addToHistory('/page1');
+      result.current.addToHistory('/page2');
+      result.current.addToHistory('/page3');
+      // This should cause the first item to be removed
+      result.current.addToHistory('/page4');
+    });
+
+    expect(result.current.history).toHaveLength(3);
+    expect(result.current.history[0].path).toBe('/page2');
+    expect(result.current.history[1].path).toBe('/page3');
+    expect(result.current.history[2].path).toBe('/page4');
+    expect(result.current.currentIndex).toBe(2);
+  });
 });

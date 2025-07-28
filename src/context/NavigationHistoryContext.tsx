@@ -77,15 +77,22 @@ export const NavigationHistoryProvider: React.FC<NavigationHistoryProviderProps>
       // Add new item
       newHistory.push(newItem);
       
-      // Limit history size
+      // Limit history size and track if items were removed
+      let itemsRemoved = 0;
       if (newHistory.length > maxHistorySize) {
-        newHistory.shift();
+        itemsRemoved = newHistory.length - maxHistorySize;
+        newHistory.splice(0, itemsRemoved);
       }
       
       return newHistory;
     });
 
-    setCurrentIndex(prevIndex => Math.min(prevIndex + 1, maxHistorySize - 1));
+    setCurrentIndex(prevIndex => {
+      // Calculate the new index accounting for removed items
+      const newIndex = prevIndex + 1;
+      const adjustedIndex = Math.max(0, newIndex - Math.max(0, (prevIndex + 2) - maxHistorySize));
+      return Math.min(adjustedIndex, maxHistorySize - 1);
+    });
   }, [currentIndex, maxHistorySize]);
 
   /**

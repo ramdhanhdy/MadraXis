@@ -61,7 +61,7 @@ export class ErrorBoundary extends Component<Props, State> {
             style={styles.message}
             accessibilityLabel="Error description"
           >
-            We're sorry, but an unexpected error occurred.
+            We&apos;re sorry, but an unexpected error occurred.
           </Text>
           {this.state.error && (
             <Text
