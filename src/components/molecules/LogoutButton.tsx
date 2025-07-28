@@ -2,7 +2,7 @@ import { logger } from '../../utils/logger';
 /**
  * LogoutButton Component
  * A reusable logout button component with confirmation alert, loading state, and variants
- * Integrates with AuthContext for sign-out functionality
+ * Integrates with auth store for sign-out functionality
  */
 
 import React, { useState } from 'react';

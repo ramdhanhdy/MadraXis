@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../src/hooks/useAuth';
@@ -21,6 +21,12 @@ const RootLayoutNav = () => {
         setSplashAnimationComplete(true);
     }, []);
 
+    // Memoize the splash screen to prevent re-mounting
+    const splashScreen = useMemo(() => {
+        logger.debug('🎬 Creating splash screen component');
+        return <AnimatedSplashScreen onAnimationFinish={handleAnimationFinish} />;
+    }, [handleAnimationFinish]);
+
     useEffect(() => {
         logger.debug(`🔄 Splash state: authLoading=${authLoading}, animComplete=${splashAnimationComplete}, hidden=${splashHidden}`);
         if (!authLoading && splashAnimationComplete && !splashHidden) {
@@ -35,9 +41,9 @@ const RootLayoutNav = () => {
     }, [authLoading, splashAnimationComplete, splashHidden]);
 
     // Show animated splash screen until both auth loading and animation are complete
-    if (authLoading || !splashAnimationComplete) {
+    if ((authLoading || !splashAnimationComplete) && !splashHidden) {
         logger.debug(`🎬 Showing splash: authLoading=${authLoading}, animComplete=${splashAnimationComplete}`);
-        return <AnimatedSplashScreen onAnimationFinish={handleAnimationFinish} />;
+        return splashScreen;
     }
 
     return (

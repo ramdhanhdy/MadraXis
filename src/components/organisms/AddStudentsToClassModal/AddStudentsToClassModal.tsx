@@ -8,7 +8,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Modal } from '../Modal';
 import { ClassService } from '../../../services/classService';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../hooks/useAuth';
 import { useSafeToQuery } from '../../../utils/navigationGuard';
 import { useTheme } from '../../../context/ThemeContext';
 import { StudentSelectionList, StudentFilters } from '../../molecules/StudentSelectionList/StudentSelectionList';

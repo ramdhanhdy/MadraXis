@@ -39,7 +39,6 @@
         "react-native-url-polyfill": "^2.0.0",
         "react-native-web": "^0.20.0",
         "react-native-webview": "13.13.5",
-        "rive-react-native": "^9.3.4",
         "supabase": "^2.31.8",
         "uuid": "^11.1.0",
         "zod": "^4.0.5",
@@ -2011,8 +2010,6 @@
     "reusify": ["reusify@1.1.0", "", {}, "sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw=="],
 
     "rimraf": ["rimraf@3.0.2", "", { "dependencies": { "glob": "^7.1.3" }, "bin": "bin.js" }, "sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA=="],
-
-    "rive-react-native": ["rive-react-native@9.3.4", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-rlJlEWjSLrbDcxAQYV/JyJ+XS38fI5C0FcZXXlOtUEioCatlkyz6c9BfW1Xkax9LvX+++O+ZV83LsTu7foNhuA=="],
 
     "run-parallel": ["run-parallel@1.2.0", "", { "dependencies": { "queue-microtask": "^1.2.2" } }, "sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA=="],
 

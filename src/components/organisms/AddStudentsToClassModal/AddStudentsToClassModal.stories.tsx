@@ -12,7 +12,7 @@ import { ClassService } from '../../../services/classService';
 
 // Mock ClassService for stories
 jest.mock('../../../services/classService');
-jest.mock('../../../context/AuthContext', () => ({
+jest.mock('../../../hooks/useAuth', () => ({
   useAuth: () => ({
     user: {
       id: 1,

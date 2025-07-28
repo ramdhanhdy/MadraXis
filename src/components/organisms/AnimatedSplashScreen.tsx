@@ -1,7 +1,6 @@
 import { logger } from '../../utils/logger';
-import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import Rive from 'rive-react-native';
+import React, { useEffect, useRef, useCallback } from 'react';
+import { StyleSheet, View, Text, Animated } from 'react-native';
 
 interface AnimatedSplashScreenProps {
   onAnimationFinish: () => void;
@@ -10,7 +9,8 @@ interface AnimatedSplashScreenProps {
 const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimationFinish }) => {
   const hasFinished = useRef(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [animationError, setAnimationError] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   const handleFinish = useCallback(() => {
     if (hasFinished.current) return; // Prevent multiple calls
@@ -19,61 +19,55 @@ const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({ onAnimation
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-    logger.debug('🎬 Animation finishing, calling onAnimationFinish');
+    logger.debug('🎬 Simple animation finished, calling onAnimationFinish');
     onAnimationFinish?.();
   }, [onAnimationFinish]);
 
   useEffect(() => {
-    // Fallback timeout in case animation doesn't trigger completion
+    // Start the simple animation
+    logger.debug('🎬 Starting simple splash animation');
+
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Auto-finish after animation completes
     timeoutRef.current = setTimeout(() => {
       handleFinish();
-    }, 3000); // 3 second timeout for better UX
+    }, 1500); // 1.5 second total duration
 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [handleFinish]);
-
-  // Render fallback UI if animation fails
-  if (animationError) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.fallbackContainer}>
-          <Text style={styles.fallbackText}>MadraXis</Text>
-          <Text style={styles.fallbackSubtext}>Loading...</Text>
-        </View>
-      </View>
-    );
-  }
+  }, [handleFinish, fadeAnim, scaleAnim]);
 
   return (
     <View style={styles.container}>
-      <Rive
-        resourceName="splash_screen"
-        autoplay={true}
-        style={styles.animation}
-        artboardName="Artboard"
-        stateMachineName="State Machine 1"
-        onPlay={() => {
-          logger.debug('Rive animation started');
-        }}
-        onStop={() => {
-          logger.debug('Rive animation completed');
-          handleFinish();
-        }}
-        onError={(error) => {
-          logger.warn('Rive animation error (continuing anyway):', error);
-          setAnimationError(true);
-          // Continue with a timeout fallback instead of immediately finishing
-          setTimeout(() => {
-            handleFinish();
-          }, 1500); // Shorter timeout for error case
-        }} />
-
-    </View>);
-
+      <Animated.View
+        style={[
+          styles.logoContainer,
+          {
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }]
+          }
+        ]}
+      >
+        <Text style={styles.logoText}>MadraXis</Text>
+        <Text style={styles.taglineText}>Sistem Manajemen Madrasah</Text>
+      </Animated.View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -83,23 +77,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#ffffff'
   },
-  animation: {
-    width: 300,
-    height: 300
-  },
-  fallbackContainer: {
+  logoContainer: {
     alignItems: 'center',
     justifyContent: 'center'
   },
-  fallbackText: {
-    fontSize: 32,
+  logoText: {
+    fontSize: 42,
     fontWeight: 'bold',
     color: '#005e7a',
-    marginBottom: 8
+    marginBottom: 12,
+    letterSpacing: 1
   },
-  fallbackSubtext: {
+  taglineText: {
     fontSize: 16,
-    color: '#666666'
+    color: '#666666',
+    textAlign: 'center',
+    fontWeight: '300'
   }
 });
 

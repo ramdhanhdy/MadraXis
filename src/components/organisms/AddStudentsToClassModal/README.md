@@ -166,7 +166,7 @@ bun run storybook
 - `@/components/molecules/StudentSelectionList`: Student list component (Task 7)
 - `@/components/molecules/BulkActionBar`: Bulk action component (Task 8)
 - `@/services/classService`: Class management service
-- `@/context/AuthContext`: Authentication context
+- `@/hooks/useAuth`: Authentication hook
 - `@/context/ThemeContext`: Theme context
 
 ### External Dependencies

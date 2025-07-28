@@ -7,11 +7,11 @@ import { render, fireEvent, waitFor, screen, act } from '@testing-library/react-
 import { Alert } from 'react-native';
 import { AddStudentsToClassModal } from './AddStudentsToClassModal';
 import { ClassService } from '../../../services/classService';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../hooks/useAuth';
 
 // Mock dependencies
 jest.mock('../../../services/classService');
-jest.mock('../../../context/AuthContext');
+jest.mock('../../../hooks/useAuth');
 jest.mock('../../../utils/supabase', () => ({
   supabase: {
     from: jest.fn(() => ({
