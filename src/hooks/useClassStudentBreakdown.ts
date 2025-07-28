@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../utils/supabase';
-import { ClassService } from '../services/classService';
 
 interface StudentBreakdown {
   classId: number;
@@ -109,7 +108,7 @@ export function useClassStudentBreakdown({
     if (enabled && classIds.length > 0) {
       fetchBreakdown(classIds);
     }
-  }, [classIds.join(','), enabled, fetchBreakdown]);
+  }, [classIds, enabled, fetchBreakdown]);
 
   return {
     breakdowns,

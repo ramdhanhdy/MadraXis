@@ -103,7 +103,7 @@ export function parseDeepLink(url: string): ParsedDeepLink | null {
 
     // Remove the scheme and get the path
     const urlWithoutScheme = url.replace('madraxis://', '');
-    const [pathPart, queryPart] = urlWithoutScheme.split('?');
+    const [pathPart] = urlWithoutScheme.split('?');
     const segments = pathPart.split('/').filter(Boolean);
     
     if (segments.length === 0) {
@@ -147,7 +147,7 @@ export function parseDeepLink(url: string): ParsedDeepLink | null {
       params: params,
       screen: segments.join('/')
     };
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -207,7 +207,7 @@ export function isValidDeepLink(url: string): boolean {
     
     const validPrefixes = ['madraxis://teacher/', 'madraxis://management/', 'madraxis://parent/', 'madraxis://student/', 'madraxis://auth/'];
     return validPrefixes.some(prefix => url.startsWith(prefix));
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -231,7 +231,7 @@ export function getQueryParams(url: string): Record<string, string> {
     }
     
     return result;
-  } catch (error) {
+  } catch {
     return {};
   }
 }

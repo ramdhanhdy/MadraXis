@@ -219,7 +219,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
     if (visible) {
       loadStudents();
     }
-  }, [visible, classId, user?.id, filters.search, filters.boarding, pagination.page, pagination.limit, isSafeToQuery]); // Remove function dependency
+  }, [visible, loadStudents]);
 
   // Reset state when modal closes
   useEffect(() => {

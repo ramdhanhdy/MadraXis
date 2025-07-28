@@ -1,15 +1,14 @@
 import { logger } from '../../utils/logger';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/hooks/useAuth';
 import { useSafeToQuery } from '@/src/utils/navigationGuard';
-import { ClassService } from '@/src/services/classService';
+import { ClassService, ClassWithDetails } from '@/src/services/classService';
 import { Class } from '@/src/types/class';
-import { ClassWithDetails } from '@/src/services/classService';
 import ClassFormModal from '@/src/components/organisms/ClassFormModal';
 import { useStudentCountSubscription } from '@/src/hooks/useStudentCountSubscription';
 import { useClassStudentBreakdown } from '@/src/hooks/useClassStudentBreakdown';
@@ -38,13 +37,13 @@ export default function ClassesList() {
   const classIds = useMemo(() => classes.map((c) => c.id), [classes]);
 
   // Real-time student count subscription
-  const { counts: realTimeCounts, loading: countsLoading, error: countsError } = useStudentCountSubscription({
+  const { counts: realTimeCounts, loading: countsLoading } = useStudentCountSubscription({
     classIds,
     enabled: classes.length > 0
   });
 
   // Real-time student breakdown (boarding vs day students)
-  const { breakdowns: studentBreakdowns, loading: breakdownLoading, error: breakdownError } = useClassStudentBreakdown({
+  const { breakdowns: studentBreakdowns, loading: breakdownLoading } = useClassStudentBreakdown({
     classIds,
     enabled: classes.length > 0
   });
@@ -101,11 +100,11 @@ export default function ClassesList() {
     } finally {
       setLoading(false);
     }
-  }, [user, debouncedSearchQuery, filterStatus, sortBy, sortOrder, isSafeToQuery]);
+  }, [user, profile, debouncedSearchQuery, filterStatus, sortBy, sortOrder, isSafeToQuery]);
 
   useEffect(() => {
     fetchClasses();
-  }, [user?.id, debouncedSearchQuery, filterStatus, sortBy, sortOrder, isSafeToQuery]); // Remove function dependency
+  }, [fetchClasses]);
 
   const handleRefresh = useCallback(() => {
     fetchClasses();
@@ -120,19 +119,19 @@ export default function ClassesList() {
     setShowAddModal(true);
   };
 
-  const handleOpenEditModal = (classItem: Class) => {
-    if (!profile?.school_id) {
-      Alert.alert('Error', 'School ID is required to edit a class');
-      return;
-    }
-    // Convert Class to ClassWithDetails by adding required properties
-    const classWithDetails: ClassWithDetails = {
-      ...classItem,
-      teachers: [] // Initialize with empty array, will be populated by the modal if needed
-    };
-    setEditingClass(classWithDetails);
-    setShowAddModal(true);
-  };
+  // const handleOpenEditModal = (classItem: Class) => {
+  //   if (!profile?.school_id) {
+  //     Alert.alert('Error', 'School ID is required to edit a class');
+  //     return;
+  //   }
+  //   // Convert Class to ClassWithDetails by adding required properties
+  //   const classWithDetails: ClassWithDetails = {
+  //     ...classItem,
+  //     teachers: [] // Initialize with empty array, will be populated by the modal if needed
+  //   };
+  //   setEditingClass(classWithDetails);
+  //   setShowAddModal(true);
+  // };
 
   const handleCloseModal = () => {
     setShowAddModal(false);
@@ -182,10 +181,10 @@ export default function ClassesList() {
     }
   };
 
-  const toggleBulkSelectionMode = () => {
-    setBulkSelectionMode(!bulkSelectionMode);
-    setSelectedClasses([]);
-  };
+  // const toggleBulkSelectionMode = () => {
+  //   setBulkSelectionMode(!bulkSelectionMode);
+  //   setSelectedClasses([]);
+  // };
 
   const handleBulkDelete = async () => {
     if (selectedClasses.length === 0) return;
@@ -209,7 +208,7 @@ export default function ClassesList() {
             setSelectedClasses([]);
             setBulkSelectionMode(false);
             fetchClasses();
-          } catch (error) {
+          } catch {
             Alert.alert('Error', 'Failed to delete classes');
           } finally {
             setLoading(false);
@@ -237,7 +236,7 @@ export default function ClassesList() {
       setSelectedClasses([]);
       setBulkSelectionMode(false);
       fetchClasses();
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to update classes');
     } finally {
       setLoading(false);

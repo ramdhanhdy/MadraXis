@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { View, TouchableOpacity, ViewStyle, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useColors } from '../../../context/ThemeContext';
 

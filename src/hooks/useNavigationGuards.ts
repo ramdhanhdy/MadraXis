@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { ClassService } from '../services/classService';
 import { logger } from '../utils/logger';
@@ -20,7 +19,6 @@ export function useNavigationGuards(): NavigationGuardResult {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
-  const router = useRouter();
 
   /**
    * Validate if teacher has access to specific class

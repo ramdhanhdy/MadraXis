@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
@@ -84,10 +84,10 @@ export default function CCTVAccessRequest() {
     return dateValidation.isValid;
   };
 
-  const getDateError = () => {
-    const dateValidation = validateDateRange(startDate, endDate);
-    return dateValidation.error;
-  };
+  // const getDateError = () => {
+  //   const dateValidation = validateDateRange(startDate, endDate);
+  //   return dateValidation.error;
+  // };
 
   const handleSubmit = () => {
     if (!isFormValid()) return;
@@ -110,12 +110,12 @@ export default function CCTVAccessRequest() {
     });
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('id-ID', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  // const formatTime = (date: Date) => {
+  //   return date.toLocaleTimeString('id-ID', {
+  //     hour: '2-digit',
+  //     minute: '2-digit',
+  //   });
+  // };
 
   if (submitted) {
     return (

@@ -8,11 +8,6 @@ interface UseStudentCountSubscriptionProps {
   enabled?: boolean;
 }
 
-interface ClassStudentCount {
-  classId: number;
-  count: number;
-}
-
 interface UseStudentCountSubscriptionReturn {
   counts: Record<number, number>;
   loading: boolean;
@@ -141,7 +136,7 @@ export function useStudentCountSubscription({
     return () => {
       cleanupSubscriptions();
     };
-  }, [classIds.join(','), enabled]); // Remove function dependencies to prevent infinite loops
+  }, [classIds, enabled, fetchCounts, setupSubscriptions, cleanupSubscriptions]);
 
   const refetch = useCallback(() => {
     fetchCounts();

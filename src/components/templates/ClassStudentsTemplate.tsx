@@ -15,8 +15,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Swipeable } from 'react-native-gesture-handler';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Swipeable, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ClassService } from '../../services/class';
 import { useAuth } from '../../hooks/useAuth';
 import { useSafeToQuery } from '../../utils/navigationGuard';
@@ -47,7 +46,7 @@ export default function ClassStudentsTemplate() {
   const [removeLoading, setRemoveLoading] = useState<Set<string>>(new Set());
 
   // Use real-time subscription for students
-  const { students, loading: studentsLoading, error, refetch } = useClassStudentsSubscription({
+  const { students, loading: studentsLoading, refetch } = useClassStudentsSubscription({
     classId: classId || 0,
     enabled: !!classId && !!user?.id
   });

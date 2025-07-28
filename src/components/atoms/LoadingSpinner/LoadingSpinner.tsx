@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { ActivityIndicator, View, ViewStyle, TextStyle, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, ViewStyle, TextStyle } from 'react-native';
 import { useTheme, useColors } from '../../../context/ThemeContext';
 import { Typography } from '../Typography';
 
@@ -115,10 +115,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   );
 };
 
-// Internal styles
-const styles = StyleSheet.create({
-  // Add any internal styles if needed
-});
+
 
 // Named export
 export { LoadingSpinner };

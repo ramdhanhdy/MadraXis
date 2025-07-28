@@ -3,7 +3,7 @@
  * Consistent form input implementation with validation, states, and accessibility
  */
 
-import React, { useState, useRef, forwardRef } from 'react';
+import React, { useState, forwardRef } from 'react';
 import {
   TextInput,
   View,
@@ -17,7 +17,7 @@ import {
   TextInputFocusEventData,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors, useComponentTheme } from '../../../context/ThemeContext';
+import { useTheme, useColors } from '../../../context/ThemeContext';
 
 // Input Props Interface
 export interface InputProps extends Omit<TextInputProps, 'style'> {

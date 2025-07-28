@@ -16,9 +16,7 @@ interface UseClassStudentsSubscriptionReturn {
   refetch: () => void;
 }
 
-interface ClassStudentJoin extends ClassStudent {
-  student: Student;
-}
+
 
 export function useClassStudentsSubscription({
   classId,
@@ -125,7 +123,7 @@ export function useClassStudentsSubscription({
         subscriptionRef.current = null;
       }
     };
-  }, [classId, enabled]); // Remove function dependencies to prevent infinite loops
+  }, [classId, enabled, fetchStudents, setupSubscription]);
 
   const refetch = useCallback(() => {
     fetchStudents();
