@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
+import { useLocalSearchParams, Stack } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 import { useAuth } from '../../src/hooks/useAuth';
 import AuthForm from '../../src/components/organisms/AuthForm';

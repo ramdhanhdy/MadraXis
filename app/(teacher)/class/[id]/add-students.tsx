@@ -4,13 +4,11 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import { AddStudentsToClassModal } from '../../../../src/components/organisms/AddStudentsToClassModal/AddStudentsToClassModal';
 import { ErrorBoundary } from '../../../../src/components/organisms/ErrorBoundary';
 import { useNavigationGuards } from '../../../../src/hooks/useNavigationGuards';
-import { logger } from '../../../../src/utils/logger';
 
 export default function AddStudentsModal() {
   const router = useRouter();
   const { id, returnUrl } = useLocalSearchParams();
   const [retryKey, setRetryKey] = useState(0);
-  const [isInitialized, setIsInitialized] = useState(false);
   const { hasAccess, isLoading, error, validateAccess } = useNavigationGuards();
   
   // Validate and parse class ID with error handling

@@ -7,17 +7,7 @@ export * from './class';
 export * from './dashboard';
 export * from './database';
 
-// Database-specific types
-export type {
-  Tables,
-  InsertTables,
-  UpdateTables,
-  DatabaseResponse,
-  PaginatedResponse,
-  DatabaseError,
-  Nullable,
-  Optional,
-} from '../types/database';
+// Database-specific types are already exported via export * from './database' above
 
 // Service-specific types
 export type { School } from '../services/schools';

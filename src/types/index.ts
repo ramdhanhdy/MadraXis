@@ -8,8 +8,7 @@ export interface Profile {
   updated_at: string;
 }
 
-// Import database types for consistency
-export type { Database } from '../types/database';
+// Database types are exported via exports.ts to avoid duplicate exports
 
 // Role-specific detail interfaces
 export interface StudentDetails {

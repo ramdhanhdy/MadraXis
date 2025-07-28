@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, ScrollView, Alert, TouchableOpacity } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
@@ -11,7 +10,6 @@ import { Card } from '../../src/components/molecules/Card';
 import { QuickAction } from '../../src/components/molecules/QuickAction';
 import { ListItem } from '../../src/components/molecules/ListItem';
 import { Typography } from '../../src/components/atoms/Typography';
-import { LoadingSpinner } from '../../src/components/atoms/LoadingSpinner/LoadingSpinner';
 import { ErrorMessage } from '../../src/components/molecules/ErrorMessage/ErrorMessage';
 import { EmptyState } from '../../src/components/molecules/EmptyState/EmptyState';
 import { SkeletonCard } from '../../src/components/molecules/SkeletonCard/SkeletonCard';
@@ -33,9 +31,9 @@ type IoniconsIcon = keyof typeof Ionicons.glyphMap;
 
 export default function ManagementDashboard() {
   const router = useRouter();
-  const { user, profile, signOut, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const isSafeToQuery = useSafeToQuery();
-  const [schoolName, setSchoolName] = useState('Zaid Bin Tsabit');
+  const [schoolName] = useState('Zaid Bin Tsabit');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
@@ -77,7 +75,7 @@ export default function ManagementDashboard() {
   };
 
   // Unified data fetching function to prevent loading state race conditions
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     // Don't fetch data if navigation is in progress
     if (!isSafeToQuery) {
       console.log('Skipping dashboard data fetch - navigation in progress');
@@ -153,7 +151,7 @@ export default function ManagementDashboard() {
       setIsLoading(false);
       setDashboardLoading(false);
     }
-  };
+  }, [user, profile, isSafeToQuery]);
 
   // Navigate to incident detail
   const navigateToIncidentDetail = (incidentId: number) => {
@@ -228,7 +226,7 @@ export default function ManagementDashboard() {
     if (user && !authLoading && isSafeToQuery) {
       fetchDashboardData();
     }
-  }, [user, profile, authLoading, isSafeToQuery]);
+  }, [user, profile, authLoading, isSafeToQuery, fetchDashboardData]);
 
   // No additional refresh needed - data loads on mount and user change
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 
@@ -150,7 +150,7 @@ export default function ParentDashboard() {
     };
 
     fetchSchoolName();
-  }, [profile?.school_id]);
+  }, [profile?.school_id, isSafeToQuery]);
 
   // Handle navigation
   const handleNavigate = (route: string) => {
@@ -252,15 +252,6 @@ export default function ParentDashboard() {
         return 'home-outline';
       default:
         return 'information-circle-outline';
-    }
-  };
-
-  const getActivityColor = (type: string) => {
-    switch (type) {
-      case 'academic': return colors.success.main;
-      case 'quran': return colors.primary.main;
-      case 'dorm': return colors.warning.main;
-      default: return colors.neutral[500];
     }
   };
 
