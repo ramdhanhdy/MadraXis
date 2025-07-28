@@ -1,7 +1,6 @@
 import {
   CreateClassRequest,
   UpdateClassRequest,
-  BulkUpdateRequest,
   GetClassesOptions,
   GetAvailableStudentsOptions,
   GetClassStudentsOptions,
@@ -9,8 +8,7 @@ import {
   BulkEnrollStudentsRequest,
   BulkUpdateClassesRequest,
   ClassWithDetails,
-  StudentWithDetails,
-  ClassServiceError
+  StudentWithDetails
 } from './types';
 import { ClassRepository } from './repository';
 import { ClassAccessControl } from './access';
@@ -140,7 +138,7 @@ export class ClassService {
     teacherId: string
   ): Promise<{
     results: string[];
-    errors: Array<{ studentId: string; error: string }>;
+    errors: { studentId: string; error: string }[];
   }> {
     return ClassEnrollmentService.bulkEnrollStudents(classId, enrollmentData, teacherId);
   }
@@ -165,7 +163,7 @@ export class ClassService {
     teacherId: string
   ): Promise<{
     results: string[];
-    errors: Array<{ studentId: string; error: string }>;
+    errors: { studentId: string; error: string }[];
   }> {
     return ClassEnrollmentService.bulkRemoveStudents(classId, studentIds, teacherId);
   }
@@ -180,7 +178,7 @@ export class ClassService {
     teacherId: string
   ): Promise<{
     results: number[];
-    errors: Array<{ classId: number; error: string }>;
+    errors: { classId: number; error: string }[];
   }> {
     return ClassBulkOperations.bulkUpdateClasses(updateData, teacherId);
   }
@@ -193,7 +191,7 @@ export class ClassService {
     teacherId: string
   ): Promise<{
     results: number[];
-    errors: Array<{ classId: number; error: string }>;
+    errors: { classId: number; error: string }[];
   }> {
     return ClassBulkOperations.bulkDeleteClasses(classIds, teacherId);
   }
@@ -206,7 +204,7 @@ export class ClassService {
     teacherId: string
   ): Promise<{
     results: number[];
-    errors: Array<{ classId: number; error: string }>;
+    errors: { classId: number; error: string }[];
   }> {
     return ClassBulkOperations.bulkRestoreClasses(classIds, teacherId);
   }
@@ -220,7 +218,7 @@ export class ClassService {
     currentTeacherId: string
   ): Promise<{
     results: number[];
-    errors: Array<{ classId: number; error: string }>;
+    errors: { classId: number; error: string }[];
   }> {
     return ClassBulkOperations.bulkAssignTeacher(classIds, newTeacherId, currentTeacherId);
   }
@@ -288,7 +286,7 @@ export class ClassService {
       end_date?: string;
     }
   ): Promise<{
-    audits: Array<{
+    audits: {
       id: number;
       action_type: string;
       old_values: any;
@@ -296,7 +294,7 @@ export class ClassService {
       performed_by: string;
       performed_at: string;
       metadata: any;
-    }>;
+    }[];
     total: number;
   }> {
     // Verify access first

@@ -221,7 +221,7 @@ export class ClassAuditService {
       end_date?: string;
     }
   ): Promise<{
-    audits: Array<{
+    audits: {
       id: number;
       action_type: string;
       old_values: any;
@@ -230,7 +230,7 @@ export class ClassAuditService {
       performed_at: string;
       metadata: any;
       performed_by_name: string | null;
-    }>;
+    }[];
     total: number;
   }> {
     try {

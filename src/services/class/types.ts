@@ -74,17 +74,17 @@ export interface BulkUpdateRequest {
 }
 
 // Alias for backward compatibility
-export interface BulkUpdateClassesRequest extends BulkUpdateRequest {}
+export type BulkUpdateClassesRequest = BulkUpdateRequest;
 
 export interface ClassWithDetails extends Class {
   student_count: number;
   subject_count: number;
   teacher_count: number;
-  teachers: Array<{
+  teachers: {
     user_id: string;
     role: string;
     full_name: string;
-  }>;
+  }[];
 }
 
 export interface EnrollStudentRequest {
@@ -135,7 +135,7 @@ export interface GetTeacherClassesOptions {
 }
 
 // Alias for backward compatibility
-export interface GetClassesOptions extends GetTeacherClassesOptions {}
+export type GetClassesOptions = GetTeacherClassesOptions;
 
 // Error class
 export class ClassServiceError extends Error {

@@ -1,11 +1,11 @@
 /**
  * Tests for ClassEnrollmentService
  * Focuses on the enrollStudent method and its use of atomic enrollment
+ * Also includes tests for SQL injection prevention in getClassStudents
  */
 
 import { ClassEnrollmentService } from '../enrollment';
 import { supabase } from '../../../utils/supabase';
-import { ClassServiceError } from '../types';
 
 // Mock supabase
 jest.mock('../../../utils/supabase', () => ({
@@ -22,6 +22,81 @@ describe('ClassEnrollmentService', () => {
     jest.clearAllMocks();
   });
 
+  describe('getClassStudents', () => {
+    const classId = 1;
+    const teacherId = 'teacher-123';
+
+    it('should properly escape malicious search terms to prevent SQL injection', async () => {
+      // Mock the query builder chain
+      const mockQuery = {
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        or: jest.fn().mockReturnThis(),
+        order: jest.fn().mockReturnThis(),
+        range: jest.fn().mockResolvedValue({
+          data: [],
+          count: 0,
+          error: null
+        })
+      };
+
+      mockSupabase.from.mockReturnValue(mockQuery as any);
+
+      // Search term with SQL injection attempt
+      const maliciousSearchTerm = '";\'--; DROP TABLE students;';
+      
+      await ClassEnrollmentService.getClassStudents(classId, teacherId, {
+        searchTerm: maliciousSearchTerm
+      });
+
+      // Verify the or method was called with properly escaped parameters
+      expect(mockQuery.or).toHaveBeenCalled();
+      const orCallArg = mockQuery.or.mock.calls[0][0];
+      
+      // Instead of checking the exact string which causes escaping issues,
+      // verify key aspects of proper escaping
+      
+      // 1. Verify the malicious content is present but properly escaped
+      expect(orCallArg).toContain('DROP TABLE students');
+      
+      // 2. Verify double quotes are doubled (" becomes "")
+      expect(orCallArg).toContain('""');
+      
+      // 3. Verify the pattern is wrapped in double quotes (indicating proper escaping)
+      expect(orCallArg).toMatch(/\.ilike\.".*"/);
+      
+      // Verify the structure of the OR condition
+      expect(orCallArg.split(',').length).toBe(2); // Should have two conditions
+      expect(orCallArg).toMatch(/profiles\.full_name\.ilike\./); // Should have full_name condition
+      expect(orCallArg).toMatch(/profiles\.student_details\.nis\.ilike\./); // Should have nis condition
+    });
+
+    it('should handle empty search terms gracefully', async () => {
+      // Mock the query builder chain
+      const mockQuery = {
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        or: jest.fn().mockReturnThis(),
+        order: jest.fn().mockReturnThis(),
+        range: jest.fn().mockResolvedValue({
+          data: [],
+          count: 0,
+          error: null
+        })
+      };
+
+      mockSupabase.from.mockReturnValue(mockQuery as any);
+      
+      // Empty search term
+      await ClassEnrollmentService.getClassStudents(classId, teacherId, {
+        searchTerm: ''
+      });
+
+      // Verify the or method was NOT called for empty search term
+      expect(mockQuery.or).not.toHaveBeenCalled();
+    });
+  });
+  
   describe('enrollStudent', () => {
     const classId = 1;
     const teacherId = 'teacher-123';

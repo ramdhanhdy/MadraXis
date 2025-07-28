@@ -266,7 +266,7 @@ export class ClassRepository {
     const validatedData = UpdateClassSchema.parse(updates);
 
     // Update class record
-    const { data: updatedClass, error } = await supabase
+    const { error } = await supabase
       .from('classes')
       .update({
         ...validatedData,
@@ -324,7 +324,7 @@ export class ClassRepository {
    * Restore a soft-deleted class
    */
   static async restore(classId: number, teacherId: string): Promise<ClassWithDetails> {
-    const { data: restoredClass, error } = await supabase
+    const { error } = await supabase
       .from('classes')
       .update({
         status: 'active',

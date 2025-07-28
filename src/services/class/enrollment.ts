@@ -47,7 +47,6 @@ export class ClassEnrollmentService {
 
       const { page, limit } = sanitizePagination(validatedOptions?.page, validatedOptions?.limit);
       const offset = (page - 1) * limit;
-      let searchResults: StudentWithDetails[] = [];
 
       // Handle search functionality with optimized single query
       if (validatedOptions?.searchTerm) {
@@ -242,13 +241,25 @@ export class ClassEnrollmentService {
         `, { count: 'exact' }).
       eq('class_id', classId);
 
-      // Apply search filter safely using parameterized queries
+      // Apply search filter safely using server-side filtering with proper escaping
       if (options?.searchTerm) {
         const sanitizedSearch = sanitizeLikeInput(options.searchTerm);
         if (sanitizedSearch.length > 0) {
           const searchPattern = `%${sanitizedSearch}%`;
-          // Use Supabase's or method with proper escaping
-          query = query.or(`profiles.full_name.ilike.${searchPattern},profiles.student_details.nis.ilike.${searchPattern}`);
+          
+          // Escape the pattern for safe inclusion in Postgrest OR filter
+          // by quoting it and doubling any inner quotes to prevent SQL injection
+          const escapePostgrestValue = (val: string): string => {
+            const escaped = val.replace(/"/g, '""');
+            return `"${escaped}"`;
+          };
+
+          const escapedPattern = escapePostgrestValue(searchPattern);
+          const nameCondition = `profiles.full_name.ilike.${escapedPattern}`;
+          const nisCondition = `profiles.student_details.nis.ilike.${escapedPattern}`;
+
+          // Use OR with properly escaped conditions
+          query = query.or(`${nameCondition},${nisCondition}`);
         }
       }
 
@@ -336,6 +347,36 @@ export class ClassEnrollmentService {
         );
       }
 
+      // Get class's school_id and validate it matches teacher's school_id
+      const { data: classData } = await supabase.
+      from('classes').
+      select('school_id').
+      eq('id', classId).
+      single();
+
+      if (!classData) {
+        throw ClassServiceError.create(
+          'CLASS_NOT_FOUND',
+          'Class not found',
+          { classId, teacherId }
+        );
+      }
+
+      if (classData.school_id !== teacherProfile.school_id) {
+        throw ClassServiceError.create(
+          'CROSS_SCHOOL_ENROLLMENT',
+          'Cannot enroll students in classes from different schools',
+          { 
+            classId, 
+            teacherId, 
+            additionalContext: { 
+              teacherSchoolId: teacherProfile.school_id, 
+              classSchoolId: classData.school_id 
+            }
+          }
+        );
+      }
+
       // Use atomic function to enroll student with capacity checking
       const { data: result, error } = await supabase.
       rpc('add_students_to_class_atomic', {
@@ -415,7 +456,7 @@ export class ClassEnrollmentService {
   teacherId: string)
   : Promise<{
     results: string[];
-    errors: Array<{studentId: string;error: string;}>;
+    errors: {studentId: string;error: string;}[];
   }> {
     try {
       // Validate input
@@ -433,6 +474,36 @@ export class ClassEnrollmentService {
           'TEACHER_NOT_FOUND',
           'Teacher profile not found',
           { teacherId, classId }
+        );
+      }
+
+      // Get class's school_id and validate it matches teacher's school_id
+      const { data: classData } = await supabase.
+      from('classes').
+      select('school_id').
+      eq('id', classId).
+      single();
+
+      if (!classData) {
+        throw ClassServiceError.create(
+          'CLASS_NOT_FOUND',
+          'Class not found',
+          { classId, teacherId }
+        );
+      }
+
+      if (classData.school_id !== teacherProfile.school_id) {
+        throw ClassServiceError.create(
+          'CROSS_SCHOOL_ENROLLMENT',
+          'Cannot enroll students in classes from different schools',
+          { 
+            classId, 
+            teacherId, 
+            additionalContext: { 
+              teacherSchoolId: teacherProfile.school_id, 
+              classSchoolId: classData.school_id 
+            }
+          }
         );
       }
 
@@ -556,10 +627,10 @@ export class ClassEnrollmentService {
   teacherId: string)
   : Promise<{
     results: string[];
-    errors: Array<{studentId: string;error: string;}>;
+    errors: {studentId: string;error: string;}[];
   }> {
     const results: string[] = [];
-    const errors: Array<{studentId: string;error: string;}> = [];
+    const errors: {studentId: string;error: string;}[] = [];
 
     for (const studentId of studentIds) {
       try {

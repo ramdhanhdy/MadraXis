@@ -20,13 +20,13 @@ export class ClassBulkOperations {
     teacherId: string
   ): Promise<{
     results: number[];
-    errors: Array<{ classId: number; error: string }>;
+    errors: { classId: number; error: string }[];
   }> {
     // Validate input
     const validatedData = BulkUpdateClassSchema.parse(updateData);
     
     const results: number[] = [];
-    const errors: Array<{ classId: number; error: string }> = [];
+    const errors: { classId: number; error: string }[] = [];
 
     for (const classId of validatedData.class_ids) {
       try {
@@ -113,10 +113,10 @@ export class ClassBulkOperations {
     teacherId: string
   ): Promise<{
     results: number[];
-    errors: Array<{ classId: number; error: string }>;
+    errors: { classId: number; error: string }[];
   }> {
     const results: number[] = [];
-    const errors: Array<{ classId: number; error: string }> = [];
+    const errors: { classId: number; error: string }[] = [];
 
     for (const classId of classIds) {
       try {
@@ -178,10 +178,10 @@ export class ClassBulkOperations {
     teacherId: string
   ): Promise<{
     results: number[];
-    errors: Array<{ classId: number; error: string }>;
+    errors: { classId: number; error: string }[];
   }> {
     const results: number[] = [];
-    const errors: Array<{ classId: number; error: string }> = [];
+    const errors: { classId: number; error: string }[] = [];
 
     for (const classId of classIds) {
       try {
@@ -267,10 +267,10 @@ export class ClassBulkOperations {
     currentTeacherId: string
   ): Promise<{
     results: number[];
-    errors: Array<{ classId: number; error: string }>;
+    errors: { classId: number; error: string }[];
   }> {
     const results: number[] = [];
-    const errors: Array<{ classId: number; error: string }> = [];
+    const errors: { classId: number; error: string }[] = [];
 
     for (const classId of classIds) {
       try {
