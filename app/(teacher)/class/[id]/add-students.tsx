@@ -1,8 +1,8 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { AddStudentsToClassModal } from '../../../../src/components/organisms/AddStudentsToClassModal/AddStudentsToClassModal';
-import { ErrorBoundary } from '../../../../src/components/organisms/ErrorBoundary';
+import { AddStudentsToClassModal } from '@ui/organisms/AddStudentsToClassModal';
+import { ErrorBoundary } from '@ui/organisms/ErrorBoundary';
 import { useNavigationGuards } from '../../../../src/hooks/useNavigationGuards';
 
 export default function AddStudentsModal() {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import ClassDetailView from '../../../../src/components/templates/ClassDetailView';
+import ClassDetailView from '@ui/templates/ClassDetailView';
 
 export default function ClassDetailIndex() {
   return (

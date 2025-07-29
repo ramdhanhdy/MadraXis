@@ -1,29 +1,24 @@
 /**
- * UI Templates - Page-level layouts and structures
+ * Barrel exports for template components
  * 
- * Templates are page-level objects that place components into a layout
- * and articulate the design's underlying content structure.
+ * These are page-level layouts that provide consistent structure
+ * and composition patterns for different types of screens.
  */
 
-// Export all templates here as they are migrated
-// Example exports (will be uncommented as components are migrated):
-// export { DashboardTemplate } from './DashboardTemplate';
-// export { FormTemplate } from './FormTemplate';
-// export { ModalTemplate } from './ModalTemplate';
-// export { AddStudentTemplate } from './AddStudentTemplate';
-// export { AntiBullyingResourcesTemplate } from './AntiBullyingResourcesTemplate';
-// export { CCTVAccessRequestTemplate } from './CCTVAccessRequestTemplate';
-// export { ClassDetailTemplate } from './ClassDetailTemplate';
-// export { ClassDetailView } from './ClassDetailView';
-// export { ClassReportsTemplate } from './ClassReportsTemplate';
-// export { ClassScheduleTemplate } from './ClassScheduleTemplate';
-// export { ClassStudentsTemplate } from './ClassStudentsTemplate';
-// export { ClassesListTemplate } from './ClassesListTemplate';
-// export { ParentIncidentReportTemplate } from './ParentIncidentReportTemplate';
-// export { StudentAntiBullyingTemplate } from './StudentAntiBullyingTemplate';
-// export { StudentDetailTemplate } from './StudentDetailTemplate';
-// export { StudentIncidentReportTemplate } from './StudentIncidentReportTemplate';
-// export { StudentsListTemplate } from './StudentsListTemplate';
-
-// Temporary empty export to prevent TypeScript errors
-export {};
+export { DashboardTemplate } from './DashboardTemplate';
+export { FormTemplate } from './FormTemplate';
+export { ModalTemplate } from './ModalTemplate';
+export { default as AddStudentTemplate } from './AddStudentTemplate';
+export { default as AntiBullyingResourcesTemplate } from './AntiBullyingResourcesTemplate';
+export { default as CCTVAccessRequestTemplate } from './CCTVAccessRequestTemplate';
+export { default as ClassDetailTemplate } from './ClassDetailTemplate';
+export { default as ClassDetailView } from './ClassDetailView';
+export { default as ClassReportsTemplate } from './ClassReportsTemplate';
+export { default as ClassScheduleTemplate } from './ClassScheduleTemplate';
+export { default as ClassStudentsTemplate } from './ClassStudentsTemplate';
+export { default as ClassesListTemplate } from './ClassesListTemplate';
+export { default as ParentIncidentReportTemplate } from './ParentIncidentReportTemplate';
+export { default as StudentAntiBullyingTemplate } from './StudentAntiBullyingTemplate';
+export { default as StudentDetailTemplate } from './StudentDetailTemplate';
+export { default as StudentIncidentReportTemplate } from './StudentIncidentReportTemplate';
+export { default as StudentsListTemplate } from './StudentsListTemplate';

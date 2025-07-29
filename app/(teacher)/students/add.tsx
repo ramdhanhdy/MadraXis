@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import AddStudent from '../../../src/components/templates/AddStudentTemplate';
+import AddStudent from '@ui/templates/AddStudentTemplate';
 
 export default function AddStudentPage() {
   return (

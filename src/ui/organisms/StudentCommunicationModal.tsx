@@ -1,0 +1,110 @@
+import React from 'react';
+import { View } from 'react-native';
+import { Card } from '../molecules/Card';
+import { ListItem } from '../molecules/ListItem';
+import { Typography } from '../atoms/Typography';
+import { Icon } from '../atoms/Icon';
+
+export default function CommunicationModal() {
+  return (
+    <View>
+      <View style={{ marginBottom: 20 }}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          Guru
+        </Typography>
+        <Card variant="default" padding="none">
+          <ListItem
+            title="Ustadz Ahmad"
+            subtitle="Guru Tahfidz"
+            leftComponent={
+              <Icon
+                name="person"
+                size="md"
+                background={true}
+                backgroundColor="#005e7a"
+                color="#ffffff"
+              />
+            }
+            rightIcon="chatbubble-outline"
+            onPress={() => alert('Fitur chat dengan guru akan segera hadir!')}
+            testID="contact-ustadz-ahmad"
+          />
+          <ListItem
+            title="Ustadzah Fatimah"
+            subtitle="Guru Bahasa Arab"
+            leftComponent={
+              <Icon
+                name="person"
+                size="md"
+                background={true}
+                backgroundColor="#005e7a"
+                color="#ffffff"
+              />
+            }
+            rightIcon="chatbubble-outline"
+            onPress={() => alert('Fitur chat dengan guru akan segera hadir!')}
+            showDivider={true}
+            testID="contact-ustadzah-fatimah"
+          />
+        </Card>
+      </View>
+
+      <View style={{ marginBottom: 20 }}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          Orang Tua
+        </Typography>
+        <Card variant="default" padding="none">
+          <ListItem
+            title="Orang Tua"
+            subtitle="Ayah & Ibu"
+            leftComponent={
+              <Icon
+                name="people"
+                size="md"
+                background={true}
+                backgroundColor="#f0c75e"
+                color="#ffffff"
+              />
+            }
+            rightIcon="chatbubble-outline"
+            onPress={() => alert('Fitur chat dengan orang tua akan segera hadir!')}
+            testID="contact-parents"
+          />
+        </Card>
+      </View>
+
+      <View style={{ marginBottom: 20 }}>
+        <Typography variant="h4" color="primary" weight="bold" style={{ marginBottom: 15 }}>
+          Pesan Terbaru
+        </Typography>
+        <Card variant="default" padding="medium" style={{ marginBottom: 10 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+            <Typography variant="body1" color="primary" weight="bold">
+              Ustadz Ahmad
+            </Typography>
+            <Typography variant="body2" color="tertiary">
+              10:30
+            </Typography>
+          </View>
+          <Typography variant="body2" color="secondary">
+            Jangan lupa persiapkan hafalan untuk besok ya
+          </Typography>
+        </Card>
+        <Card variant="default" padding="medium">
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+            <Typography variant="body1" color="primary" weight="bold">
+              Ibu
+            </Typography>
+            <Typography variant="body2" color="tertiary">
+              Kemarin
+            </Typography>
+          </View>
+          <Typography variant="body2" color="secondary">
+            Bagaimana kabarmu hari ini, nak?
+          </Typography>
+        </Card>
+      </View>
+    </View>
+  );
+}
+

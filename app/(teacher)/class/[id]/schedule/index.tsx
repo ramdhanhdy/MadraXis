@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import ClassSchedule from '../../../../../src/components/templates/ClassScheduleTemplate';
+import ClassSchedule from '@ui/templates/ClassScheduleTemplate';
 
 export default function ClassScheduleIndex() {
   return (

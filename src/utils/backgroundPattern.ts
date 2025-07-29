@@ -4,7 +4,7 @@
  */
 
 import { useTheme, useColors } from '../context/ThemeContext';
-import { PatternVariant, PatternIntensity } from '../components/atoms/BackgroundPattern';
+import { PatternVariant, PatternIntensity } from '@ui/atoms/BackgroundPattern';
 
 // Pattern configuration for different contexts
 export interface PatternConfig {

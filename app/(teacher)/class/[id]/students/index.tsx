@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import ClassStudents from '../../../../../src/components/templates/ClassStudentsTemplate';
+import ClassStudents from '@ui/templates/ClassStudentsTemplate';
 
 export default function ClassStudentsIndex() {
   return (

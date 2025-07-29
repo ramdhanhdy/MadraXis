@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import ClassReports from '../../../../../src/components/templates/ClassReportsTemplate';
+import ClassReports from '@ui/templates/ClassReportsTemplate';
 
 export default function ClassReportsIndex() {
   return (
