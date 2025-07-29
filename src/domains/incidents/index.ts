@@ -8,11 +8,17 @@
  * - Communication with parents/teachers
  */
 
-// Export all incidents domain modules here as they are migrated
-// Example exports (will be uncommented as modules are migrated):
-// export * from './api';
-// export * from './hooks';
-// export * from './types';
+// Export all incidents domain modules
+export * from './api';
+export * from './hooks';
+export * from './store';
+export * from './types';
 
-// Temporary empty export to prevent TypeScript errors
-export {};
+// Export main services for backward compatibility
+export {
+  IncidentService,
+  IncidentRepository
+} from './api';
+
+// Re-export main service as default for backward compatibility
+export { IncidentService as default } from './api';

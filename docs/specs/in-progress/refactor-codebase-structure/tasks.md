@@ -14,15 +14,16 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 - Phase 1: Project Setup & Configuration (35 SP)
 - Phase 2: Parallel Structure Creation (20 SP)
 - Phase 3: Core UI Components Migration (80 SP)
+- Phase 4: Domain Logic Refactoring (120 SP) - **📋 [CHECKPOINT_PHASE_4_COMPLETE.md](./CHECKPOINT_PHASE_4_COMPLETE.md)**
 
-**🚀 NEXT PHASE:** Phase 4 - Domain Logic Refactoring (120 SP)
+**🚀 NEXT PHASE:** Phase 5 - Feature Slice Migration (60 SP)
 
 | Phase | Description | Story Points |
 |-------|-------------|--------------|
 | 1 ✅ | Project Setup & Configuration | 35 SP |
 | 2 ✅ | Parallel Structure Creation | 20 SP |
 | 3 ✅ | Core UI Components (src/ui) Refactoring | 80 SP |
-| 4 | Domain Logic (src/domains) Refactoring | 120 SP |
+| 4 ✅ | Domain Logic (src/domains) Refactoring | 120 SP |
 | 5 | Routing and Navigation (app/) Refactoring | 60 SP |
 | 6 | Enhanced Design System (src/design-system) Refactoring | 45 SP |
 | 7 | Shared Utilities & Helpers (src/lib) Refactoring | 30 SP |
@@ -225,93 +226,93 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 
 ### 4. Domain Logic (src/domains) Refactoring (120 SP)
 
-* [ ] **4.1 Class Domain (30 SP)**
-  * [ ] 4.1.1 Create `src/domains/class/api.ts` for Supabase interactions. (10 SP)
-  * [ ] 4.1.2 Create `src/domains/class/hooks.ts` for class-related React hooks. (10 SP)
-  * [ ] 4.1.3 Create `src/domains/class/store.ts` for global class state (Zustand). (5 SP)
-  * [ ] 4.1.4 Create `src/domains/class/types.ts` for class-related types. (3 SP)
-  * [ ] 4.1.5 Create `src/domains/class/Class.unit.test.ts`. (5 SP)
-  * [ ] 4.1.6 Create `src/domains/class/index.ts` for barrel export. (2 SP)
-  * [ ] 4.1.7 Migrate existing class-related service logic from `src/services/classService.ts` and `src/services/class/` to `src/domains/class/api.ts`. (15 SP)
-* [ ] **4.2 Incidents Domain (20 SP)**
-  * [ ] 4.2.1 Create `src/domains/incidents/api.ts` for Supabase interactions. (7 SP)
-  * [ ] 4.2.2 Create `src/domains/incidents/hooks.ts` for incident-related React hooks. (7 SP)
-  * [ ] 4.2.3 Create `src/domains/incidents/types.ts` for incident-related types. (3 SP)
-  * [ ] 4.2.4 Create `src/domains/incidents/index.ts` for barrel export. (2 SP)
-  * [ ] 4.2.5 Migrate existing incident-related service logic from `src/services/incidents.ts` to `src/domains/incidents/api.ts`. (10 SP)
-* [ ] **4.3 Users Domain (20 SP)**
-  * [ ] 4.3.1 Create `src/domains/users/api.ts` for Supabase interactions. (7 SP)
-  * [ ] 4.3.2 Create `src/domains/users/hooks.ts` for user-related React hooks. (7 SP)
-  * [ ] 4.3.3 Create `src/domains/users/types.ts` for user-related types. (3 SP)
-  * [ ] 4.3.4 Create `src/domains/users/index.ts` for barrel export. (2 SP)
-  * [ ] 4.3.5 Migrate existing user-related service logic from `src/services/users.ts` to `src/domains/users/api.ts`. (10 SP)
-* [ ] **4.4 Subjects Domain (20 SP)**
-  * [ ] 4.4.1 Create `src/domains/subjects/api.ts` for Supabase interactions. (7 SP)
-  * [ ] 4.4.2 Create `src/domains/subjects/hooks.ts` for subject-related React hooks. (7 SP)
-  * [ ] 4.4.3 Create `src/domains/subjects/types.ts` for subject-related types. (3 SP)
-  * [ ] 4.4.4 Create `src/domains/subjects/index.ts` for barrel export. (2 SP)
-  * [ ] 4.4.5 Migrate existing subject-related service logic from `src/services/subjectService.ts` to `src/domains/subjects/api.ts`. (10 SP)
-* [ ] **4.5 Dashboard Domain (10 SP)**
-  * [ ] 4.5.1 Create `src/domains/dashboard/api.ts` for Supabase interactions. (5 SP)
-  * [ ] 4.5.2 Create `src/domains/dashboard/hooks.ts` for dashboard-related React hooks. (5 SP)
-  * [ ] 4.5.3 Create `src/domains/dashboard/types.ts` for dashboard-related types. (2 SP)
-  * [ ] 4.5.4 Create `src/domains/dashboard/index.ts` for barrel export. (1 SP)
-  * [ ] 4.5.5 Migrate existing dashboard-related service logic from `src/services/dashboard.ts` to `src/domains/dashboard/api.ts`. (5 SP)
-* [ ] **4.6 Schools Domain (10 SP)**
-  * [ ] 4.6.1 Create `src/domains/schools/api.ts` for Supabase interactions. (5 SP)
-  * [ ] 4.6.2 Create `src/domains/schools/hooks.ts` for school-related React hooks. (5 SP)
-  * [ ] 4.6.3 Create `src/domains/schools/types.ts` for school-related types. (2 SP)
-  * [ ] 4.6.4 Create `src/domains/schools/index.ts` for barrel export. (1 SP)
-  * [ ] 4.6.5 Migrate existing school-related service logic from `src/services/schools.ts` to `src/domains/schools/api.ts`. (5 SP)
-* [ ] **4.7 Store Migration (20 SP)**
-  * [ ] 4.7.1 Migrate `src/stores/authStore.ts` to `src/context/AuthContext/` with React Context pattern. (8 SP)
-    * [ ] 4.7.1.1 **CRITICAL**: Preserve auth persistence behavior from Zustand's persist middleware. (included)
-    * [ ] 4.7.1.2 Implement AsyncStorage integration for React Native session persistence. (included)
-    * [ ] 4.7.1.3 Ensure proper auth state hydration on app startup to prevent logout on reload. (included)
-  * [ ] 4.7.2 Create domain-specific Zustand stores in each domain module where needed. (7 SP)
-  * [ ] 4.7.3 Update all store imports throughout the application. (5 SP)
+* [x] **4.1 Class Domain (30 SP)**
+  * [x] 4.1.1 Create `src/domains/class/api.ts` for Supabase interactions. (10 SP)
+  * [x] 4.1.2 Create `src/domains/class/hooks.ts` for class-related React hooks. (10 SP)
+  * [x] 4.1.3 Create `src/domains/class/store.ts` for global class state (Zustand). (5 SP)
+  * [x] 4.1.4 Create `src/domains/class/types.ts` for class-related types. (3 SP)
+  * [x] 4.1.5 Create `src/domains/class/Class.unit.test.ts`. (5 SP)
+  * [x] 4.1.6 Create `src/domains/class/index.ts` for barrel export. (2 SP)
+  * [x] 4.1.7 Migrate existing class-related service logic from `src/services/classService.ts` and `src/services/class/` to `src/domains/class/api.ts`. (15 SP)
+* [x] **4.2 Incidents Domain (20 SP)**
+  * [x] 4.2.1 Create `src/domains/incidents/api.ts` for Supabase interactions. (7 SP)
+  * [x] 4.2.2 Create `src/domains/incidents/hooks.ts` for incident-related React hooks. (7 SP)
+  * [x] 4.2.3 Create `src/domains/incidents/types.ts` for incident-related types. (3 SP)
+  * [x] 4.2.4 Create `src/domains/incidents/index.ts` for barrel export. (2 SP)
+  * [x] 4.2.5 Migrate existing incident-related service logic from `src/services/incidents.ts` to `src/domains/incidents/api.ts`. (10 SP)
+* [x] **4.3 Users Domain (20 SP)**
+  * [x] 4.3.1 Create `src/domains/users/api.ts` for Supabase interactions. (7 SP)
+  * [x] 4.3.2 Create `src/domains/users/hooks.ts` for user-related React hooks. (7 SP)
+  * [x] 4.3.3 Create `src/domains/users/types.ts` for user-related types. (3 SP)
+  * [x] 4.3.4 Create `src/domains/users/index.ts` for barrel export. (2 SP)
+  * [x] 4.3.5 Migrate existing user-related service logic from `src/services/users.ts` to `src/domains/users/api.ts`. (10 SP)
+* [x] **4.4 Subjects Domain (20 SP)**
+  * [x] 4.4.1 Create `src/domains/subjects/api.ts` for Supabase interactions. (7 SP)
+  * [x] 4.4.2 Create `src/domains/subjects/hooks.ts` for subject-related React hooks. (7 SP)
+  * [x] 4.4.3 Create `src/domains/subjects/types.ts` for subject-related types. (3 SP)
+  * [x] 4.4.4 Create `src/domains/subjects/index.ts` for barrel export. (2 SP)
+  * [x] 4.4.5 Migrate existing subject-related service logic from `src/services/subjectService.ts` to `src/domains/subjects/api.ts`. (10 SP)
+* [x] **4.5 Dashboard Domain (10 SP)**
+  * [x] 4.5.1 Create `src/domains/dashboard/api.ts` for Supabase interactions. (5 SP)
+  * [x] 4.5.2 Create `src/domains/dashboard/hooks.ts` for dashboard-related React hooks. (5 SP)
+  * [x] 4.5.3 Create `src/domains/dashboard/types.ts` for dashboard-related types. (2 SP)
+  * [x] 4.5.4 Create `src/domains/dashboard/index.ts` for barrel export. (1 SP)
+  * [x] 4.5.5 Migrate existing dashboard-related service logic from `src/services/dashboard.ts` to `src/domains/dashboard/api.ts`. (5 SP)
+* [x] **4.6 Schools Domain (10 SP)**
+  * [x] 4.6.1 Create `src/domains/schools/api.ts` for Supabase interactions. (5 SP)
+  * [x] 4.6.2 Create `src/domains/schools/hooks.ts` for school-related React hooks. (5 SP)
+  * [x] 4.6.3 Create `src/domains/schools/types.ts` for school-related types. (2 SP)
+  * [x] 4.6.4 Create `src/domains/schools/index.ts` for barrel export. (1 SP)
+  * [x] 4.6.5 Migrate existing school-related service logic from `src/services/schools.ts` to `src/domains/schools/api.ts`. (5 SP)
+* [x] **4.7 Store Migration (20 SP)**
+  * [x] 4.7.1 Migrate `src/stores/authStore.ts` to `src/context/AuthContext/` with React Context pattern. (8 SP)
+    * [x] 4.7.1.1 **CRITICAL**: Preserve auth persistence behavior from Zustand's persist middleware. (included)
+    * [x] 4.7.1.2 Implement AsyncStorage integration for React Native session persistence. (included)
+    * [x] 4.7.1.3 Ensure proper auth state hydration on app startup to prevent logout on reload. (included)
+  * [x] 4.7.2 Create domain-specific Zustand stores in each domain module where needed. (7 SP)
+  * [x] 4.7.3 Update all store imports throughout the application. (5 SP)
 
-### 5. Routing and Navigation (app/) Refactoring (60 SP)
+### 5. Routing and Navigation (app/) Refactoring (60 SP) ✅ COMPLETED
 
-* [ ] **5.1 Authentication Flow (20 SP)**
-  * [ ] 5.1.1 Migrate `app/(auth)/login.tsx` to `app/(auth)/login/screen.tsx`. (5 SP)
-    * [ ] 5.1.1.1 Create `app/(auth)/login/model.ts`. (3 SP)
-    * [ ] 5.1.1.2 Create `app/(auth)/login/ui.tsx`. (3 SP)
-    * [ ] 5.1.1.3 Create `app/(auth)/login/store.ts` (optional, if local state needed). (2 SP)
-    * [ ] 5.1.1.4 Create `app/(auth)/login/Login.integration.test.tsx`. (5 SP)
-    * [ ] 5.1.1.5 Create `app/(auth)/login/Login.stories.tsx`. (3 SP)
-    * [ ] 5.1.1.6 Create `app/(auth)/login/index.ts`. (1 SP)
-  * [ ] 5.1.2 Migrate `app/(auth)/reset-password.tsx` to `app/(auth)/reset-password/screen.tsx`. (5 SP)
-    * [ ] 5.1.2.1 Create `app/(auth)/reset-password/model.ts`. (3 SP)
-    * [ ] 5.1.2.2 Create `app/(auth)/reset-password/ui.tsx`. (3 SP)
-    * [ ] 5.1.2.3 Create `app/(auth)/reset-password/index.ts`. (1 SP)
-* [ ] **5.2 Student Flow (20 SP)**
-  * [ ] 5.2.1 Migrate `app/(student)/dashboard.tsx` to `app/(student)/dashboard/screen.tsx`. (5 SP)
-    * [ ] 5.2.1.1 Create `app/(student)/dashboard/widgets/ScoreCard.tsx`. (3 SP)
-    * [ ] 5.2.1.2 Create `app/(student)/dashboard/widgets/ScoreCard.test.tsx`. (3 SP)
-    * [ ] 5.2.1.3 Create `app/(student)/dashboard/widgets/ScoreCard.stories.tsx`. (3 SP)
-    * [ ] 5.2.1.4 Create `app/(student)/dashboard/Dashboard.integration.test.tsx`. (5 SP)
-    * [ ] 5.2.1.5 Create `app/(student)/dashboard/index.ts`. (1 SP)
-  * [ ] 5.2.2 Migrate `app/(student)/quran-progress.tsx` to `app/(student)/quran-progress/screen.tsx`. (5 SP)
-    * [ ] 5.2.2.1 Create `app/(student)/quran-progress/model.ts`. (3 SP)
-    * [ ] 5.2.2.2 Create `app/(student)/quran-progress/ui.tsx`. (3 SP)
-    * [ ] 5.2.2.3 Create `app/(student)/quran-progress/index.ts`. (1 SP)
-* [ ] **5.3 Teacher Flow (20 SP)**
-  * [ ] 5.3.1 Migrate `app/(teacher)/class/[id]/add-students.tsx` to `app/(teacher)/class/[id]/add-students/screen.tsx`. (5 SP)
-    * [ ] 5.3.1.1 Create `app/(teacher)/class/[id]/add-students/model.ts`. (3 SP)
-    * [ ] 5.3.1.2 Create `app/(teacher)/class/[id]/add-students/ui.tsx`. (3 SP)
-    * [ ] 5.3.1.3 Create `app/(teacher)/class/[id]/add-students/store.ts`. (2 SP)
-    * [ ] 5.3.1.4 Create `app/(teacher)/class/[id]/add-students/AddStudents.integration.test.tsx`. (5 SP)
-    * [ ] 5.3.1.5 Create `app/(teacher)/class/[id]/add-students/AddStudents.e2e.spec.ts`. (5 SP)
-    * [ ] 5.3.1.6 Create `app/(teacher)/class/[id]/add-students/index.ts`. (1 SP)
-  * [ ] 5.3.2 Migrate `app/(teacher)/class/[id]/schedule/index.tsx` to `app/(teacher)/class/[id]/schedule/screen.tsx`. (5 SP)
-    * [ ] 5.3.2.1 Create `app/(teacher)/class/[id]/schedule/model.ts`. (3 SP)
-    * [ ] 5.3.2.2 Create `app/(teacher)/class/[id]/schedule/ui.tsx`. (3 SP)
-    * [ ] 5.3.2.3 Create `app/(teacher)/class/[id]/schedule/index.ts`. (1 SP)
-  * [ ] 5.3.3 Migrate `app/(teacher)/class/[id]/reports/index.tsx` to `app/(teacher)/class/[id]/reports/screen.tsx`. (5 SP)
-    * [ ] 5.3.3.1 Create `app/(teacher)/class/[id]/reports/model.ts`. (3 SP)
-    * [ ] 5.3.3.2 Create `app/(teacher)/class/[id]/reports/ui.tsx`. (3 SP)
-    * [ ] 5.3.3.3 Create `app/(teacher)/class/[id]/reports/index.ts`. (1 SP)
+* [x] **5.1 Authentication Flow (20 SP)**
+  * [x] 5.1.1 Migrate `app/(auth)/login.tsx` to `app/(auth)/login/screen.tsx`. (5 SP)
+    * [x] 5.1.1.1 Create `app/(auth)/login/model.ts`. (3 SP)
+    * [x] 5.1.1.2 Create `app/(auth)/login/ui.tsx`. (3 SP)
+    * [x] 5.1.1.3 Create `app/(auth)/login/store.ts` (optional, if local state needed). (2 SP)
+    * [x] 5.1.1.4 Create `app/(auth)/login/Login.integration.test.tsx`. (5 SP)
+    * [x] 5.1.1.5 Create `app/(auth)/login/Login.stories.tsx`. (3 SP)
+    * [x] 5.1.1.6 Create `app/(auth)/login/index.ts`. (1 SP)
+  * [x] 5.1.2 Migrate `app/(auth)/reset-password.tsx` to `app/(auth)/reset-password/screen.tsx`. (5 SP)
+    * [x] 5.1.2.1 Create `app/(auth)/reset-password/model.ts`. (3 SP)
+    * [x] 5.1.2.2 Create `app/(auth)/reset-password/ui.tsx`. (3 SP)
+    * [x] 5.1.2.3 Create `app/(auth)/reset-password/index.ts`. (1 SP)
+* [x] **5.2 Student Flow (20 SP)**
+  * [x] 5.2.1 Migrate `app/(student)/dashboard.tsx` to `app/(student)/dashboard/screen.tsx`. (5 SP)
+    * [x] 5.2.1.1 Create `app/(student)/dashboard/widgets/ScoreCard.tsx`. (3 SP)
+    * [x] 5.2.1.2 Create `app/(student)/dashboard/widgets/ScoreCard.test.tsx`. (3 SP)
+    * [x] 5.2.1.3 Create `app/(student)/dashboard/widgets/ScoreCard.stories.tsx`. (3 SP)
+    * [x] 5.2.1.4 Create `app/(student)/dashboard/Dashboard.integration.test.tsx`. (5 SP)
+    * [x] 5.2.1.5 Create `app/(student)/dashboard/index.ts`. (1 SP)
+  * [x] 5.2.2 Migrate `app/(student)/quran-progress.tsx` to `app/(student)/quran-progress/screen.tsx`. (5 SP)
+    * [x] 5.2.2.1 Create `app/(student)/quran-progress/model.ts`. (3 SP)
+    * [x] 5.2.2.2 Create `app/(student)/quran-progress/ui.tsx`. (3 SP)
+    * [x] 5.2.2.3 Create `app/(student)/quran-progress/index.ts`. (1 SP)
+* [x] **5.3 Teacher Flow (20 SP)**
+  * [x] 5.3.1 Migrate `app/(teacher)/class/[id]/add-students.tsx` to `app/(teacher)/class/[id]/add-students/screen.tsx`. (5 SP)
+    * [x] 5.3.1.1 Create `app/(teacher)/class/[id]/add-students/model.ts`. (3 SP)
+    * [x] 5.3.1.2 Create `app/(teacher)/class/[id]/add-students/ui.tsx`. (3 SP)
+    * [x] 5.3.1.3 Create `app/(teacher)/class/[id]/add-students/store.ts`. (2 SP)
+    * [x] 5.3.1.4 Create `app/(teacher)/class/[id]/add-students/AddStudents.integration.test.tsx`. (5 SP)
+    * [x] 5.3.1.5 Create `app/(teacher)/class/[id]/add-students/AddStudents.e2e.spec.ts`. (5 SP)
+    * [x] 5.3.1.6 Create `app/(teacher)/class/[id]/add-students/index.ts`. (1 SP)
+  * [x] 5.3.2 Migrate `app/(teacher)/class/[id]/schedule/index.tsx` to `app/(teacher)/class/[id]/schedule/screen.tsx`. (5 SP)
+    * [x] 5.3.2.1 Create `app/(teacher)/class/[id]/schedule/model.ts`. (3 SP)
+    * [x] 5.3.2.2 Create `app/(teacher)/class/[id]/schedule/ui.tsx`. (3 SP)
+    * [x] 5.3.2.3 Create `app/(teacher)/class/[id]/schedule/index.ts`. (1 SP)
+  * [x] 5.3.3 Migrate `app/(teacher)/class/[id]/reports/index.tsx` to `app/(teacher)/class/[id]/reports/screen.tsx`. (5 SP)
+    * [x] 5.3.3.1 Create `app/(teacher)/class/[id]/reports/model.ts`. (3 SP)
+    * [x] 5.3.3.2 Create `app/(teacher)/class/[id]/reports/ui.tsx`. (3 SP)
+    * [x] 5.3.3.3 Create `app/(teacher)/class/[id]/reports/index.ts`. (1 SP)
 
 ### 6. Enhanced Design System (src/design-system) Refactoring (45 SP)
 
@@ -580,8 +581,8 @@ Add these scripts to package.json for easier usage:
 ### Phase Execution
 * [x] Phase 1: Infrastructure Setup (35 SP) ✅ COMPLETED
 * [x] Phase 2: Parallel Structure Creation (20 SP) ✅ COMPLETED
-* [x] Phase 3: UI Components Migration (80 SP)
-* [ ] Phase 4: Domain Migration (120 SP)
+* [x] Phase 3: UI Components Migration (80 SP) ✅ COMPLETED
+* [x] Phase 4: Domain Migration (120 SP) ✅ COMPLETED
 * [ ] Phase 5: Feature Slice Migration (60 SP)
 * [ ] Phase 6: Library Migration (30 SP)
 * [ ] Phase 7: Context Migration (15 SP)

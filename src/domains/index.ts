@@ -12,4 +12,4 @@ export * from './incidents';
 export * from './users';
 export * from './subjects';
 export * from './dashboard';
-export * from './schools';
+export * from './management';

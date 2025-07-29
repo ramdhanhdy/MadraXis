@@ -8,11 +8,12 @@
  * - Role-specific dashboard content
  */
 
-// Export all dashboard domain modules here as they are migrated
-// Example exports (will be uncommented as modules are migrated):
-// export * from './api';
-// export * from './hooks';
-// export * from './types';
+// Export all dashboard domain modules
+export * from './api';
+export * from './types';
 
-// Temporary empty export to prevent TypeScript errors
-export {};
+// Export main services for backward compatibility
+export { DashboardService } from './api';
+
+// Re-export main service as default for backward compatibility
+export { DashboardService as default } from './api';
