@@ -23,35 +23,23 @@
     "security:audit-input": "bun run ./scripts/security/audit-input.js",
     "security:audit-auth": "bun run ./scripts/security/audit-auth.js",
     "security:fix-logging": "bun run ./scripts/security/fix-logging.js",
-    "security:audit": "bun run security:audit-logging && bun run security:audit-input && bun run security:audit-auth"
+    "security:audit": "bun run security:audit-logging && bun run security:audit-input && bun run security:audit-auth",
+    "migrate:ui": "bun run scripts/migration/update-imports.js --phase=ui-components",
+    "migrate:domains": "bun run scripts/migration/update-imports.js --phase=domains",
+    "migrate:lib": "bun run scripts/migration/update-imports.js --phase=lib",
+    "migrate:validate": "bun run scripts/migration/validate-imports.js",
+    "migrate:rollback": "bun run scripts/migration/rollback.js",
+    "migrate:dry-run": "bun run scripts/migration/update-imports.js --dry-run",
+    "migrate:test-patterns": "bun run scripts/migration/test-patterns.js",
+    "migrate:checkpoint": "bun run scripts/migration/checkpoint-validation.js",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "e2e:test": "detox test --configuration=ios.sim.debug",
+    "e2e:build": "detox build --configuration=ios.sim.debug",
+    "e2e:test-android": "detox test --configuration=android.emu.debug",
+    "e2e:build-android": "detox build --configuration=android.emu.debug"
   },
-  "jest": {
-    "preset": "jest-expo",
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.js"
-    ],
-    "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-.*|expo(nent)?|@expo(nent)?/.*|@unimodules|@sentry/.*|sentry-expo|native-base))"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx"
-    ],
-    "transform": {
-      "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
-    },
-    "testMatch": [
-      "**/__tests__/**/*.(ts|tsx|js)",
-      "**/*.(test|spec).(ts|tsx|js)"
-    ],
-    "collectCoverageFrom": [
-      "src/**/*.{ts,tsx}",
-      "!src/**/*.d.ts",
-      "!src/**/*.stories.{ts,tsx}"
-    ]
-  },
+
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
     "@react-native-async-storage/async-storage": "2.1.2",

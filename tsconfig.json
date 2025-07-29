@@ -7,8 +7,16 @@
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "bundler",
     "skipLibCheck": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@ui/*": ["src/ui/*"],
+      "@domains/*": ["src/domains/*"],
+      "@lib/*": ["src/lib/*"],
+      "@design-system/*": ["src/design-system/*"],
+      "@context/*": ["src/context/*"],
+      "@types/*": ["src/types/*"],
+      "@app/*": ["app/*"]
     }
   },
   "include": [

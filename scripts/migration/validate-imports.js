@@ -174,7 +174,7 @@ function checkTypeScriptCompilation() {
   console.log('🔧 Checking TypeScript compilation...\n');
   
   try {
-    execSync('npx tsc --noEmit', { stdio: 'pipe' });
+    execSync('bun tsc --noEmit', { stdio: 'pipe' });
     console.log('✅ TypeScript compilation successful!\n');
     return true;
   } catch (error) {
