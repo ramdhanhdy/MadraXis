@@ -15,32 +15,113 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 // Migration phase configurations
 const MIGRATION_PHASES = {
   'ui-components': {
     name: 'UI Components Migration',
     patterns: [
+      // Double-level relative paths (../../)
       {
-        from: /from ['"]\.\.\/\.\.\/src\/components\/atoms\/([^'"]+)['"]/g,
-        to: "from '@ui/atoms/$1'"
+        forward: {
+          from: /from (['"])\.\.\/\.\.\/src\/components\/atoms\/([^'"]+)\1/g,
+          to: "from $1@ui/atoms/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@ui\/atoms\/([^'"]+)\1/g,
+          to: "from $1../../src/components/atoms/$2$1"
+        }
       },
       {
-        from: /from ['"]\.\.\/\.\.\/src\/components\/molecules\/([^'"]+)['"]/g,
-        to: "from '@ui/molecules/$1'"
+        forward: {
+          from: /from (['"])\.\.\/\.\.\/src\/components\/molecules\/([^'"]+)\1/g,
+          to: "from $1@ui/molecules/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@ui\/molecules\/([^'"]+)\1/g,
+          to: "from $1../../src/components/molecules/$2$1"
+        }
       },
       {
-        from: /from ['"]\.\.\/\.\.\/src\/components\/organisms\/([^'"]+)['"]/g,
-        to: "from '@ui/organisms/$1'"
+        forward: {
+          from: /from (['"])\.\.\/\.\.\/src\/components\/organisms\/([^'"]+)\1/g,
+          to: "from $1@ui/organisms/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@ui\/organisms\/([^'"]+)\1/g,
+          to: "from $1../../src/components/organisms/$2$1"
+        }
       },
       {
-        from: /from ['"]\.\.\/\.\.\/src\/components\/templates\/([^'"]+)['"]/g,
-        to: "from '@ui/templates/$1'"
+        forward: {
+          from: /from (['"])\.\.\/\.\.\/src\/components\/templates\/([^'"]+)\1/g,
+          to: "from $1@ui/templates/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@ui\/templates\/([^'"]+)\1/g,
+          to: "from $1../../src/components/templates/$2$1"
+        }
       },
       {
-        from: /from ['"]\.\.\/src\/components\/([^'"]+)['"]/g,
-        to: "from '@ui/$1'"
+        forward: {
+          from: /from (['"])\.\.\/\.\.\/src\/components\/([^'"]+)\1/g,
+          to: "from $1@ui/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@ui\/([^'"]+)\1/g,
+          to: "from $1../../src/components/$2$1"
+        }
+      },
+      // Single-level relative paths (../)
+      {
+        forward: {
+          from: /from (['"])\.\.\/src\/components\/atoms\/([^'"]+)\1/g,
+          to: "from $1@ui/atoms/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@ui\/atoms\/([^'"]+)\1/g,
+          to: "from $1../src/components/atoms/$2$1"
+        }
+      },
+      {
+        forward: {
+          from: /from (['"])\.\.\/src\/components\/molecules\/([^'"]+)\1/g,
+          to: "from $1@ui/molecules/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@ui\/molecules\/([^'"]+)\1/g,
+          to: "from $1../src/components/molecules/$2$1"
+        }
+      },
+      {
+        forward: {
+          from: /from (['"])\.\.\/src\/components\/organisms\/([^'"]+)\1/g,
+          to: "from $1@ui/organisms/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@ui\/organisms\/([^'"]+)\1/g,
+          to: "from $1../src/components/organisms/$2$1"
+        }
+      },
+      {
+        forward: {
+          from: /from (['"])\.\.\/src\/components\/templates\/([^'"]+)\1/g,
+          to: "from $1@ui/templates/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@ui\/templates\/([^'"]+)\1/g,
+          to: "from $1../src/components/templates/$2$1"
+        }
+      },
+      {
+        forward: {
+          from: /from (['"])\.\.\/src\/components\/([^'"]+)\1/g,
+          to: "from $1@ui/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@ui\/([^'"]+)\1/g,
+          to: "from $1../src/components/$2$1"
+        }
       }
     ],
     directories: ['app/', 'src/']
@@ -48,21 +129,49 @@ const MIGRATION_PHASES = {
   'domains': {
     name: 'Domain Migration',
     patterns: [
+      // Special case: classService -> class domain (double-level) - MUST come before generic
       {
-        from: /from ['"]\.\.\/\.\.\/src\/services\/classService['"]/g,
-        to: "from '@domains/class'"
+        forward: {
+          from: /from (['"])\.\.\/\.\.\/src\/services\/classService\1/g,
+          to: "from $1@domains/class$1"
+        },
+        rollback: {
+          from: /from (['"])@domains\/class\1/g,
+          to: "from $1../../src/services/classService$1"
+        }
       },
+      // Special case: classService -> class domain (single-level) - MUST come before generic
       {
-        from: /from ['"]\.\.\/src\/services\/classService['"]/g,
-        to: "from '@domains/class'"
+        forward: {
+          from: /from (['"])\.\.\/src\/services\/classService\1/g,
+          to: "from $1@domains/class$1"
+        },
+        rollback: {
+          from: /from (['"])@domains\/class\1/g,
+          to: "from $1../src/services/classService$1"
+        }
       },
+      // Generic services (double-level) - comes after specific patterns
       {
-        from: /from ['"]\.\.\/\.\.\/src\/services\/([^'"]+)['"]/g,
-        to: "from '@domains/$1'"
+        forward: {
+          from: /from (['"])\.\.\/\.\.\/src\/services\/(?!classService)([^'"]+)\1/g,
+          to: "from $1@domains/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@domains\/(?!class)([^'"]+)\1/g,
+          to: "from $1../../src/services/$2$1"
+        }
       },
+      // Generic services (single-level) - comes after specific patterns
       {
-        from: /from ['"]\.\.\/src\/services\/([^'"]+)['"]/g,
-        to: "from '@domains/$1'"
+        forward: {
+          from: /from (['"])\.\.\/src\/services\/(?!classService)([^'"]+)\1/g,
+          to: "from $1@domains/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@domains\/(?!class)([^'"]+)\1/g,
+          to: "from $1../src/services/$2$1"
+        }
       }
     ],
     directories: ['app/', 'src/']
@@ -70,42 +179,75 @@ const MIGRATION_PHASES = {
   'lib': {
     name: 'Library Migration',
     patterns: [
+      // Hooks (double-level)
       {
-        from: /from ['"]\.\.\/\.\.\/src\/hooks\/([^'"]+)['"]/g,
-        to: "from '@lib/hooks/$1'"
+        forward: {
+          from: /from (['"])\.\.\/\.\.\/src\/hooks\/([^'"]+)\1/g,
+          to: "from $1@lib/hooks/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@lib\/hooks\/([^'"]+)\1/g,
+          to: "from $1../../src/hooks/$2$1"
+        }
       },
+      // Hooks (single-level)
       {
-        from: /from ['"]\.\.\/src\/hooks\/([^'"]+)['"]/g,
-        to: "from '@lib/hooks/$1'"
+        forward: {
+          from: /from (['"])\.\.\/src\/hooks\/([^'"]+)\1/g,
+          to: "from $1@lib/hooks/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@lib\/hooks\/([^'"]+)\1/g,
+          to: "from $1../src/hooks/$2$1"
+        }
       },
+      // Utils (double-level)
       {
-        from: /from ['"]\.\.\/\.\.\/src\/utils\/([^'"]+)['"]/g,
-        to: "from '@lib/utils/$1'"
+        forward: {
+          from: /from (['"])\.\.\/\.\.\/src\/utils\/([^'"]+)\1/g,
+          to: "from $1@lib/utils/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@lib\/utils\/([^'"]+)\1/g,
+          to: "from $1../../src/utils/$2$1"
+        }
       },
+      // Utils (single-level)
       {
-        from: /from ['"]\.\.\/src\/utils\/([^'"]+)['"]/g,
-        to: "from '@lib/utils/$1'"
+        forward: {
+          from: /from (['"])\.\.\/src\/utils\/([^'"]+)\1/g,
+          to: "from $1@lib/utils/$2$1"
+        },
+        rollback: {
+          from: /from (['"])@lib\/utils\/([^'"]+)\1/g,
+          to: "from $1../src/utils/$2$1"
+        }
       }
     ],
     directories: ['app/', 'src/']
   }
 };
 
-// Command line argument parsing
-const args = process.argv.slice(2);
-const phase = args.find(arg => arg.startsWith('--phase='))?.split('=')[1];
-const isRollback = args.includes('--rollback');
-const isDryRun = args.includes('--dry-run');
+// Export for testing
+module.exports = { MIGRATION_PHASES };
 
-if (!phase || !MIGRATION_PHASES[phase]) {
-  console.error('❌ Invalid or missing phase. Available phases:');
-  Object.keys(MIGRATION_PHASES).forEach(p => {
-    console.error(`   - ${p}: ${MIGRATION_PHASES[p].name}`);
-  });
-  process.exit(1);
-}
+// Only run if this script is executed directly
+if (require.main === module) {
+  // Command line argument parsing
+  const args = process.argv.slice(2);
+  const phase = args.find(arg => arg.startsWith('--phase='))?.split('=')[1];
+  const isRollback = args.includes('--rollback');
+  const isDryRun = args.includes('--dry-run');
 
-const config = MIGRATION_PHASES[phase];
+  if (!phase || !MIGRATION_PHASES[phase]) {
+    console.error('❌ Invalid or missing phase. Available phases:');
+    Object.keys(MIGRATION_PHASES).forEach(p => {
+      console.error(`   - ${p}: ${MIGRATION_PHASES[p].name}`);
+    });
+    process.exit(1);
+  }
+
+  const config = MIGRATION_PHASES[phase];
 
 /**
  * Get all TypeScript and JavaScript files in a directory
@@ -138,16 +280,18 @@ function updateFileImports(filePath, patterns, isRollback = false) {
   const content = fs.readFileSync(filePath, 'utf8');
   let updatedContent = content;
   let hasChanges = false;
-  
+
   patterns.forEach(pattern => {
-    const { from, to } = isRollback ? { from: new RegExp(to.replace(/'/g, "['\"']"), 'g'), to: from.source } : pattern;
-    
+    // Use the appropriate pattern based on rollback flag
+    const activePattern = isRollback ? pattern.rollback : pattern.forward;
+    const { from, to } = activePattern;
+
     if (from.test(updatedContent)) {
       updatedContent = updatedContent.replace(from, to);
       hasChanges = true;
     }
   });
-  
+
   return { content: updatedContent, hasChanges };
 }
 
@@ -227,10 +371,11 @@ function runMigration() {
   }
 }
 
-// Run the migration
-try {
-  runMigration();
-} catch (error) {
-  console.error(`❌ Migration failed:`, error.message);
-  process.exit(1);
+  // Run the migration
+  try {
+    runMigration();
+  } catch (error) {
+    console.error(`❌ Migration failed:`, error.message);
+    process.exit(1);
+  }
 }

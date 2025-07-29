@@ -6,28 +6,30 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 
 ### 1. Project Setup & Configuration (35 SP)
 
-*   [ ] **Backend/Infra:**
-    *   [ ] Review existing Supabase schema and identify potential impacts of refactor. (5 SP)
-    *   [ ] Ensure Supabase client configuration is aligned with new domain structure. (5 SP)
-*   [ ] **Frontend:**
-    *   [ ] Update `tsconfig.json` to include new path aliases (`@ui`, `@domains`, `@lib`, `@context`, `@types`). (5 SP)
-    *   [ ] Configure ESLint and Prettier to enforce new coding standards and architectural patterns. (5 SP)
-*   [ ] **Migration Infrastructure:**
-    *   [ ] Create migration automation scripts for import path updates. (10 SP)
-    *   [ ] Set up Storybook configuration (`.storybook/main.js`, `.storybook/preview.js`). (5 SP)
-    *   [ ] Initialize E2E testing framework (Detox/Playwright setup). (10 SP)
-    *   [ ] Create migration validation scripts for import checking. (5 SP)
+* [ ] **Backend/Infra:**
+  * [ ] Review existing Supabase schema and identify potential impacts of refactor. (5 SP)
+  * [ ] Ensure Supabase client configuration is aligned with new domain structure. (5 SP)
+* [ ] **Frontend:**
+  * [ ] Update `tsconfig.json` to include new path aliases (`@ui`, `@domains`, `@lib`, `@context`, `@types`). (3 SP)
+  * [ ] Update `jest.config.ts` with moduleNameMapper for path aliases to prevent test failures. (2 SP)
+  * [ ] Configure ESLint and Prettier to enforce new coding standards and architectural patterns. (5 SP)
+* [ ] **Migration Infrastructure:**
+  * [ ] Create migration automation scripts for import path updates. (8 SP)
+  * [ ] Create comprehensive test suite for migration regex patterns. (2 SP)
+  * [ ] Set up Storybook configuration (`.storybook/main.js`, `.storybook/preview.js`). (5 SP)
+  * [ ] Initialize E2E testing framework (Detox/Playwright setup). (10 SP)
+  * [ ] Create migration validation scripts for import checking. (5 SP)
 
 ### 2. Parallel Structure Creation (20 SP)
 
-*   [ ] **Directory Structure:**
-    *   [ ] Create new `src/ui/` directory structure (atoms, molecules, organisms, templates). (3 SP)
-    *   [ ] Create new `src/domains/` directory structure (class, incidents, users, subjects, dashboard, schools). (3 SP)
-    *   [ ] Create new `src/lib/` directory structure (hooks, utils, constants, tests). (3 SP)
-    *   [ ] Set up barrel exports in new directories for backward compatibility. (5 SP)
-*   [ ] **Migration Preparation:**
-    *   [ ] Create migration checkpoint validation scripts. (3 SP)
-    *   [ ] Set up dual import system (old and new paths working simultaneously). (3 SP)
+* [ ] **Directory Structure:**
+  * [ ] Create new `src/ui/` directory structure (atoms, molecules, organisms, templates). (3 SP)
+  * [ ] Create new `src/domains/` directory structure (class, incidents, users, subjects, dashboard, schools). (3 SP)
+  * [ ] Create new `src/lib/` directory structure (hooks, utils, constants, tests). (3 SP)
+  * [ ] Set up barrel exports in new directories for backward compatibility. (5 SP)
+* [ ] **Migration Preparation:**
+  * [ ] Create migration checkpoint validation scripts. (3 SP)
+  * [ ] Set up dual import system (old and new paths working simultaneously). (3 SP)
 
 ### 3. Core UI Components (src/ui) Refactoring (80 SP)
 
@@ -223,10 +225,13 @@ This document outlines the detailed tasks required to refactor the MadraXis code
     *   [ ] Create `src/domains/schools/types.ts` for school-related types. (2 SP)
     *   [ ] Create `src/domains/schools/index.ts` for barrel export. (1 SP)
     *   [ ] Migrate existing school-related service logic from `src/services/schools.ts` to `src/domains/schools/api.ts`. (5 SP)
-*   **Store Migration (20 SP)**
-    *   [ ] Migrate `src/stores/authStore.ts` to `src/context/AuthContext/` with React Context pattern. (8 SP)
-    *   [ ] Create domain-specific Zustand stores in each domain module where needed. (7 SP)
-    *   [ ] Update all store imports throughout the application. (5 SP)
+* **Store Migration (20 SP)**
+  * [ ] Migrate `src/stores/authStore.ts` to `src/context/AuthContext/` with React Context pattern. (8 SP)
+    * [ ] **CRITICAL**: Preserve auth persistence behavior from Zustand's persist middleware. (included)
+    * [ ] Implement AsyncStorage integration for React Native session persistence. (included)
+    * [ ] Ensure proper auth state hydration on app startup to prevent logout on reload. (included)
+  * [ ] Create domain-specific Zustand stores in each domain module where needed. (7 SP)
+  * [ ] Update all store imports throughout the application. (5 SP)
 
 ### 5. Routing and Navigation (app/) Refactoring (60 SP)
 
@@ -434,28 +439,28 @@ Add these scripts to package.json for easier usage:
 ## Migration Checklist
 
 ### Pre-Migration
-- [ ] Backup entire codebase
-- [ ] Ensure all tests pass
-- [ ] Create feature branch for migration
-- [ ] Review migration scripts and validate on small subset
+* [ ] Backup entire codebase
+* [ ] Ensure all tests pass
+* [ ] Create feature branch for migration
+* [ ] Review migration scripts and validate on small subset
 
 ### Phase Execution
-- [ ] Phase 1: Infrastructure Setup (35 SP)
-- [ ] Phase 2: Parallel Structure Creation (20 SP)
-- [ ] Phase 3: UI Components Migration (80 SP)
-- [ ] Phase 4: Domain Migration (120 SP)
-- [ ] Phase 5: Feature Slice Migration (60 SP)
-- [ ] Phase 6: Library Migration (30 SP)
-- [ ] Phase 7: Context Migration (15 SP)
-- [ ] Phase 8: Types Migration (10 SP)
-- [ ] Phase 9: Testing Infrastructure (20 SP)
-- [ ] Phase 10: Migration Validation (25 SP)
-- [ ] Phase 11: Cleanup & Final Verification (20 SP)
-- [ ] Phase 12: Rollback Procedures (15 SP)
+* [ ] Phase 1: Infrastructure Setup (35 SP)
+* [ ] Phase 2: Parallel Structure Creation (20 SP)
+* [ ] Phase 3: UI Components Migration (80 SP)
+* [ ] Phase 4: Domain Migration (120 SP)
+* [ ] Phase 5: Feature Slice Migration (60 SP)
+* [ ] Phase 6: Library Migration (30 SP)
+* [ ] Phase 7: Context Migration (15 SP)
+* [ ] Phase 8: Types Migration (10 SP)
+* [ ] Phase 9: Testing Infrastructure (20 SP)
+* [ ] Phase 10: Migration Validation (25 SP)
+* [ ] Phase 11: Cleanup & Final Verification (20 SP)
+* [ ] Phase 12: Rollback Procedures (15 SP)
 
 ### Post-Migration
-- [ ] Run full test suite
-- [ ] Performance benchmarking
-- [ ] Code review and documentation update
-- [ ] Deploy to staging environment
-- [ ] Monitor for issues and gather feedback
+* [ ] Run full test suite
+* [ ] Performance benchmarking
+* [ ] Code review and documentation update
+* [ ] Deploy to staging environment
+* [ ] Monitor for issues and gather feedback

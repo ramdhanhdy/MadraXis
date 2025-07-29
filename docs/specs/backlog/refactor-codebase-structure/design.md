@@ -575,10 +575,10 @@ MadraXis
 The refactoring will be executed in 6 carefully planned phases:
 
 #### Phase 1: Infrastructure Setup
-- Configure path aliases in `tsconfig.json`
+- Configure path aliases in `tsconfig.json` and `jest.config.ts`
 - Set up Storybook and E2E testing frameworks
 - Create migration automation scripts
-- **Checkpoint**: Validate path aliases and tooling setup
+- **Checkpoint**: Validate path aliases and tooling setup (including test compilation)
 
 #### Phase 2: Parallel Structure Creation
 - Create new directory structures alongside existing ones
@@ -641,19 +641,63 @@ node scripts/migration/rollback.js --to-checkpoint=ui-components
 
 #### Current State
 ```typescript
-// src/stores/authStore.ts - Zustand store
-export const useAuthStore = create((set) => ({
-  session: null,
-  user: null,
-  // ... auth logic
-}));
+// src/stores/authStore.ts - Zustand store with persistence
+export const useAuthStore = create(
+  persist(
+    (set) => ({
+      session: null,
+      user: null,
+      // ... auth logic
+    }),
+    {
+      name: 'auth-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
 ```
 
 #### Target State
 ```typescript
-// src/context/AuthContext/AuthProvider.tsx - React Context
+// src/context/AuthContext/AuthProvider.tsx - React Context with persistence
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export const AuthProvider = ({ children }) => {
-  // Auth logic using React Context + useReducer
+  const [authState, dispatch] = useReducer(authReducer, initialState);
+
+  // Preserve persistence behavior from Zustand
+  useEffect(() => {
+    // Hydrate auth state on app startup
+    const loadPersistedAuth = async () => {
+      try {
+        const persistedAuth = await AsyncStorage.getItem('auth-storage');
+        if (persistedAuth) {
+          dispatch({ type: 'HYDRATE', payload: JSON.parse(persistedAuth) });
+        }
+      } catch (error) {
+        console.error('Failed to load persisted auth:', error);
+      }
+    };
+
+    loadPersistedAuth();
+  }, []);
+
+  // Persist auth state changes
+  useEffect(() => {
+    const persistAuth = async () => {
+      try {
+        await AsyncStorage.setItem('auth-storage', JSON.stringify(authState));
+      } catch (error) {
+        console.error('Failed to persist auth:', error);
+      }
+    };
+
+    if (authState.session || authState.user) {
+      persistAuth();
+    }
+  }, [authState]);
+
+  // ... rest of auth logic
 };
 
 // src/domains/class/store.ts - Domain-specific Zustand store
@@ -666,6 +710,8 @@ export const useClassStore = create((set) => ({
 
 #### Migration Rules
 1. **Global State** → React Context (auth, theme, navigation)
-2. **Domain State** → Domain-specific Zustand stores
-3. **Feature State** → Local Zustand stores in feature directories
-4. **Maintain Interfaces** → Keep existing hook interfaces during transition
+2. **Auth Persistence** → Replicate Zustand persist behavior with AsyncStorage and proper hydration
+3. **Domain State** → Domain-specific Zustand stores
+4. **Feature State** → Local Zustand stores in feature directories
+5. **Maintain Interfaces** → Keep existing hook interfaces during transition
+6. **Session Continuity** → Ensure users remain logged in across app restarts and reloads

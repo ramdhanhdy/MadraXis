@@ -156,6 +156,7 @@ The refactoring will be executed in carefully planned phases to ensure system st
 
 ### 7.3. Store Migration Strategy
 *   **SMS1: Context Migration:** Simple global state (auth, theme) MUST be migrated to React Context providers.
-*   **SMS2: Domain Stores:** Complex domain-specific state MUST use Zustand stores within domain modules.
-*   **SMS3: Local State:** Feature-specific state MUST use local Zustand stores within feature directories.
-*   **SMS4: Backward Compatibility:** Existing store interfaces MUST be maintained during transition period.
+*   **SMS2: Auth Persistence:** Authentication state MUST maintain persistence behavior equivalent to current Zustand persist middleware, including AsyncStorage integration and proper hydration on app startup.
+*   **SMS3: Domain Stores:** Complex domain-specific state MUST use Zustand stores within domain modules.
+*   **SMS4: Local State:** Feature-specific state MUST use local Zustand stores within feature directories.
+*   **SMS5: Backward Compatibility:** Existing store interfaces MUST be maintained during transition period.

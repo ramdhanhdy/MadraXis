@@ -179,8 +179,9 @@ npx tsc --noEmit
 
 ### Path Aliases
 
-The scripts expect these path aliases to be configured in `tsconfig.json`:
+The scripts expect these path aliases to be configured in both `tsconfig.json` and `jest.config.ts`:
 
+#### TypeScript Configuration (`tsconfig.json`)
 ```json
 {
   "compilerOptions": {
@@ -195,6 +196,23 @@ The scripts expect these path aliases to be configured in `tsconfig.json`:
 }
 ```
 
+#### Jest Configuration (`jest.config.ts`)
+```typescript
+// jest.config.ts
+export default {
+  moduleNameMapper: {
+    '^@ui/(.*)$': '<rootDir>/src/ui/$1',
+    '^@domains/(.*)$': '<rootDir>/src/domains/$1',
+    '^@lib/(.*)$': '<rootDir>/src/lib/$1',
+    '^@context/(.*)$': '<rootDir>/src/context/$1',
+    '^@types/(.*)$': '<rootDir>/src/types/$1',
+  },
+  // ... other Jest configuration
+};
+```
+
+**⚠️ Critical**: Both configurations are required. Without Jest moduleNameMapper, all tests will fail during migration phases when path aliases are introduced.
+
 ### Package.json Scripts
 
 Add these convenience scripts to your `package.json`:
@@ -206,10 +224,36 @@ Add these convenience scripts to your `package.json`:
     "migrate:domains": "node scripts/migration/update-imports.js --phase=domains",
     "migrate:lib": "node scripts/migration/update-imports.js --phase=lib",
     "migrate:validate": "node scripts/migration/validate-imports.js",
+    "migrate:test-patterns": "node scripts/migration/test-patterns.js",
     "migrate:rollback": "node scripts/migration/rollback.js --list-backups"
   }
 }
 ```
+
+### Pattern Testing
+
+Before running any migration, validate that all regex patterns work correctly:
+
+```bash
+# Test all migration patterns
+node scripts/migration/test-patterns.js
+
+# Test specific phase patterns
+node scripts/migration/test-patterns.js --phase=ui-components
+node scripts/migration/test-patterns.js --phase=domains
+node scripts/migration/test-patterns.js --phase=lib
+
+# Verbose output showing all transformations
+node scripts/migration/test-patterns.js --verbose
+```
+
+The test suite validates:
+- ✅ Forward transformations (relative paths → aliases)
+- ✅ Rollback transformations (aliases → relative paths)
+- ✅ Quote style preservation (single vs double quotes)
+- ✅ Path depth handling (../ vs ../../)
+- ✅ Special case mappings (classService → class domain)
+- ✅ Global regex lastIndex reset to prevent flakiness
 
 ## 🛡️ Safety Features
 
