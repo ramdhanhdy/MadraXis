@@ -1,17 +1,46 @@
 /**
- * Design System - Main export file
- * 
- * This file exports the enhanced theming system with scalable architecture
- * supporting both shared and role-based theming scenarios.
+ * Design System Main Export
+ * Central export point for the enhanced design system
  */
 
-// Export all design system modules here as they are migrated
-// Example exports (will be uncommented as modules are migrated):
-// export * from './core';
-// export * from './tokens';
-// export * from './themes';
-// export * from './components';
-// export * from './utilities';
+// Core exports
+export * from './core/types';
+export * from './core/utils';
+export * from './core/theme-builder';
 
-// Temporary empty export to prevent TypeScript errors
-export {};
+// Enhanced token exports
+export * from './tokens';
+
+// Re-export existing tokens for backward compatibility
+export {
+  colors,
+  semanticColors,
+  baseColors,
+  roleColors,
+  typography,
+  typographyVariants,
+  fontFamily,
+  fontWeight,
+  fontSize,
+  lineHeight,
+  spacingTokens,
+  spacing,
+  semanticSpacing,
+  componentSpacing,
+  shadows,
+  semanticShadows,
+  elevationLevels,
+  borderRadius,
+  duration,
+  easing,
+  nativeEasing,
+  breakpoints,
+  zIndex,
+  zIndexUtils,
+} from '../styles/theme';
+
+// Export theme and role themes for backward compatibility
+export { theme, roleThemes } from '../styles/theme';
+
+// Export enhanced theme context (will be created next)
+// export { ThemeProvider, useTheme } from './provider/ThemeProvider';

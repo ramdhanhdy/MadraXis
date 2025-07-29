@@ -1,15 +1,9 @@
-import React from 'react';
-import { Stack } from 'expo-router';
-import AntiBullying from '@ui/templates/StudentAntiBullyingTemplate';
+/**
+ * Anti-Bullying Route - Backward Compatibility Wrapper
+ *
+ * This file maintains backward compatibility with the existing route structure
+ * while delegating to the new feature slice implementation.
+ */
 
-export default function AntiBullyingScreen() {
-  return (
-    <>
-      <Stack.Screen options={{ 
-        headerShown: false,
-        title: "Edukasi Anti-Perundungan" 
-      }} />
-      <AntiBullying />
-    </>
-  );
-} 
+// Re-export the screen from the feature slice
+export { default } from './anti-bullying/screen';

@@ -1,33 +1,9 @@
-import React from 'react';
-import { Stack } from 'expo-router';
-import { Text, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+/**
+ * Boarding Info Route - Backward Compatibility Wrapper
+ *
+ * This file maintains backward compatibility with the existing route structure
+ * while delegating to the new feature slice implementation.
+ */
 
-export default function BoardingInfoScreen() {
-  return (
-    <>
-      <Stack.Screen options={{ 
-        headerShown: false,
-        title: "Informasi Asrama" 
-      }} />
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.text}>Halaman Informasi Asrama akan segera tersedia</Text>
-      </SafeAreaView>
-    </>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-  },
-  text: {
-    fontSize: 16,
-    color: '#333333',
-    textAlign: 'center',
-    padding: 20,
-  }
-}); 
+// Re-export the screen from the feature slice
+export { default } from './boarding-info/screen';

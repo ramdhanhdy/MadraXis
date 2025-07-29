@@ -1,15 +1,9 @@
-import React from 'react';
-import { Stack } from 'expo-router';
-import CCTVAccessRequest from '@ui/templates/CCTVAccessRequestTemplate';
+/**
+ * CCTV Request Route - Backward Compatibility Wrapper
+ *
+ * This file maintains backward compatibility with the existing route structure
+ * while delegating to the new feature slice implementation.
+ */
 
-export default function CCTVRequestScreen() {
-  return (
-    <>
-      <Stack.Screen options={{ 
-        headerShown: false,
-        title: "Permintaan Akses CCTV" 
-      }} />
-      <CCTVAccessRequest />
-    </>
-  );
-} 
+// Re-export the screen from the feature slice
+export { default } from './cctv-request/screen';

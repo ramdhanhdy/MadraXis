@@ -1,15 +1,9 @@
-import React from 'react';
-import { Stack } from 'expo-router';
-import IncidentReport from '@ui/templates/StudentIncidentReportTemplate';
+/**
+ * Incident Report Route - Backward Compatibility Wrapper
+ *
+ * This file maintains backward compatibility with the existing route structure
+ * while delegating to the new feature slice implementation.
+ */
 
-export default function IncidentReportScreen() {
-  return (
-    <>
-      <Stack.Screen options={{ 
-        headerShown: false,
-        title: "Lapor Masalah" 
-      }} />
-      <IncidentReport />
-    </>
-  );
-} 
+// Re-export the screen from the feature slice
+export { default } from './incident-report/screen';
