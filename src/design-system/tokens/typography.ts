@@ -273,28 +273,69 @@ export const roleTypography = {
   },
 } as const;
 
-// Accessibility enhancements
-export const accessibleTypography = {
+// Responsive typography scales
+export const responsiveTypography = {
+  // Mobile-first responsive scales
+  mobile: {
+    display1: { fontSize: fontSize['6xl'], lineHeight: lineHeight.tight },
+    display2: { fontSize: fontSize['5xl'], lineHeight: lineHeight.tight },
+    h1: { fontSize: fontSize['4xl'], lineHeight: lineHeight.tight },
+    h2: { fontSize: fontSize['3xl'], lineHeight: lineHeight.snug },
+    h3: { fontSize: fontSize['2xl'], lineHeight: lineHeight.snug },
+    body: { fontSize: fontSize.base, lineHeight: lineHeight.normal },
+  },
+
+  // Tablet responsive scales
+  tablet: {
+    display1: { fontSize: fontSize['7xl'], lineHeight: lineHeight.tight },
+    display2: { fontSize: fontSize['6xl'], lineHeight: lineHeight.tight },
+    h1: { fontSize: fontSize['5xl'], lineHeight: lineHeight.tight },
+    h2: { fontSize: fontSize['4xl'], lineHeight: lineHeight.tight },
+    h3: { fontSize: fontSize['3xl'], lineHeight: lineHeight.snug },
+    body: { fontSize: fontSize.lg, lineHeight: lineHeight.normal },
+  },
+
+  // Desktop responsive scales
+  desktop: {
+    display1: { fontSize: fontSize['8xl'], lineHeight: lineHeight.none },
+    display2: { fontSize: fontSize['7xl'], lineHeight: lineHeight.none },
+    h1: { fontSize: fontSize['5xl'], lineHeight: lineHeight.tight },
+    h2: { fontSize: fontSize['4xl'], lineHeight: lineHeight.tight },
+    h3: { fontSize: fontSize['3xl'], lineHeight: lineHeight.snug },
+    body: { fontSize: fontSize.lg, lineHeight: lineHeight.relaxed },
+  },
+} as const;
+
+// Typography accessibility enhancements
+export const typographyAccessibility = {
   // Minimum sizes for accessibility
   minSizes: {
     mobile: fontSize.base,    // 16px minimum on mobile
     tablet: fontSize.sm,      // 14px minimum on tablet
     desktop: fontSize.xs,     // 12px minimum on desktop
   },
-  
+
   // High contrast typography
   highContrast: {
     fontWeight: fontWeight.bold,
     letterSpacing: letterSpacing.wide,
     lineHeight: lineHeight.loose,
   },
-  
+
   // Dyslexia-friendly options
   dyslexiaFriendly: {
     fontFamily: 'OpenDyslexic, Arial, sans-serif',
     letterSpacing: letterSpacing.wider,
     lineHeight: lineHeight.loose,
     wordSpacing: 0.16,
+  },
+
+  // Reading-optimized typography
+  readingOptimized: {
+    lineHeight: lineHeight.relaxed,
+    letterSpacing: letterSpacing.normal,
+    wordSpacing: 0.1,
+    paragraphSpacing: 24,
   },
 } as const;
 
@@ -307,7 +348,8 @@ export const typography = {
   letterSpacing,
   variants: typographyVariants,
   roleTypography,
-  accessibleTypography,
+  responsiveTypography,
+  accessibleTypography: typographyAccessibility,
 } as const;
 
 // Type definitions

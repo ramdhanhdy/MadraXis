@@ -11,6 +11,9 @@ export * from './core/theme-builder';
 // Enhanced token exports
 export * from './tokens';
 
+// Enhanced theme system exports
+export * from './themes';
+
 // Re-export existing tokens for backward compatibility
 export {
   colors,
@@ -40,7 +43,4 @@ export {
 } from '../styles/theme';
 
 // Export theme and role themes for backward compatibility
-export { theme, roleThemes } from '../styles/theme';
-
-// Export enhanced theme context (will be created next)
-// export { ThemeProvider, useTheme } from './provider/ThemeProvider';
+export { theme, roleThemes as legacyRoleThemes } from '../styles/theme';

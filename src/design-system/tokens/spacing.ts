@@ -258,12 +258,74 @@ export const animationSpacing = {
     medium: baseSpacing.sm,
     large: baseSpacing.md,
   },
-  
+
   // Stagger delays (in ms)
   stagger: {
     fast: 50,
     normal: 100,
     slow: 200,
+  },
+} as const;
+
+// Contextual spacing - Semantic spacing for specific contexts
+export const contextualSpacing = {
+  // Reading and content spacing
+  reading: {
+    paragraphSpacing: baseSpacing.lg,
+    lineSpacing: baseSpacing.xs,
+    sectionSpacing: baseSpacing['2xl'],
+    chapterSpacing: baseSpacing['4xl'],
+  },
+
+  // Dashboard and data spacing
+  dashboard: {
+    widgetSpacing: baseSpacing.lg,
+    metricSpacing: baseSpacing.md,
+    chartSpacing: baseSpacing.xl,
+    sectionSpacing: baseSpacing['2xl'],
+  },
+
+  // Form and input spacing
+  forms: {
+    fieldSpacing: baseSpacing.lg,
+    groupSpacing: baseSpacing.xl,
+    sectionSpacing: baseSpacing['2xl'],
+    actionSpacing: baseSpacing.lg,
+  },
+
+  // Navigation spacing
+  navigation: {
+    itemSpacing: baseSpacing.sm,
+    groupSpacing: baseSpacing.lg,
+    levelSpacing: baseSpacing.xl,
+    breadcrumbSpacing: baseSpacing.xs,
+  },
+} as const;
+
+// Density variations - Different spacing densities
+export const densitySpacing = {
+  // Compact density for data-heavy interfaces
+  compact: {
+    base: baseSpacing.xs,
+    content: baseSpacing.sm,
+    section: baseSpacing.md,
+    container: baseSpacing.lg,
+  },
+
+  // Normal density for balanced interfaces
+  normal: {
+    base: baseSpacing.sm,
+    content: baseSpacing.md,
+    section: baseSpacing.lg,
+    container: baseSpacing.xl,
+  },
+
+  // Comfortable density for accessibility
+  comfortable: {
+    base: baseSpacing.md,
+    content: baseSpacing.lg,
+    section: baseSpacing.xl,
+    container: baseSpacing['2xl'],
   },
 } as const;
 
@@ -277,6 +339,8 @@ export const spacingTokens = {
   accessibility: accessibilitySpacing,
   grid: gridSpacing,
   animation: animationSpacing,
+  contextual: contextualSpacing,
+  density: densitySpacing,
 } as const;
 
 // Legacy exports for backward compatibility

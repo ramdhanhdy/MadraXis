@@ -45,6 +45,10 @@ export const focusRing = {
 
 // Contrast Requirements - WCAG compliance levels
 export const contrast = {
+  // Required properties for interface compatibility
+  minimum: 4.5,
+  enhanced: 7.0,
+
   // WCAG AA requirements
   aa: {
     normal: 4.5,      // Normal text (< 18pt or < 14pt bold)
@@ -58,7 +62,7 @@ export const contrast = {
     nonText: 3.0,     // Non-text elements
   },
   // Enhanced contrast for better readability
-  enhanced: {
+  enhancedLevels: {
     normal: 8.0,      // Enhanced normal text
     large: 5.0,       // Enhanced large text
     nonText: 4.0,     // Enhanced non-text elements
@@ -233,6 +237,125 @@ export const mobileAccessibility = {
   },
 } as const;
 
+// Voice Control and Speech Recognition
+export const voiceControl = {
+  // Voice command targets
+  commands: {
+    navigation: ['go to', 'navigate to', 'open'],
+    actions: ['click', 'tap', 'select', 'activate'],
+    forms: ['fill', 'enter', 'type', 'submit'],
+    content: ['read', 'scroll', 'search'],
+  },
+
+  // Voice feedback
+  feedback: {
+    confirmation: true,
+    error: true,
+    progress: true,
+    completion: true,
+  },
+} as const;
+
+// Cognitive Accessibility
+export const cognitiveAccessibility = {
+  // Content simplification
+  content: {
+    plainLanguage: true,
+    shortSentences: true,
+    clearHeadings: true,
+    consistentNavigation: true,
+  },
+
+  // Memory aids
+  memoryAids: {
+    breadcrumbs: true,
+    progressIndicators: true,
+    confirmationDialogs: true,
+    undoActions: true,
+  },
+
+  // Attention and focus
+  attention: {
+    minimizeDistractions: true,
+    clearFocusIndicators: true,
+    logicalTabOrder: true,
+    timeoutWarnings: true,
+  },
+} as const;
+
+// Motor Accessibility
+export const motorAccessibility = {
+  // Alternative input methods
+  inputMethods: {
+    keyboard: true,
+    voice: true,
+    eyeTracking: false, // Future enhancement
+    switchControl: true,
+  },
+
+  // Gesture alternatives
+  gestureAlternatives: {
+    swipe: 'button',
+    pinch: 'button',
+    longPress: 'double-tap',
+    drag: 'button-sequence',
+  },
+
+  // Timing considerations
+  timing: {
+    noTimeouts: true,
+    adjustableTimeouts: true,
+    pauseableContent: true,
+    extendedInteractionTime: true,
+  },
+} as const;
+
+// Visual Accessibility
+export const visualAccessibility = {
+  // Low vision support
+  lowVision: {
+    highContrast: true,
+    largeText: true,
+    customColors: true,
+    magnification: true,
+  },
+
+  // Blindness support
+  blindness: {
+    screenReader: true,
+    altText: true,
+    descriptiveLinks: true,
+    structuredContent: true,
+  },
+
+  // Color vision deficiency
+  colorVision: {
+    colorBlindSafe: true,
+    patternAlternatives: true,
+    textLabels: true,
+    iconSupport: true,
+  },
+} as const;
+
+// Hearing Accessibility
+export const hearingAccessibility = {
+  // Deaf and hard of hearing support
+  deafHardOfHearing: {
+    captions: true,
+    transcripts: true,
+    signLanguage: false, // Future enhancement
+    visualAlerts: true,
+  },
+
+  // Audio alternatives
+  audioAlternatives: {
+    visualFeedback: true,
+    hapticFeedback: true,
+    textNotifications: true,
+    flashingAlerts: true,
+  },
+} as const;
+
 // Accessibility Testing Utilities
 export const testing = {
   // Automated testing requirements
@@ -241,14 +364,26 @@ export const testing = {
     keyboardNavigation: true,
     screenReader: true,
     focusManagement: true,
+    altText: true,
+    headingStructure: true,
   },
-  
+
   // Manual testing checklist
   manual: {
-    screenReader: ['NVDA', 'JAWS', 'VoiceOver'],
+    screenReader: ['NVDA', 'JAWS', 'VoiceOver', 'TalkBack'],
     keyboard: 'tab-navigation',
     colorBlind: 'simulator-tools',
     zoom: '200-percent',
+    voiceControl: 'dragon-naturally-speaking',
+    switchControl: 'hardware-switches',
+  },
+
+  // Testing tools and simulators
+  tools: {
+    contrastCheckers: ['WebAIM', 'Colour Contrast Analyser'],
+    screenReaders: ['NVDA', 'JAWS', 'VoiceOver', 'TalkBack'],
+    colorBlindSimulators: ['Stark', 'Colorblinding'],
+    keyboardTesting: 'manual-tab-navigation',
   },
 } as const;
 
@@ -264,6 +399,11 @@ export const accessibility = {
   keyboardNavigation,
   highContrast,
   mobileAccessibility,
+  voiceControl,
+  cognitiveAccessibility,
+  motorAccessibility,
+  visualAccessibility,
+  hearingAccessibility,
   testing,
 } as const;
 

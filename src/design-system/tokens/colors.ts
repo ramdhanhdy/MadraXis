@@ -259,6 +259,129 @@ export type SemanticColorKey = keyof typeof semanticColors;
 export type ColorVariant = '50' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
 export type UserRole = 'student' | 'teacher' | 'parent' | 'management';
 
+// Dark mode color mappings
+export const darkModeColors = {
+  // Background colors for dark mode
+  background: {
+    primary: baseColors.neutral[900],   // #171717
+    secondary: baseColors.neutral[800], // #333333
+    tertiary: baseColors.neutral[700],  // #404040
+  },
+
+  // Surface colors for dark mode
+  surface: {
+    primary: baseColors.neutral[800],   // #333333
+    secondary: baseColors.neutral[700], // #404040
+    tertiary: baseColors.neutral[600],  // #666666
+  },
+
+  // Text colors for dark mode
+  text: {
+    primary: baseColors.neutral[100],   // #f5f5f5
+    secondary: baseColors.neutral[300], // #d4d4d4
+    tertiary: baseColors.neutral[400],  // #a3a3a3
+    disabled: baseColors.neutral[500],  // #737373
+    inverse: baseColors.neutral[900],   // #171717
+  },
+
+  // Border colors for dark mode
+  border: {
+    primary: baseColors.neutral[700],   // #404040
+    secondary: baseColors.neutral[600], // #666666
+    focus: baseColors.teal[400],        // Brighter for dark backgrounds
+    error: baseColors.error[500],       // Adjusted for dark mode
+  },
+
+  // Role colors optimized for dark mode
+  role: {
+    student: {
+      primary: baseColors.teal[400],    // #2DD4BF - Brighter for dark
+      accent: baseColors.teal[300],     // #5EEAD4
+    },
+    teacher: {
+      primary: baseColors.green[400],   // #4ADE80 - Brighter for dark
+      accent: baseColors.green[300],    // #86EFAC
+    },
+    parent: {
+      primary: baseColors.amber[400],   // #FBBF24 - Maintained brightness
+      accent: baseColors.amber[300],    // #FCD34D
+    },
+    management: {
+      primary: baseColors.rose[400],    // #FB7185 - Brighter for dark
+      accent: baseColors.rose[300],     // #FDA4AF
+    },
+  },
+} as const;
+
+// Enhanced semantic color mappings with context awareness
+export const contextualColors = {
+  // Status colors with variations
+  status: {
+    success: {
+      subtle: baseColors.success[50],
+      muted: baseColors.success[100],
+      default: baseColors.success[500],
+      emphasis: baseColors.success[600],
+      strong: baseColors.success[700],
+    },
+    warning: {
+      subtle: baseColors.warning[50],
+      muted: baseColors.warning[100],
+      default: baseColors.warning[500],
+      emphasis: baseColors.warning[600],
+      strong: baseColors.warning[700],
+    },
+    error: {
+      subtle: baseColors.error[50],
+      muted: baseColors.error[100],
+      default: baseColors.error[500],
+      emphasis: baseColors.error[600],
+      strong: baseColors.error[700],
+    },
+    info: {
+      subtle: baseColors.teal[50],
+      muted: baseColors.teal[100],
+      default: baseColors.teal[500],
+      emphasis: baseColors.teal[600],
+      strong: baseColors.teal[700],
+    },
+  },
+
+  // Interactive state colors
+  interactive: {
+    default: baseColors.neutral[50],
+    hover: baseColors.neutral[100],
+    active: baseColors.neutral[200],
+    pressed: baseColors.neutral[300],
+    disabled: baseColors.neutral[200],
+    focus: baseColors.teal[100],
+  },
+
+  // Data visualization colors
+  dataViz: {
+    primary: [
+      baseColors.teal[500],
+      baseColors.green[500],
+      baseColors.amber[500],
+      baseColors.rose[500],
+    ],
+    sequential: [
+      baseColors.teal[100],
+      baseColors.teal[300],
+      baseColors.teal[500],
+      baseColors.teal[700],
+      baseColors.teal[900],
+    ],
+    diverging: [
+      baseColors.rose[500],
+      baseColors.rose[300],
+      baseColors.neutral[200],
+      baseColors.teal[300],
+      baseColors.teal[500],
+    ],
+  },
+} as const;
+
 // WCAG AA Compliance validation
 export const wcagCompliantCombinations = {
   // Text on white background (4.5:1 minimum)
@@ -270,7 +393,7 @@ export const wcagCompliantCombinations = {
     baseColors.amber[700],   // Parent links
     baseColors.rose[700],    // Management links
   ],
-  
+
   // Text on colored backgrounds
   whiteTextOn: [
     baseColors.teal[500],    // Student primary
@@ -278,4 +401,20 @@ export const wcagCompliantCombinations = {
     baseColors.amber[600],   // Parent primary (darker for contrast)
     baseColors.rose[600],    // Management primary
   ],
+
+  // Dark mode compliant combinations
+  darkModeCompliant: {
+    textOnDark: [
+      baseColors.neutral[100], // Primary text on dark
+      baseColors.neutral[300], // Secondary text on dark
+      baseColors.teal[400],    // Student links on dark
+      baseColors.green[400],   // Teacher links on dark
+      baseColors.amber[400],   // Parent links on dark
+      baseColors.rose[400],    // Management links on dark
+    ],
+    darkTextOn: [
+      baseColors.neutral[100], // Light backgrounds
+      baseColors.neutral[50],  // Very light backgrounds
+    ],
+  },
 } as const;

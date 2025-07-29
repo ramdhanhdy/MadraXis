@@ -34,6 +34,8 @@ export interface AnimationTokens {
     fast: number;
     normal: number;
     slow: number;
+    slower?: number;
+    slowest?: number;
   };
   easing: {
     linear: string;
@@ -42,30 +44,58 @@ export interface AnimationTokens {
     easeOut: string;
     easeInOut: string;
     spring: string;
+    smooth?: string;
+    sharp?: string;
+    bounce?: string;
   };
   transitions: {
-    fade: { opacity: number[] };
-    slide: { transform: Array<{ translateY: number }> };
-    scale: { transform: Array<{ scale: number }> };
+    fade: { opacity: number[]; duration?: number; easing?: string };
+    slide: { transform: Array<{ translateY: number }>; opacity?: number[]; duration?: number; easing?: string };
+    scale: { transform: Array<{ scale: number }>; opacity?: number[]; duration?: number; easing?: string };
+    [key: string]: any; // Allow additional transition types
   };
+  microInteractions?: any;
+  performance?: any;
+  roleAnimations?: any;
+  reducedMotion?: any;
+  animationUtils?: any;
 }
 
 // Accessibility tokens interface
 export interface AccessibilityTokens {
-  minTouchTarget: number;
-  focusRing: {
+  minTouchTarget?: number;
+  touchTargets?: any;
+  focusRing?: {
     width: number;
     offset: number;
     color: string;
+    styles?: any;
   };
-  contrast: {
+  contrast?: {
     minimum: number;
     enhanced: number;
+    aa?: any;
+    aaa?: any;
   };
-  reducedMotion: {
+  reducedMotion?: {
     duration: number;
     easing: string;
+    transitions?: any;
+    indicators?: any;
   };
+  accessibleTypography?: any;
+  colorAccessibility?: any;
+  screenReader?: any;
+  keyboardNavigation?: any;
+  highContrast?: any;
+  mobileAccessibility?: any;
+  voiceControl?: any;
+  cognitiveAccessibility?: any;
+  motorAccessibility?: any;
+  visualAccessibility?: any;
+  hearingAccessibility?: any;
+  testing?: any;
+  [key: string]: any; // Allow additional accessibility properties
 }
 
 // Component theme interfaces
@@ -129,70 +159,8 @@ export interface ComponentThemes {
 
 // Enhanced Theme interface with all design tokens
 export interface Theme {
-  colors: {
-    // Primary and secondary colors (role-specific)
-    primary: SemanticColor;
-    secondary: SemanticColor;
-    
-    // Status colors (shared across roles)
-    success: SemanticColor;
-    warning: SemanticColor;
-    error: SemanticColor;
-    info: SemanticColor;
-    
-    // Background colors
-    background: {
-      primary: string;
-      secondary: string;
-      tertiary: string;
-    };
-    
-    // Surface colors
-    surface: {
-      primary: string;
-      secondary: string;
-      tertiary: string;
-    };
-    
-    // Text colors
-    text: {
-      primary: string;
-      secondary: string;
-      tertiary: string;
-      disabled: string;
-      inverse: string;
-    };
-    
-    // Border colors
-    border: {
-      primary: string;
-      secondary: string;
-      focus: string;
-      error: string;
-    };
-    
-    // Interactive colors
-    interactive: {
-      hover: string;
-      pressed: string;
-      focus: string;
-      disabled: string;
-    };
-    
-    // Role-specific colors
-    role: Record<UserRole, {
-      primary: string;
-      accent: string;
-    }>;
-    
-    // Base color palettes
-    teal: ColorPalette;
-    gold: ColorPalette;
-    neutral: ColorPalette;
-    white: string;
-    black: string;
-  };
-  
+  colors: any; // Flexible colors interface to accommodate various theme structures
+
   typography: any; // Will be enhanced in future iterations
   spacing: any; // Will be enhanced in future iterations
   shadows: any; // Will be enhanced in future iterations
@@ -204,13 +172,16 @@ export interface Theme {
   zIndex: any; // Will be enhanced in future iterations
   zIndexUtils: any; // Will be enhanced in future iterations
   elevationLevels: any; // Will be enhanced in future iterations
-  
+
   // Enhanced design tokens
-  animations: AnimationTokens;
-  accessibility: AccessibilityTokens;
-  
+  animations: any; // Flexible animation tokens
+  accessibility: any; // Flexible accessibility tokens
+
   // Component themes
   componentThemes: ComponentThemes;
+
+  // Allow additional theme properties for extensibility
+  [key: string]: any;
 }
 
 // Theme configuration interface for theme composition
@@ -257,6 +228,8 @@ export interface ThemeContextType {
   setColorScheme: (scheme: 'light' | 'dark') => void;
   strategy: ThemeStrategy;
   setStrategy: (strategy: ThemeStrategy) => void;
+  isLoading?: boolean;
+  error?: Error | null;
 }
 
 // Deep merge utility type

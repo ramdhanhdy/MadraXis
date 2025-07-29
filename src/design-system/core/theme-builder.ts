@@ -3,7 +3,7 @@
  * Core theme composition system with deep merge capability and strategy pattern
  */
 
-import { Theme, ThemeConfig, ThemeStrategy, RoleThemeConfig, AnimationTokens, AccessibilityTokens } from './types';
+import { Theme, ThemeConfig, ThemeStrategy, RoleThemeConfig, AnimationTokens, AccessibilityTokens, DeepPartial } from './types';
 import { deepMerge, generateColorVariants, validateTheme } from './utils';
 import { UserRole } from '../../styles/colors';
 
@@ -207,10 +207,7 @@ export function createDarkBaseTheme(): Theme {
 /**
  * Create role-specific theme configuration
  */
-export function createRoleThemeConfig(role: UserRole): Partial<Theme> {
-  const roleColor = roleColors[role];
-  const colorVariants = generateColorVariants(roleColor.primary);
-  
+export function createRoleThemeConfig(role: UserRole): DeepPartial<Theme> {
   // Role-specific color mappings based on specifications
   const roleColorMappings = {
     student: {
@@ -230,21 +227,21 @@ export function createRoleThemeConfig(role: UserRole): Partial<Theme> {
       secondary: { main: '#FDA4AF', light: '#FECDD3', dark: '#FB7185' },
     },
   };
-  
-  const roleColors = roleColorMappings[role];
+
+  const roleThemeColors = roleColorMappings[role];
   
   return {
     colors: {
       primary: {
-        main: roleColors.primary.main,
-        light: roleColors.primary.light,
-        dark: roleColors.primary.dark,
+        main: roleThemeColors.primary.main,
+        light: roleThemeColors.primary.light,
+        dark: roleThemeColors.primary.dark,
         contrast: baseColors.white,
       },
       secondary: {
-        main: roleColors.secondary.main,
-        light: roleColors.secondary.light,
-        dark: roleColors.secondary.dark,
+        main: roleThemeColors.secondary.main,
+        light: roleThemeColors.secondary.light,
+        dark: roleThemeColors.secondary.dark,
         contrast: baseColors.white,
       },
     },
