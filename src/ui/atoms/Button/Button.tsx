@@ -15,7 +15,8 @@ import {
   TouchableOpacityProps,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useTheme } from '@design-system';
+import { ButtonComponentTheme } from '@design-system/core/types';
 
 // Button Props Interface
 export interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
@@ -66,109 +67,77 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const { theme } = useTheme();
-  const colors = useColors();
-  
-  // Get button styles based on variant, size, and state
+  const buttonTheme: ButtonComponentTheme = theme.componentThemes.button;
+  const colors = theme.colors;
+
+  // Get button styles based on variant, size, and state using design system
   const getButtonStyles = (): ViewStyle => {
     const baseStyle: ViewStyle = {
-      borderRadius: theme.borderRadius.md,
+      borderRadius: buttonTheme.borderRadius,
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'row',
-      minHeight: 44, // Minimum touch target
+      minHeight: buttonTheme.minHeight[size],
+      paddingHorizontal: buttonTheme.padding[size].horizontal,
+      paddingVertical: buttonTheme.padding[size].vertical,
     };
 
-    // Size-specific styles
-    const sizeStyles = {
-      small: {
-        minHeight: 32,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-      },
-      medium: {
-        minHeight: 40,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-      },
-      large: {
-        minHeight: 48,
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-      },
-    };
-
-    // Variant-specific styles
+    // Variant-specific styles using design system colors
     const variantStyles = {
       primary: {
-        backgroundColor: disabled ? colors.interactive.disabled : colors.primary.main,
-        ...theme.shadows.button,
+        backgroundColor: disabled ? colors.interactive?.disabled || colors.neutral?.[300] : colors.primary.main,
+        ...theme.shadows?.button,
       },
       secondary: {
-        backgroundColor: disabled ? colors.interactive.disabled : colors.secondary.main,
-        ...theme.shadows.button,
+        backgroundColor: disabled ? colors.interactive?.disabled || colors.neutral?.[300] : colors.secondary.main,
+        ...theme.shadows?.button,
       },
       outline: {
         backgroundColor: 'transparent',
         borderWidth: 1,
-        borderColor: disabled ? colors.interactive.disabled : colors.primary.main,
+        borderColor: disabled ? colors.interactive?.disabled || colors.neutral?.[300] : colors.primary.main,
       },
       ghost: {
         backgroundColor: 'transparent',
       },
       danger: {
-        backgroundColor: disabled ? colors.interactive.disabled : colors.error.main,
-        ...theme.shadows.button,
+        backgroundColor: disabled ? colors.interactive?.disabled || colors.neutral?.[300] : colors.error?.main || colors.red?.[500],
+        ...theme.shadows?.button,
       },
     };
 
     return {
       ...baseStyle,
-      ...sizeStyles[size],
       ...variantStyles[variant],
       ...(fullWidth && { width: '100%' }),
       ...(iconOnly && {
-        paddingHorizontal: sizeStyles[size].paddingVertical,
+        paddingHorizontal: buttonTheme.padding[size].vertical,
         aspectRatio: 1,
       }),
       opacity: disabled ? 0.6 : 1,
     };
   };
 
-  // Get text styles based on variant, size, and state
+  // Get text styles based on variant, size, and state using design system
   const getTextStyles = (): TextStyle => {
     const baseTextStyle: TextStyle = {
-      fontWeight: '600',
+      fontWeight: buttonTheme.typography[size]?.fontWeight || '600',
       textAlign: 'center',
+      fontSize: buttonTheme.typography[size]?.fontSize || theme.typography?.fontSize?.base || 16,
+      lineHeight: buttonTheme.typography[size]?.lineHeight || theme.typography?.fontSize?.base * (theme.typography?.lineHeight?.tight || 1.2),
     };
 
-    // Size-specific text styles
-    const sizeTextStyles = {
-      small: {
-        fontSize: theme.typography.fontSize.sm,
-        lineHeight: theme.typography.fontSize.sm * theme.typography.lineHeight.tight,
-      },
-      medium: {
-        fontSize: theme.typography.fontSize.base,
-        lineHeight: theme.typography.fontSize.base * theme.typography.lineHeight.tight,
-      },
-      large: {
-        fontSize: theme.typography.fontSize.lg,
-        lineHeight: theme.typography.fontSize.lg * theme.typography.lineHeight.tight,
-      },
-    };
-
-    // Variant-specific text colors
+    // Variant-specific text colors using design system colors
     const variantTextColors = {
-      primary: disabled ? colors.text.disabled : colors.primary.contrast,
-      secondary: disabled ? colors.text.disabled : colors.secondary.contrast,
-      outline: disabled ? colors.text.disabled : colors.primary.main,
-      ghost: disabled ? colors.text.disabled : colors.primary.main,
-      danger: disabled ? colors.text.disabled : colors.error.contrast,
+      primary: disabled ? colors.text?.disabled || colors.neutral?.[400] : colors.primary?.contrast || colors.white,
+      secondary: disabled ? colors.text?.disabled || colors.neutral?.[400] : colors.secondary?.contrast || colors.white,
+      outline: disabled ? colors.text?.disabled || colors.neutral?.[400] : colors.primary.main,
+      ghost: disabled ? colors.text?.disabled || colors.neutral?.[400] : colors.primary.main,
+      danger: disabled ? colors.text?.disabled || colors.neutral?.[400] : colors.error?.contrast || colors.white,
     };
 
     return {
       ...baseTextStyle,
-      ...sizeTextStyles[size],
       color: variantTextColors[variant],
     };
   };

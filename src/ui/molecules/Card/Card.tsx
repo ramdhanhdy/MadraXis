@@ -10,7 +10,8 @@ import {
   ViewStyle,
   TouchableOpacityProps,
 } from 'react-native';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useTheme } from '@design-system';
+import { CardComponentTheme } from '@design-system/core/types';
 
 // Card Props Interface
 export interface CardProps extends Omit<TouchableOpacityProps, 'style'> {
@@ -58,41 +59,34 @@ export const Card: React.FC<CardProps> = ({
   ...props
 }) => {
   const { theme } = useTheme();
-  const colors = useColors();
+  const cardTheme: CardComponentTheme = theme.componentThemes.card;
+  const colors = theme.colors;
 
-  // Get card styles based on variant and state
+  // Get card styles based on variant and state using design system
   const getCardStyles = (): ViewStyle => {
     const baseStyle: ViewStyle = {
-      borderRadius: theme.borderRadius.lg, // 12px as per design spec
-      backgroundColor: colors.surface.primary,
+      borderRadius: cardTheme.borderRadius,
+      backgroundColor: cardTheme.backgroundColor,
+      padding: cardTheme.padding[padding],
     };
 
-    // Padding styles
-    const paddingStyles = {
-      none: {},
-      small: { padding: 12 }, // Small (12px) as per design spec
-      medium: { padding: theme.spacing.base.md }, // Medium (16px) as per design spec
-      large: { padding: 20 }, // Large (20px) as per design spec
-    };
-
-    // Variant styles
+    // Variant styles using design system
     const variantStyles = {
       default: {
-        ...theme.shadows.card, // 0px 2px 4px rgba(0, 0, 0, 0.1) as per design spec
+        ...cardTheme.shadow,
       },
       elevated: {
-        ...theme.shadows.cardHover, // Enhanced shadow for elevated state
+        ...theme.shadows?.cardHover || cardTheme.shadow,
       },
       outlined: {
         borderWidth: 1,
-        borderColor: colors.border.primary,
+        borderColor: colors.border?.primary || colors.neutral?.[300] || '#e5e5e5',
         // No shadow for outlined variant
       },
     };
 
     return {
       ...baseStyle,
-      ...paddingStyles[padding],
       ...variantStyles[variant],
       ...(onPress && {
         opacity: disabled ? 0.6 : 1,

@@ -18,7 +18,8 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors } from '../../../context/ThemeContext';
+import { useTheme } from '@design-system';
+import { ModalComponentTheme } from '@design-system/core/types';
 import { Typography } from '../../atoms/Typography';
 import { Icon } from '../../atoms/Icon';
 import { Button } from '../../atoms/Button';
@@ -108,7 +109,8 @@ export const Modal: React.FC<ModalProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const colors = useColors();
+  const modalTheme: ModalComponentTheme = theme.componentThemes.modal;
+  const colors = theme.colors;
   const screenDimensions = Dimensions.get('window');
   
   // Animation values
@@ -183,26 +185,27 @@ export const Modal: React.FC<ModalProps> = ({
     }
   };
 
-  // Get backdrop styles
+  // Get backdrop styles using design system
   const getBackdropStyles = (): ViewStyle => {
     return {
       flex: 1,
-      backgroundColor: backdropColor || `rgba(0, 0, 0, ${backdropOpacity})`,
+      backgroundColor: backdropColor || modalTheme.backdropColor,
       justifyContent: size === 'fullscreen' ? 'flex-start' : 'center',
       alignItems: 'center',
-      padding: size === 'fullscreen' ? 0 : theme.spacing.base.md,
+      padding: size === 'fullscreen' ? 0 : theme.spacing?.base?.md || 16,
     };
   };
 
-  // Get modal container styles
+  // Get modal container styles using design system
   const getModalContainerStyles = (): ViewStyle => {
     const dimensions = getModalDimensions();
-    
+
     const baseStyle: ViewStyle = {
-      backgroundColor: backgroundColor || colors.surface.primary,
-      borderRadius: size === 'fullscreen' ? 0 : theme.borderRadius.xl,
-      ...theme.shadows.modal,
+      backgroundColor: backgroundColor || modalTheme.backgroundColor,
+      borderRadius: size === 'fullscreen' ? 0 : modalTheme.borderRadius,
+      ...modalTheme.shadow,
       overflow: 'hidden',
+      padding: modalTheme.padding,
     };
 
     if (size === 'fullscreen') {

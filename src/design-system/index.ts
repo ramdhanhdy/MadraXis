@@ -14,6 +14,18 @@ export * from './tokens';
 // Enhanced theme system exports
 export * from './themes';
 
+// Utility exports
+export * from './utilities';
+
+// Validation exports
+export * from './validation';
+
+// Hook exports
+export * from './hooks';
+
+// Debug exports (development only)
+export * from './debug';
+
 // Re-export existing tokens for backward compatibility
 export {
   colors,

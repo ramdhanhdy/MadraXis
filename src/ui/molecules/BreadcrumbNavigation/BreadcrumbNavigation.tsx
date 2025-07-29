@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTheme } from '../../../design-system';
+import { NavigationComponentTheme } from '../../../design-system/core/types';
 
 export interface BreadcrumbItem {
   label: string;
@@ -24,6 +26,10 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
   separator = ' › ',
   maxVisibleItems = 3,
 }) => {
+  const { theme } = useTheme();
+  const navigationTheme: NavigationComponentTheme = theme.componentThemes.navigation;
+  const colors = theme.colors;
+
   if (items.length === 0) {
     return null;
   }
@@ -39,42 +45,83 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
     }
   };
 
+  // Create dynamic styles using design system
+  const dynamicStyles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: navigationTheme.padding.horizontal,
+      paddingVertical: navigationTheme.padding.vertical,
+      backgroundColor: navigationTheme.backgroundColor,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border?.primary || colors.neutral?.[300] || '#e9ecef',
+    },
+    item: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    clickableItem: {
+      opacity: 0.8,
+    },
+    label: {
+      fontSize: theme.typography?.fontSize?.sm || 14,
+      color: colors.text?.secondary || colors.neutral?.[600] || '#6c757d',
+    },
+    currentLabel: {
+      fontSize: theme.typography?.fontSize?.sm || 14,
+      fontWeight: theme.typography?.fontWeight?.semibold || '600',
+      color: navigationTheme.accentColor,
+    },
+    separator: {
+      fontSize: theme.typography?.fontSize?.sm || 14,
+      color: colors.text?.tertiary || colors.neutral?.[400] || '#adb5bd',
+      marginHorizontal: 4,
+    },
+    ellipsisButton: {
+      paddingHorizontal: 4,
+    },
+    ellipsisText: {
+      fontSize: theme.typography?.fontSize?.sm || 14,
+      color: colors.text?.secondary || colors.neutral?.[600] || '#6c757d',
+    },
+  });
+
   return (
-    <View style={styles.container}>
+    <View style={dynamicStyles.container}>
       {hasHiddenItems && (
         <>
           <TouchableOpacity
-            style={styles.ellipsisButton}
+            style={dynamicStyles.ellipsisButton}
             onPress={() => {
               // Navigate back to the first hidden item
               const firstHiddenItem = items[0];
               onNavigate(firstHiddenItem.path, firstHiddenItem.params);
             }}
           >
-            <Text style={styles.ellipsisText}>...</Text>
+            <Text style={dynamicStyles.ellipsisText}>...</Text>
           </TouchableOpacity>
-          <Text style={styles.separator}>{separator}</Text>
+          <Text style={dynamicStyles.separator}>{separator}</Text>
         </>
       )}
-      
+
       {visibleItems.map((item, index) => {
         const isLast = index === visibleItems.length - 1;
         const isClickable = !isLast;
-        
+
         return (
           <React.Fragment key={`${item.path}-${index}`}>
             <TouchableOpacity
-              style={[styles.item, isClickable && styles.clickableItem]}
+              style={[dynamicStyles.item, isClickable && dynamicStyles.clickableItem]}
               onPress={() => handleItemPress(item, index)}
               disabled={!isClickable}
             >
-              <Text style={[styles.label, isLast && styles.currentLabel]}>
+              <Text style={[dynamicStyles.label, isLast && dynamicStyles.currentLabel]}>
                 {item.label}
               </Text>
             </TouchableOpacity>
-            
+
             {!isLast && (
-              <Text style={styles.separator}>{separator}</Text>
+              <Text style={dynamicStyles.separator}>{separator}</Text>
             )}
           </React.Fragment>
         );
@@ -83,42 +130,3 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#f8f9fa',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
-  },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  clickableItem: {
-    opacity: 0.8,
-  },
-  label: {
-    fontSize: 14,
-    color: '#6c757d',
-  },
-  currentLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#007AFF',
-  },
-  separator: {
-    fontSize: 14,
-    color: '#adb5bd',
-    marginHorizontal: 4,
-  },
-  ellipsisButton: {
-    paddingHorizontal: 4,
-  },
-  ellipsisText: {
-    fontSize: 14,
-    color: '#6c757d',
-  },
-});
