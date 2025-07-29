@@ -447,7 +447,7 @@ MadraXis
 |   |   |   +-- screen.tsx
 |   |   |   +-- model.ts
 |   |   |   +-- ui.tsx
-|   |   |   +-- store.ts                     # optional local Zustand store
+|   |   |   +-- store.ts                     # local Zustand store
 |   |   |   +-- Login.integration.test.tsx
 |   |   |   +-- Login.stories.tsx
 |   |   |   +-- Login.md
@@ -567,3 +567,105 @@ MadraXis
 +-- package.json
 +-- README.md
 ```
+
+## Migration Strategy
+
+### Migration Phases
+
+The refactoring will be executed in 6 carefully planned phases:
+
+#### Phase 1: Infrastructure Setup
+- Configure path aliases in `tsconfig.json`
+- Set up Storybook and E2E testing frameworks
+- Create migration automation scripts
+- **Checkpoint**: Validate path aliases and tooling setup
+
+#### Phase 2: Parallel Structure Creation
+- Create new directory structures alongside existing ones
+- Set up barrel exports for backward compatibility
+- Implement dual import system
+- **Checkpoint**: Validate parallel structure and dual imports
+
+#### Phase 3: UI Component Migration
+- Migrate components from `src/components/` to `src/ui/`
+- Update imports using automation scripts
+- Maintain backward compatibility during transition
+- **Checkpoint**: Validate component migration and imports
+
+#### Phase 4: Domain Migration
+- Create domain modules and migrate from `src/services/`
+- Migrate stores to appropriate contexts/domains
+- Update business logic imports
+- **Checkpoint**: Validate domain structure and service replacement
+
+#### Phase 5: Feature Slice Migration
+- Convert flat route files to feature directories
+- Implement feature-specific patterns
+- Update routing and navigation
+- **Checkpoint**: Validate feature slices and routing
+
+#### Phase 6: Cleanup and Validation
+- Remove old directory structures
+- Final validation and performance testing
+- Documentation updates
+- **Checkpoint**: Migration completion validation
+
+### Migration Automation
+
+#### Import Update Scripts
+```bash
+# scripts/migration/update-imports.js
+# Automatically updates import paths from old to new structure
+node scripts/migration/update-imports.js --phase=ui-components
+node scripts/migration/update-imports.js --phase=domains
+node scripts/migration/update-imports.js --phase=lib
+```
+
+#### Validation Scripts
+```bash
+# scripts/migration/validate-imports.js
+# Validates all imports are working after migration phase
+node scripts/migration/validate-imports.js --check-broken-imports
+node scripts/migration/validate-imports.js --check-unused-exports
+```
+
+#### Rollback Scripts
+```bash
+# scripts/migration/rollback.js
+# Rollback to previous migration phase if issues occur
+node scripts/migration/rollback.js --to-phase=2
+node scripts/migration/rollback.js --to-checkpoint=ui-components
+```
+
+### Store Migration Strategy
+
+#### Current State
+```typescript
+// src/stores/authStore.ts - Zustand store
+export const useAuthStore = create((set) => ({
+  session: null,
+  user: null,
+  // ... auth logic
+}));
+```
+
+#### Target State
+```typescript
+// src/context/AuthContext/AuthProvider.tsx - React Context
+export const AuthProvider = ({ children }) => {
+  // Auth logic using React Context + useReducer
+};
+
+// src/domains/class/store.ts - Domain-specific Zustand store
+export const useClassStore = create((set) => ({
+  classes: [],
+  selectedClass: null,
+  // ... class-specific state
+}));
+```
+
+#### Migration Rules
+1. **Global State** → React Context (auth, theme, navigation)
+2. **Domain State** → Domain-specific Zustand stores
+3. **Feature State** → Local Zustand stores in feature directories
+4. **Maintain Interfaces** → Keep existing hook interfaces during transition

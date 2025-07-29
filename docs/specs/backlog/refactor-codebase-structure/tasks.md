@@ -4,7 +4,7 @@
 
 This document outlines the detailed tasks required to refactor the MadraXis codebase according to the new architectural guidelines. Tasks are grouped by category and include estimated story points (SP) for complexity.
 
-### 1. Project Setup & Configuration (20 SP)
+### 1. Project Setup & Configuration (35 SP)
 
 *   [ ] **Backend/Infra:**
     *   [ ] Review existing Supabase schema and identify potential impacts of refactor. (5 SP)
@@ -12,8 +12,24 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 *   [ ] **Frontend:**
     *   [ ] Update `tsconfig.json` to include new path aliases (`@ui`, `@domains`, `@lib`, `@context`, `@types`). (5 SP)
     *   [ ] Configure ESLint and Prettier to enforce new coding standards and architectural patterns. (5 SP)
+*   [ ] **Migration Infrastructure:**
+    *   [ ] Create migration automation scripts for import path updates. (10 SP)
+    *   [ ] Set up Storybook configuration (`.storybook/main.js`, `.storybook/preview.js`). (5 SP)
+    *   [ ] Initialize E2E testing framework (Detox/Playwright setup). (10 SP)
+    *   [ ] Create migration validation scripts for import checking. (5 SP)
 
-### 2. Core UI Components (src/ui) Refactoring (80 SP)
+### 2. Parallel Structure Creation (20 SP)
+
+*   [ ] **Directory Structure:**
+    *   [ ] Create new `src/ui/` directory structure (atoms, molecules, organisms, templates). (3 SP)
+    *   [ ] Create new `src/domains/` directory structure (class, incidents, users, subjects, dashboard, schools). (3 SP)
+    *   [ ] Create new `src/lib/` directory structure (hooks, utils, constants, tests). (3 SP)
+    *   [ ] Set up barrel exports in new directories for backward compatibility. (5 SP)
+*   [ ] **Migration Preparation:**
+    *   [ ] Create migration checkpoint validation scripts. (3 SP)
+    *   [ ] Set up dual import system (old and new paths working simultaneously). (3 SP)
+
+### 3. Core UI Components (src/ui) Refactoring (80 SP)
 
 *   **Atoms (30 SP)**
     *   [ ] Refactor `Button` component to `src/ui/atoms/Button/Button.tsx`. (5 SP)
@@ -167,7 +183,7 @@ This document outlines the detailed tasks required to refactor the MadraXis code
     *   [ ] Refactor `StudentIncidentReportTemplate` to `src/ui/templates/StudentIncidentReportTemplate.tsx`. (3 SP)
     *   [ ] Refactor `StudentsListTemplate` to `src/ui/templates/StudentsListTemplate.tsx`. (3 SP)
 
-### 3. Domain Logic (src/domains) Refactoring (100 SP)
+### 4. Domain Logic (src/domains) Refactoring (120 SP)
 
 *   **Class Domain (30 SP)**
     *   [ ] Create `src/domains/class/api.ts` for Supabase interactions. (10 SP)
@@ -207,8 +223,12 @@ This document outlines the detailed tasks required to refactor the MadraXis code
     *   [ ] Create `src/domains/schools/types.ts` for school-related types. (2 SP)
     *   [ ] Create `src/domains/schools/index.ts` for barrel export. (1 SP)
     *   [ ] Migrate existing school-related service logic from `src/services/schools.ts` to `src/domains/schools/api.ts`. (5 SP)
+*   **Store Migration (20 SP)**
+    *   [ ] Migrate `src/stores/authStore.ts` to `src/context/AuthContext/` with React Context pattern. (8 SP)
+    *   [ ] Create domain-specific Zustand stores in each domain module where needed. (7 SP)
+    *   [ ] Update all store imports throughout the application. (5 SP)
 
-### 4. Routing and Navigation (app/) Refactoring (60 SP)
+### 5. Routing and Navigation (app/) Refactoring (60 SP)
 
 *   [ ] **Authentication Flow (20 SP)**
     *   [ ] Migrate `app/(auth)/login.tsx` to `app/(auth)/login/screen.tsx`. (5 SP)
@@ -250,7 +270,7 @@ This document outlines the detailed tasks required to refactor the MadraXis code
         *   [ ] Create `app/(teacher)/class/[id]/reports/ui.tsx`. (3 SP)
         *   [ ] Create `app/(teacher)/class/[id]/reports/index.ts`. (1 SP)
 
-### 5. Shared Utilities & Helpers (src/lib) Refactoring (30 SP)
+### 6. Shared Utilities & Helpers (src/lib) Refactoring (30 SP)
 
 *   **Hooks (10 SP)**
     *   [ ] Migrate `useAuth.ts` to `src/lib/hooks/useAuth.ts`. (3 SP)
@@ -281,7 +301,7 @@ This document outlines the detailed tasks required to refactor the MadraXis code
     *   [ ] Create `src/lib/tests/renderWithProviders.tsx`. (3 SP)
     *   [ ] Create `src/lib/tests/navigationMock.ts`. (2 SP)
 
-### 6. Global State & Context (src/context) Refactoring (15 SP)
+### 7. Global State & Context (src/context) Refactoring (15 SP)
 
 *   [ ] Migrate `AuthContext.tsx` to `src/context/AuthContext/AuthProvider.tsx`. (5 SP)
     *   [ ] Create `src/context/AuthContext/useAuth.ts`. (3 SP)
@@ -292,7 +312,7 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 *   [ ] Migrate `NavigationHistoryContext.tsx` to `src/context/NavigationHistoryContext/NavigationHistoryContext.tsx`. (5 SP)
     *   [ ] Create `src/context/NavigationHistoryContext/index.ts`. (1 SP)
 
-### 7. Global Type Declarations (src/types) Refactoring (10 SP)
+### 8. Global Type Declarations (src/types) Refactoring (10 SP)
 
 *   [ ] Consolidate all global type declarations into `src/types/index.ts`. (10 SP)
     *   [ ] Migrate `class.ts` types.
@@ -301,7 +321,7 @@ This document outlines the detailed tasks required to refactor the MadraXis code
     *   [ ] Migrate `exports.ts` types.
     *   [ ] Migrate `student.ts` types.
 
-### 8. Testing Infrastructure (20 SP)
+### 9. Testing Infrastructure (20 SP)
 
 *   [ ] Configure Jest for new project structure. (5 SP)
     *   [ ] Update `jest.setup.js` to `jest/setup.ts`.
@@ -313,12 +333,129 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 *   [ ] Set up E2E testing with Detox/Playwright. (10 SP)
     *   [ ] Create `e2e/add-students-flow.spec.ts` as an example.
 
-### 9. Cleanup & Verification (15 SP)
+### 10. Migration Validation & Checkpoints (25 SP)
 
-*   [ ] Remove old component files and directories after migration. (5 SP)
-*   [ ] Remove old service files and directories after migration. (5 SP)
-*   [ ] Run all tests (unit, integration, e2e) to ensure full functionality. (5 SP)
-*   [ ] Perform a comprehensive code review to ensure adherence to new architecture and coding standards. (5 SP)
-*   [ ] Update `README.md` with new project structure and development guidelines. (5 SP)
+*   [ ] **Phase Validation:**
+    *   [ ] Checkpoint 1: Validate infrastructure setup and path aliases working. (3 SP)
+    *   [ ] Checkpoint 2: Validate parallel structure creation and dual imports. (3 SP)
+    *   [ ] Checkpoint 3: Validate UI component migration and import updates. (5 SP)
+    *   [ ] Checkpoint 4: Validate domain migration and service replacement. (5 SP)
+    *   [ ] Checkpoint 5: Validate feature slice migration and routing. (4 SP)
+*   [ ] **Migration Scripts:**
+    *   [ ] Run automated import path validation after each phase. (3 SP)
+    *   [ ] Execute performance benchmarking before/after migration. (2 SP)
 
-### Total Estimated Story Points: ~360 SP
+### 11. Cleanup & Final Verification (20 SP)
+
+*   [ ] **Legacy Cleanup:**
+    *   [ ] Remove old `src/components/` directory after UI migration complete. (3 SP)
+    *   [ ] Remove old `src/services/` directory after domain migration complete. (3 SP)
+    *   [ ] Remove old `src/hooks/` and `src/utils/` after lib migration complete. (2 SP)
+*   [ ] **Final Validation:**
+    *   [ ] Run complete test suite (unit, integration, e2e) for final validation. (5 SP)
+    *   [ ] Perform comprehensive code review for architectural compliance. (3 SP)
+    *   [ ] Update `README.md` and all documentation with new structure. (2 SP)
+    *   [ ] Create migration completion report and lessons learned. (2 SP)
+
+### 12. Rollback Procedures (15 SP)
+
+*   [ ] **Rollback Scripts:**
+    *   [ ] Create rollback scripts for each migration phase. (8 SP)
+    *   [ ] Test rollback procedures in development environment. (4 SP)
+    *   [ ] Document rollback procedures and emergency contacts. (3 SP)
+
+## Migration Scripts Usage
+
+### Setup Scripts
+```bash
+# Make scripts executable
+chmod +x scripts/migration/*.js
+
+# Install dependencies (if needed)
+npm install
+```
+
+### Import Migration Scripts
+```bash
+# Migrate UI components
+node scripts/migration/update-imports.js --phase=ui-components
+
+# Migrate domain services
+node scripts/migration/update-imports.js --phase=domains
+
+# Migrate library utilities
+node scripts/migration/update-imports.js --phase=lib
+
+# Dry run (preview changes)
+node scripts/migration/update-imports.js --phase=ui-components --dry-run
+```
+
+### Validation Scripts
+```bash
+# Validate all imports
+node scripts/migration/validate-imports.js
+
+# Check only broken imports
+node scripts/migration/validate-imports.js --check-broken-imports
+
+# Check unused exports
+node scripts/migration/validate-imports.js --check-unused-exports
+```
+
+### Rollback Scripts
+```bash
+# List available backups
+node scripts/migration/rollback.js --list-backups
+
+# Rollback to specific phase
+node scripts/migration/rollback.js --to-phase=2 --force
+
+# Rollback to checkpoint
+node scripts/migration/rollback.js --to-checkpoint=ui-components --force
+```
+
+### Package.json Scripts
+Add these scripts to package.json for easier usage:
+```json
+{
+  "scripts": {
+    "migrate:ui": "node scripts/migration/update-imports.js --phase=ui-components",
+    "migrate:domains": "node scripts/migration/update-imports.js --phase=domains",
+    "migrate:lib": "node scripts/migration/update-imports.js --phase=lib",
+    "migrate:validate": "node scripts/migration/validate-imports.js",
+    "migrate:rollback": "node scripts/migration/rollback.js",
+    "migrate:dry-run": "node scripts/migration/update-imports.js --dry-run"
+  }
+}
+```
+
+### Total Estimated Story Points: ~440 SP
+
+## Migration Checklist
+
+### Pre-Migration
+- [ ] Backup entire codebase
+- [ ] Ensure all tests pass
+- [ ] Create feature branch for migration
+- [ ] Review migration scripts and validate on small subset
+
+### Phase Execution
+- [ ] Phase 1: Infrastructure Setup (35 SP)
+- [ ] Phase 2: Parallel Structure Creation (20 SP)
+- [ ] Phase 3: UI Components Migration (80 SP)
+- [ ] Phase 4: Domain Migration (120 SP)
+- [ ] Phase 5: Feature Slice Migration (60 SP)
+- [ ] Phase 6: Library Migration (30 SP)
+- [ ] Phase 7: Context Migration (15 SP)
+- [ ] Phase 8: Types Migration (10 SP)
+- [ ] Phase 9: Testing Infrastructure (20 SP)
+- [ ] Phase 10: Migration Validation (25 SP)
+- [ ] Phase 11: Cleanup & Final Verification (20 SP)
+- [ ] Phase 12: Rollback Procedures (15 SP)
+
+### Post-Migration
+- [ ] Run full test suite
+- [ ] Performance benchmarking
+- [ ] Code review and documentation update
+- [ ] Deploy to staging environment
+- [ ] Monitor for issues and gather feedback
