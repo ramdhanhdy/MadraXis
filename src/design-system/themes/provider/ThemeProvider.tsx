@@ -3,25 +3,21 @@
  * Performance-optimized theme provider with role-based theme switching
  */
 
-import React, { 
-  createContext, 
-  useContext, 
-  useState, 
-  useCallback, 
-  useMemo, 
+import React, {
+  useState,
+  useCallback,
+  useMemo,
   useEffect,
-  ReactNode 
+  ReactNode
 } from 'react';
 import { Theme, ThemeStrategy, ThemeContextType } from '../../core/types';
 import { UserRole } from '../../tokens/colors';
 import { validateTheme } from '../../core/utils';
 import { fallbackTheme } from '../shared/default';
 import { roleThemes } from '../roles';
+import { EnhancedThemeContext } from '../context';
 
-/**
- * Enhanced Theme Context
- */
-export const EnhancedThemeContext = createContext<ThemeContextType | undefined>(undefined);
+// EnhancedThemeContext is now imported from ../context.ts
 
 /**
  * Theme Provider Props
@@ -196,18 +192,7 @@ export const EnhancedThemeProvider: React.FC<EnhancedThemeProviderProps> = ({
   );
 };
 
-/**
- * Enhanced useTheme hook with error handling
- */
-export const useEnhancedTheme = (): ThemeContextType => {
-  const context = useContext(EnhancedThemeContext);
-  
-  if (context === undefined) {
-    throw new Error('useEnhancedTheme must be used within an EnhancedThemeProvider');
-  }
-  
-  return context;
-};
+// useEnhancedTheme hook is now in ../hooks.ts
 
 /**
  * Theme debugging hook
@@ -276,6 +261,5 @@ export const useThemePerformance = () => {
  * Backward compatibility with existing ThemeProvider
  */
 export const ThemeProvider = EnhancedThemeProvider;
-export const useTheme = useEnhancedTheme;
 
 export default EnhancedThemeProvider;

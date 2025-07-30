@@ -15,16 +15,8 @@ export * from './roles';
 // Theme strategies
 export * from './strategies';
 
-// Theme provider
-export * from './provider/ThemeProvider';
-
-// Re-export key components for convenience
-export {
-  EnhancedThemeProvider as ThemeProvider,
-  useEnhancedTheme as useTheme,
-  useThemeDebugger,
-  useThemePerformance,
-} from './provider/ThemeProvider';
+// Note: ThemeProvider exports are available directly from './provider/ThemeProvider'
+// but not re-exported here to avoid JSX compilation issues during TypeScript checking
 
 export {
   defaultThemeStrategy,

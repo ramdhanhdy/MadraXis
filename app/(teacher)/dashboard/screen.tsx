@@ -14,11 +14,11 @@ import { EmptyState } from '@ui/molecules/EmptyState/EmptyState';
 import { SkeletonCard } from '@ui/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
-import { useAuth } from '../../../src/hooks/useAuth';
-import { supabase } from '../../../src/utils/supabase';
-import { logoSvg } from '../../../src/utils/svgPatterns';
-import { colors } from '../../../src/styles/colors';
-import { useSafeToQuery } from '../../../src/utils/navigationGuard';
+import { useAuth } from '@lib/hooks/useAuth';
+import { supabase } from '@lib/utils/supabase';
+import { logoSvg } from '@lib/utils/svgPatterns';
+import { colors } from '@design-system/tokens/colors';
+import { useSafeToQuery } from '@lib/utils/navigationGuard';
 
 // Modal Components
 import TeacherProfileView from '@ui/organisms/TeacherProfileView';

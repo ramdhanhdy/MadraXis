@@ -5,18 +5,8 @@
  * user navigation throughout the application.
  */
 
-export * from './NavigationHistoryContext';
+export * from './context';
+export * from './hooks';
 
-// Re-export main components for easy importing
-export { 
-  NavigationHistoryProvider, 
-  useNavigationHistory,
-  useRouteTracking,
-  useBreadcrumbData
-} from './NavigationHistoryContext';
-
-// Re-export types
-export type { 
-  NavigationHistoryItem, 
-  NavigationHistoryState 
-} from './NavigationHistoryContext';
+// NavigationHistoryProvider is available from './NavigationHistoryContext' but not exported here to avoid JSX resolution issues
+// For runtime usage: import { NavigationHistoryProvider } from './NavigationHistoryContext';

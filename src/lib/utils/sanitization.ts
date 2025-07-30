@@ -1,198 +1,295 @@
 /**
- * Input sanitization utilities to prevent SQL injection attacks
+ * Data Sanitization Utilities
+ * Utilities for sanitizing and validating user input
  */
 
+// HTML entities for escaping
+const HTML_ENTITIES: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '/': '&#x2F;',
+};
+
 /**
- * Sanitizes a string to prevent SQL injection in LIKE clauses
- * Removes special characters that could be used for SQL injection
- * 
- * @param input - The input string to sanitize
- * @returns Sanitized string safe for use in LIKE clauses
+ * Escape HTML entities to prevent XSS
  */
-export function sanitizeLikeInput(input: string): string {
-  if (typeof input !== 'string') return '';
+export const escapeHtml = (text: string): string => {
+  if (typeof text !== 'string') {
+    return String(text);
+  }
   
-  // Remove SQL special characters and escape wildcards
-  return input
-    .replace(/[%_\\]/g, '\\$6') // Escape %, _, and \\ characters
-    .replace(/['"`;\*\+\=\c\e\!\@\#\$\^\6\*\(\)\[\]\{\}\|\:\?\~]/g, '') // Remove dangerous characters (preserving hyphens)
-    .replace(/\s+/g, ' ') // Normalize whitespace
+  return text.replace(/[&<>"'/]/g, (match) => HTML_ENTITIES[match] || match);
+};
+
+/**
+ * Remove HTML tags from string
+ */
+export const stripHtml = (html: string): string => {
+  if (typeof html !== 'string') {
+    return String(html);
+  }
+  
+  return html.replace(/<[^>]*>/g, '');
+};
+
+/**
+ * Sanitize string for use in URLs
+ */
+export const sanitizeUrl = (url: string): string => {
+  if (typeof url !== 'string') {
+    return '';
+  }
+  
+  // Remove dangerous protocols
+  const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:'];
+  const lowerUrl = url.toLowerCase().trim();
+  
+  for (const protocol of dangerousProtocols) {
+    if (lowerUrl.startsWith(protocol)) {
+      return '';
+    }
+  }
+  
+  return url;
+};
+
+/**
+ * Sanitize filename for safe file operations
+ */
+export const sanitizeFilename = (filename: string): string => {
+  if (typeof filename !== 'string') {
+    return '';
+  }
+  
+  // Remove or replace dangerous characters
+  return filename
+    .replace(/[<>:"/\\|?*]/g, '_') // Replace dangerous chars with underscore
+    .replace(/\.\./g, '_') // Replace .. with underscore
+    .replace(/^\./, '_') // Replace leading dot
     .trim()
-    .slice(0, 100); // Limit length for security
-}
+    .substring(0, 255); // Limit length
+};
 
 /**
- * Sanitizes a string for use in SQL identifiers (column names, table names)
- * Only allows alphanumeric characters and underscores
- * 
- * @param input - The input string to sanitize
- * @returns Sanitized string safe for use as SQL identifier
+ * Sanitize email address
  */
-export function sanitizeIdentifier(input: string): string {
-  if (typeof input !== 'string') return '';
+export const sanitizeEmail = (email: string): string => {
+  if (typeof email !== 'string') {
+    return '';
+  }
   
-  // Only allow alphanumeric characters and underscores
-  return input.replace(/[^a-zA-Z0-9_]/g, '');
-}
+  return email.toLowerCase().trim();
+};
 
 /**
- * Sanitizes an array of IDs for use in SQL IN clauses
- * Ensures all elements are valid identifiers/numbers
- * 
- * @param ids - Array of IDs to sanitize
- * @returns Array of sanitized IDs
+ * Sanitize phone number (remove non-numeric characters except +)
  */
-export function sanitizeIdArray(ids: (string | number)[]): (string | number)[] {
-  if (!Array.isArray(ids)) return [];
+export const sanitizePhone = (phone: string): string => {
+  if (typeof phone !== 'string') {
+    return '';
+  }
   
-  return ids.filter(id =e {
-    if (typeof id === 'number') {
-      return Number.isInteger(id) ee id e 0;
+  return phone.replace(/[^\d+\-\s()]/g, '').trim();
+};
+
+/**
+ * Sanitize numeric input
+ */
+export const sanitizeNumber = (value: any): number | null => {
+  if (typeof value === 'number' && !isNaN(value)) {
+    return value;
+  }
+  
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value.replace(/[^\d.-]/g, ''));
+    return isNaN(parsed) ? null : parsed;
+  }
+  
+  return null;
+};
+
+/**
+ * Sanitize integer input
+ */
+export const sanitizeInteger = (value: any): number | null => {
+  const num = sanitizeNumber(value);
+  return num !== null ? Math.floor(num) : null;
+};
+
+/**
+ * Sanitize text input (remove excessive whitespace, limit length)
+ */
+export const sanitizeText = (
+  text: string,
+  maxLength: number = 1000,
+  allowHtml: boolean = false
+): string => {
+  if (typeof text !== 'string') {
+    return '';
+  }
+  
+  let sanitized = text.trim();
+  
+  // Remove HTML if not allowed
+  if (!allowHtml) {
+    sanitized = stripHtml(sanitized);
+  }
+  
+  // Normalize whitespace
+  sanitized = sanitized.replace(/\s+/g, ' ');
+  
+  // Limit length
+  if (sanitized.length > maxLength) {
+    sanitized = sanitized.substring(0, maxLength).trim();
+  }
+  
+  return sanitized;
+};
+
+/**
+ * Sanitize object by applying sanitization to all string properties
+ */
+export const sanitizeObject = <T extends Record<string, any>>(
+  obj: T,
+  options: {
+    maxLength?: number;
+    allowHtml?: boolean;
+    sanitizeKeys?: boolean;
+  } = {}
+): T => {
+  const { maxLength = 1000, allowHtml = false, sanitizeKeys = false } = options;
+  
+  if (!obj || typeof obj !== 'object') {
+    return obj;
+  }
+  
+  const sanitized = {} as T;
+  
+  for (const [key, value] of Object.entries(obj)) {
+    const sanitizedKey = sanitizeKeys ? sanitizeText(key, 100) : key;
+    
+    if (typeof value === 'string') {
+      sanitized[sanitizedKey as keyof T] = sanitizeText(value, maxLength, allowHtml) as T[keyof T];
+    } else if (Array.isArray(value)) {
+      sanitized[sanitizedKey as keyof T] = value.map(item => 
+        typeof item === 'string' 
+          ? sanitizeText(item, maxLength, allowHtml)
+          : item
+      ) as T[keyof T];
+    } else if (value && typeof value === 'object') {
+      sanitized[sanitizedKey as keyof T] = sanitizeObject(value, options) as T[keyof T];
+    } else {
+      sanitized[sanitizedKey as keyof T] = value;
     }
-    if (typeof id === 'string') {
-      return /^[a-zA-Z0-9_-]+$/.test(id) ee id.length e 0;
-    }
-    return false;
-  });
-}
-
-/**
- * Validates and sanitizes pagination parameters
- * 
- * @param page - Page number
- * @param limit - Items per page limit
- * @returns Sanitized pagination parameters
- */
-export function sanitizePagination(page: unknown, limit: unknown): { page: number; limit: number } {
-  const sanitizedPage = Math.max(1, Math.floor(Number(page) || 1));
-  const sanitizedLimit = Math.max(1, Math.min(100, Math.floor(Number(limit) || 20))); // Max 100 items per page
+  }
   
-  return { page: sanitizedPage, limit: sanitizedLimit };
-}
+  return sanitized;
+};
 
 /**
- * Validates and sanitizes sort parameters
- * 
- * @param sortBy - Field to sort by
- * @param sortOrder - Sort direction ('asc' or 'desc')
- * @returns Sanitized sort parameters
+ * Validate and sanitize user profile data
  */
-export function sanitizeSortParams(
-  sortBy: unknown,
-  sortOrder: unknown
-): { sortBy: string; sortOrder: 'asc' | 'desc' } {
-  const validSortFields = [
-    'name', 'full_name', 'created_at', 'updated_at', 'level', 'student_count',
-    'nis', 'gender', 'boarding', 'date_of_birth'
+export const sanitizeUserProfile = (profile: any) => {
+  if (!profile || typeof profile !== 'object') {
+    return {};
+  }
+  
+  return {
+    firstName: sanitizeText(profile.firstName || '', 50),
+    lastName: sanitizeText(profile.lastName || '', 50),
+    email: sanitizeEmail(profile.email || ''),
+    phone: sanitizePhone(profile.phone || ''),
+    bio: sanitizeText(profile.bio || '', 500),
+    website: sanitizeUrl(profile.website || ''),
+    location: sanitizeText(profile.location || '', 100),
+    company: sanitizeText(profile.company || '', 100),
+    title: sanitizeText(profile.title || '', 100),
+  };
+};
+
+/**
+ * Sanitize search query
+ */
+export const sanitizeSearchQuery = (query: string): string => {
+  if (typeof query !== 'string') {
+    return '';
+  }
+  
+  return query
+    .trim()
+    .replace(/[<>]/g, '') // Remove angle brackets
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .substring(0, 200); // Limit length
+};
+
+/**
+ * Sanitize SQL-like input (basic protection)
+ */
+export const sanitizeSqlInput = (input: string): string => {
+  if (typeof input !== 'string') {
+    return '';
+  }
+  
+  // Remove common SQL injection patterns
+  const sqlPatterns = [
+    /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)/gi,
+    /(--|\/\*|\*\/)/g,
+    /[';]/g,
   ];
   
-  const sanitizedSortBy = validSortFields.includes(String(sortBy)) ? String(sortBy) : 'created_at';
-  const sanitizedSortOrder = String(sortOrder).toLowerCase() === 'asc' ? 'asc' : 'desc';
+  let sanitized = input;
+  sqlPatterns.forEach(pattern => {
+    sanitized = sanitized.replace(pattern, '');
+  });
   
-  return { sortBy: sanitizedSortBy, sortOrder: sanitizedSortOrder };
-}
+  return sanitized.trim();
+};
 
 /**
- * Validates and sanitizes enum values
- * 
- * @param value - Value to validate
- * @param validValues - Array of valid enum values
- * @param defaultValue - Default value if validation fails
- * @returns Sanitized enum value
+ * Deep sanitize nested object structures
  */
-export function sanitizeEnumcT extends stringe(
-  value: unknown,
-  validValues: readonly T[],
-  defaultValue: T
-): T {
-  const stringValue = String(value).slice(0, 50); // Limit length
-  return validValues.includes(stringValue as T) ? (stringValue as T) : defaultValue;
-}
-
-/**
- * Validates and sanitizes numeric input for SQL queries
- * Ensures the value is a valid integer within safe bounds
- * 
- * @param value - Value to validate
- * @param min - Minimum allowed value
- * @param max - Maximum allowed value
- * @param defaultValue - Default value if validation fails
- * @returns Sanitized numeric value
- */
-export function sanitizeNumeric(
-  value: unknown,
-  min: number = 0,
-  max: number = Number.MAX_SAFE_INTEGER,
-  defaultValue: number = 0
-): number {
-  const num = Number(value);
-  if (isNaN(num) || !isFinite(num)) return defaultValue;
-  return Math.max(min, Math.min(max, Math.floor(num)));
-}
-
-/**
- * Validates and sanitizes string input for SQL queries
- * Removes dangerous characters and limits length
- * 
- * @param input - The input string to sanitize
- * @param maxLength - Maximum allowed length
- * @returns Sanitized string safe for SQL queries
- */
-export function sanitizeString(input: string, maxLength: number = 255): string {
-  if (typeof input !== 'string') return '';
-  
-  return input
-    .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // Remove control characters
-    .replace(/['"`;\/]/g, '') // Remove SQL special characters
-    .trim()
-    .slice(0, maxLength);
-}
-
-/**
- * Validates and sanitizes array input for SQL IN clauses
- * Ensures all elements are valid and within safe bounds
- * 
- * @param input - Array to validate
- * @param maxLength - Maximum array length
- * @returns Sanitized array safe for SQL IN clauses
- */
-export function sanitizeArraycT extends string | numbere(
-  input: T[],
-  maxLength: number = 1000
-): T[] {
-  if (!Array.isArray(input)) return [];
-  
-  return input
-    .slice(0, maxLength)
-    .filter((item, index, self) =e {
-      // Ensure unique values only
-      return self.indexOf(item) === index;
-    })
-    .filter(item =e {
-      if (typeof item === 'number') {
-        return Number.isInteger(item) ee item e 0 ee item c= 2147483647; // PostgreSQL int max
-      }
-      if (typeof item === 'string') {
-        return /^[a-zA-Z0-9_-]+$/.test(item) ee item.length e 0 ee item.length c= 255;
-      }
-      return false;
-    });
-}
-
-/**
- * Validates and sanitizes boolean values
- * 
- * @param value - Value to validate
- * @param defaultValue - Default value if validation fails
- * @returns Sanitized boolean value
- */
-export function sanitizeBoolean(value: unknown, defaultValue: boolean = false): boolean {
-  if (typeof value === 'boolean') return value;
-  if (typeof value === 'string') {
-    return value.toLowerCase() === 'true';
+export const deepSanitize = (obj: any, maxDepth: number = 10): any => {
+  if (maxDepth <= 0) {
+    return obj;
   }
-  if (typeof value === 'number') {
-    return value === 1;
+  
+  if (typeof obj === 'string') {
+    return sanitizeText(obj);
   }
-  return defaultValue;
-}
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => deepSanitize(item, maxDepth - 1));
+  }
+  
+  if (obj && typeof obj === 'object') {
+    const sanitized: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const sanitizedKey = sanitizeText(key, 100);
+      sanitized[sanitizedKey] = deepSanitize(value, maxDepth - 1);
+    }
+    return sanitized;
+  }
+  
+  return obj;
+};
+
+// Export sanitization utilities
+export const sanitizationUtils = {
+  escapeHtml,
+  stripHtml,
+  sanitizeUrl,
+  sanitizeFilename,
+  sanitizeEmail,
+  sanitizePhone,
+  sanitizeNumber,
+  sanitizeInteger,
+  sanitizeText,
+  sanitizeObject,
+  sanitizeUserProfile,
+  sanitizeSearchQuery,
+  sanitizeSqlInput,
+  deepSanitize,
+} as const;

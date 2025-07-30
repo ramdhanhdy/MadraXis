@@ -5,14 +5,16 @@
 
 import { Theme, ThemeConfig, ThemeStrategy, RoleThemeConfig, AnimationTokens, AccessibilityTokens, DeepPartial } from './types';
 import { deepMerge, generateColorVariants, validateTheme } from './utils';
-import { UserRole } from '../../styles/colors';
 
-// Import existing theme tokens (will be migrated to design-system/tokens)
-import { baseColors, semanticColors, roleColors } from '../../styles/colors';
-import { typography } from '../../styles/typography';
-import { spacingTokens } from '../../styles/spacing';
-import { shadows } from '../../styles/shadows';
-import { borderRadius, duration, easing, nativeEasing, breakpoints, zIndex, zIndexUtils, elevationLevels } from '../../styles/theme';
+// Import theme tokens from design system
+import { baseColors, semanticColors, roleColors } from '../tokens/colors';
+import { typography } from '../tokens/typography';
+import { spacingTokens } from '../tokens/spacing';
+import { shadows } from '../tokens/shadows';
+import { borderRadius, duration, easing, breakpoints, zIndex, zIndexUtils, nativeEasing, elevationLevels } from '../tokens';
+
+// Define UserRole type locally since it was in the old styles
+export type UserRole = 'student' | 'teacher' | 'parent' | 'management';
 
 /**
  * Enhanced animation tokens
@@ -94,13 +96,13 @@ function createComponentThemes(theme: Partial<Theme>) {
         large: spacingTokens.base.lg,
       },
       backgroundColor,
-      shadow: shadows.card,
+      shadow: shadows.semantic.card.default,
     },
     modal: {
       borderRadius: borderRadius['2xl'],
       padding: spacingTokens.base.lg,
       backgroundColor,
-      shadow: shadows.modal,
+      shadow: shadows.semantic.modal,
       backdropColor: 'rgba(0, 0, 0, 0.5)',
       maxHeight: '80%',
     },

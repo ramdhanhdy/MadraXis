@@ -14,13 +14,13 @@ import { EmptyState } from '@ui/molecules/EmptyState/EmptyState';
 import { SkeletonCard } from '@ui/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
-import { useAuth } from '../../../src/hooks/useAuth';
-import { fetchIncidentsForSchool } from '../../../src/services/incidents';
-import { fetchDashboardMetrics, DashboardMetrics } from '../../../src/services/dashboard';
-import { logoSvg } from '../../../src/utils/svgPatterns';
-import { colors } from '../../../src/styles/colors';
-import { useSafeToQuery } from '../../../src/utils/navigationGuard';
-import { Incident } from '../../../src/types';
+import { useAuth } from '@lib/hooks/useAuth';
+import { fetchIncidentsForSchool } from '@domains/incidents';
+import { fetchDashboardMetrics, DashboardMetrics } from '@domains/dashboard';
+import { logoSvg } from '@lib/utils/svgPatterns';
+import { colors } from '@design-system/tokens/colors';
+import { useSafeToQuery } from '@lib/utils/navigationGuard';
+import { Incident } from '@types';
 
 // Feature Model
 import {

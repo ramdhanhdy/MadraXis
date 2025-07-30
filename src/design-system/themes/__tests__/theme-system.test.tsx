@@ -21,14 +21,14 @@ import { validateTheme } from '../../core/utils';
 // Test component to access theme context
 const TestComponent: React.FC = () => {
   const { theme, currentRole, setRole, colorScheme, setColorScheme } = useEnhancedTheme();
-  const debugger = useThemeDebugger();
-  
+  const themeDebugger = useThemeDebugger();
+
   return (
     <div>
       <div data-testid="current-role">{currentRole || 'none'}</div>
       <div data-testid="color-scheme">{colorScheme}</div>
       <div data-testid="primary-color">{theme.colors.primary.main}</div>
-      <div data-testid="strategy-type">{debugger.getThemeMetadata().strategyType}</div>
+      <div data-testid="strategy-type">{themeDebugger.getThemeMetadata().strategyType}</div>
       <button 
         data-testid="set-student" 
         onClick={() => setRole('student')}
@@ -197,8 +197,8 @@ describe('Enhanced Theme System', () => {
   describe('Theme Debugging', () => {
     test('should provide debugging utilities', () => {
       const TestDebugComponent: React.FC = () => {
-        const debugger = useThemeDebugger();
-        const metadata = debugger.getThemeMetadata();
+        const themeDebugger = useThemeDebugger();
+        const metadata = themeDebugger.getThemeMetadata();
         
         return (
           <div>

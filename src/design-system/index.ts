@@ -17,8 +17,28 @@ export * from './themes';
 // Utility exports
 export * from './utilities';
 
-// Validation exports
-export * from './validation';
+// Validation exports (specific exports to avoid conflicts)
+export {
+  ThemeValidator,
+  ValidationResult,
+  ValidationError,
+  ValidationWarning,
+  ValidationSummary,
+  ValidationOptions,
+  ColorParser,
+  ContrastCalculator,
+  ThemeContrastValidator,
+  ContrastResult,
+  ContrastCheckOptions,
+  ContrastCheckResult,
+  ContrastValidationResult,
+  ColorSuggestion,
+  validateThemeContrast,
+  suggestBetterColors,
+  checkContrast as checkA11y,
+  calculateContrast as calculateContrastRatio,
+  validateTheme as validateThemeStructure,
+} from './validation';
 
 // Hook exports
 export * from './hooks';
@@ -26,33 +46,33 @@ export * from './hooks';
 // Debug exports (development only)
 export * from './debug';
 
-// Re-export existing tokens for backward compatibility
+// Re-export tokens for backward compatibility
 export {
   colors,
-  semanticColors,
   baseColors,
+  semanticColors,
   roleColors,
+} from './tokens/colors';
+
+export {
   typography,
-  typographyVariants,
   fontFamily,
   fontWeight,
   fontSize,
   lineHeight,
-  spacingTokens,
+} from './tokens/typography';
+
+export {
   spacing,
-  semanticSpacing,
-  componentSpacing,
+  spacingTokens,
+} from './tokens/spacing';
+
+export {
   shadows,
-  semanticShadows,
   elevationLevels,
-  borderRadius,
+} from './tokens/shadows';
+
+export {
   duration,
   easing,
-  nativeEasing,
-  breakpoints,
-  zIndex,
-  zIndexUtils,
-} from '../styles/theme';
-
-// Export theme and role themes for backward compatibility
-export { theme, roleThemes as legacyRoleThemes } from '../styles/theme';
+} from './tokens/animations';

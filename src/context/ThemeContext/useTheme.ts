@@ -3,9 +3,9 @@
  * Provides convenient hooks for accessing theme values and utilities
  */
 
-import { useEnhancedTheme } from '@design-system/themes/provider/ThemeProvider';
-import { Theme, ThemeContextType } from '@design-system/core/types';
-import { UserRole } from '@design-system/tokens/colors';
+import { useEnhancedTheme } from '../../design-system/themes/hooks';
+import { Theme, ButtonComponentTheme, CardComponentTheme, ModalComponentTheme } from '../../design-system/core/types';
+import { UserRole } from '../../design-system/tokens/colors';
 
 /**
  * Main theme hook - re-export from design system
@@ -159,17 +159,22 @@ export const useStyleHelpers = () => {
  * Hook for theme-aware button styles
  */
 export const useButtonStyles = (variant: 'solid' | 'outline' = 'solid', size: 'sm' | 'md' | 'lg' = 'md') => {
-  const buttonTheme = useComponentTheme('button');
+  const buttonTheme = useComponentTheme('button') as ButtonComponentTheme;
   const colors = useColors();
-  
-  const baseStyle = buttonTheme?.baseStyle || {};
-  const variantStyle = buttonTheme?.variants?.[variant] || {};
-  const sizeStyle = buttonTheme?.sizes?.[size] || {};
-  
+
+  if (!buttonTheme) {
+    return {};
+  }
+
+  // Use the actual ButtonComponentTheme structure
+  const sizeConfig = size === 'sm' ? 'small' : size === 'lg' ? 'large' : 'medium';
+
   return {
-    ...baseStyle,
-    ...variantStyle,
-    ...sizeStyle,
+    borderRadius: buttonTheme.borderRadius,
+    minHeight: buttonTheme.minHeight[sizeConfig],
+    backgroundColor: variant === 'solid' ? colors.primary?.main : 'transparent',
+    borderColor: colors.primary?.main,
+    borderWidth: variant === 'outline' ? 1 : 0,
   };
 };
 
@@ -177,16 +182,37 @@ export const useButtonStyles = (variant: 'solid' | 'outline' = 'solid', size: 's
  * Hook for theme-aware card styles
  */
 export const useCardStyles = () => {
-  const cardTheme = useComponentTheme('card');
-  return cardTheme?.baseStyle || {};
+  const cardTheme = useComponentTheme('card') as CardComponentTheme;
+
+  if (!cardTheme) {
+    return {};
+  }
+
+  return {
+    borderRadius: cardTheme.borderRadius,
+    padding: cardTheme.padding.medium,
+    backgroundColor: cardTheme.backgroundColor,
+    ...cardTheme.shadow,
+  };
 };
 
 /**
  * Hook for theme-aware modal styles
  */
 export const useModalStyles = () => {
-  const modalTheme = useComponentTheme('modal');
-  return modalTheme?.baseStyle || {};
+  const modalTheme = useComponentTheme('modal') as ModalComponentTheme;
+
+  if (!modalTheme) {
+    return {};
+  }
+
+  return {
+    borderRadius: modalTheme.borderRadius,
+    padding: modalTheme.padding,
+    backgroundColor: modalTheme.backgroundColor,
+    maxHeight: modalTheme.maxHeight,
+    ...modalTheme.shadow,
+  };
 };
 
 /**
@@ -238,7 +264,7 @@ export const useRoleColors = (role?: UserRole) => {
 export const useThemeDebug = () => {
   const themeContext = useTheme();
   
-  if (!__DEV__) {
+  if (process.env.NODE_ENV === 'production') {
     return {
       logTheme: () => {},
       exportTheme: () => '{}',

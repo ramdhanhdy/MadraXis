@@ -1,12 +1,12 @@
 import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useAuth } from '../src/hooks/useAuth';
+import { useAuth } from '@lib/hooks/useAuth';
 import { ThemeProvider } from '../src/context/ThemeContext';
 import { NavigationHistoryProvider } from '../src/context/NavigationHistoryContext';
 import * as SplashScreen from 'expo-splash-screen';
 import AnimatedSplashScreen from '@ui/organisms/AnimatedSplashScreen';
-import { logger } from '../src/utils/logger';
+import { logger } from '@lib/utils/logger';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

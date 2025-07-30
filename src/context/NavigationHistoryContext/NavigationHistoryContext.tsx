@@ -3,39 +3,14 @@
  * Provides shared navigation history state across the entire app
  */
 
-import React, { createContext, useContext, useCallback, useState, ReactNode, useEffect } from 'react';
+import React, { useCallback, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-
-export interface NavigationHistoryItem {
-  path: string;
-  params?: Record<string, any>;
-  timestamp: number;
-  label?: string;
-}
-
-export interface NavigationHistoryState {
-  history: NavigationHistoryItem[];
-  currentIndex: number;
-  canGoBack: boolean;
-  canGoForward: boolean;
-}
-
-// Navigation History Context Interface
-interface NavigationHistoryContextType {
-  history: NavigationHistoryItem[];
-  currentIndex: number;
-  canGoBack: boolean;
-  canGoForward: boolean;
-  addToHistory: (path: string, params?: Record<string, any>, label?: string) => void;
-  goBack: () => void;
-  goForward: () => void;
-  clearHistory: () => void;
-  getBreadcrumbItems: () => NavigationHistoryItem[];
-  navigateToHistoryItem: (index: number) => void;
-}
-
-// Create Navigation History Context
-export const NavigationHistoryContext = createContext<NavigationHistoryContextType | undefined>(undefined);
+import {
+  NavigationHistoryContext,
+  NavigationHistoryContextType,
+  NavigationHistoryItem,
+  NavigationHistoryState
+} from './context';
 
 // Navigation History Provider Props
 interface NavigationHistoryProviderProps {
@@ -163,14 +138,7 @@ export const NavigationHistoryProvider: React.FC<NavigationHistoryProviderProps>
   );
 };
 
-// Custom hook to use navigation history context
-export const useNavigationHistory = () => {
-  const context = useContext(NavigationHistoryContext);
-  if (context === undefined) {
-    throw new Error('useNavigationHistory must be used within a NavigationHistoryProvider');
-  }
-  return context;
-};
+// useNavigationHistory hook is now in ./hooks.ts
 
 /**
  * Hook for tracking navigation to specific routes

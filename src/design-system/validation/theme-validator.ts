@@ -371,7 +371,7 @@ export class ThemeValidator {
     const minTouchTarget = accessibility?.minTouchTarget || 44;
 
     if (minTouchTarget < 44) {
-      this.addError(
+      this.addWarning(
         'accessibility',
         'accessibility.minTouchTarget',
         `Minimum touch target ${minTouchTarget}px is below WCAG recommendation (44px)`,

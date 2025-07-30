@@ -1,6 +1,15 @@
 const { getDefaultConfig } = require('expo/metro-config');
-const { withStorybook } = require('@storybook/react-native/metro/withStorybook');
 const path = require('path');
+
+// Try to import Storybook metro config, fallback if not available
+let withStorybook;
+try {
+  const storybookModule = require('@storybook/react-native/metro/withStorybook');
+  withStorybook = storybookModule.withStorybook || storybookModule.default || storybookModule;
+} catch (error) {
+  console.warn('Storybook metro config not available, using fallback');
+  withStorybook = (config) => config;
+}
 
 const config = getDefaultConfig(__dirname, {
   // Enable CSS support.
@@ -27,4 +36,5 @@ config.resolver.alias = {
   '@app': path.resolve(__dirname, 'app'),
 };
 
-module.exports = withStorybook(config);
+// Export config with Storybook if available, otherwise plain config
+module.exports = typeof withStorybook === 'function' ? withStorybook(config) : config;

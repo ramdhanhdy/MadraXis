@@ -8,9 +8,44 @@
 import { z } from 'zod';
 import { Ionicons } from '@expo/vector-icons';
 
-// Re-export types from services and shared types
-export type { DashboardMetrics } from '../../../src/services/dashboard';
-export type { Incident } from '../../../src/types';
+// Local type definitions (since path aliases are not working)
+export interface DashboardMetrics {
+  studentEnrollment: number;
+  teacherCount: number;
+  teacherToStudentRatio?: number;
+  incidentSummary: {
+    total: number;
+    pending: number;
+    resolved: number;
+  };
+  academicPerformance?: {
+    averageScore: number;
+  };
+  teacherPerformance?: {
+    averageScore: number;
+  };
+  studentAttendance?: {
+    averagePercentage: number;
+  };
+  parentEngagement?: {
+    meetingsHeld: number;
+  };
+  lastUpdated?: Date;
+}
+
+export interface Incident {
+  id: number | string;
+  incident_type: string;
+  description: string;
+  location: string;
+  status: string;
+  created_at: string;
+  student?: {
+    full_name: string;
+  };
+  is_anonymous?: boolean;
+  reporter_id: string;
+}
 
 // Icon types for proper typing
 export type IoniconsIcon = keyof typeof Ionicons.glyphMap;
@@ -125,7 +160,7 @@ export const validateIncident = (data: Incident): { isValid: boolean; errors: Re
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string> = {};
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         if (err.path.length > 0) {
           errors[err.path[0] as string] = err.message;
         }

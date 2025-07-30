@@ -7,8 +7,8 @@
 
 import { z } from 'zod';
 
-// Re-export School type from services
-export type { School } from '../../../src/services/schools';
+// Re-export School type from domains
+export type { School } from '@domains/schools';
 
 // Types
 export interface SchoolSetupState {

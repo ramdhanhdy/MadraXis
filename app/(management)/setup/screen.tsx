@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 
 // Services
-import { supabase } from '../../../src/utils/supabase';
-import { saveSchool, School } from '../../../src/services/schools';
+import { supabase } from '@lib/utils/supabase';
+import { saveSchool, School } from '@domains/schools';
 
 // Feature Model
 import {

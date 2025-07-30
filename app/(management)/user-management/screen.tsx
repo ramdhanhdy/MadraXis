@@ -15,8 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 // Context and Services
-import { useAuth } from '../../../src/hooks/useAuth';
-import { fetchStudents, fetchTeachers } from '../../../src/services/users';
+import { useAuth } from '@lib/hooks/useAuth';
+import { fetchStudents, fetchTeachers } from '@domains/users';
 
 // Feature Model
 import {

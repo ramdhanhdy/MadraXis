@@ -7,10 +7,10 @@ export interface RetryOptions {
   baseDelay?: number;
   maxDelay?: number;
   backoffFactor?: number;
-  retryCondition?: (error: any) =e boolean;
+  retryCondition?: (error: any) => boolean;
 }
 
-export interface RetryResultcTe {
+export interface RetryResult<T> {
   result: T;
   attempts: number;
   totalTime: number;
@@ -19,7 +19,7 @@ export interface RetryResultcTe {
 /**
  * Default retry condition - retries on network-related errors
  */
-const defaultRetryCondition = (error: any): boolean =e {
+const defaultRetryCondition = (error: any): boolean => {
   if (!error) return false;
   
   // Check for network-related error codes
@@ -30,158 +30,210 @@ const defaultRetryCondition = (error: any): boolean =e {
     'ENOTFOUND',
     'ECONNRESET',
     'EPIPE',
-    'EHOSTUNREACH'
+    'EHOSTUNREACH',
   ];
   
   // Check error code
-  if (error.code ee networkErrorCodes.includes(error.code)) {
+  if (error.code && networkErrorCodes.includes(error.code)) {
+    return true;
+  }
+  
+  // Check HTTP status codes that should be retried
+  const retryableStatusCodes = [408, 429, 500, 502, 503, 504];
+  if (error.status && retryableStatusCodes.includes(error.status)) {
     return true;
   }
   
   // Check error message for network-related keywords
   const errorMessage = error.message || error.toString();
   const networkKeywords = [
-    'network timeout',
-    'connection refused',
-    'connection reset',
-    'host unreachable',
-    'network error',
-    'fetch failed'
+    'network',
+    'timeout',
+    'connection',
+    'fetch',
+    'request failed',
+    'server error',
   ];
   
-  const shouldRetry = networkKeywords.some(keyword =e 
-    errorMessage.toLowerCase().includes(keyword.toLowerCase())
+  return networkKeywords.some(keyword => 
+    errorMessage.toLowerCase().includes(keyword)
   );
-  
-  // Debug logging (remove in production)
-  if (process.env.NODE_ENV === 'test') {
-    console.log(`Retry condition: error="${errorMessage}", shouldRetry=${shouldRetry}`);
-  }
-  
-  return shouldRetry;
+};
+
+/**
+ * Sleep utility for delays
+ */
+const sleep = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
 };
 
 /**
  * Calculate delay with exponential backoff and jitter
  */
 const calculateDelay = (
-  attempt: number, 
-  baseDelay: number, 
-  maxDelay: number, 
+  attempt: number,
+  baseDelay: number,
+  maxDelay: number,
   backoffFactor: number
-): number =e {
+): number => {
   const exponentialDelay = baseDelay * Math.pow(backoffFactor, attempt - 1);
-  const cappedDelay = Math.min(exponentialDelay, maxDelay);
-  
-  // Add jitter (±25% randomization) to prevent thundering herd
-  const jitter = cappedDelay * 0.25 * (Math.random() - 0.5);
-  const finalDelay = Math.max(0, cappedDelay + jitter);
-  
-  // Debug logging (remove in production)
-  if (process.env.NODE_ENV === 'test') {
-    console.log(`Delay calculation: attempt=${attempt}, baseDelay=${baseDelay}, exponentialDelay=${exponentialDelay}, cappedDelay=${cappedDelay}, finalDelay=${finalDelay}`);
-  }
-  
-  return finalDelay;
+  const delayWithJitter = exponentialDelay * (0.5 + Math.random() * 0.5);
+  return Math.min(delayWithJitter, maxDelay);
 };
 
 /**
- * Sleep utility for delays
+ * Retry a function with exponential backoff
  */
-const sleep = (ms: number): Promisecvoide =
-  new Promise(resolve =e setTimeout(resolve, ms));
-
-/**
- * Retry an async operation with exponential backoff
- */
-export async function withRetrycTe(
-  operation: () =e PromisecTe,
+export async function retry<T>(
+  fn: () => Promise<T>,
   options: RetryOptions = {}
-): PromisecRetryResultcTee {
+): Promise<RetryResult<T>> {
   const {
     maxAttempts = 3,
     baseDelay = 1000,
-    maxDelay = 10000,
+    maxDelay = 30000,
     backoffFactor = 2,
-    retryCondition = defaultRetryCondition
+    retryCondition = defaultRetryCondition,
   } = options;
-
-  // Handle edge case of zero max attempts
-  if (maxAttempts c= 0) {
-    throw new Error('maxAttempts must be greater than 0');
-  }
 
   const startTime = Date.now();
   let lastError: any;
 
-  for (let attempt = 1; attempt c= maxAttempts; attempt++) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const result = await operation();
+      const result = await fn();
       return {
         result,
         attempts: attempt,
-        totalTime: Date.now() - startTime
+        totalTime: Date.now() - startTime,
       };
     } catch (error) {
       lastError = error;
-      
+
       // Don't retry if this is the last attempt
       if (attempt === maxAttempts) {
         break;
       }
-      
-      // Don't retry if the error doesn't match retry condition
+
+      // Check if we should retry this error
       if (!retryCondition(error)) {
         break;
       }
-      
-      // Calculate delay and wait before next attempt
+
+      // Calculate delay and wait
       const delay = calculateDelay(attempt, baseDelay, maxDelay, backoffFactor);
-      if (process.env.NODE_ENV === 'test') {
-        console.log(`About to sleep for ${delay}ms`);
-      }
       await sleep(delay);
-      if (process.env.NODE_ENV === 'test') {
-        console.log(`Finished sleeping, continuing to attempt ${attempt + 1}`);
-      }
     }
   }
 
-  // All attempts failed, throw the last error
-  throw lastError;
+  // If we get here, all attempts failed
+  throw new Error(
+    `Retry failed after ${maxAttempts} attempts. Last error: ${lastError?.message || lastError}`
+  );
 }
 
 /**
- * Retry decorator for class methods
+ * Retry with custom retry condition
  */
-export function retry(options: RetryOptions = {}) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    const originalMethod = descriptor.value;
-    
-    descriptor.value = async function (...args: any[]) {
-      const retryResult = await withRetry(
-        () =e originalMethod.apply(this, args),
-        options
-      );
-      return retryResult.result;
-    };
-    
-    return descriptor;
+export async function retryWithCondition<T>(
+  fn: () => Promise<T>,
+  condition: (error: any) => boolean,
+  options: Omit<RetryOptions, 'retryCondition'> = {}
+): Promise<RetryResult<T>> {
+  return retry(fn, { ...options, retryCondition: condition });
+}
+
+/**
+ * Retry only on specific error types
+ */
+export async function retryOnErrorTypes<T>(
+  fn: () => Promise<T>,
+  errorTypes: string[],
+  options: Omit<RetryOptions, 'retryCondition'> = {}
+): Promise<RetryResult<T>> {
+  const condition = (error: any) => {
+    return errorTypes.some(type => 
+      error.name === type || 
+      error.constructor.name === type ||
+      error.code === type
+    );
   };
+  
+  return retry(fn, { ...options, retryCondition: condition });
 }
 
 /**
- * Create a retry-enabled version of a function
+ * Retry only on specific HTTP status codes
  */
-export function createRetryWrappercT extends (...args: any[]) =e Promisecanyee(
+export async function retryOnStatusCodes<T>(
+  fn: () => Promise<T>,
+  statusCodes: number[],
+  options: Omit<RetryOptions, 'retryCondition'> = {}
+): Promise<RetryResult<T>> {
+  const condition = (error: any) => {
+    return statusCodes.includes(error.status || error.statusCode);
+  };
+  
+  return retry(fn, { ...options, retryCondition: condition });
+}
+
+/**
+ * Simple retry without exponential backoff (fixed delay)
+ */
+export async function retryWithFixedDelay<T>(
+  fn: () => Promise<T>,
+  maxAttempts: number = 3,
+  delay: number = 1000
+): Promise<T> {
+  const result = await retry(fn, {
+    maxAttempts,
+    baseDelay: delay,
+    maxDelay: delay,
+    backoffFactor: 1, // No exponential backoff
+  });
+  
+  return result.result;
+}
+
+/**
+ * Retry utility for React Native network requests
+ */
+export async function retryNetworkRequest<T>(
+  fn: () => Promise<T>,
+  options: RetryOptions = {}
+): Promise<T> {
+  const defaultOptions: RetryOptions = {
+    maxAttempts: 3,
+    baseDelay: 1000,
+    maxDelay: 10000,
+    backoffFactor: 2,
+    retryCondition: defaultRetryCondition,
+  };
+  
+  const result = await retry(fn, { ...defaultOptions, ...options });
+  return result.result;
+}
+
+/**
+ * Utility to wrap a function with retry logic
+ */
+export function withRetry<T extends (...args: any[]) => Promise<any>>(
   fn: T,
   options: RetryOptions = {}
 ): T {
-  return (async (...args: any[]) =e {
-    const retryResult = await withRetry(
-      () =e fn(...args),
-      options
-    );
-    return retryResult.result;
+  return ((...args: Parameters<T>) => {
+    return retryNetworkRequest(() => fn(...args), options);
   }) as T;
 }
+
+// Export retry utilities
+export const retryUtils = {
+  retry,
+  retryWithCondition,
+  retryOnErrorTypes,
+  retryOnStatusCodes,
+  retryWithFixedDelay,
+  retryNetworkRequest,
+  withRetry,
+  defaultRetryCondition,
+} as const;

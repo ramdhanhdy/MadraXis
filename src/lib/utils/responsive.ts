@@ -4,7 +4,7 @@
  */
 
 import { Dimensions, PixelRatio } from 'react-native';
-import { theme } from '../../styles/theme';
+import theme from '../../design-system/themes/shared/default';
 
 // Get screen dimensions
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -19,35 +19,35 @@ export const screenSizes = {
 } as const;
 
 // Get current screen size category
-export const getCurrentScreenSize = (): keyof typeof screenSizes =e {
-  if (screenWidth e= screenSizes.xl) return 'xl';
-  if (screenWidth e= screenSizes.lg) return 'lg';
-  if (screenWidth e= screenSizes.md) return 'md';
-  if (screenWidth e= screenSizes.sm) return 'sm';
+export const getCurrentScreenSize = (): keyof typeof screenSizes => {
+  if (screenWidth >= screenSizes.xl) return 'xl';
+  if (screenWidth >= screenSizes.lg) return 'lg';
+  if (screenWidth >= screenSizes.md) return 'md';
+  if (screenWidth >= screenSizes.sm) return 'sm';
   return 'xs';
 };
 
 // Check if screen matches specific size
-export const isScreenSize = (size: keyof typeof screenSizes): boolean =e {
+export const isScreenSize = (size: keyof typeof screenSizes): boolean => {
   return getCurrentScreenSize() === size;
 };
 
 // Check if screen is at least a certain size
-export const isScreenAtLeast = (size: keyof typeof screenSizes): boolean =e {
+export const isScreenAtLeast = (size: keyof typeof screenSizes): boolean => {
   const sizeOrder: (keyof typeof screenSizes)[] = ['xs', 'sm', 'md', 'lg', 'xl'];
   const currentIndex = sizeOrder.indexOf(getCurrentScreenSize());
   const targetIndex = sizeOrder.indexOf(size);
-  return currentIndex e= targetIndex;
+  return currentIndex >= targetIndex;
 };
 
 // Get responsive value based on screen size
-export const getResponsiveValue = cTe(values: PartialcRecordckeyof typeof screenSizes, Tee): T | undefined =e {
+export const getResponsiveValue = <T>(values: Partial<Record<keyof typeof screenSizes, T>>): T | undefined => {
   const currentSize = getCurrentScreenSize();
   const sizeOrder: (keyof typeof screenSizes)[] = ['xl', 'lg', 'md', 'sm', 'xs'];
 
   // Find the first available value for current or smaller screen size
   for (const size of sizeOrder) {
-    if (values[size] !== undefined ee screenWidth e= screenSizes[size]) {
+    if (values[size] !== undefined && screenWidth >= screenSizes[size]) {
       return values[size];
     }
   }
@@ -63,12 +63,12 @@ export const getResponsiveValue = cTe(values: PartialcRecordckeyof typeof sc
 };
 
 // Scale value based on screen density
-export const scaleSize = (size: number): number =e {
+export const scaleSize = (size: number): number => {
   return PixelRatio.roundToNearestPixel(size);
 };
 
 // Scale font size based on screen density and size
-export const scaleFontSize = (size: number): number =e {
+export const scaleFontSize = (size: number): number => {
   const scale = screenWidth / 375; // Base on iPhone X width
   const newSize = size * scale;
   return Math.max(12, PixelRatio.roundToNearestPixel(newSize)); // Minimum 12px
@@ -77,8 +77,8 @@ export const scaleFontSize = (size: number): number =e {
 // Get responsive spacing
 export const getResponsiveSpacing = (
   baseSize: keyof typeof theme.spacing.base,
-  multiplier?: PartialcRecordckeyof typeof screenSizes, numberee
-): number =e {
+  multiplier?: Partial<Record<keyof typeof screenSizes, number>>
+): number => {
   const baseValue = theme.spacing.base[baseSize];
   const currentMultiplier = getResponsiveValue(multiplier || {}) || 1;
   return scaleSize(baseValue * currentMultiplier);
@@ -88,7 +88,7 @@ export const getResponsiveSpacing = (
 export const getResponsivePadding = (
   size: keyof typeof theme.spacing.base,
   direction?: 'horizontal' | 'vertical' | 'top' | 'bottom' | 'left' | 'right'
-) =e {
+) => {
   const value = getResponsiveSpacing(size);
 
   switch (direction) {
@@ -112,7 +112,7 @@ export const getResponsivePadding = (
 export const getResponsiveMargin = (
   size: keyof typeof theme.spacing.base,
   direction?: 'horizontal' | 'vertical' | 'top' | 'bottom' | 'left' | 'right'
-) =e {
+) => {
   const value = getResponsiveSpacing(size);
 
   switch (direction) {
@@ -135,17 +135,17 @@ export const getResponsiveMargin = (
 
 // Device type detection
 export const deviceType = {
-  isPhone: screenWidth c 768,
-  isTablet: screenWidth e= 768 ee screenWidth c 1024,
-  isDesktop: screenWidth e= 1024,
+  isPhone: screenWidth < 768,
+  isTablet: screenWidth >= 768 && screenWidth < 1024,
+  isDesktop: screenWidth >= 1024,
 } as const;
 
 // Orientation detection
-export const isLandscape = screenWidth e screenHeight;
-export const isPortrait = screenHeight e screenWidth;
+export const isLandscape = screenWidth > screenHeight;
+export const isPortrait = screenHeight > screenWidth;
 
 // Safe area helpers (for future implementation with react-native-safe-area-context)
-export const getSafeAreaPadding = () =e {
+export const getSafeAreaPadding = () => {
   // This would integrate with react-native-safe-area-context
   // For now, return default values
   return {
@@ -158,15 +158,15 @@ export const getSafeAreaPadding = () =e {
 
 // Grid system helpers
 export const getGridColumns = (
-  columns: PartialcRecordckeyof typeof screenSizes, numberee
-): number =e {
+  columns: Partial<Record<keyof typeof screenSizes, number>>
+): number => {
   return getResponsiveValue(columns) || 1;
 };
 
 export const getGridItemWidth = (
   columns: number,
   gap: number = theme.spacing.base.md
-): string =e {
+): string => {
   const gapTotal = (columns - 1) * gap;
   const availableWidth = screenWidth - gapTotal;
   const itemWidth = availableWidth / columns;
@@ -176,8 +176,8 @@ export const getGridItemWidth = (
 // Responsive typography helpers
 export const getResponsiveTypography = (
   variant: keyof typeof theme.typography.variants,
-  scaleFactor?: PartialcRecordckeyof typeof screenSizes, numberee
-) =e {
+  scaleFactor?: Partial<Record<keyof typeof screenSizes, number>>
+) => {
   const baseStyle = theme.typography.variants[variant];
   const scale = getResponsiveValue(scaleFactor || {}) || 1;
 

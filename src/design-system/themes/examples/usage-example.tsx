@@ -54,7 +54,7 @@ interface MainContentProps {
 
 const MainContent: React.FC<MainContentProps> = ({ onStrategyChange, onRoleChange }) => {
   const { theme, currentRole, setRole, colorScheme, setColorScheme } = useTheme();
-  const debugger = useThemeDebugger();
+  const themeDebugger = useThemeDebugger();
 
   const styles = createStyles(theme);
 
@@ -172,7 +172,7 @@ const MainContent: React.FC<MainContentProps> = ({ onStrategyChange, onRoleChang
         <Text style={styles.sectionTitle}>Debug Information</Text>
         <TouchableOpacity
           style={[styles.debugButton, { backgroundColor: theme.colors.text.secondary }]}
-          onPress={() => debugger.logTheme()}
+          onPress={() => themeDebugger.logTheme()}
         >
           <Text style={[styles.buttonText, { color: theme.colors.background.primary }]}>
             Log Theme to Console
@@ -181,7 +181,7 @@ const MainContent: React.FC<MainContentProps> = ({ onStrategyChange, onRoleChang
         
         <View style={styles.debugInfo}>
           <Text style={styles.debugText}>
-            Strategy: {debugger.getThemeMetadata().strategyName}
+            Strategy: {themeDebugger.getThemeMetadata().strategyName}
           </Text>
           <Text style={styles.debugText}>
             Primary Color: {theme.colors.primary.main}

@@ -5,11 +5,10 @@
  * configuration and provides convenient hooks for theme access.
  */
 
-export * from './ThemeProvider';
 export * from './useTheme';
 
-// Re-export main components for easy importing
-export { AppThemeProvider, ThemeProvider } from './ThemeProvider';
+// ThemeProvider components are available from './ThemeProvider' but not exported here to avoid JSX resolution issues
+// For runtime usage: import { AppThemeProvider, ThemeProvider } from './ThemeProvider';
 export { 
   useTheme,
   useColors,
@@ -32,9 +31,9 @@ export {
 } from './useTheme';
 
 // Re-export design system types for convenience
-export type { 
-  Theme, 
-  ThemeStrategy, 
-  ThemeContextType 
-} from '@design-system/core/types';
-export type { UserRole } from '@design-system/tokens/colors';
+export type {
+  Theme,
+  ThemeStrategy,
+  ThemeContextType
+} from '../../design-system/core/types';
+export type { UserRole } from '../../design-system/tokens/colors';

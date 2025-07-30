@@ -42,6 +42,9 @@ export type {
 // Re-export commonly used functions with shorter names
 export {
   validateTheme as validate,
+} from './theme-validator';
+
+export {
   checkContrast as checkA11y,
   calculateContrast as getContrastRatio,
-} from './theme-validator';
+} from './contrast-checker';

@@ -17,9 +17,9 @@ import {
 import { 
   shadows 
 } from '../../tokens/shadows';
-import { 
-  borderRadius 
-} from '../../../styles/theme';
+import {
+  borderRadius
+} from '../../tokens';
 
 /**
  * Create component themes optimized for dark mode

@@ -9,7 +9,7 @@ import {
   ThemeMode,
   createTheme,
   THEME_STRATEGIES,
-} from '@design-system';
+} from '../src/design-system';
 
 // Configuration types
 export interface ThemeConfig {

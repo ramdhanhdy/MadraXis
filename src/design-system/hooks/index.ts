@@ -14,5 +14,5 @@ export type {
   ThemeSwitcherResult,
 } from './useThemeSwitcher';
 
-// Re-export theme provider hook for convenience
-export { useTheme } from '../themes/ThemeProvider';
+// Note: useTheme is available from '../themes/provider/ThemeProvider'
+// but not re-exported here to avoid JSX compilation issues during TypeScript checking

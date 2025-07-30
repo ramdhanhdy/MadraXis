@@ -1,5 +1,5 @@
 import { Redirect } from 'expo-router';
-import { useAuth } from '../src/hooks/useAuth';
+import { useAuth } from '@lib/hooks/useAuth';
 
 // Storybook toggle - set to true to enable Storybook mode
 const ENABLE_STORYBOOK = __DEV__ && false; // Change to true to enable Storybook

@@ -246,9 +246,6 @@ export function createReducedMotionStyle(
   
   return {
     ...normalStyle,
-    // Remove or reduce animations
-    animationDuration: reducedMotion.duration || 0,
-    transitionDuration: reducedMotion.duration || 0,
     // Remove transforms that might cause motion
     transform: undefined,
   };

@@ -5,12 +5,12 @@
  * while preserving all authentication functionality and persistence behavior.
  */
 
-export * from './AuthProvider';
+export * from './context';
 export * from './useAuth';
 export * from './types';
 
-// Re-export the main components for easy importing
-export { AuthProvider } from './AuthProvider';
+// AuthProvider is available from './AuthProvider' but not exported here to avoid JSX resolution issues
+// For runtime usage: import { AuthProvider } from './AuthProvider';
 export {
   useAuth,
   useIsAuthenticated,

@@ -62,7 +62,6 @@ export type {
 
 // Accessibility utilities
 export {
-  createAccessibilityProps,
   createTouchTargetStyle,
   createFocusRingStyle,
   calculateContrastRatio,
@@ -84,7 +83,13 @@ export type {
 // Re-export commonly used utilities with shorter names
 export {
   ComponentThemeUtils as ThemeUtils,
-  useResponsiveValue as useResponsive,
   createAccessibilityProps as createA11yProps,
-  validateColorContrast as validateContrast,
 } from './style-helpers';
+
+export {
+  useResponsiveValue as useResponsive,
+} from './responsive';
+
+export {
+  validateColorContrast as validateContrast,
+} from './accessibility';

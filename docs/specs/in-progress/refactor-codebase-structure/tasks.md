@@ -518,7 +518,7 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 chmod +x scripts/migration/*.js
 
 # Install dependencies (if needed)
-npm install
+bun install
 ```
 
 ### Import Migration Scripts

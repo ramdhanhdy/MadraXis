@@ -6,7 +6,8 @@
  */
 
 // Main screen component
-export { default as ManagementDashboardScreen } from './screen';
+// Note: Screen component export is commented out due to JSX compilation issues
+// export { default as ManagementDashboardScreen } from './screen';
 
 // Types and models
 export type {

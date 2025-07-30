@@ -4,13 +4,11 @@
  */
 
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
-import {
-  EnhancedThemeProvider as DesignSystemThemeProvider,
-  useEnhancedTheme
-} from '@design-system/themes/provider/ThemeProvider';
-import { ThemeStrategy, Theme } from '@design-system/core/types';
-import { UserRole } from '@design-system/tokens/colors';
-import { sharedThemeStrategy, lightSharedTheme, darkSharedTheme } from '@design-system/themes/shared/default';
+import { EnhancedThemeProvider as DesignSystemThemeProvider } from '../../design-system/themes/provider/ThemeProvider';
+import { useEnhancedTheme } from '../../design-system/themes/hooks';
+import { ThemeStrategy, Theme } from '../../design-system/core/types';
+import { UserRole } from '../../design-system/tokens/colors';
+import { sharedThemeStrategy, lightSharedTheme, darkSharedTheme } from '../../design-system/themes/shared/default';
 import { logger } from '@lib/utils/logger';
 
 // Simple theme config for now - will be enhanced later

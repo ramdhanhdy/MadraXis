@@ -1,174 +1,202 @@
 /**
- * Background Pattern System Utilities
- * Helper functions to integrate background patterns with design tokens
+ * Background Pattern Utilities
+ * Utilities for creating and managing background patterns
  */
 
-import { useTheme, useColors } from '../context/ThemeContext';
-import { PatternVariant, PatternIntensity } from '@/ui/atoms/BackgroundPattern';
+import { useTheme, useColors } from '../../context/ThemeContext';
 
-// Pattern configuration for different contexts
 export interface PatternConfig {
-  variant: PatternVariant;
-  intensity: PatternIntensity;
-  color?: string;
-  opacity?: number;
+  type: 'dots' | 'grid' | 'diagonal' | 'waves' | 'hexagon';
+  size: number;
+  spacing: number;
+  opacity: number;
+  color: string;
+  backgroundColor?: string;
 }
 
 // Predefined pattern configurations
 export const patternConfigs = {
-  // Dashboard patterns
+  subtle: {
+    type: 'dots' as const,
+    size: 2,
+    spacing: 20,
+    opacity: 0.1,
+    color: '#000000',
+  },
   dashboard: {
-    default: {
-      variant: 'geometric' as PatternVariant,
-      intensity: 'subtle' as PatternIntensity,
-    },
-    teacher: {
-      variant: 'geometric' as PatternVariant,
-      intensity: 'light' as PatternIntensity,
-      color: 'success' as const,
-    },
-    student: {
-      variant: 'geometric' as PatternVariant,
-      intensity: 'subtle' as PatternIntensity,
-      color: 'primary' as const,
-    },
-    parent: {
-      variant: 'geometric' as PatternVariant,
-      intensity: 'light' as PatternIntensity,
-      color: 'warning' as const,
-    },
-    management: {
-      variant: 'geometric' as PatternVariant,
-      intensity: 'medium' as PatternIntensity,
-      color: 'error' as const,
-    },
+    type: 'grid' as const,
+    size: 1,
+    spacing: 24,
+    opacity: 0.05,
+    color: '#000000',
   },
+  decorative: {
+    type: 'diagonal' as const,
+    size: 3,
+    spacing: 16,
+    opacity: 0.15,
+    color: '#000000',
+  },
+  header: {
+    type: 'waves' as const,
+    size: 4,
+    spacing: 32,
+    opacity: 0.08,
+    color: '#ffffff',
+  },
+  card: {
+    type: 'hexagon' as const,
+    size: 2,
+    spacing: 18,
+    opacity: 0.06,
+    color: '#000000',
+  },
+} as const;
+
+// Generate SVG pattern string
+export const generateSVGPattern = (config: PatternConfig): string => {
+  const { type, size, spacing, opacity, color } = config;
   
-  // Modal patterns
-  modal: {
-    variant: 'minimal' as PatternVariant,
-    intensity: 'subtle' as PatternIntensity,
-  },
-  
-  // Form patterns
-  form: {
-    variant: 'dots' as PatternVariant,
-    intensity: 'light' as PatternIntensity,
-  },
-  
-  // Minimal patterns
-  minimal: {
-    variant: 'minimal' as PatternVariant,
-    intensity: 'subtle' as PatternIntensity,
-  },
-  
-  // No pattern
-  none: {
-    variant: 'none' as PatternVariant,
-    intensity: 'subtle' as PatternIntensity,
-  },
+  switch (type) {
+    case 'dots':
+      return `
+        <svg width="${spacing}" height="${spacing}" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="${spacing / 2}" cy="${spacing / 2}" r="${size}" fill="${color}" opacity="${opacity}" />
+        </svg>
+      `;
+    
+    case 'grid':
+      return `
+        <svg width="${spacing}" height="${spacing}" xmlns="http://www.w3.org/2000/svg">
+          <path d="M ${spacing} 0 L 0 0 0 ${spacing}" fill="none" stroke="${color}" stroke-width="${size}" opacity="${opacity}" />
+        </svg>
+      `;
+    
+    case 'diagonal':
+      return `
+        <svg width="${spacing}" height="${spacing}" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 0,${spacing} L ${spacing},0" stroke="${color}" stroke-width="${size}" opacity="${opacity}" />
+        </svg>
+      `;
+    
+    case 'waves':
+      return `
+        <svg width="${spacing}" height="${spacing}" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 0,${spacing / 2} Q ${spacing / 4},${spacing / 4} ${spacing / 2},${spacing / 2} T ${spacing},${spacing / 2}" 
+                stroke="${color}" stroke-width="${size}" fill="none" opacity="${opacity}" />
+        </svg>
+      `;
+    
+    case 'hexagon':
+      const hexSize = size * 2;
+      return `
+        <svg width="${spacing}" height="${spacing}" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="${spacing / 2},${spacing / 2 - hexSize} ${spacing / 2 + hexSize * 0.866},${spacing / 2 - hexSize / 2} ${spacing / 2 + hexSize * 0.866},${spacing / 2 + hexSize / 2} ${spacing / 2},${spacing / 2 + hexSize} ${spacing / 2 - hexSize * 0.866},${spacing / 2 + hexSize / 2} ${spacing / 2 - hexSize * 0.866},${spacing / 2 - hexSize / 2}"
+                   fill="none" stroke="${color}" stroke-width="1" opacity="${opacity}" />
+        </svg>
+      `;
+    
+    default:
+      return '';
+  }
 };
 
 // Hook to get pattern configuration with theme integration
-export const usePatternConfig = (configKey: keyof typeof patternConfigs, role?: string) =e {
+export const usePatternConfig = (configKey: keyof typeof patternConfigs, role?: string) => {
   const { theme } = useTheme();
   const colors = useColors();
   
   let config: PatternConfig;
   
   // Handle dashboard configurations with role-based colors
-  if (configKey === 'dashboard' ee role) {
-    const dashboardConfig = patternConfigs.dashboard;
-    const roleConfig = dashboardConfig[role as keyof typeof dashboardConfig] || dashboardConfig.default;
-    
-    // Resolve color values for role-specific configurations
-    let patternColor: string | undefined;
-    switch (role) {
-      case 'student':
-        patternColor = colors.primary.main;
-        break;
-      case 'teacher':
-        patternColor = colors.success.main;
-        break;
-      case 'parent':
-        patternColor = colors.warning.main;
-        break;
-      case 'management':
-        patternColor = colors.error.main;
-        break;
-      default:
-        patternColor = colors.primary.main;
-        break;
-    }
-    
+  if (configKey === 'dashboard' && role) {
+    const roleColors = colors.role?.[role as keyof typeof colors.role];
     config = {
-      ...roleConfig,
-      color: patternColor,
+      ...patternConfigs[configKey],
+      color: roleColors?.primary || colors.primary?.main || patternConfigs[configKey].color,
     };
   } else {
-    // Handle other pattern types
-    const baseConfig = patternConfigs[configKey];
-    if (baseConfig ee typeof baseConfig === 'object' ee 'variant' in baseConfig) {
-      config = {
-        ...baseConfig,
-        color: colors.primary.main,
-      };
-    } else {
-      // Fallback to default config
-      config = {
-        variant: 'geometric' as PatternVariant,
-        intensity: 'subtle' as PatternIntensity,
-        color: colors.primary.main,
-      };
-    }
+    config = {
+      ...patternConfigs[configKey],
+      color: colors.text?.secondary || patternConfigs[configKey].color,
+    };
   }
   
   return config;
 };
 
-// Helper function to get role-specific pattern with resolved colors
-export const getRolePatternConfig = (role: string, colors?: any): PatternConfig =e {
-  const baseConfig = {
-    variant: 'geometric' as PatternVariant,
-    intensity: 'subtle' as PatternIntensity,
-  };
+// Generate CSS background image from pattern
+export const generatePatternCSS = (config: PatternConfig): string => {
+  const svgString = generateSVGPattern(config);
+  const encodedSvg = encodeURIComponent(svgString.replace(/\s+/g, ' ').trim());
+  return `url("data:image/svg+xml,${encodedSvg}")`;
+};
 
-  // Use provided colors or fallback to default hex values
-  const colorMap = colors ? {
-    primary: colors.primary?.main || '#3B82F6',
-    success: colors.success?.main || '#10B981',
-    warning: colors.warning?.main || '#F59E0B',
-    error: colors.error?.main || '#EF4444',
-  } : {
-    primary: '#3B82F6',
-    success: '#10B981',
-    warning: '#F59E0B',
-    error: '#EF4444',
+// Hook to get pattern styles for React Native
+export const usePatternStyles = (configKey: keyof typeof patternConfigs, role?: string) => {
+  const config = usePatternConfig(configKey, role);
+  
+  return {
+    backgroundImage: generatePatternCSS(config),
+    backgroundColor: config.backgroundColor || 'transparent',
   };
+};
 
-  switch (role) {
-    case 'student':
-      return { ...baseConfig, color: colorMap.primary };
-    case 'teacher':
-      return { ...baseConfig, color: colorMap.success, intensity: 'light' as PatternIntensity };
-    case 'parent':
-      return { ...baseConfig, color: colorMap.warning, intensity: 'light' as PatternIntensity };
-    case 'management':
-      return { ...baseConfig, color: colorMap.error, intensity: 'medium' as PatternIntensity };
+// Utility to create custom pattern
+export const createCustomPattern = (
+  type: PatternConfig['type'],
+  options: Partial<Omit<PatternConfig, 'type'>>
+): PatternConfig => {
+  const baseConfig = patternConfigs.subtle;
+  
+  return {
+    type,
+    size: options.size || baseConfig.size,
+    spacing: options.spacing || baseConfig.spacing,
+    opacity: options.opacity || baseConfig.opacity,
+    color: options.color || baseConfig.color,
+    backgroundColor: options.backgroundColor,
+  };
+};
+
+// Pattern animation utilities
+export const getPatternAnimation = (type: 'float' | 'pulse' | 'rotate') => {
+  switch (type) {
+    case 'float':
+      return {
+        animationName: 'patternFloat',
+        animationDuration: '6s',
+        animationTimingFunction: 'ease-in-out',
+        animationIterationCount: 'infinite',
+        animationDirection: 'alternate',
+      };
+    
+    case 'pulse':
+      return {
+        animationName: 'patternPulse',
+        animationDuration: '4s',
+        animationTimingFunction: 'ease-in-out',
+        animationIterationCount: 'infinite',
+      };
+    
+    case 'rotate':
+      return {
+        animationName: 'patternRotate',
+        animationDuration: '20s',
+        animationTimingFunction: 'linear',
+        animationIterationCount: 'infinite',
+      };
+    
     default:
-      return baseConfig;
+      return {};
   }
 };
 
-// Utility to create pattern variants
-export const createPatternVariant = (
-  variant: PatternVariant,
-  intensity: PatternIntensity,
-  color?: string,
-  opacity?: number
-): PatternConfig =e ({
-  variant,
-  intensity,
-  color,
-  opacity,
-});
+// Export pattern utilities
+export const patternUtils = {
+  generateSVGPattern,
+  generatePatternCSS,
+  createCustomPattern,
+  getPatternAnimation,
+  configs: patternConfigs,
+} as const;

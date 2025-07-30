@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
-import { useAuth } from '../../../src/hooks/useAuth';
+import { useAuth } from '@lib/hooks/useAuth';
 import AuthForm from '@ui/organisms/AuthForm';
 import { LoadingSpinner } from '@ui/atoms/LoadingSpinner';
 

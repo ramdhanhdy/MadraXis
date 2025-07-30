@@ -31,16 +31,16 @@ import {
 import { 
   accessibility 
 } from '../../tokens/accessibility';
-import { 
-  borderRadius, 
-  duration, 
-  easing, 
-  nativeEasing, 
-  breakpoints, 
-  zIndex, 
-  zIndexUtils, 
-  elevationLevels 
-} from '../../../styles/theme';
+import {
+  borderRadius,
+  duration,
+  easing,
+  breakpoints,
+  zIndex,
+  zIndexUtils,
+  nativeEasing,
+  elevationLevels
+} from '../../tokens';
 
 /**
  * Create component themes based on light theme colors

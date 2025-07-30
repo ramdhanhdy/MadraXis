@@ -3,8 +3,8 @@
  * All role-based theme configurations and utilities
  */
 
-// Student theme exports
-export {
+// Import all theme components
+import {
   lightStudentTheme,
   darkStudentTheme,
   studentThemeConfig,
@@ -13,8 +13,7 @@ export {
   studentThemeCustomizations,
 } from './student';
 
-// Teacher theme exports
-export {
+import {
   lightTeacherTheme,
   darkTeacherTheme,
   teacherThemeConfig,
@@ -23,8 +22,7 @@ export {
   teacherThemeCustomizations,
 } from './teacher';
 
-// Parent theme exports
-export {
+import {
   lightParentTheme,
   darkParentTheme,
   parentThemeConfig,
@@ -33,8 +31,7 @@ export {
   parentThemeCustomizations,
 } from './parent';
 
-// Management theme exports
-export {
+import {
   lightManagementTheme,
   darkManagementTheme,
   managementThemeConfig,
@@ -42,6 +39,34 @@ export {
   managementThemeMetadata,
   managementThemeCustomizations,
 } from './management';
+
+// Re-export all individual components
+export {
+  lightStudentTheme,
+  darkStudentTheme,
+  studentThemeConfig,
+  createStudentTheme,
+  studentThemeMetadata,
+  studentThemeCustomizations,
+  lightTeacherTheme,
+  darkTeacherTheme,
+  teacherThemeConfig,
+  createTeacherTheme,
+  teacherThemeMetadata,
+  teacherThemeCustomizations,
+  lightParentTheme,
+  darkParentTheme,
+  parentThemeConfig,
+  createParentTheme,
+  parentThemeMetadata,
+  parentThemeCustomizations,
+  lightManagementTheme,
+  darkManagementTheme,
+  managementThemeConfig,
+  createManagementTheme,
+  managementThemeMetadata,
+  managementThemeCustomizations,
+};
 
 // Default theme exports by role
 export { default as studentTheme } from './student';

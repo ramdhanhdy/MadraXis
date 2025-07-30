@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Alert, View, StyleSheet } from 'react-native';
-import { supabase } from '../../../src/utils/supabase';
+import { supabase } from '@lib/utils/supabase';
 import { Stack, useRouter, useGlobalSearchParams } from 'expo-router';
 import { Button } from '@ui/atoms/Button';
 import { Input } from '@ui/atoms/Input';

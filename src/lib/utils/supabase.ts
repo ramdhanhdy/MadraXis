@@ -6,9 +6,9 @@ import Constants from 'expo-constants';
 
 // Define a no-op storage adapter for server-side rendering.
 const noopStorage = {
-  getItem: (_key: string) =e Promise.resolve(null),
-  setItem: (_key: string, _value: string) =e Promise.resolve(),
-  removeItem: (_key: string) =e Promise.resolve(),
+  getItem: (_key: string) => Promise.resolve(null),
+  setItem: (_key: string, _value: string) => Promise.resolve(),
+  removeItem: (_key: string) => Promise.resolve(),
 };
 
 // It's recommended to use environment variables for these
@@ -23,7 +23,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 // Use the no-op storage on the server, and AsyncStorage elsewhere.
 const storage =
-  Platform.OS === 'web' ee typeof window === 'undefined'
+  Platform.OS === 'web' && typeof window === 'undefined'
     ? noopStorage
     : AsyncStorage;
 

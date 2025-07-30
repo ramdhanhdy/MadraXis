@@ -1,9 +1,10 @@
-import React, { createContext, useReducer, useEffect, useCallback } from 'react';
+import React, { useReducer, useEffect, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@lib/utils/supabase';
 import { Profile } from '@types';
 import { logger } from '@lib/utils/logger';
 import { AuthState, AuthActions, AuthContextType, AuthProviderProps } from './types';
+import { AuthContext } from './context';
 
 // Action types for reducer
 type AuthAction =
@@ -59,8 +60,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
   }
 }
 
-// Create context
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// AuthContext is now imported from ./context.ts
 
 // Global flags to prevent multiple initializations and excessive DB calls
 let authInitialized = false;
@@ -282,4 +282,4 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
-export { AuthContext };
+// AuthContext is exported from ./context.ts
