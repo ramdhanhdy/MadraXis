@@ -1,6 +1,4 @@
-import type { Config } from 'jest';
-
-const config: Config = {
+module.exports = {
   preset: 'jest-expo',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   transformIgnorePatterns: [
@@ -35,5 +33,3 @@ const config: Config = {
   resetMocks: true,
   restoreMocks: true,
 };
-
-export default config;

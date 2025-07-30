@@ -3,7 +3,7 @@
  * Comprehensive TypeScript interfaces for the enhanced theme system
  */
 
-import { UserRole } from '../../styles/colors';
+import { UserRole } from '../tokens/colors';
 
 // Color palette interface for consistent color definitions
 export interface ColorPalette {

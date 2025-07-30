@@ -1,6 +1,18 @@
-// Export all context providers and hooks for easy importing
-export { NavigationHistoryProvider, useNavigationHistory, useRouteTracking, useBreadcrumbData } from './NavigationHistoryContext';
-export { ThemeProvider, useTheme, useColors, useTypography, useSpacing, useShadows, useBorderRadius, useComponentTheme, useStyleHelpers, useResponsiveValue } from './ThemeContext';
+/**
+ * Context Providers and Hooks
+ * Central export point for all application context providers and hooks
+ */
 
-// Export types
-export type { NavigationHistoryItem, NavigationHistoryState } from './NavigationHistoryContext';
+// AuthContext exports
+export * from './AuthContext';
+
+// ThemeContext exports
+export * from './ThemeContext';
+
+// NavigationHistoryContext exports
+export * from './NavigationHistoryContext';
+
+// Convenience re-exports for backward compatibility
+export { AuthProvider, useAuth } from './AuthContext';
+export { ThemeProvider, useTheme } from './ThemeContext';
+export { NavigationHistoryProvider, useNavigationHistory } from './NavigationHistoryContext';
