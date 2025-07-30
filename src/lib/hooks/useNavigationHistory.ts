@@ -1,10 +1,10 @@
 /**
  * @deprecated This hook has been deprecated. Use the new NavigationHistoryContext instead.
- * Import from '../../context/NavigationHistoryContext' for shared global state.
+ * Import from '@context/NavigationHistoryContext' for shared global state.
  */
 
 import { useEffect } from 'react';
-import { useNavigationHistory as useNavigationHistoryContext } from '../../context/NavigationHistoryContext';
+import { useNavigationHistory as useNavigationHistoryContext } from '@context/NavigationHistoryContext';
 
 export interface NavigationHistoryItem {
   path: string;

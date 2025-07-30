@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react-native';
 import { BulkActionBar } from './BulkActionBar';
-import { ThemeContext } from '../../../context/ThemeContext';
-import { theme } from '../../../styles/theme';
+import { ThemeContextType } from '@context/ThemeContext';
+import { theme } from '@design-system';
 
 // Mock dependencies
 jest.mock('../../../context/ThemeContext');

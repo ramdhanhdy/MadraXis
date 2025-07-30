@@ -1,15 +1,15 @@
-import { logger } from '../../utils/logger';
+import { logger } from '@lib/utils/logger';
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useAuth } from '@/src/hooks/useAuth';
-import { useSafeToQuery } from '@/src/utils/navigationGuard';
-import { ClassService } from '@/src/services/classService';
-import { Class } from '@/src/types/class';
-import { ClassWithDetails } from '@/src/services/classService';
+import { useAuth } from '@lib/hooks/useAuth';
+import { useSafeToQuery } from '@lib/utils/navigationGuard';
+import { ClassService } from '@domains/class';
+import { Class } from '@types';
+import { ClassWithDetails } from '@domains/class';
 import SubjectManager from '@ui/organisms/SubjectManager';
 import ClassFormModal from '@ui/organisms/ClassFormModal';
 

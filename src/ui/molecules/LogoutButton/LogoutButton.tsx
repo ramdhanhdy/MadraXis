@@ -1,4 +1,4 @@
-import { logger } from '../../../utils/logger';
+import { logger } from '@lib/utils/logger';
 /**
  * LogoutButton Component
  * A reusable logout button component with confirmation alert, loading state, and variants
@@ -8,7 +8,7 @@ import { logger } from '../../../utils/logger';
 import React, { useState } from 'react';
 import { Alert, ViewStyle } from 'react-native';
 import { Button } from '@ui/atoms/Button';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth } from '@lib/hooks/useAuth';
 
 export interface LogoutButtonProps {
   variant?: 'button' | 'text' | 'icon';

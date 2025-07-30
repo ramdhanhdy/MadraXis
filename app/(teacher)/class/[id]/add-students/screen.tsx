@@ -3,7 +3,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AddStudentsToClassModal } from '@ui/organisms/AddStudentsToClassModal';
 import { ErrorBoundary } from '@ui/organisms/ErrorBoundary';
-import { useNavigationGuards } from '../../../../../src/hooks/useNavigationGuards';
+import { useNavigationGuards } from '@lib/hooks/useNavigationGuards';
 
 export default function AddStudentsModal() {
   const router = useRouter();

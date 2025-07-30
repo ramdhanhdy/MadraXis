@@ -2,7 +2,7 @@ import { supabase } from '@lib/utils/supabase';
 import { logger } from '@lib/utils/logger';
 import { sanitizeLikeInput } from '@lib/utils/sanitization';
 import { Student, Teacher, Profile } from '@types';
-import type { DatabaseResponse } from '@types/database';
+import type { DatabaseResponse } from '../../types/database';
 import {
   SearchUsersOptions,
   CreateUserRequest,

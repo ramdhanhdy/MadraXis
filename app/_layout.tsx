@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '@lib/hooks/useAuth';
 import { ThemeProvider } from '../src/context/ThemeContext';
-import { NavigationHistoryProvider } from '../src/context/NavigationHistoryContext';
+import { NavigationHistoryProvider } from '../src/context/NavigationHistoryContext/NavigationHistoryContext';
 import * as SplashScreen from 'expo-splash-screen';
 import AnimatedSplashScreen from '@ui/organisms/AnimatedSplashScreen';
 import { logger } from '@lib/utils/logger';

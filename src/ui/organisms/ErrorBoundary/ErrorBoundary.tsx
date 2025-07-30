@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { logger } from '../../../utils/logger';
+import { logger } from '@lib/utils/logger';
 
 interface Props {
   children: ReactNode;

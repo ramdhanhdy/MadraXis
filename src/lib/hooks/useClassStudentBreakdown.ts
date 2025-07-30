@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { supabase } from '../../utils/supabase';
+import { supabase } from '@lib/utils/supabase';
 
 interface StudentBreakdown {
   classId: number;

@@ -5,7 +5,7 @@ import { Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 import { LogoutButton } from '@ui/molecules/LogoutButton';
 import CommunicationModal from '@ui/organisms/StudentCommunicationModal';
-import { useAuth } from '@/src/hooks/useAuth';
+import { useAuth } from '@lib/hooks/useAuth';
 import { DashboardTemplate } from '@ui/templates/DashboardTemplate';
 import type { TabConfig, HeaderAction } from '@ui/templates/DashboardTemplate';
 import { Card } from '@ui/molecules/Card';
@@ -14,9 +14,9 @@ import { ProgressBar } from '@ui/molecules/ProgressBar';
 import { ListItem } from '@ui/molecules/ListItem';
 import { Typography } from '@ui/atoms/Typography';
 import { Modal } from '@ui/organisms/Modal';
-import { colors } from '@/src/styles/colors';
-import { spacing } from '@/src/styles/spacing';
-import { logoSvg } from '@/src/utils/svgPatterns';
+import { colors } from '@design-system/tokens/colors';
+import { spacing } from '@design-system/tokens/spacing';
+import { logoSvg } from '@lib/utils/svgPatterns';
 
 export default function StudentDashboard() {
   const router = useRouter();

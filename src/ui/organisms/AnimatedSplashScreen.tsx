@@ -1,4 +1,4 @@
-import { logger } from '../../utils/logger';
+import { logger } from '@lib/utils/logger';
 import React, { useEffect, useRef, useCallback } from 'react';
 import { StyleSheet, View, Text, Animated } from 'react-native';
 

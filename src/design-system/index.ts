@@ -44,7 +44,8 @@ export {
 export * from './hooks';
 
 // Debug exports (development only)
-export * from './debug';
+// Debug utilities (excluding useThemeDebugger to avoid conflicts)
+export { ThemeInspector } from './debug/ThemeInspector';
 
 // Re-export tokens for backward compatibility
 export {

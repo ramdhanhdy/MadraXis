@@ -2,7 +2,7 @@ import { supabase } from '@lib/utils/supabase';
 import { logger } from '@lib/utils/logger';
 import { sanitizeLikeInput, sanitizeSortParams } from '@lib/utils/sanitization';
 import { Incident } from '@types';
-import type { DatabaseResponse } from '@types/database';
+import type { DatabaseResponse } from '../../types/database';
 import {
   CreateIncidentRequest,
   UpdateIncidentRequest,

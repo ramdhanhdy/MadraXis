@@ -2,7 +2,7 @@ import { supabase } from '@lib/utils/supabase';
 import { logger } from '@lib/utils/logger';
 import { withRetry } from '@lib/utils/retry';
 import { sanitizeLikeInput, sanitizeSortParams } from '@lib/utils/sanitization';
-import { Class } from '@types/class';
+import { Class } from '@types';
 import {
   CreateClassRequest,
   UpdateClassRequest,

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
-import { supabase } from '@/src/utils/supabase';
+import { supabase } from '@lib/utils/supabase';
 import { Button } from '@ui/atoms/Button';
 import { Input } from '@ui/atoms/Input';
 import { Typography } from '@ui/atoms/Typography';
 // Theme colors are used via baseColors import
-import { baseColors } from '@/src/styles/colors';
+import { baseColors } from '@design-system/tokens/colors';
 
 interface AuthFormProps {
   role?: string | null;

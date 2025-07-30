@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Student as GlobalStudent } from '../../types';
-import { convertNumberToString } from '../../utils/idConversion';
+import { convertNumberToString } from '@lib/utils/idConversion';
 import { mockClassData, ClassData as MockClassData } from '../../mocks/classData';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];

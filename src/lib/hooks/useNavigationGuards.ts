@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from './useAuth';
-import { ClassService } from '../../services/classService';
-import { logger } from '../../utils/logger';
+import { ClassService } from '@domains/class';
+import { logger } from '@lib/utils/logger';
 
 export interface NavigationGuardResult {
   hasAccess: boolean;

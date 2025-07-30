@@ -1,9 +1,9 @@
-import { logger } from '../../utils/logger';
+import { logger } from '@lib/utils/logger';
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SubjectService, ClassSubject, Subject } from '@/src/services/subjectService';
-import { useSafeToQuery } from '@/src/utils/navigationGuard';
+import { SubjectService, ClassSubject, Subject } from '@domains/subjects';
+import { useSafeToQuery } from '@lib/utils/navigationGuard';
 
 interface SubjectManagerProps {
   classId: number;

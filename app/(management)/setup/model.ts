@@ -8,7 +8,7 @@
 import { z } from 'zod';
 
 // Re-export School type from domains
-export type { School } from '@domains/schools';
+export type { School } from '@domains/management';
 
 // Types
 export interface SchoolSetupState {
@@ -146,7 +146,7 @@ export const validateFormStep = (step: number, formData: SchoolSetupFormData): {
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string> = {};
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         if (err.path.length > 0) {
           errors[err.path[0] as string] = err.message;
         }
@@ -164,7 +164,7 @@ export const validateCompleteSetup = (formData: SchoolSetupFormData): { isValid:
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string> = {};
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         if (err.path.length > 0) {
           errors[err.path[0] as string] = err.message;
         }

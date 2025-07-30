@@ -7,8 +7,8 @@
 
 export * from './useTheme';
 
-// ThemeProvider components are available from './ThemeProvider' but not exported here to avoid JSX resolution issues
-// For runtime usage: import { AppThemeProvider, ThemeProvider } from './ThemeProvider';
+// Export ThemeProvider components for convenient access
+export { AppThemeProvider, ThemeProvider } from './ThemeProvider';
 export { 
   useTheme,
   useColors,

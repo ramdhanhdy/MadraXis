@@ -109,6 +109,11 @@ export default function ParentDashboard() {
     router.push('/(parent)/messages');
   };
 
+  // Handle tab change
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+  };
+
   // Render functions for different tabs
   const renderDashboard = () => {
     if (loading) {
@@ -350,7 +355,7 @@ export default function ParentDashboard() {
         header={headerConfig}
         tabs={PARENT_DASHBOARD_TABS}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         backgroundPattern={true}
         scrollable={false}
         contentPadding={false}

@@ -6,9 +6,7 @@
  */
 
 import { z } from 'zod';
-
-// Re-export types from shared types
-export type { Student, Teacher } from '../../../src/types';
+import type { Student as BaseStudent, Teacher as BaseTeacher } from '@types';
 
 // Types
 export interface UserManagementState {
@@ -39,6 +37,18 @@ export interface StudentDetails {
   address?: string;
   parent_name?: string;
   parent_phone?: string;
+}
+
+// Local Student interface that uses the local StudentDetails and adds email
+export interface Student extends Omit<BaseStudent, 'details'> {
+  details?: StudentDetails;
+  email?: string;
+}
+
+// Local Teacher interface that uses the local TeacherDetails and adds email
+export interface Teacher extends Omit<BaseTeacher, 'details'> {
+  details?: TeacherDetails;
+  email?: string;
 }
 
 export interface TeacherDetails {
@@ -135,7 +145,7 @@ export const validateUserForm = (data: UserFormData): { isValid: boolean; errors
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string> = {};
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         if (err.path.length > 0) {
           errors[err.path[0] as string] = err.message;
         }

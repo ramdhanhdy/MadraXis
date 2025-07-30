@@ -17,7 +17,7 @@ import {
 import { useThemeDebugger, ThemeInspector as ThemeInspectorUtils } from './useThemeDebugger';
 import { ThemeExporter } from './theme-export';
 import { validateTheme } from '../validation';
-import { useTheme } from '../themes/ThemeProvider';
+import { useTheme } from '../themes/hooks';
 
 // Component props
 export interface ThemeInspectorProps {

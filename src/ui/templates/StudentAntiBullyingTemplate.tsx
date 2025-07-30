@@ -1,4 +1,4 @@
-import { logger } from '../../utils/logger';
+import { logger } from '@lib/utils/logger';
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

@@ -46,10 +46,7 @@ export const ThemeExample: React.FC = () => {
   const [showInspector, setShowInspector] = useState(false);
 
   // Debug info (development only)
-  const debugInfo = useThemeDebugger({
-    enableValidation: true,
-    enablePerformanceTracking: true,
-  });
+  const debugInfo = useThemeDebugger();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.surface?.primary || '#ffffff' }]}>

@@ -15,12 +15,25 @@ import { SkeletonCard } from '@ui/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
 import { useAuth } from '@lib/hooks/useAuth';
-import { fetchIncidentsForSchool } from '@domains/incidents';
-import { fetchDashboardMetrics, DashboardMetrics } from '@domains/dashboard';
-import { logoSvg } from '@lib/utils/svgPatterns';
+import { IncidentService } from '@domains/incidents';
+import { DashboardService, DashboardMetrics } from '@domains/dashboard';
 import { colors } from '@design-system/tokens/colors';
 import { useSafeToQuery } from '@lib/utils/navigationGuard';
 import { Incident } from '@types';
+
+// Logo SVG
+const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="95" fill="#005e7a" />
+  <circle cx="100" cy="100" r="85" fill="#ffffff" />
+  <path d="M100 60C100 60 70 50 50 60V140C70 130 100 140 100 140V60Z" fill="#005e7a" />
+  <path d="M100 60C100 60 130 50 150 60V140C130 130 100 140 100 140V60Z" fill="#005e7a" />
+  <path d="M100 70C100 70 75 62 60 70V130C75 122 100 130 100 130V70Z" fill="#ffffff" />
+  <path d="M100 70C100 70 125 62 140 70V130C125 122 100 130 100 130V70Z" fill="#ffffff" />
+  <path d="M100 40C100 40 90 45 100 50C110 45 100 40 100 40Z" fill="#f0c75e" />
+  <path d="M80 45C80 45 70 50 80 55C90 50 80 45 80 45Z" fill="#f0c75e" />
+  <path d="M120 45C120 45 130 50 120 55C110 50 120 45 120 45Z" fill="#f0c75e" />
+</svg>`;
 
 // Feature Model
 import {
@@ -37,12 +50,15 @@ import {
   MANAGEMENT_DASHBOARD_ERRORS,
 } from './model';
 
+// Create a union type for tab values to ensure type safety
+type DashboardTabValue = typeof DASHBOARD_TABS[keyof typeof DASHBOARD_TABS];
+
 export default function ManagementDashboardScreen() {
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
   const isSafeToQuery = useSafeToQuery();
   const [schoolName] = useState('Zaid Bin Tsabit');
-  const [activeTab, setActiveTab] = useState(DASHBOARD_TABS.DASHBOARD);
+  const [activeTab, setActiveTab] = useState<DashboardTabValue>(DASHBOARD_TABS.DASHBOARD);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -64,15 +80,15 @@ export default function ManagementDashboardScreen() {
       try {
         if (profile?.school_id) {
           // Fetch incidents
-          const { data: incidentsData, error: incidentsError } = await fetchIncidentsForSchool(profile.school_id);
-          if (incidentsError) {
+          try {
+            const incidentsResult = await IncidentService.getIncidents(profile.school_id);
+            setIncidents(incidentsResult.incidents || []);
+          } catch (incidentsError) {
             console.error('Error fetching incidents:', incidentsError);
-          } else {
-            setIncidents(incidentsData || []);
           }
 
           // Fetch dashboard metrics
-          const { data: metricsData, error: metricsError } = await fetchDashboardMetrics(profile.school_id);
+          const { data: metricsData, error: metricsError } = await DashboardService.fetchDashboardMetrics(profile.school_id);
           if (metricsError) {
             console.error('Error fetching dashboard metrics:', metricsError);
           } else {
@@ -89,6 +105,11 @@ export default function ManagementDashboardScreen() {
 
     fetchData();
   }, [profile?.school_id, isSafeToQuery]);
+
+  // Handle tab change
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId as DashboardTabValue);
+  };
 
   // Handle navigation
   const handleNavigate = (route: string) => {
@@ -215,7 +236,7 @@ export default function ManagementDashboardScreen() {
         }}
         tabs={tabs}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         backgroundPattern={true}
         contentPadding={true}
         scrollable={true}
@@ -242,7 +263,7 @@ export default function ManagementDashboardScreen() {
         }}
         tabs={tabs}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         backgroundPattern={true}
         contentPadding={true}
         scrollable={true}
@@ -359,7 +380,7 @@ export default function ManagementDashboardScreen() {
                 title={incident.description}
                 subtitle={`${formatIncidentType(incident.incident_type)} • ${incident.location}`}
                 leftIcon="warning-outline"
-                leftIconColor={getIncidentPriorityColor(incident.incident_type)}
+
                 rightComponent={
                   <View style={{ alignItems: 'flex-end' }}>
                     <Typography variant="caption" color="textSecondary">
@@ -380,7 +401,7 @@ export default function ManagementDashboardScreen() {
                     </View>
                   </View>
                 }
-                onPress={() => navigateToIncidentDetail(incident.id)}
+                onPress={() => navigateToIncidentDetail(String(incident.id))}
                 showDivider={incident.id !== getRecentIncidents(incidents)[getRecentIncidents(incidents).length - 1].id}
               />
             ))}
@@ -511,7 +532,7 @@ export default function ManagementDashboardScreen() {
       }}
       tabs={tabs}
       activeTab={activeTab}
-      onTabChange={setActiveTab}
+      onTabChange={handleTabChange}
       backgroundPattern={true}
       contentPadding={true}
       scrollable={true}

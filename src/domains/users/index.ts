@@ -20,5 +20,9 @@ export {
   UserRepository
 } from './api';
 
+// Export specific functions for backward compatibility
+export const fetchStudents = UserService.fetchStudents;
+export const fetchTeachers = UserService.fetchTeachers;
+
 // Re-export main service as default for backward compatibility
 export { UserService as default } from './api';

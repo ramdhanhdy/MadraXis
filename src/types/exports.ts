@@ -17,11 +17,11 @@ export * from './index';
 // Individual files can still be imported directly if needed:
 // - import { Class } from '@types/class';
 // - import { DashboardMetrics } from '@types/dashboard';
-// - import { Database } from '@types/database';
+// - import { Database } from '../src/types/database';
 // - import { Student } from '@types/student';
 
 // Service-specific types (these remain in their respective service files)
-export type { School } from '../services/schools';
+export type { School } from '@domains/schools';
 
 // Note: Utility types from typeHelpers.ts are temporarily excluded due to syntax errors
 // They will be re-added once the typeHelpers.ts file is fixed

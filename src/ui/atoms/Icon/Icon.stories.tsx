@@ -1,4 +1,4 @@
-import { logger } from '../../../utils/logger';
+import { logger } from '@lib/utils/logger';
 /**
  * Icon Component Stories
  * Storybook stories showcasing all Icon variants and use cases

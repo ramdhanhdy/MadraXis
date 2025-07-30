@@ -1,10 +1,10 @@
-import { logger } from '../../utils/logger';
+import { logger } from '@lib/utils/logger';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ClassService, ClassWithDetails } from '@/src/services/classService';
+import { ClassService, ClassWithDetails } from '@domains/class';
 import { CreateClassData, UpdateClassData } from '@/src/types/class';
-import { useAuth } from '@/src/hooks/useAuth';
+import { useAuth } from '@lib/hooks/useAuth';
 
 interface ClassFormModalProps {
   visible: boolean;

@@ -1,4 +1,4 @@
-import { logger } from '../../utils/logger';
+import { logger } from '@lib/utils/logger';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -16,10 +16,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Swipeable, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ClassService } from '../../services/class';
-import { useAuth } from '../../hooks/useAuth';
-import { useSafeToQuery } from '../../utils/navigationGuard';
-import { useClassStudentsSubscription } from '../../hooks/useClassStudentsSubscription';
+import { ClassService } from '@domains/class';
+import { useAuth } from '@lib/hooks/useAuth';
+import { useSafeToQuery } from '@lib/utils/navigationGuard';
+import { useClassStudentsSubscription } from '@lib/hooks/useClassStudentsSubscription';
 import { EmptyState } from '../molecules/EmptyState/EmptyState';
 import { Student } from '../../types/student';
 

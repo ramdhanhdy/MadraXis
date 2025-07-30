@@ -6,7 +6,6 @@
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react-native';
 import { ThemeProvider, useComponentTheme } from '../../../context/ThemeContext';
-import { theme } from '../../../styles/theme';
 import { Button } from './Button';
 
 // Test wrapper with ThemeProvider

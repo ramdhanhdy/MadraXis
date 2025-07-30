@@ -6,10 +6,18 @@
 import {
   ThemeStrategy,
   UserRole,
-  ThemeMode,
   createTheme,
-  THEME_STRATEGIES,
+  themeStrategies,
+  sharedThemeStrategy,
+  roleBasedThemeStrategy,
+  Theme,
 } from '../src/design-system';
+
+// Define theme strategy type values (the 'type' property of ThemeStrategy)
+type ThemeStrategyTypeValue = 'shared' | 'role-based';
+
+// Define theme mode type (color scheme)
+type ThemeMode = 'light' | 'dark';
 
 // Configuration types
 export interface ThemeConfig {
@@ -43,22 +51,18 @@ export interface DevelopmentConfig {
   showThemeWarnings: boolean;
 }
 
-export interface ThemeOverrides {
-  colors?: Record<string, any>;
-  typography?: Record<string, any>;
-  spacing?: Record<string, any>;
-  componentThemes?: Record<string, any>;
-}
+// Use the design system's theme type for overrides
+export type ThemeOverrides = Partial<Theme>;
 
 // Default theme configuration
 export const DEFAULT_THEME_CONFIG: ThemeConfig = {
   // Default theme settings
-  defaultStrategy: 'role-based',
+  defaultStrategy: roleBasedThemeStrategy,
   defaultRole: 'student',
   defaultMode: 'light',
 
   // Enabled options
-  enabledStrategies: ['shared', 'role-based', 'adaptive', 'high-contrast'],
+  enabledStrategies: [sharedThemeStrategy, roleBasedThemeStrategy],
   enabledRoles: ['student', 'teacher', 'parent', 'management'],
   enabledModes: ['light', 'dark'],
 
@@ -255,13 +259,15 @@ export class ThemeConfigManager {
       mode = this.config.defaultMode;
     }
 
-    // Create base theme
-    const baseTheme = createTheme({
-      strategy,
-      role,
-      mode,
-      overrides: this.overrides,
-    });
+    // Use the strategy's resolver to create the theme
+    const themeConfig = {
+      strategy: strategy.type,
+      baseTheme: mode,
+      // Only include customizations if they exist and are properly typed
+      ...(this.overrides && Object.keys(this.overrides).length > 0 ? { customizations: this.overrides } : {}),
+    };
+
+    const baseTheme = strategy.resolver(themeConfig, role);
 
     // Add configuration metadata
     return {
@@ -342,27 +348,19 @@ export class ThemeConfigManager {
 
   // Helper methods for labels and descriptions
   private getStrategyLabel(strategy: ThemeStrategy): string {
-    const labels: Record<ThemeStrategy, string> = {
+    const labels: Record<ThemeStrategyTypeValue, string> = {
       'shared': 'Shared Theme',
       'role-based': 'Role-Based Theme',
-      'adaptive': 'Adaptive Theme',
-      'high-contrast': 'High Contrast',
-      'reduced-motion': 'Reduced Motion',
-      'custom': 'Custom Theme',
     };
-    return labels[strategy] || strategy;
+    return labels[strategy.type] || strategy.name || strategy.type;
   }
 
   private getStrategyDescription(strategy: ThemeStrategy): string {
-    const descriptions: Record<ThemeStrategy, string> = {
+    const descriptions: Record<ThemeStrategyTypeValue, string> = {
       'shared': 'Single theme for all users',
       'role-based': 'Different themes for each user role',
-      'adaptive': 'Automatically adapts based on context',
-      'high-contrast': 'High contrast for accessibility',
-      'reduced-motion': 'Reduced animations for accessibility',
-      'custom': 'Custom user-defined theme',
     };
-    return descriptions[strategy] || 'Theme strategy';
+    return descriptions[strategy.type] || strategy.description || 'Theme strategy';
   }
 
   private getRoleLabel(role: UserRole): string {

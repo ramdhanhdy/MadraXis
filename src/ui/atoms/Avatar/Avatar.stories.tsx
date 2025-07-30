@@ -1,4 +1,4 @@
-import { logger } from '../../../utils/logger';
+import { logger } from '@lib/utils/logger';
 /**
  * Avatar Component Stories
  * Storybook stories showcasing all Avatar variants and use cases

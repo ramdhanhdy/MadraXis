@@ -1,7 +1,7 @@
 import { logger } from '@lib/utils/logger';
 import { supabase } from '@lib/utils/supabase';
 import { UserService } from '@domains/users';
-import type { DatabaseResponse } from '@types/database';
+import type { DatabaseResponse } from '../../types/database';
 import { DashboardMetrics, DashboardServiceError } from './types';
 
 /**

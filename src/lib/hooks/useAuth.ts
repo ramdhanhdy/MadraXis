@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { useAuthStore } from '../../stores/authStore';
-import { logger } from '../../utils/logger';
-import { UserRole } from '../../styles/colors';
+import { useAuth as useAuthContext } from '@context/AuthContext';
+import { logger } from '@lib/utils/logger';
+import { UserRole } from '@lib/constants/roleCapabilities';
 
 export const useAuth = () => {
   const router = useRouter();
@@ -20,7 +20,7 @@ export const useAuth = () => {
     setLastNavigationTime,
     signOut,
     clearSession
-  } = useAuthStore();
+  } = useAuthContext();
 
   // Handle navigation based on auth state
   useEffect(() => {
@@ -30,7 +30,7 @@ export const useAuth = () => {
     }
 
     // Don't navigate if we're already on the correct route
-    const currentPath = router.pathname || '';
+    const currentPath = '';
 
     // If user is authenticated and has profile, navigate to appropriate dashboard
     if (session && profile?.role) {

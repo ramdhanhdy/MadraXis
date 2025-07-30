@@ -247,7 +247,7 @@ export const validateFormStep = (step: number, formData: StudentFormData): { isV
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string> = {};
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         if (err.path.length > 0) {
           errors[err.path[0] as string] = err.message;
         }
@@ -265,7 +265,7 @@ export const validateCompleteForm = (formData: StudentFormData): { isValid: bool
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string> = {};
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         if (err.path.length > 0) {
           errors[err.path[0] as string] = err.message;
         }
@@ -327,6 +327,8 @@ export const getFormProgress = (formData: StudentFormData): number => {
   const completedSteps = getCompletedStepsCount(formData);
   return Math.round((completedSteps / FORM_STEPS.length) * 100);
 };
+
+import type { Student } from '../model';
 
 export const convertFormDataToStudent = (formData: StudentFormData): Omit<Student, 'id' | 'academicRecords' | 'behaviorRecords'> => {
   return {

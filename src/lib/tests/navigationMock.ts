@@ -298,8 +298,8 @@ export function createNavigationTestEnvironment(preset?: keyof typeof navigation
   const mockRouter = createMockRouter(config);
   const mockNavigation = createMockNavigation(config);
   const mockRoute = createMockRoute(
-    config.initialRoute || 'Home',
-    config.initialParams || {}
+    (config as any).initialRoute || 'Home',
+    (config as any).initialParams || {}
   );
 
   setupNavigationMocks(config);
@@ -329,8 +329,8 @@ export function createNavigationTestEnvironment(preset?: keyof typeof navigation
 // EXPORTS
 // ============================================================================
 
-// Export commonly used mocks
-export {
+// Default export for convenience
+export default {
   createMockRouter,
   createMockNavigation,
   createMockRoute,
@@ -339,19 +339,6 @@ export {
   mockNavigationHooks,
   setupNavigationMocks,
   resetNavigationMocks,
-  createNavigationTestEnvironment
-};
-
-// Export preset configurations
-export { navigationPresets };
-
-// Default export for convenience
-export default {
-  createMockRouter,
-  createMockNavigation,
-  createMockRoute,
-  setupNavigationMocks,
-  resetNavigationMocks,
   createNavigationTestEnvironment,
-  presets: navigationPresets
+  navigationPresets
 };

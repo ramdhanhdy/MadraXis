@@ -1,6 +1,6 @@
 import { logger } from '@lib/utils/logger';
 import { supabase } from '@lib/utils/supabase';
-import type { DatabaseResponse } from '@types/database';
+import type { DatabaseResponse } from '../../types/database';
 import {
   School,
   SchoolWithStats,

@@ -27,7 +27,7 @@ import { EmptyState } from '../EmptyState/EmptyState';
 import { StudentWithDetails } from '../../../types';
 import { StudentSelectionItem } from './StudentSelectionItem';
 import { BulkActionBar } from '../BulkActionBar';
-import { determineGradeLevel } from '../../../utils/dateHelpers';
+import { determineGradeLevel } from '@lib/utils';
 
 // Filter options for student selection
 export interface StudentFilters {

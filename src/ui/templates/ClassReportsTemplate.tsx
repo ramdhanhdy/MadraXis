@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { mockClassData, ClassData as MockClassData, Report } from '../../mocks/classData';
-import { convertStringToNumber } from '../../utils/idConversion';
+import { convertStringToNumber } from '@lib/utils/idConversion';
 
 // Types
 type ReportType = 'academic' | 'behavior' | 'attendance';

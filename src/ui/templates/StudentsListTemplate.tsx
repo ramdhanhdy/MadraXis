@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { convertNumberToString } from '../../utils/idConversion';
+import { convertNumberToString } from '@lib/utils/idConversion';
 // Local interface for StudentsList display purposes
 interface StudentsListItem {
   id: number;

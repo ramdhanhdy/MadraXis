@@ -6,8 +6,8 @@ import React from 'react';
 import { render, fireEvent, waitFor, screen, act } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { AddStudentsToClassModal } from './AddStudentsToClassModal';
-import { ClassService } from '../../../services/classService';
-import { useAuth } from '../../../hooks/useAuth';
+import { ClassService } from '@domains/class';
+import { useAuth } from '@lib/hooks/useAuth';
 
 // Mock dependencies
 jest.mock('../../../services/classService');

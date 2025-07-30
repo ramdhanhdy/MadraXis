@@ -71,8 +71,8 @@ export const toBeAccessible = (received: ReactTestInstance) => {
 export const toHaveLoadingState = (received: ReactTestInstance) => {
   const hasLoadingProp = received.props.loading === true;
   const hasDisabledState = received.props.disabled === true;
-  const hasLoadingIndicator = received.findAllByType ? 
-    received.findAllByType('ActivityIndicator').length > 0 || 
+  const hasLoadingIndicator = received.findAllByType ?
+    received.findAllByType('ActivityIndicator' as any).length > 0 ||
     received.findAllByProps({ 'data-testid': 'loading-spinner' }).length > 0 : false;
   
   const pass = hasLoadingProp && hasDisabledState && hasLoadingIndicator;
@@ -196,7 +196,7 @@ export const toHaveErrorBoundary = (received: ReactTestInstance) => {
   while (current && !hasErrorBoundary) {
     // Check if current component looks like an error boundary
     if (current.type && typeof current.type === 'object') {
-      const componentName = current.type.displayName || current.type.name || '';
+      const componentName = (current.type as any)?.displayName || (current.type as any)?.name || '';
       hasErrorBoundary = componentName.toLowerCase().includes('errorboundary');
     }
     current = current.parent;

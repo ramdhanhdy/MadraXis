@@ -11,7 +11,7 @@ import {
   UserCounts,
   LegacyStudent
 } from './types';
-import type { DatabaseResponse } from '@types/database';
+import type { DatabaseResponse } from '../../types/database';
 
 /**
  * Hook for fetching students for a school

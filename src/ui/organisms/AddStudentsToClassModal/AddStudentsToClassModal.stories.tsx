@@ -1,4 +1,4 @@
-import { logger } from '../../../utils/logger';
+import { logger } from '@lib/utils/logger';
 /**
  * AddStudentsToClassModal Component Stories
  */
@@ -8,7 +8,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { AddStudentsToClassModal } from './AddStudentsToClassModal';
 import { ThemeProvider } from '../../../context/ThemeContext';
-import { ClassService } from '../../../services/classService';
+import { ClassService } from '@domains/class';
 
 // Mock ClassService for stories
 jest.mock('../../../services/classService');

@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Student as GlobalStudent } from '../../types';
-import { convertStringToNumber } from '../../utils/idConversion';
+import { convertStringToNumber } from '@lib/utils/idConversion';
 
 // Types
 interface Memorization {

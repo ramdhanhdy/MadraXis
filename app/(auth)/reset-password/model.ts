@@ -45,7 +45,7 @@ export const validatePassword = (password: string): { isValid: boolean; error?: 
     return { isValid: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { isValid: false, error: error.errors[0].message };
+      return { isValid: false, error: error.issues[0].message };
     }
     return { isValid: false, error: 'Invalid password' };
   }
@@ -61,7 +61,7 @@ export const validateResetPasswordForm = (data: ResetPasswordFormData): {
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string> = {};
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         if (err.path.length > 0) {
           errors[err.path[0] as string] = err.message;
         }

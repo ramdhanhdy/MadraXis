@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { Student, Teacher, Profile } from '../../types/index';
 
+// Re-export core types for convenience
+export type { Student, Teacher, Profile };
+
 // Validation schemas
 export const SearchUsersOptionsSchema = z.object({
   searchTerm: z.string().min(1).max(100).optional(),

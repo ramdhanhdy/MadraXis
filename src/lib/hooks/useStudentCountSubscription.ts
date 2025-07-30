@@ -1,7 +1,7 @@
-import { logger } from '../../utils/logger';
+import { logger } from '@lib/utils/logger';
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { supabase } from '../../utils/supabase';
-import { isSafeToQuery } from '../../utils/navigationGuard';
+import { supabase } from '@lib/utils/supabase';
+import { isSafeToQuery } from '@lib/utils/navigationGuard';
 
 interface UseStudentCountSubscriptionProps {
   classIds: number[];

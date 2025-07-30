@@ -12,7 +12,7 @@ import {
 
 // Services
 import { supabase } from '@lib/utils/supabase';
-import { saveSchool, School } from '@domains/schools';
+import { saveSchool, School } from '@domains/management';
 
 // Feature Model
 import {

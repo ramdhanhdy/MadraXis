@@ -194,6 +194,8 @@ export const EnhancedThemeProvider: React.FC<EnhancedThemeProviderProps> = ({
 
 // useEnhancedTheme hook is now in ../hooks.ts
 
+import { useEnhancedTheme } from '../hooks';
+
 /**
  * Theme debugging hook
  */

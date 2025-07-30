@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useColors } from '../../../context/ThemeContext';
 import { Typography } from '../../atoms/Typography';
 import { Icon } from '../../atoms/Icon';
-import { combineStyles } from '../../../utils/styleHelpers';
+import { combineStyles } from '@lib/utils';
 
 // ListItem Props Interface
 export interface ListItemProps extends Omit<TouchableOpacityProps, 'style'> {

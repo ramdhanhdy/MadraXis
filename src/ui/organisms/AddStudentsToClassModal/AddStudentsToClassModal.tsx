@@ -1,4 +1,4 @@
-import { logger } from '../../../utils/logger';
+import { logger } from '@lib/utils/logger';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
@@ -7,9 +7,9 @@ import {
 'react-native';
 import { useRouter } from 'expo-router';
 import { Modal } from '../Modal';
-import { ClassService } from '../../../services/classService';
-import { useAuth } from '../../../hooks/useAuth';
-import { useSafeToQuery } from '../../../utils/navigationGuard';
+import { ClassService } from '@domains/class';
+import { useAuth } from '@lib/hooks/useAuth';
+import { useSafeToQuery } from '@lib/utils/navigationGuard';
 import { useTheme } from '../../../context/ThemeContext';
 import { StudentSelectionList, StudentFilters } from '../../molecules/StudentSelectionList/StudentSelectionList';
 import { BreadcrumbNavigation } from '../../molecules/BreadcrumbNavigation';

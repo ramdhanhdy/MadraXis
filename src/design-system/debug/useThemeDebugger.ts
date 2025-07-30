@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Theme } from '../core/types';
 import { validateTheme, ValidationResult } from '../validation';
-import { useTheme } from '../themes/ThemeProvider';
+import { useTheme } from '../themes/hooks';
 
 // Debug information types
 export interface ThemeDebugInfo {
@@ -69,7 +69,8 @@ export function useThemeDebugger(options: ThemeDebuggerOptions = {}): ThemeDebug
     maxHistoryEntries = 50,
   } = options;
 
-  const { theme, strategy, role } = useTheme();
+  const { theme, strategy, currentRole } = useTheme();
+  const role = currentRole;
   
   // State for debug information
   const [debugInfo, setDebugInfo] = useState<ThemeDebugInfo>(() => ({

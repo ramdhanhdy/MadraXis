@@ -19,7 +19,7 @@ import { Typography } from '../../atoms/Typography';
 import { Icon } from '../../atoms/Icon';
 import { Avatar } from '../../atoms/Avatar';
 import { StudentWithDetails } from '../../../types';
-import { determineGradeLevel } from '../../../utils/dateHelpers';
+import { determineGradeLevel } from '@lib/utils';
 
 // Props interface
 export interface StudentSelectionItemProps {

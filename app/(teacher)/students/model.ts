@@ -7,7 +7,7 @@
 
 import { z } from 'zod';
 
-// Types
+// Student interface based on the schema
 export interface Student {
   id: string;
   studentNumber: string;
@@ -26,8 +26,6 @@ export interface Student {
   status: 'active' | 'inactive' | 'transferred' | 'graduated';
   profilePicture?: string;
   notes?: string;
-  academicRecords: AcademicRecord[];
-  behaviorRecords: BehaviorRecord[];
 }
 
 export interface AcademicRecord {
@@ -234,7 +232,7 @@ export const validateStudent = (data: Student): { isValid: boolean; errors: Reco
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string> = {};
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         if (err.path.length > 0) {
           errors[err.path[0] as string] = err.message;
         }

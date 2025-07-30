@@ -249,6 +249,42 @@ export const sanitizeSqlInput = (input: string): string => {
 };
 
 /**
+ * Sanitize LIKE input for SQL queries
+ */
+export const sanitizeLikeInput = (input: string): string => {
+  if (typeof input !== 'string') {
+    return '';
+  }
+  
+  // Escape special LIKE characters and remove SQL injection patterns
+  return sanitizeSqlInput(input)
+    .replace(/[%_]/g, '\\$&') // Escape LIKE wildcards
+    .trim();
+};
+
+/**
+ * Sanitize sort parameters for SQL ORDER BY clauses
+ */
+export const sanitizeSortParams = (
+  field?: string, 
+  direction?: string, 
+  allowedFields: string[] = ['id', 'name', 'created_at', 'updated_at', 'level', 'status']
+): { column: string; ascending: boolean } => {
+  const sanitizedField = typeof field === 'string' && allowedFields.includes(field.toLowerCase()) 
+    ? field.toLowerCase() 
+    : 'id';
+    
+  const sanitizedDirection = typeof direction === 'string' && ['asc', 'desc'].includes(direction.toLowerCase())
+    ? direction.toLowerCase()
+    : 'asc';
+  
+  return { 
+    column: sanitizedField, 
+    ascending: sanitizedDirection === 'asc' 
+  };
+};
+
+/**
  * Deep sanitize nested object structures
  */
 export const deepSanitize = (obj: any, maxDepth: number = 10): any => {
@@ -291,5 +327,7 @@ export const sanitizationUtils = {
   sanitizeUserProfile,
   sanitizeSearchQuery,
   sanitizeSqlInput,
+  sanitizeLikeInput,
+  sanitizeSortParams,
   deepSanitize,
 } as const;

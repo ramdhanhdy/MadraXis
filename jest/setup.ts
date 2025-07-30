@@ -1,13 +1,19 @@
+/**
+ * Jest Setup Configuration
+ * Sets up testing environment for React Native components
+ *
+ * Note: This file avoids DOM type conflicts by using React Native-specific imports
+ */
+
+/// <reference path="./setup.d.ts" />
+
+// Import custom matchers first to avoid type conflicts
 import { customMatchers } from '../src/lib/tests/customMatchers';
 
 // Extends Jest expect with custom matchers
 expect.extend(customMatchers);
 
-/**
- * Jest Setup Configuration
- * Sets up testing environment for React Native components
- */
-
+// Import testing library extensions (avoiding DOM conflicts)
 import '@testing-library/jest-native/extend-expect';
 
 // Mock Expo modules that might cause issues in tests
@@ -66,7 +72,12 @@ jest.mock('react-native/Libraries/Components/ActivityIndicator/ActivityIndicator
   const { View } = require('react-native');
   return {
     __esModule: true,
-    default: ({ size = 'small', color = '#007AFF', testID, ...props }) => {
+    default: ({ size = 'small', color = '#007AFF', testID, ...props }: {
+      size?: 'small' | 'large';
+      color?: string;
+      testID?: string;
+      [key: string]: any;
+    }) => {
       return React.createElement(View, {
         ...props,
         testID: testID || 'activity-indicator',
@@ -90,7 +101,15 @@ jest.mock('react-native/Libraries/Modal/Modal', () => {
   const { View } = require('react-native');
   return {
     __esModule: true,
-    default: ({ visible, transparent, animationType, onRequestClose, children, testID, ...props }) => {
+    default: ({ visible, transparent, animationType, onRequestClose, children, testID, ...props }: {
+      visible?: boolean;
+      transparent?: boolean;
+      animationType?: 'none' | 'slide' | 'fade';
+      onRequestClose?: () => void;
+      children?: React.ReactNode;
+      testID?: string;
+      [key: string]: any;
+    }) => {
       if (!visible) return null;
       return React.createElement(View, {
         ...props,
@@ -114,7 +133,14 @@ jest.mock('react-native/Libraries/Components/ScrollView/ScrollView', () => {
   const { View } = require('react-native');
   
   // Create a simple View-like component using actual React Native View
-  const MockScrollView = ({ children, refreshing, onRefresh, showsVerticalScrollIndicator, testID, ...props }) => {
+  const MockScrollView = ({ children, refreshing, onRefresh, showsVerticalScrollIndicator, testID, ...props }: {
+    children?: React.ReactNode;
+    refreshing?: boolean;
+    onRefresh?: () => void;
+    showsVerticalScrollIndicator?: boolean;
+    testID?: string;
+    [key: string]: any;
+  }) => {
     return React.createElement(View, {
       ...props,
       testID: testID || 'scroll-view',
@@ -152,7 +178,11 @@ jest.mock('react-native/Libraries/Components/SafeAreaView/SafeAreaView', () => {
   const { View } = require('react-native');
   return {
     __esModule: true,
-    default: ({ children, style, ...props }) => {
+    default: ({ children, style, ...props }: {
+      children?: React.ReactNode;
+      style?: any;
+      [key: string]: any;
+    }) => {
       return React.createElement(View, {
         ...props,
         style: style,
@@ -313,7 +343,7 @@ jest.mock('../src/context/ThemeContext', () => ({
 jest.mock('@react-navigation/native', () => {
   const React = require('react');
   return {
-    NavigationContainer: ({ children, ...props }) => {
+    NavigationContainer: ({ children, ...props }: { children?: React.ReactNode; [key: string]: any }) => {
       return React.createElement('NavigationContainer', props, children);
     },
     useNavigation: () => ({
@@ -403,7 +433,7 @@ jest.mock('@design-system', () => ({
     colorScheme: 'light',
     currentRole: null,
   })),
-  ThemeProvider: ({ children }) => {
+  ThemeProvider: ({ children }: { children?: React.ReactNode }) => {
     const React = require('react');
     return React.createElement('ThemeProvider', {}, children);
   },
@@ -434,20 +464,20 @@ jest.mock('expo-router', () => ({
     canGoBack: jest.fn(() => false),
     setParams: jest.fn(),
   },
-  Link: ({ children, href, ...props }) => {
+  Link: ({ children, href, ...props }: { children?: React.ReactNode; href?: string; [key: string]: any }) => {
     const React = require('react');
     const { Text } = require('react-native');
     return React.createElement(Text, { ...props, testID: 'expo-router-link' }, children);
   },
   Redirect: () => null,
   Stack: {
-    Screen: ({ children, ...props }) => {
+    Screen: ({ children, ...props }: { children?: React.ReactNode; [key: string]: any }) => {
       const React = require('react');
       return React.createElement('Stack.Screen', props, children);
     },
   },
   Tabs: {
-    Screen: ({ children, ...props }) => {
+    Screen: ({ children, ...props }: { children?: React.ReactNode; [key: string]: any }) => {
       const React = require('react');
       return React.createElement('Tabs.Screen', props, children);
     },
@@ -455,7 +485,7 @@ jest.mock('expo-router', () => ({
 }));
 
 // Mock console methods to reduce noise in tests
-global.console = {
+(global as any).console = {
   ...console,
   // Uncomment to ignore specific console methods in tests
   // log: jest.fn(),
