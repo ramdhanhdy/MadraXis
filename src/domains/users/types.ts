@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Student, Teacher, Profile } from '@types';
+import { Student, Teacher, Profile } from '../../types/index';
 
 // Validation schemas
 export const SearchUsersOptionsSchema = z.object({

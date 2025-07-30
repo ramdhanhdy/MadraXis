@@ -1,5 +1,5 @@
 import { Session, User } from '@supabase/supabase-js';
-import { Profile } from '@types';
+import { Profile } from '../../types/index';
 
 export interface AuthState {
   // State

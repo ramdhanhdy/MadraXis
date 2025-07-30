@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Incident } from '@types';
+import { Incident } from '../../types/index';
 
 // Validation schemas
 export const CreateIncidentSchema = z.object({

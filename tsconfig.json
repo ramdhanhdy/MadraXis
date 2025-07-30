@@ -15,6 +15,7 @@
       "@lib/*": ["src/lib/*"],
       "@design-system/*": ["src/design-system/*"],
       "@context/*": ["src/context/*"],
+      "@types": ["src/types"],
       "@types/*": ["src/types/*"],
       "@app/*": ["app/*"]
     }
