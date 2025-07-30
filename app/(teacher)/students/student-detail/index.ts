@@ -10,11 +10,6 @@ export { default as StudentDetailScreen } from './screen';
 
 // Types and models
 export type {
-  Student,
-  AcademicRecord,
-  SubjectRecord,
-  Score,
-  BehaviorRecord,
   StudentDetailState,
   AttendanceRecord,
   StudentNote,
@@ -22,6 +17,15 @@ export type {
   AttendanceRecordSchema,
   StudentNoteSchema,
 } from './model';
+
+// Re-export types from parent model
+export type {
+  Student,
+  AcademicRecord,
+  SubjectRecord,
+  Score,
+  BehaviorRecord,
+} from '../model';
 
 export {
   attendanceRecordSchema,

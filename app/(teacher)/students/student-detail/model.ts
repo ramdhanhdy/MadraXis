@@ -7,8 +7,8 @@
 
 import { z } from 'zod';
 
-// Re-export common types from parent model
-export type {
+// Import common types from parent model
+import type {
   Student,
   AcademicRecord,
   SubjectRecord,

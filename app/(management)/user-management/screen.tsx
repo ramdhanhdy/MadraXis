@@ -17,24 +17,18 @@ import { useRouter } from 'expo-router';
 // Context and Services
 import { useAuth } from '@lib/hooks/useAuth';
 import { fetchStudents, fetchTeachers } from '@domains/users';
+import type { Student, Teacher } from '@types';
 
 // Feature Model
 import {
-  type Student,
-  type Teacher,
   type UserManagementState,
-  type UserStats,
   USER_TABS,
   searchUsers,
   calculateUserStats,
-  formatUserRole,
   formatGender,
-  getUniqueClasses,
-  getUniqueSubjects,
   sortUsersByName,
   initialUserManagementState,
   USER_MANAGEMENT_ERRORS,
-  USER_MANAGEMENT_SUCCESS,
 } from './model';
 
 export default function UserManagementScreen() {
@@ -44,8 +38,8 @@ export default function UserManagementScreen() {
   const [state, setState] = useState<UserManagementState>(initialUserManagementState);
   
   // Derived state
-  const filteredStudents = searchUsers(state.students, state.searchTerm) as Student[];
-  const filteredTeachers = searchUsers(state.teachers, state.searchTerm) as Teacher[];
+  const filteredStudents = searchUsers(state.students, state.searchTerm);
+  const filteredTeachers = searchUsers(state.teachers, state.searchTerm);
   const userStats = calculateUserStats(state.students, state.teachers);
 
   // Update state helper

@@ -72,8 +72,8 @@ export const basicInfoSchema = z.object({
   studentNumber: z.string().min(1, 'Nomor siswa harus diisi'),
   fullName: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
   nickname: z.string().optional(),
-  dateOfBirth: z.date({ required_error: 'Tanggal lahir harus diisi' }),
-  gender: z.enum(['male', 'female'], { required_error: 'Jenis kelamin harus dipilih' }),
+  dateOfBirth: z.date({ message: 'Tanggal lahir harus diisi' }),
+  gender: z.enum(['male', 'female'], { message: 'Jenis kelamin harus dipilih' }),
 });
 
 export const contactInfoSchema = z.object({
@@ -91,7 +91,7 @@ export const parentInfoSchema = z.object({
 });
 
 export const schoolInfoSchema = z.object({
-  enrollmentDate: z.date({ required_error: 'Tanggal pendaftaran harus diisi' }),
+  enrollmentDate: z.date({ message: 'Tanggal pendaftaran harus diisi' }),
   currentClass: z.string().optional(),
   previousSchool: z.string().optional(),
 });
@@ -348,8 +348,6 @@ export const convertFormDataToStudent = (formData: StudentFormData): Omit<Studen
     status: 'active',
     profilePicture: formData.profilePicture,
     notes: formData.notes,
-    academicRecords: [],
-    behaviorRecords: [],
   };
 };
 

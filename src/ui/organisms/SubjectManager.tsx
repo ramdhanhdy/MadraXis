@@ -57,7 +57,7 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
     }
 
     try {
-      const subjects = await SubjectService.getAvailableSubjects();
+      const subjects = await SubjectService.getSchoolSubjects(1); // TODO: Get actual school ID
       setAvailableSubjects(subjects);
     } catch (error: unknown) {
       const context = error instanceof Error ? {
@@ -84,12 +84,12 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
     }
 
     try {
-      await SubjectService.addSubjectToClass(classId, {
+      await SubjectService.createClassSubject(classId, {
         subject_name: newSubjectName,
         subject_code: newSubjectCode,
         grading_scale: newGradingScale,
         standards_alignment: newStandardsAlignment
-      });
+      }, 'current-teacher-id'); // TODO: Get actual teacher ID
 
       Alert.alert('Success', 'Mata pelajaran berhasil ditambahkan');
       setNewSubjectName('');
@@ -116,7 +116,7 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
         subject_code: newSubjectCode,
         grading_scale: newGradingScale,
         standards_alignment: newStandardsAlignment
-      });
+      }, 'current-teacher-id'); // TODO: Get actual teacher ID
 
       Alert.alert('Success', 'Mata pelajaran berhasil diperbarui');
       setEditingSubject(null);
@@ -132,21 +132,21 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
       'Hapus Mata Pelajaran',
       'Apakah Anda yakin ingin menghapus mata pelajaran ini?',
       [
-      { text: 'Batal', style: 'cancel' },
-      {
-        text: 'Hapus',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await SubjectService.removeSubjectFromClass(subjectId);
-            Alert.alert('Success', 'Mata pelajaran berhasil dihapus');
-            fetchSubjects();
-          } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Gagal menghapus mata pelajaran';
-            Alert.alert('Error', errorMessage);
+        { text: 'Batal', style: 'cancel' },
+        {
+          text: 'Hapus',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await SubjectService.deleteClassSubject(subjectId, 'current-teacher-id'); // TODO: Get actual teacher ID
+              Alert.alert('Success', 'Mata pelajaran berhasil dihapus');
+              fetchSubjects();
+            } catch (error: unknown) {
+              const errorMessage = error instanceof Error ? error.message : 'Gagal menghapus mata pelajaran';
+              Alert.alert('Error', errorMessage);
+            }
           }
-        }
-      }]
+        }]
 
     );
   };
@@ -166,27 +166,27 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
     setNewStandardsAlignment(subject.standards_alignment || '');
   };
 
-  const renderSubjectItem = ({ item }: {item: ClassSubject;}) =>
-  <View style={styles.subjectItem}>
+  const renderSubjectItem = ({ item }: { item: ClassSubject; }) =>
+    <View style={styles.subjectItem}>
       <View style={styles.subjectInfo}>
         <Text style={styles.subjectName}>{item.subject_name}</Text>
         <Text style={styles.subjectCode}>{item.subject_code || 'N/A'}</Text>
         <Text style={styles.subjectDetails}>{`Skala: ${item.grading_scale}`}</Text>
         {item.standards_alignment &&
-      <Text style={styles.subjectDetails}>{`Standar: ${item.standards_alignment}`}</Text>
-      }
+          <Text style={styles.subjectDetails}>{`Standar: ${item.standards_alignment}`}</Text>
+        }
       </View>
       <View style={styles.subjectActions}>
         <TouchableOpacity
-        style={styles.actionButton}
-        onPress={() => handleEditSubject(item)}>
-        
+          style={styles.actionButton}
+          onPress={() => handleEditSubject(item)}>
+
           <Ionicons name="create-outline" size={18} color="#005e7a" />
         </TouchableOpacity>
         <TouchableOpacity
-        style={[styles.actionButton, styles.deleteButton]}
-        onPress={() => handleDeleteSubject(item.id)}>
-        
+          style={[styles.actionButton, styles.deleteButton]}
+          onPress={() => handleDeleteSubject(item.id)}>
+
           <Ionicons name="trash-outline" size={18} color="#ff3b30" />
         </TouchableOpacity>
       </View>
@@ -194,7 +194,7 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
 
 
   const renderEmptyState = () =>
-  <View style={styles.emptyContainer}>
+    <View style={styles.emptyContainer}>
       <Ionicons name="book-outline" size={48} color="#666666" />
       <Text style={styles.emptyTitle}>Belum ada mata pelajaran</Text>
       <Text style={styles.emptyDescription}>
@@ -210,99 +210,99 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => setShowAddModal(true)}>
-          
+
           <Ionicons name="add" size={20} color="#ffffff" />
           <Text style={styles.addButtonText}>Tambah</Text>
         </TouchableOpacity>
       </View>
 
       {loading ?
-      <View style={styles.loadingContainer}>
+        <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#005e7a" />
         </View> :
 
-      <FlatList
-        data={subjects}
-        renderItem={renderSubjectItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={[
-        styles.listContainer,
-        subjects.length === 0 && styles.emptyListContainer]
-        }
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmptyState} />
+        <FlatList
+          data={subjects}
+          renderItem={renderSubjectItem}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={[
+            styles.listContainer,
+            subjects.length === 0 && styles.emptyListContainer]
+          }
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={renderEmptyState} />
 
       }
 
       {/* Add/Edit Subject Modal */}
       {(showAddModal || editingSubject) &&
-      <View style={styles.modalContainer}>
+        <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
               {editingSubject ? 'Edit Mata Pelajaran' : 'Tambah Mata Pelajaran'}
             </Text>
-            
+
             <TextInput
-            style={styles.input}
-            value={newSubjectName}
-            onChangeText={setNewSubjectName}
-            placeholder="Nama Mata Pelajaran" />
-          
-            
+              style={styles.input}
+              value={newSubjectName}
+              onChangeText={setNewSubjectName}
+              placeholder="Nama Mata Pelajaran" />
+
+
             <TextInput
-            style={styles.input}
-            value={newSubjectCode}
-            onChangeText={setNewSubjectCode}
-            placeholder="Kode Mata Pelajaran" />
-          
-            
+              style={styles.input}
+              value={newSubjectCode}
+              onChangeText={setNewSubjectCode}
+              placeholder="Kode Mata Pelajaran" />
+
+
             <View style={styles.pickerContainer}>
               <Text style={styles.pickerLabel}>Skala Penilaian:</Text>
               <TouchableOpacity
-              style={[styles.pickerOption, newGradingScale === 'percentage' && styles.pickerSelected]}
-              onPress={() => setNewGradingScale('percentage')}>
-              
+                style={[styles.pickerOption, newGradingScale === 'percentage' && styles.pickerSelected]}
+                onPress={() => setNewGradingScale('percentage')}>
+
                 <Text style={[styles.pickerText, newGradingScale === 'percentage' && styles.pickerTextSelected]}>Persentase</Text>
               </TouchableOpacity>
               <TouchableOpacity
-              style={[styles.pickerOption, newGradingScale === 'points' && styles.pickerSelected]}
-              onPress={() => setNewGradingScale('points')}>
-              
+                style={[styles.pickerOption, newGradingScale === 'points' && styles.pickerSelected]}
+                onPress={() => setNewGradingScale('points')}>
+
                 <Text style={[styles.pickerText, newGradingScale === 'points' && styles.pickerTextSelected]}>Poin</Text>
               </TouchableOpacity>
               <TouchableOpacity
-              style={[styles.pickerOption, newGradingScale === 'standards' && styles.pickerSelected]}
-              onPress={() => setNewGradingScale('standards')}>
-              
+                style={[styles.pickerOption, newGradingScale === 'standards' && styles.pickerSelected]}
+                onPress={() => setNewGradingScale('standards')}>
+
                 <Text style={[styles.pickerText, newGradingScale === 'standards' && styles.pickerTextSelected]}>Standar</Text>
               </TouchableOpacity>
             </View>
-            
+
             <TextInput
-            style={styles.input}
-            value={newStandardsAlignment}
-            onChangeText={setNewStandardsAlignment}
-            placeholder="Standar Penilaian (opsional)" />
-          
-            
+              style={styles.input}
+              value={newStandardsAlignment}
+              onChangeText={setNewStandardsAlignment}
+              placeholder="Standar Penilaian (opsional)" />
+
+
             <View style={styles.modalButtons}>
               <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => {
-                setShowAddModal(false);
-                setEditingSubject(null);
-                setNewSubjectName('');
-                setNewSubjectCode('');
-                setNewGradingScale('percentage');
-                setNewStandardsAlignment('');
-              }}>
-              
+                style={styles.cancelButton}
+                onPress={() => {
+                  setShowAddModal(false);
+                  setEditingSubject(null);
+                  setNewSubjectName('');
+                  setNewSubjectCode('');
+                  setNewGradingScale('percentage');
+                  setNewStandardsAlignment('');
+                }}>
+
                 <Text style={styles.cancelButtonText}>Batal</Text>
               </TouchableOpacity>
               <TouchableOpacity
-              style={styles.saveButton}
-              onPress={editingSubject ? handleUpdateSubject : handleAddSubject}>
-              
+                style={styles.saveButton}
+                onPress={editingSubject ? handleUpdateSubject : handleAddSubject}>
+
                 <Text style={styles.saveButtonText}>{editingSubject ? 'Update' : 'Simpan'}</Text>
               </TouchableOpacity>
             </View>
@@ -312,24 +312,24 @@ export default function SubjectManager({ classId, onSubjectCountChange }: Subjec
 
       {/* Available Subjects */}
       {!showAddModal && !editingSubject && availableSubjects.length > 0 &&
-      <View style={styles.availableContainer}>
+        <View style={styles.availableContainer}>
           <Text style={styles.availableTitle}>Mata Pelajaran Tersedia</Text>
           <FlatList
-          data={availableSubjects}
-          renderItem={({ item }) =>
-          <TouchableOpacity
-            style={styles.availableItem}
-            onPress={() => handleAddFromAvailable(item)}>
-            
+            data={availableSubjects}
+            renderItem={({ item }) =>
+              <TouchableOpacity
+                style={styles.availableItem}
+                onPress={() => handleAddFromAvailable(item)}>
+
                 <Text style={styles.availableName}>{item.subject_name}</Text>
                 <Text style={styles.availableCode}>{item.subject_code || 'N/A'}</Text>
               </TouchableOpacity>
-          }
-          keyExtractor={(item) => item.id.toString()}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.availableList} />
-        
+            }
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.availableList} />
+
         </View>
       }
     </View>);

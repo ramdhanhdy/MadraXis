@@ -116,12 +116,14 @@ export default function BoardingInfoScreen() {
                 )}
               </View>
               <Button
-                title="Hubungi"
                 variant="secondary"
                 size="small"
                 onPress={handleCallSupervisor}
-                leftIcon="call-outline"
-              />
+                icon="call-outline"
+                iconPosition="left"
+              >
+                Hubungi
+              </Button>
             </View>
           </Card>
 
@@ -177,7 +179,7 @@ export default function BoardingInfoScreen() {
           </Card>
 
           {/* Emergency Contacts */}
-          <Card variant="elevated" style={[styles.card, styles.lastCard]}>
+          <Card variant="elevated" style={[styles.card, styles.lastCard] as any}>
             <Typography variant="h4" weight="semibold" style={styles.cardTitle}>
               Kontak Darurat
             </Typography>
@@ -189,11 +191,12 @@ export default function BoardingInfoScreen() {
                 leftIcon="call-outline"
                 rightComponent={
                   <Button
-                    title="Hubungi"
                     variant="secondary"
                     size="small"
                     onPress={() => handleCallEmergency(contact.phone)}
-                  />
+                  >
+                    Hubungi
+                  </Button>
                 }
                 showDivider={index < emergencyContacts.length - 1}
               />

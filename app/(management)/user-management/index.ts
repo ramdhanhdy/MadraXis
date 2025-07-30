@@ -14,17 +14,11 @@ export type {
   Teacher,
   UserManagementState,
   UserFormData,
-  StudentDetails,
-  TeacherDetails,
   UserStats,
-  StudentDetailsSchema,
-  TeacherDetailsSchema,
   UserFormSchema,
 } from './model';
 
 export {
-  studentDetailsSchema,
-  teacherDetailsSchema,
   userFormSchema,
   USER_TABS,
   USER_ROLES,

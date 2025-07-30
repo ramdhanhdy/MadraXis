@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Class } from '../../types/class';
+import { Class } from '../../types';
 
 // Validation schemas
 export const CreateClassSchema = z.object({

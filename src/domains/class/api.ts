@@ -32,7 +32,7 @@ export class ClassRepository {
   static async create(classData: CreateClassRequest, teacherId: string): Promise<ClassWithDetails> {
     // Validate input data
     const validatedData = CreateClassSchema.parse(classData);
-    
+
     // Security validation: Verify teacher belongs to the same school as the class being created
     const { data: teacherProfile, error: teacherError } = await supabase
       .from('profiles')
@@ -52,7 +52,7 @@ export class ClassRepository {
       throw ClassServiceError.create(
         'AUTHORIZATION_FAILED',
         'You can only create classes for your own school',
-        { 
+        {
           teacherId,
           additionalContext: {
             teacherSchoolId: teacherProfile.school_id,
@@ -61,20 +61,20 @@ export class ClassRepository {
         }
       );
     }
-    
+
     const insertData = {
       ...validatedData,
       created_by: teacherId,
       updated_by: teacherId,
       status: 'active',
     };
-    
+
     logger.debug('Attempting to create class', {
       operation: 'class_create',
       userId: teacherId,
       schoolId: validatedData.school_id
     });
-    
+
     const { data: newClass, error: insertError } = await supabase
       .from('classes')
       .insert(insertData)
@@ -88,7 +88,7 @@ export class ClassRepository {
         operation: 'class_create',
         userId: teacherId
       });
-      
+
       if (insertError.code === '23505') {
         throw ClassServiceError.create(
           'DUPLICATE_CLASS_NAME',
@@ -96,7 +96,7 @@ export class ClassRepository {
           { originalError: insertError, classData: validatedData }
         );
       }
-      
+
       throw ClassServiceError.create(
         'DATABASE_ERROR',
         'Failed to create class',
@@ -122,10 +122,10 @@ export class ClassRepository {
         teacherId,
         operation: 'class_create'
       });
-      
+
       // Clean up the created class if teacher assignment fails
       await supabase.from('classes').delete().eq('id', newClass.id);
-      
+
       throw ClassServiceError.create(
         'TEACHER_ASSIGNMENT_FAILED',
         'Failed to assign teacher to the newly created class',
@@ -204,7 +204,7 @@ export class ClassRepository {
         class_subjects!left(id)
       `)
       .eq('class_teachers.user_id', teacherId);
-        
+
     // Apply filters
     if (options?.status) {
       queryBuilder = queryBuilder.eq('status', options.status);
@@ -267,7 +267,7 @@ export class ClassRepository {
   ): Promise<ClassWithDetails> {
     // Validate input data
     const validatedData = UpdateClassSchema.parse(updateData);
-    
+
     const { data: updatedClass, error } = await supabase
       .from('classes')
       .update({
@@ -287,7 +287,7 @@ export class ClassRepository {
           { originalError: error, classId, updateData: validatedData }
         );
       }
-      
+
       throw ClassServiceError.create(
         'DATABASE_ERROR',
         'Failed to update class',
@@ -1131,7 +1131,7 @@ export class ClassService {
       await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'view_students');
 
       // Use retry logic for the actual data retrieval
-      const retryResult = await withRetry(
+      const retryFn = withRetry(
         () => ClassEnrollmentService.getAvailableStudents(classId, teacherId, options),
         {
           maxAttempts: 3,
@@ -1141,7 +1141,7 @@ export class ClassService {
         }
       );
 
-      return retryResult.result;
+      return await retryFn();
     } catch (error) {
       if (error instanceof ClassServiceError) {
         // Map ACCESS_DENIED to UNAUTHORIZED_ACCESS for consistency with tests
@@ -1243,7 +1243,7 @@ export class ClassService {
       await ClassAccessControl.validateTeacherAccess(classId, teacherId, 'enroll_students');
 
       // Use retry logic for the actual enrollment operation
-      const retryResult = await withRetry(
+      const retryFn = withRetry(
         () => ClassEnrollmentService.bulkEnrollStudents(classId, enrollmentData, teacherId),
         {
           maxAttempts: 3,
@@ -1253,7 +1253,7 @@ export class ClassService {
         }
       );
 
-      return retryResult.result;
+      return await retryFn();
     } catch (error) {
       if (error instanceof ClassServiceError) {
         // Map ACCESS_DENIED to UNAUTHORIZED_ACCESS for consistency with tests

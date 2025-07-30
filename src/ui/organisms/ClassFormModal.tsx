@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ClassService, ClassWithDetails } from '@domains/class';
-import { CreateClassData, UpdateClassData } from '@/src/types/class';
+import { CreateClassData, UpdateClassData } from '@types';
 import { useAuth } from '@lib/hooks/useAuth';
 
 interface ClassFormModalProps {

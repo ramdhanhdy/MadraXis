@@ -13,18 +13,10 @@ import { useSafeToQuery } from '@lib/utils/navigationGuard';
 import { useTheme } from '../../../context/ThemeContext';
 import { StudentSelectionList, StudentFilters } from '../../molecules/StudentSelectionList/StudentSelectionList';
 import { BreadcrumbNavigation } from '../../molecules/BreadcrumbNavigation';
-import { StudentWithDetails } from '../../../types';
+import { StudentWithDetails as GlobalStudentWithDetails } from '../../../types';
+import { StudentWithDetails as ClassStudentWithDetails } from '@domains/class/types';
 import { Button } from '../../atoms/Button';
 import { Typography } from '../../atoms/Typography';
-
-// Available student type from ClassService
-interface AvailableStudent {
-  student_id: string;
-  full_name: string;
-  nis?: string;
-  gender?: 'male' | 'female';
-  boarding?: 'day' | 'boarding';
-}
 
 // Component Props Interface
 export interface AddStudentsToClassModalProps {
@@ -34,28 +26,19 @@ export interface AddStudentsToClassModalProps {
   onStudentsAdded?: () => void;
 }
 
-// Data adapter to convert AvailableStudent to StudentWithDetails
-const adaptAvailableStudentToStudentWithDetails = (student: AvailableStudent, school_id: number): StudentWithDetails => {
-  // Handle boarding type conversion more robustly
-  let boarding: boolean | undefined;
-  if (student.boarding === 'boarding') {
-    boarding = true;
-  } else if (student.boarding === 'day') {
-    boarding = false;
-  } else {
-    boarding = undefined;
-  }
-
+// Adapter to convert class domain student to global UI format
+const adaptClassStudentToGlobalFormat = (classStudent: ClassStudentWithDetails, classData: any): GlobalStudentWithDetails => {
   return {
-    id: student.student_id,
-    full_name: student.full_name,
+    id: classStudent.id,
+    full_name: classStudent.full_name,
     role: 'student' as const,
-    school_id, // Use the actual school_id from class data
+    school_id: classData.school_id,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    nis: student.nis,
-    gender: student.gender === 'male' ? 'M' : student.gender === 'female' ? 'F' : undefined,
-    boarding
+    nis: classStudent.nis,
+    date_of_birth: classStudent.date_of_birth,
+    gender: classStudent.gender === 'male' ? 'M' : classStudent.gender === 'female' ? 'F' : undefined,
+    boarding: classStudent.boarding === 'boarding' ? true : classStudent.boarding === 'day' ? false : undefined
   };
 };
 
@@ -124,7 +107,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [students, setStudents] = useState<StudentWithDetails[]>([]);
+  const [students, setStudents] = useState<GlobalStudentWithDetails[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<StudentFilters>({
     search: '',
@@ -187,9 +170,9 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
         }
       );
 
-      // Adapt the data to StudentWithDetails format with actual school_id
-      const adaptedStudents = result.students.map((student) =>
-      adaptAvailableStudentToStudentWithDetails(student, classData.school_id)
+      // Adapt class domain students to global UI format
+      const adaptedStudents = result.students.map((classStudent) =>
+        adaptClassStudentToGlobalFormat(classStudent, classData)
       );
       setStudents(adaptedStudents);
       setPagination((prev) => ({
@@ -329,8 +312,8 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
     }
   }, [classId, selectedStudents, user?.id, onStudentsAdded, onClose]);
 
-  // Memoize the adapted students to prevent unnecessary re-renders
-  const adaptedStudents = useMemo(() => students, [students]);
+  // Memoize the students to prevent unnecessary re-renders
+  const memoizedStudents = useMemo(() => students, [students]);
 
   return (
     <Modal
@@ -385,7 +368,7 @@ export const AddStudentsToClassModal: React.FC<AddStudentsToClassModalProps> = (
         {/* Student Selection List */}
         <View style={styles.studentsContainer}>
           <StudentSelectionList
-            students={adaptedStudents}
+            students={memoizedStudents}
             selectedStudentIds={selectedStudents}
             onStudentSelect={handleStudentSelect}
             onStudentDeselect={handleStudentDeselect}

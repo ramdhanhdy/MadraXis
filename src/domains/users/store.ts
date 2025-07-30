@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Student, Teacher, Profile, UserWithDetails, UserCounts } from './types';
+import { Student, Teacher, UserWithDetails, UserCounts } from './types';
 
 interface UserState {
   // Current selected user
@@ -66,7 +66,7 @@ interface UserState {
   resetFilters: () => void;
 }
 
-export const useUserStore = create<UserState>((set, get) => ({
+export const useUserStore = create<UserState>((set) => ({
   // Current selected user
   selectedUser: null,
   setSelectedUser: (user) => set({ selectedUser: user }),
@@ -190,10 +190,17 @@ export const useUserSelectors = () => {
     filteredStudents: store.students.filter(student => {
       const matchesSearch = !store.searchTerm || 
         student.full_name.toLowerCase().includes(store.searchTerm.toLowerCase());
+      
+      // Handle gender filter - convert between formats
       const matchesGender = store.genderFilter === 'all' || 
-        student.details?.gender === store.genderFilter;
+        (store.genderFilter === 'male' && student.details?.gender === 'M') ||
+        (store.genderFilter === 'female' && student.details?.gender === 'F');
+      
+      // Handle boarding filter - convert between formats
       const matchesBoarding = store.boardingFilter === 'all' || 
-        student.details?.boarding === store.boardingFilter;
+        (store.boardingFilter === 'boarding' && student.details?.boarding === true) ||
+        (store.boardingFilter === 'day' && student.details?.boarding === false);
+      
       return matchesSearch && matchesGender && matchesBoarding;
     }),
 

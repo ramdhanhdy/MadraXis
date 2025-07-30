@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderWithProviders, screen, fireEvent } from '@lib/tests';
-import { Dashboard } from '@app/(student)/dashboard/screen';
+import StudentDashboard from '@app/(student)/dashboard/screen';
 
 describe('Student Dashboard Screen', () => {
   it('should display the student dashboard with all components', async () => {

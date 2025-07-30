@@ -9,8 +9,8 @@ import {
   NavigationHistoryContext,
   NavigationHistoryContextType,
   NavigationHistoryItem,
-  NavigationHistoryState
 } from './context';
+import { useNavigationHistory } from './hooks';
 
 // Navigation History Provider Props
 interface NavigationHistoryProviderProps {
@@ -48,17 +48,17 @@ export const NavigationHistoryProvider: React.FC<NavigationHistoryProviderProps>
     setHistory(prevHistory => {
       // Remove any forward history if we're not at the end
       const newHistory = prevHistory.slice(0, currentIndex + 1);
-      
+
       // Add new item
       newHistory.push(newItem);
-      
+
       // Limit history size and track if items were removed
       let itemsRemoved = 0;
       if (newHistory.length > maxHistorySize) {
         itemsRemoved = newHistory.length - maxHistorySize;
         newHistory.splice(0, itemsRemoved);
       }
-      
+
       return newHistory;
     });
 
@@ -146,7 +146,7 @@ export const NavigationHistoryProvider: React.FC<NavigationHistoryProviderProps>
  */
 export const useRouteTracking = (route: string, label?: string) => {
   const { addToHistory } = useNavigationHistory();
-  
+
   useEffect(() => {
     addToHistory(route, {}, label);
   }, [route, label, addToHistory]);

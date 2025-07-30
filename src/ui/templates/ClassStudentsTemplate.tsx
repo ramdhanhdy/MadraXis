@@ -21,7 +21,7 @@ import { useAuth } from '@lib/hooks/useAuth';
 import { useSafeToQuery } from '@lib/utils/navigationGuard';
 import { useClassStudentsSubscription } from '@lib/hooks/useClassStudentsSubscription';
 import { EmptyState } from '../molecules/EmptyState/EmptyState';
-import { Student } from '../../types/student';
+import { Student } from '@types';
 
 // Types for class data
 interface ClassData {
@@ -166,10 +166,11 @@ export default function ClassStudentsTemplate() {
   const sanitizedQuery = searchQuery.trim().slice(0, 100).toLowerCase();
 
   // Filter students based on search query
-  const filteredStudents = students.filter((student) =>
-  student.full_name.toLowerCase().includes(sanitizedQuery) ||
-  student.student_details?.nis && student.student_details.nis.toLowerCase().includes(sanitizedQuery)
-  );
+  const filteredStudents = students.filter((student) => {
+    const studentData = student as any; // Type assertion to access nested properties
+    return student.full_name.toLowerCase().includes(sanitizedQuery) ||
+    (studentData.student_details?.nis && studentData.student_details.nis.toLowerCase().includes(sanitizedQuery));
+  });
 
   // Format student for display
   const formatStudentForDisplay = (student: any) => ({
@@ -178,7 +179,7 @@ export default function ClassStudentsTemplate() {
     nis: student.student_details?.nis,
     gender: undefined, // Not available in the Student type
     boarding: student.student_details?.boarding,
-    role: 'student',
+    role: 'student' as const,
     school_id: student.school_id,
     created_at: student.created_at,
     updated_at: student.updated_at

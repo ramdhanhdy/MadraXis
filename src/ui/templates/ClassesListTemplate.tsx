@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@lib/hooks/useAuth';
 import { useSafeToQuery } from '@lib/utils/navigationGuard';
 import { ClassService, ClassWithDetails } from '@domains/class';
-import { Class } from '@/src/types/class';
+import { Class } from '@types';
 import ClassFormModal from '@ui/organisms/ClassFormModal';
 import { useStudentCountSubscription } from '@lib/hooks/useStudentCountSubscription';
 import { useClassStudentBreakdown } from '@lib/hooks/useClassStudentBreakdown';
@@ -29,7 +29,7 @@ export default function ClassesList() {
   const [selectedClasses, setSelectedClasses] = useState<number[]>([]);
   const [bulkSelectionMode, setBulkSelectionMode] = useState(false);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'archived'>('all');
-  const [sortBy, setSortBy] = useState<'name' | 'level' | 'student_count' | 'created_at'>('name');
+  const [sortBy, setSortBy] = useState<'name' | 'created_at' | 'updated_at'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showFilterModal, setShowFilterModal] = useState(false);
 
@@ -85,7 +85,7 @@ export default function ClassesList() {
         sortBy,
         sortOrder,
         limit: 50,
-        offset: 0
+        page: 1
       });
 
       logger.debug('Classes received:', {
@@ -577,9 +577,8 @@ export default function ClassesList() {
               <View style={styles.filterOptions}>
                 {[
                   { key: 'name', label: 'Name' },
-                  { key: 'level', label: 'Level' },
-                  { key: 'student_count', label: 'Student Count' },
-                  { key: 'created_at', label: 'Created Date' }].
+                  { key: 'created_at', label: 'Created Date' },
+                  { key: 'updated_at', label: 'Updated Date' }].
                   map((option) =>
                   <TouchableOpacity
                     key={option.key}
@@ -587,7 +586,7 @@ export default function ClassesList() {
                     styles.filterOption,
                     sortBy === option.key && styles.selectedFilterOption]
                     }
-                    onPress={() => setSortBy(option.key as 'name' | 'level' | 'student_count' | 'created_at')}>
+                    onPress={() => setSortBy(option.key as 'name' | 'created_at' | 'updated_at')}>
                     
                     <Text style={[
                     styles.filterOptionText,

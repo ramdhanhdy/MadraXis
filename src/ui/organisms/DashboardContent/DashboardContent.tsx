@@ -10,7 +10,7 @@ import { Typography } from '../../atoms/Typography';
 import { Card } from '../../molecules/Card';
 import { QuickAction } from '../../molecules/QuickAction';
 import { ProgressBar } from '../../molecules/ProgressBar';
-import type { QuickActionConfig, ProgressConfig } from '../../../types/dashboard';
+import type { QuickActionConfig, ProgressConfig } from '@types';
 
 // DashboardContent Props Interface
 export interface DashboardContentProps {

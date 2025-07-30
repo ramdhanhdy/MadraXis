@@ -38,6 +38,7 @@ export interface StudentDetails {
   date_of_birth?: string;
   gender?: 'M' | 'F';
   boarding?: boolean;
+  class_name?: string;  // Added missing property
   created_at: string;
   updated_at: string;
 }
@@ -45,8 +46,10 @@ export interface StudentDetails {
 export interface TeacherDetails {
   user_id: string;  // FK to profiles.id
   employee_id?: string;
+  nip?: string;     // Added missing property
   hire_date?: string;
   specialty?: string;
+  subjects?: string[];  // Added missing property
   created_at: string;
   updated_at: string;
 }
@@ -99,6 +102,7 @@ export interface Student extends Profile {
   parent_name?: string;
   parent_phone?: string;
   address?: string;
+  email?: string;  // Added email property
   // For backward compatibility with existing Quran progress tracking
   quran_progress?: {
     memorized_verses: number;
@@ -110,6 +114,7 @@ export interface Teacher extends Profile {
   role: 'teacher';
   details?: TeacherDetails;
   performance?: TeacherPerformance[];
+  email?: string;  // Added email property
 }
 
 export interface Parent extends Profile {

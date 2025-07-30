@@ -12,12 +12,12 @@ import type { Student as BaseStudent, Teacher as BaseTeacher } from '@types';
 export interface UserManagementState {
   isLoading: boolean;
   error: string | null;
-  students: Student[];
-  teachers: Teacher[];
+  students: BaseStudent[];
+  teachers: BaseTeacher[];
   activeTab: 'students' | 'teachers';
   searchTerm: string;
   showAddModal: boolean;
-  selectedUser: Student | Teacher | null;
+  selectedUser: BaseStudent | BaseTeacher | null;
   refreshing: boolean;
 }
 
@@ -26,38 +26,12 @@ export interface UserFormData {
   email?: string;
   phone?: string;
   role: 'student' | 'teacher';
-  details?: StudentDetails | TeacherDetails;
+  details?: any; // Use any for now since we're using global types
 }
 
-export interface StudentDetails {
-  nis?: string;
-  gender?: 'M' | 'F';
-  class_name?: string;
-  date_of_birth?: string;
-  address?: string;
-  parent_name?: string;
-  parent_phone?: string;
-}
-
-// Local Student interface that uses the local StudentDetails and adds email
-export interface Student extends Omit<BaseStudent, 'details'> {
-  details?: StudentDetails;
-  email?: string;
-}
-
-// Local Teacher interface that uses the local TeacherDetails and adds email
-export interface Teacher extends Omit<BaseTeacher, 'details'> {
-  details?: TeacherDetails;
-  email?: string;
-}
-
-export interface TeacherDetails {
-  nip?: string;
-  subjects?: string[];
-  qualification?: string;
-  experience_years?: number;
-  specialization?: string;
-}
+// Use the global types directly
+export type Student = BaseStudent;
+export type Teacher = BaseTeacher;
 
 export interface UserStats {
   totalStudents: number;
@@ -69,34 +43,14 @@ export interface UserStats {
 }
 
 // Validation schemas
-export const studentDetailsSchema = z.object({
-  nis: z.string().min(1, 'NIS is required').optional(),
-  gender: z.enum(['M', 'F']).optional(),
-  class_name: z.string().min(1, 'Class name is required').optional(),
-  date_of_birth: z.string().optional(),
-  address: z.string().optional(),
-  parent_name: z.string().optional(),
-  parent_phone: z.string().optional(),
-});
-
-export const teacherDetailsSchema = z.object({
-  nip: z.string().min(1, 'NIP is required').optional(),
-  subjects: z.array(z.string()).optional(),
-  qualification: z.string().optional(),
-  experience_years: z.number().min(0).optional(),
-  specialization: z.string().optional(),
-});
-
 export const userFormSchema = z.object({
   full_name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email format').optional(),
   phone: z.string().min(10, 'Phone number must be at least 10 digits').optional(),
   role: z.enum(['student', 'teacher']),
-  details: z.union([studentDetailsSchema, teacherDetailsSchema]).optional(),
+  details: z.any().optional(), // Simplified for now
 });
 
-export type StudentDetailsSchema = z.infer<typeof studentDetailsSchema>;
-export type TeacherDetailsSchema = z.infer<typeof teacherDetailsSchema>;
 export type UserFormSchema = z.infer<typeof userFormSchema>;
 
 // Constants
@@ -281,7 +235,7 @@ export const getUniqueClasses = (students: Student[]): string[] => {
     .map(student => student.details?.class_name)
     .filter(Boolean) as string[];
   
-  return [...new Set(classes)].sort();
+  return Array.from(new Set(classes)).sort();
 };
 
 export const getUniqueSubjects = (teachers: Teacher[]): string[] => {
@@ -289,7 +243,7 @@ export const getUniqueSubjects = (teachers: Teacher[]): string[] => {
     .flatMap(teacher => teacher.details?.subjects || [])
     .filter(Boolean);
   
-  return [...new Set(subjects)].sort();
+  return Array.from(new Set(subjects)).sort();
 };
 
 // Initial state
