@@ -7,8 +7,8 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 ### Summary
 
 **Total Story Points: 490 SP**
-**Completed: 400 SP (81.6%)**
-**Remaining: 90 SP (18.4%)**
+**Completed: 410 SP (83.7%)**
+**Remaining: 80 SP (16.3%)**
 
 **✅ COMPLETED PHASES:**
 - Phase 1: Project Setup & Configuration (35 SP)
@@ -33,7 +33,7 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 | 6 ✅ | Enhanced Design System (src/design-system) Refactoring | 45 SP |
 | 7 ✅ | Shared Utilities & Helpers (src/lib) Refactoring | 30 SP |
 | 8 ✅ | Global State & Context (src/context) Refactoring | 20 SP |
-| 9 | Global Type Declarations (src/types) Refactoring | 10 SP |
+| 9 ✅ | Global Type Declarations (src/types) Refactoring | 10 SP |
 | 10 | Testing Infrastructure | 20 SP |
 | 11 | Migration Validation & Checkpoints | 25 SP |
 | 12 | Cleanup & Final Verification | 20 SP |
@@ -403,7 +403,7 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 ### 7. Shared Utilities & Helpers (src/lib) Refactoring (30 SP) ✅ COMPLETED
 
 * [x] **7.1 Hooks (10 SP)** ✅ COMPLETED
-  * [x] 7.1.1 Migrate `useAuth.ts` to `src/lib/hooks/useAuth.ts`. (3 SP)
+  * [x] 7.1.1 **DEPRECATED**: `useAuth` is now part of `AuthContext` (Phase 8). Any remaining file is a legacy re-export. (0 SP)
   * [x] 7.1.2 Migrate `useClassStudentBreakdown.ts` to `src/lib/hooks/useClassStudentBreakdown.ts`. (3 SP)
   * [x] 7.1.3 Migrate `useClassStudentsSubscription.ts` to `src/lib/hooks/useClassStudentsSubscription.ts`. (3 SP)
   * [x] 7.1.4 Migrate `useNavigationGuards.ts` to `src/lib/hooks/useNavigationGuards.ts`. (3 SP)
@@ -434,7 +434,7 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 ### 8. Global State & Context (src/context) Refactoring (20 SP) ✅ COMPLETED
 
 * [x] **8.1 Auth Context (5 SP)**
-  * [x] 8.1.1 Migrate `AuthContext.tsx` to `src/context/AuthContext/AuthProvider.tsx`. (5 SP)
+  * [x] 8.1.1 Create `src/context/AuthContext/AuthProvider.tsx` to replace the old Zustand store. (5 SP)
     * [x] 8.1.1.1 Create `src/context/AuthContext/useAuth.ts`. (3 SP)
     * [x] 8.1.1.2 Create `src/context/AuthContext/AuthContext.test.tsx`. (3 SP)
     * [x] 8.1.1.3 Create `src/context/AuthContext/index.ts`. (1 SP)
@@ -592,10 +592,10 @@ Add these scripts to package.json for easier usage:
 * [x] Phase 4: Domain Migration (120 SP) ✅ COMPLETED
 * [x] Phase 5: Feature Slice Migration (60 SP) ✅ PARTIAL
 * [x] Phase 6: Enhanced Design System (45 SP) ✅ COMPLETED
-* [x] Phase 7: Library Migration (30 SP) 🚀 CURRENT
-* [x] Phase 7: Context Migration (15 SP)
-* [x] Phase 8: Types Migration (10 SP)
-* [x] Phase 9: Testing Infrastructure (20 SP)
+* [x] Phase 7: Library Migration (30 SP) ✅ COMPLETED
+* [x] Phase 8: Context Migration (20 SP) ✅ COMPLETED
+* [x] Phase 9: Types Migration (10 SP) ✅ COMPLETED
+* [ ] Phase 10: Testing Infrastructure (20 SP) 🚀 CURRENT
 * [] Phase 10: Migration Validation (25 SP)
 * [ ] Phase 11: Cleanup & Final Verification (20 SP)
 * [ ] Phase 12: Rollback Procedures (15 SP)

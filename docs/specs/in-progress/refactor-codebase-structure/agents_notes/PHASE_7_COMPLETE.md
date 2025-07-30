@@ -12,20 +12,21 @@ Successfully completed the migration of shared utilities and helpers to the new 
 ## ✅ Completed Tasks
 
 ### 🔧 **7.1 Hooks Migration (10 SP) - COMPLETE**
-- ✅ **All 6 existing hooks migrated** from `src/hooks/` to `src/lib/hooks/`
+- ✅ **All relevant shared hooks migrated** from `src/hooks/` to `src/lib/hooks/`
 - ✅ **2 new utility hooks created** (`usePrevious`, `useDebounce`)
 - ✅ **Barrel exports configured** at `src/lib/hooks/index.ts`
 - ✅ **Backward compatibility maintained** via dual import system
 
 **Migrated Hooks:**
-1. `useAuth.ts` → `src/lib/hooks/useAuth.ts`
-2. `useClassStudentBreakdown.ts` → `src/lib/hooks/useClassStudentBreakdown.ts`
-3. `useClassStudentsSubscription.ts` → `src/lib/hooks/useClassStudentsSubscription.ts`
-4. `useNavigationGuards.ts` → `src/lib/hooks/useNavigationGuards.ts`
-5. `useNavigationHistory.ts` → `src/lib/hooks/useNavigationHistory.ts`
-6. `useStudentCountSubscription.ts` → `src/lib/hooks/useStudentCountSubscription.ts`
-7. **NEW**: `usePrevious.ts` - React previous value hook
-8. **NEW**: `useDebounce.ts` - Debouncing utility hook
+1. `useClassStudentBreakdown.ts` → `src/lib/hooks/useClassStudentBreakdown.ts`
+2. `useClassStudentsSubscription.ts` → `src/lib/hooks/useClassStudentsSubscription.ts`
+3. `useNavigationGuards.ts` → `src/lib/hooks/useNavigationGuards.ts`
+4. `useNavigationHistory.ts` → `src/lib/hooks/useNavigationHistory.ts`
+5. `useStudentCountSubscription.ts` → `src/lib/hooks/useStudentCountSubscription.ts`
+6. **NEW**: `usePrevious.ts` - React previous value hook
+7. **NEW**: `useDebounce.ts` - Debouncing utility hook
+
+**Note**: `useAuth` is now part of the `AuthContext` migration (Phase 8) and is correctly imported from `@context/AuthContext`.
 
 ### 🛠️ **7.2 Utils Migration (10 SP) - COMPLETE**
 - ✅ **All 12 utility functions migrated** from `src/utils/` to `src/lib/utils/`
