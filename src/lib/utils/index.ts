@@ -1,3 +1,17 @@
+// Utility functions barrel export
+export * from './backgroundPattern';
+export * from './date';
+export * from './idConversion';
+export * from './linking';
+export * from './logger';
+export * from './navigationGuard';
+export * from './responsive';
+export * from './retry';
+export * from './sanitization';
+export * from './supabase';
+export * from './svgPatterns';
+export * from './typeHelpers';
+
 /**
  * Shared Utilities - Helper functions and utilities
  * 

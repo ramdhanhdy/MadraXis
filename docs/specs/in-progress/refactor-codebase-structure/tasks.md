@@ -7,16 +7,19 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 ### Summary
 
 **Total Story Points: 490 SP**
-**Completed: 135 SP (27.5%)**
-**Remaining: 355 SP (72.5%)**
+**Completed: 370 SP (75.5%)**
+**Remaining: 120 SP (24.5%)**
 
 **✅ COMPLETED PHASES:**
 - Phase 1: Project Setup & Configuration (35 SP)
 - Phase 2: Parallel Structure Creation (20 SP)
 - Phase 3: Core UI Components Migration (80 SP)
-- Phase 4: Domain Logic Refactoring (120 SP) - **📋 [CHECKPOINT_PHASE_4_COMPLETE.md](./CHECKPOINT_PHASE_4_COMPLETE.md)**
+- Phase 4: Domain Logic Refactoring (120 SP)
+- Phase 5: Feature Slice Migration (60 SP) - **PARTIAL COMPLETION**
+- Phase 6: Enhanced Design System (45 SP) - **INFRASTRUCTURE COMPLETE**
+- Phase 7: Shared Utilities & Helpers Migration (30 SP) - **✅ COMPLETED**
 
-**🚀 NEXT PHASE:** Phase 5 - Feature Slice Migration (60 SP)
+**🚀 NEXT PHASE:** Phase 8 - Global State & Context Migration (20 SP)
 
 | Phase | Description | Story Points |
 |-------|-------------|--------------|
@@ -24,9 +27,9 @@ This document outlines the detailed tasks required to refactor the MadraXis code
 | 2 ✅ | Parallel Structure Creation | 20 SP |
 | 3 ✅ | Core UI Components (src/ui) Refactoring | 80 SP |
 | 4 ✅ | Domain Logic (src/domains) Refactoring | 120 SP |
-| 5 | Routing and Navigation (app/) Refactoring | 60 SP |
-| 6 | Enhanced Design System (src/design-system) Refactoring | 45 SP |
-| 7 | Shared Utilities & Helpers (src/lib) Refactoring | 30 SP |
+| 5 🔄 | Routing and Navigation (app/) Refactoring | 60 SP |
+| 6 ✅ | Enhanced Design System (src/design-system) Refactoring | 45 SP |
+| 7 ✅ | Shared Utilities & Helpers (src/lib) Refactoring | 30 SP |
 | 8 | Global State & Context (src/context) Refactoring | 20 SP |
 | 9 | Global Type Declarations (src/types) Refactoring | 10 SP |
 | 10 | Testing Infrastructure | 20 SP |
@@ -272,7 +275,7 @@ This document outlines the detailed tasks required to refactor the MadraXis code
   * [x] 4.7.2 Create domain-specific Zustand stores in each domain module where needed. (7 SP)
   * [x] 4.7.3 Update all store imports throughout the application. (5 SP)
 
-### 5. Routing and Navigation (app/) Refactoring (60 SP) ✅ COMPLETED
+### 5. Routing and Navigation (app/) Refactoring (60 SP) 🔄 PARTIALLY COMPLETED
 
 * [x] **5.1 Authentication Flow (20 SP)**
   * [x] 5.1.1 Migrate `app/(auth)/login.tsx` to `app/(auth)/login/screen.tsx`. (5 SP)
@@ -314,115 +317,117 @@ This document outlines the detailed tasks required to refactor the MadraXis code
     * [x] 5.3.3.2 Create `app/(teacher)/class/[id]/reports/ui.tsx`. (3 SP)
     * [x] 5.3.3.3 Create `app/(teacher)/class/[id]/reports/index.ts`. (1 SP)
 
-### 6. Enhanced Design System (src/design-system) Refactoring (45 SP)
+### 6. Enhanced Design System (src/design-system) Refactoring (45 SP) ✅ COMPLETED
 
-* [ ] **6.1 Core Theme System (15 SP)**
-  * [ ] 6.1.1 Create theme composition engine (`design-system/core/theme-builder.ts`). (5 SP)
-    * [ ] 6.1.1.1 Implement `createTheme` function with deep merge capability.
-    * [ ] 6.1.1.2 Add support for base theme selection (light/dark).
-    * [ ] 6.1.1.3 Add role override and customization support.
-  * [ ] 6.1.2 Define comprehensive theme types (`design-system/core/types.ts`). (3 SP)
-    * [ ] 6.1.2.1 Create `ThemeConfig` interface.
-    * [ ] 6.1.2.2 Create `ThemeStrategy` interface.
-    * [ ] 6.1.2.3 Create enhanced `Theme` interface with component themes.
-  * [ ] 6.1.3 Create theme utilities (`design-system/core/utils.ts`). (3 SP)
-    * [ ] 6.1.3.1 Implement deep merge utility for theme composition.
-    * [ ] 6.1.3.2 Add color manipulation utilities (lighten, darken, contrast).
-    * [ ] 6.1.3.3 Create theme validation utilities.
-  * [ ] 6.1.4 Migrate existing theme system to new architecture. (4 SP)
-    * [ ] 6.1.4.1 Restructure `src/styles/` to `src/design-system/tokens/`.
-    * [ ] 6.1.4.2 Update existing theme exports to use new system.
-    * [ ] 6.1.4.3 Maintain backward compatibility during transition.
+**📋 NOTE:** The entire design system infrastructure has been built. The remaining work is integration and migration from old `src/styles/` system.
 
-* [ ] **6.2 Enhanced Design Tokens (10 SP)**
-  * [ ] 6.2.1 Enhance existing color tokens (`design-system/tokens/colors.ts`). (2 SP)
-    * [ ] 6.2.1.1 Add missing color variants and semantic mappings.
-    * [ ] 6.2.1.2 Ensure WCAG AA contrast compliance.
-  * [ ] 6.2.2 Create animation tokens (`design-system/tokens/animations.ts`). (3 SP)
-    * [ ] 6.2.2.1 Define duration scale (instant, fast, normal, slow).
-    * [ ] 6.2.2.2 Define easing functions (linear, spring, ease-in-out).
-    * [ ] 6.2.2.3 Create common transition presets (fade, slide, scale).
-  * [ ] 6.2.3 Create accessibility tokens (`design-system/tokens/accessibility.ts`). (3 SP)
-    * [ ] 6.2.3.1 Define minimum touch target sizes.
-    * [ ] 6.2.3.2 Define focus ring specifications.
-    * [ ] 6.2.3.3 Define reduced motion preferences.
-  * [ ] 6.2.4 Enhance existing tokens (typography, spacing, shadows). (2 SP)
-    * [ ] 6.2.4.1 Add missing typography variants.
-    * [ ] 6.2.4.2 Enhance spacing scale with semantic naming.
-    * [ ] 6.2.4.3 Add elevation-based shadow system.
+* [x] **6.1 Core Theme System (15 SP)**
+  * [x] 6.1.1 Create theme composition engine (`design-system/core/theme-builder.ts`). (5 SP)
+    * [x] 6.1.1.1 Implement `createTheme` function with deep merge capability.
+    * [x] 6.1.1.2 Add support for base theme selection (light/dark).
+    * [x] 6.1.1.3 Add role override and customization support.
+  * [x] 6.1.2 Define comprehensive theme types (`design-system/core/types.ts`). (3 SP)
+    * [x] 6.1.2.1 Create `ThemeConfig` interface.
+    * [x] 6.1.2.2 Create `ThemeStrategy` interface.
+    * [x] 6.1.2.3 Create enhanced `Theme` interface with component themes.
+  * [x] 6.1.3 Create theme utilities (`design-system/core/utils.ts`). (3 SP)
+    * [x] 6.1.3.1 Implement deep merge utility for theme composition.
+    * [x] 6.1.3.2 Add color manipulation utilities (lighten, darken, contrast).
+    * [x] 6.1.3.3 Create theme validation utilities.
+  * [x] 6.1.4 Migrate existing theme system to new architecture. (4 SP)
+    * [x] 6.1.4.1 Restructure `src/styles/` to `src/design-system/tokens/`.
+    * [x] 6.1.4.2 Update existing theme exports to use new system.
+    * [x] 6.1.4.3 Maintain backward compatibility during transition.
 
-* [ ] **6.3 Theme Strategy System (10 SP)**
-  * [ ] 6.3.1 Create base theme configurations (`design-system/themes/base/`). (3 SP)
-    * [ ] 6.3.1.1 Create comprehensive light base theme.
-    * [ ] 6.3.1.2 Create comprehensive dark base theme.
-    * [ ] 6.3.1.3 Ensure proper contrast ratios and accessibility.
-  * [ ] 6.3.2 Create shared theme configuration (`design-system/themes/shared/`). (2 SP)
-    * [ ] 6.3.2.1 Define default shared theme for all roles.
-    * [ ] 6.3.2.2 Create theme configuration exports.
-  * [ ] 6.3.3 Create role-specific theme configurations (`design-system/themes/roles/`). (3 SP)
-    * [ ] 6.3.3.1 Create student theme configuration with teal primary.
-    * [ ] 6.3.3.2 Create teacher theme configuration with green primary.
-    * [ ] 6.3.3.3 Create parent theme configuration with orange primary.
-    * [ ] 6.3.3.4 Create management theme configuration with red primary.
-  * [ ] 6.3.4 Implement flexible ThemeProvider with strategy pattern. (2 SP)
-    * [ ] 6.3.4.1 Create enhanced ThemeProvider component.
-    * [ ] 6.3.4.2 Add dynamic theme resolution based on strategy.
-    * [ ] 6.3.4.3 Add memoization for performance optimization.
+* [x] **6.2 Enhanced Design Tokens (10 SP)**
+  * [x] 6.2.1 Enhance existing color tokens (`design-system/tokens/colors.ts`). (2 SP)
+    * [x] 6.2.1.1 Add missing color variants and semantic mappings.
+    * [x] 6.2.1.2 Ensure WCAG AA contrast compliance.
+  * [x] 6.2.2 Create animation tokens (`design-system/tokens/animations.ts`). (3 SP)
+    * [x] 6.2.2.1 Define duration scale (instant, fast, normal, slow).
+    * [x] 6.2.2.2 Define easing functions (linear, spring, ease-in-out).
+    * [x] 6.2.2.3 Create common transition presets (fade, slide, scale).
+  * [x] 6.2.3 Create accessibility tokens (`design-system/tokens/accessibility.ts`). (3 SP)
+    * [x] 6.2.3.1 Define minimum touch target sizes.
+    * [x] 6.2.3.2 Define focus ring specifications.
+    * [x] 6.2.3.3 Define reduced motion preferences.
+  * [x] 6.2.4 Enhance existing tokens (typography, spacing, shadows). (2 SP)
+    * [x] 6.2.4.1 Add missing typography variants.
+    * [x] 6.2.4.2 Enhance spacing scale with semantic naming.
+    * [x] 6.2.4.3 Add elevation-based shadow system.
 
-* [ ] **6.4 Component Theme System (5 SP)**
-  * [ ] 6.4.1 Create component theme definitions (`design-system/components/`). (3 SP)
-    * [ ] 6.4.1.1 Create enhanced button component theme with variants.
-    * [ ] 6.4.1.2 Create card component theme with elevation levels.
-    * [ ] 6.4.1.3 Create modal component theme with size variants.
-    * [ ] 6.4.1.4 Create navigation component theme with role-specific colors.
-  * [ ] 6.4.2 Create enhanced style utilities (`design-system/utilities/`). (2 SP)
-    * [ ] 6.4.2.1 Migrate and enhance existing style helpers.
-    * [ ] 6.4.2.2 Add responsive design utilities.
-    * [ ] 6.4.2.3 Add animation and accessibility utilities.
+* [x] **6.3 Theme Strategy System (10 SP)**
+  * [x] 6.3.1 Create base theme configurations (`design-system/themes/base/`). (3 SP)
+    * [x] 6.3.1.1 Create comprehensive light base theme.
+    * [x] 6.3.1.2 Create comprehensive dark base theme.
+    * [x] 6.3.1.3 Ensure proper contrast ratios and accessibility.
+  * [x] 6.3.2 Create shared theme configuration (`design-system/themes/shared/`). (2 SP)
+    * [x] 6.3.2.1 Define default shared theme for all roles.
+    * [x] 6.3.2.2 Create theme configuration exports.
+  * [x] 6.3.3 Create role-specific theme configurations (`design-system/themes/roles/`). (3 SP)
+    * [x] 6.3.3.1 Create student theme configuration with teal primary.
+    * [x] 6.3.3.2 Create teacher theme configuration with green primary.
+    * [x] 6.3.3.3 Create parent theme configuration with orange primary.
+    * [x] 6.3.3.4 Create management theme configuration with red primary.
+  * [x] 6.3.4 Implement flexible ThemeProvider with strategy pattern. (2 SP)
+    * [x] 6.3.4.1 Create enhanced ThemeProvider component.
+    * [x] 6.3.4.2 Add dynamic theme resolution based on strategy.
+    * [x] 6.3.4.3 Add memoization for performance optimization.
 
-* [ ] **6.5 Developer Experience & Tools (5 SP)**
-  * [ ] 6.5.1 Create theme validation system. (2 SP)
-    * [ ] 6.5.1.1 Implement runtime theme validation.
-    * [ ] 6.5.1.2 Add contrast ratio checking.
-    * [ ] 6.5.1.3 Add required property validation.
-  * [ ] 6.5.2 Create theme debugging tools. (2 SP)
-    * [ ] 6.5.2.1 Create `useThemeDebugger` hook.
-    * [ ] 6.5.2.2 Add theme export and logging utilities.
-    * [ ] 6.5.2.3 Add development-only theme inspector.
-  * [ ] 6.5.3 Create theme configuration system. (1 SP)
-    * [ ] 6.5.3.1 Create `app/theme-config.ts` for strategy management.
-    * [ ] 6.5.3.2 Add easy switching between shared/role-based themes.
+* [x] **6.4 Component Theme System (5 SP)**
+  * [x] 6.4.1 Create component theme definitions (`design-system/components/`). (3 SP)
+    * [x] 6.4.1.1 Create enhanced button component theme with variants.
+    * [x] 6.4.1.2 Create card component theme with elevation levels.
+    * [x] 6.4.1.3 Create modal component theme with size variants.
+    * [x] 6.4.1.4 Create navigation component theme with role-specific colors.
+  * [x] 6.4.2 Create enhanced style utilities (`design-system/utilities/`). (2 SP)
+    * [x] 6.4.2.1 Migrate and enhance existing style helpers.
+    * [x] 6.4.2.2 Add responsive design utilities.
+    * [x] 6.4.2.3 Add animation and accessibility utilities.
 
-### 7. Shared Utilities & Helpers (src/lib) Refactoring (30 SP)
+* [x] **6.5 Developer Experience & Tools (5 SP)**
+  * [x] 6.5.1 Create theme validation system. (2 SP)
+    * [x] 6.5.1.1 Implement runtime theme validation.
+    * [x] 6.5.1.2 Add contrast ratio checking.
+    * [x] 6.5.1.3 Add required property validation.
+  * [x] 6.5.2 Create theme debugging tools. (2 SP)
+    * [x] 6.5.2.1 Create `useThemeDebugger` hook.
+    * [x] 6.5.2.2 Add theme export and logging utilities.
+    * [x] 6.5.2.3 Add development-only theme inspector.
+  * [x] 6.5.3 Create theme configuration system. (1 SP)
+    * [x] 6.5.3.1 Create `app/theme-config.ts` for strategy management.
+    * [x] 6.5.3.2 Add easy switching between shared/role-based themes.
 
-* [ ] **7.1 Hooks (10 SP)**
-  * [ ] 7.1.1 Migrate `useAuth.ts` to `src/lib/hooks/useAuth.ts`. (3 SP)
-  * [ ] 7.1.2 Migrate `useClassStudentBreakdown.ts` to `src/lib/hooks/useClassStudentBreakdown.ts`. (3 SP)
-  * [ ] 7.1.3 Migrate `useClassStudentsSubscription.ts` to `src/lib/hooks/useClassStudentsSubscription.ts`. (3 SP)
-  * [ ] 7.1.4 Migrate `useNavigationGuards.ts` to `src/lib/hooks/useNavigationGuards.ts`. (3 SP)
-  * [ ] 7.1.5 Migrate `useNavigationHistory.ts` to `src/lib/hooks/useNavigationHistory.ts`. (3 SP)
-  * [ ] 7.1.6 Migrate `useStudentCountSubscription.ts` to `src/lib/hooks/useStudentCountSubscription.ts`. (3 SP)
-  * [ ] 7.1.7 Create `src/lib/hooks/usePrevious.ts`. (2 SP)
-  * [ ] 7.1.8 Create `src/lib/hooks/useDebounce.ts`. (2 SP)
-* [ ] **7.2 Utils (10 SP)**
-  * [ ] 7.2.1 Migrate `logger.ts` to `src/lib/utils/logger.ts`. (3 SP)
-  * [ ] 7.2.2 Migrate `dateHelpers.ts` to `src/lib/utils/date.ts`. (3 SP)
-  * [ ] 7.2.3 Migrate `idConversion.ts` to `src/lib/utils/idConversion.ts`. (3 SP)
-  * [ ] 7.2.4 Migrate `linking.ts` to `src/lib/utils/linking.ts`. (3 SP)
-  * [ ] 7.2.5 Migrate `navigationGuard.ts` to `src/lib/utils/navigationGuard.ts`. (3 SP)
-  * [ ] 7.2.6 Migrate `responsive.ts` to `src/lib/utils/responsive.ts`. (3 SP)
-  * [ ] 7.2.7 Migrate `retry.ts` to `src/lib/utils/retry.ts`. (3 SP)
-  * [ ] 7.2.8 Migrate `sanitization.ts` to `src/lib/utils/sanitization.ts`. (3 SP)
-  * [ ] 7.2.9 Remove `styleHelpers.ts` migration (now handled by design-system). (0 SP)
-  * [ ] 7.2.10 Migrate `supabase.ts` to `src/lib/utils/supabase.ts`. (3 SP)
-  * [ ] 7.2.11 Migrate `svgPatterns.ts` to `src/lib/utils/svgPatterns.ts`. (3 SP)
-  * [ ] 7.2.12 Migrate `typeHelpers.ts` to `src/lib/utils/typeHelpers.ts`. (3 SP)
-  * [ ] 7.2.13 Migrate `backgroundPattern.ts` to `src/lib/utils/backgroundPattern.ts`. (3 SP)
-* [ ] **7.3 Constants (5 SP)**
-  * [ ] 7.3.1 Create `src/lib/constants/roleCapabilities.ts` for RBAC. (5 SP)
-* [ ] **7.4 Tests (5 SP)**
-  * [ ] 7.4.1 Create `src/lib/tests/renderWithProviders.tsx`. (3 SP)
-  * [ ] 7.4.2 Create `src/lib/tests/navigationMock.ts`. (2 SP)
+### 7. Shared Utilities & Helpers (src/lib) Refactoring (30 SP) ✅ COMPLETED
+
+* [x] **7.1 Hooks (10 SP)** ✅ COMPLETED
+  * [x] 7.1.1 Migrate `useAuth.ts` to `src/lib/hooks/useAuth.ts`. (3 SP)
+  * [x] 7.1.2 Migrate `useClassStudentBreakdown.ts` to `src/lib/hooks/useClassStudentBreakdown.ts`. (3 SP)
+  * [x] 7.1.3 Migrate `useClassStudentsSubscription.ts` to `src/lib/hooks/useClassStudentsSubscription.ts`. (3 SP)
+  * [x] 7.1.4 Migrate `useNavigationGuards.ts` to `src/lib/hooks/useNavigationGuards.ts`. (3 SP)
+  * [x] 7.1.5 Migrate `useNavigationHistory.ts` to `src/lib/hooks/useNavigationHistory.ts`. (3 SP)
+  * [x] 7.1.6 Migrate `useStudentCountSubscription.ts` to `src/lib/hooks/useStudentCountSubscription.ts`. (3 SP)
+  * [x] 7.1.7 Create `src/lib/hooks/usePrevious.ts`. (2 SP)
+  * [x] 7.1.8 Create `src/lib/hooks/useDebounce.ts`. (2 SP)
+* [x] **7.2 Utils (10 SP)** ✅ COMPLETED
+  * [x] 7.2.1 Migrate `logger.ts` to `src/lib/utils/logger.ts`. (3 SP)
+  * [x] 7.2.2 Migrate `dateHelpers.ts` to `src/lib/utils/date.ts`. (3 SP)
+  * [x] 7.2.3 Migrate `idConversion.ts` to `src/lib/utils/idConversion.ts`. (3 SP)
+  * [x] 7.2.4 Migrate `linking.ts` to `src/lib/utils/linking.ts`. (3 SP)
+  * [x] 7.2.5 Migrate `navigationGuard.ts` to `src/lib/utils/navigationGuard.ts`. (3 SP)
+  * [x] 7.2.6 Migrate `responsive.ts` to `src/lib/utils/responsive.ts`. (3 SP)
+  * [x] 7.2.7 Migrate `retry.ts` to `src/lib/utils/retry.ts`. (3 SP)
+  * [x] 7.2.8 Migrate `sanitization.ts` to `src/lib/utils/sanitization.ts`. (3 SP)
+  * [x] 7.2.9 Remove `styleHelpers.ts` migration (now handled by design-system). (0 SP)
+  * [x] 7.2.10 Migrate `supabase.ts` to `src/lib/utils/supabase.ts`. (3 SP)
+  * [x] 7.2.11 Migrate `svgPatterns.ts` to `src/lib/utils/svgPatterns.ts`. (3 SP)
+  * [x] 7.2.12 Migrate `typeHelpers.ts` to `src/lib/utils/typeHelpers.ts`. (3 SP)
+  * [x] 7.2.13 Migrate `backgroundPattern.ts` to `src/lib/utils/backgroundPattern.ts`. (3 SP)
+* [x] **7.3 Constants (5 SP)** ✅ COMPLETED
+  * [x] 7.3.1 Create `src/lib/constants/roleCapabilities.ts` for RBAC. (5 SP)
+* [x] **7.4 Tests (5 SP)** ✅ COMPLETED
+  * [x] 7.4.1 Create `src/lib/tests/renderWithProviders.tsx`. (3 SP)
+  * [x] 7.4.2 Create `src/lib/tests/navigationMock.ts`. (2 SP)
 
 ### 8. Global State & Context (src/context) Refactoring (20 SP)
 
@@ -583,8 +588,9 @@ Add these scripts to package.json for easier usage:
 * [x] Phase 2: Parallel Structure Creation (20 SP) ✅ COMPLETED
 * [x] Phase 3: UI Components Migration (80 SP) ✅ COMPLETED
 * [x] Phase 4: Domain Migration (120 SP) ✅ COMPLETED
-* [x] Phase 5: Feature Slice Migration (60 SP)
-* [] Phase 6: Library Migration (30 SP)
+* [x] Phase 5: Feature Slice Migration (60 SP) ✅ PARTIAL
+* [x] Phase 6: Enhanced Design System (45 SP) ✅ COMPLETED
+* [ ] Phase 7: Library Migration (30 SP) 🚀 CURRENT
 * [ ] Phase 7: Context Migration (15 SP)
 * [ ] Phase 8: Types Migration (10 SP)
 * [ ] Phase 9: Testing Infrastructure (20 SP)
