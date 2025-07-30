@@ -81,9 +81,6 @@ export {
 // Re-export legacy tokens for backward compatibility
 export {
   borderRadius,
-  duration,
-  easing,
-  nativeEasing,
   breakpoints,
   zIndex,
   zIndexUtils,

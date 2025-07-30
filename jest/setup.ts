@@ -1,15 +1,14 @@
+import { customMatchers } from '../src/lib/tests/customMatchers';
+
+// Extends Jest expect with custom matchers
+expect.extend(customMatchers);
+
 /**
  * Jest Setup Configuration
  * Sets up testing environment for React Native components
- * 
- * Note: This file has been migrated to jest/setup.ts
- * This file is kept for backward compatibility during the migration.
  */
 
-require('./jest/setup');
-
-// Re-export for compatibility
-require('@testing-library/jest-native/extend-expect');
+import '@testing-library/jest-native/extend-expect';
 
 // Mock Expo modules that might cause issues in tests
 jest.mock('expo-constants', () => ({
@@ -170,8 +169,8 @@ jest.mock('react-native/src/private/specs_DEPRECATED/components/RCTSafeAreaViewN
 });
 
 // Mock Theme Context for hooks
-jest.mock('./src/context/ThemeContext', () => ({
-  ...jest.requireActual('./src/context/ThemeContext'),
+jest.mock('../src/context/ThemeContext', () => ({
+  // Don't call requireActual to avoid circular dependency, just provide full mock
   useTypography: jest.fn(() => ({
     variants: {
       h1: { fontSize: 32, fontWeight: '700', lineHeight: 40, fontFamily: 'System' },
@@ -309,6 +308,151 @@ jest.mock('./src/context/ThemeContext', () => ({
 // Silence the warning: Animated: `useNativeDriver` is not supported
 // Note: This mock is commented out as it may not be available in all RN versions
 // jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
+
+// Mock React Navigation to avoid ESM import issues
+jest.mock('@react-navigation/native', () => {
+  const React = require('react');
+  return {
+    NavigationContainer: ({ children, ...props }) => {
+      return React.createElement('NavigationContainer', props, children);
+    },
+    useNavigation: () => ({
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+      reset: jest.fn(),
+      setParams: jest.fn(),
+      dispatch: jest.fn(),
+      isFocused: jest.fn(() => true),
+      canGoBack: jest.fn(() => false),
+      getId: jest.fn(),
+      getParent: jest.fn(),
+      getState: jest.fn(() => ({})),
+    }),
+    useRoute: () => ({
+      key: 'test-route',
+      name: 'TestScreen',
+      params: {},
+    }),
+    useFocusEffect: jest.fn(),
+    useIsFocused: jest.fn(() => true),
+    useNavigationState: jest.fn(() => ({})),
+    createNavigationContainerRef: jest.fn(() => ({
+      current: null,
+    })),
+  };
+});
+
+// Mock Design System to avoid complex import issues during testing
+jest.mock('@design-system', () => ({
+  useTheme: jest.fn(() => ({
+    theme: {
+      colors: {
+        primary: { main: '#007bff', light: '#66b3ff', dark: '#0056b3' },
+        secondary: { main: '#6c757d', light: '#adb5bd', dark: '#495057' },
+        background: { primary: '#ffffff', secondary: '#f8f9fa' },
+        text: { primary: '#212529', secondary: '#6c757d' },
+        success: { main: '#28a745' },
+        warning: { main: '#ffc107' },
+        error: { main: '#dc3545' },
+        info: { main: '#17a2b8' },
+      },
+      typography: {
+        fontFamily: { primary: 'System' },
+        fontSize: { sm: 14, md: 16, lg: 18 },
+        fontWeight: { normal: '400', bold: '700' },
+      },
+      spacing: {
+        xs: 4, sm: 8, md: 16, lg: 24, xl: 32,
+      },
+      borderRadius: {
+        sm: 4, md: 8, lg: 12,
+      },
+      componentThemes: {
+        button: {
+          variants: {
+            primary: {
+              backgroundColor: '#007bff',
+              color: '#ffffff',
+            },
+            secondary: {
+              backgroundColor: '#6c757d',
+              color: '#ffffff',
+            },
+            outline: {
+              backgroundColor: 'transparent',
+              borderColor: '#007bff',
+              color: '#007bff',
+            },
+            ghost: {
+              backgroundColor: 'transparent',
+              color: '#007bff',
+            },
+            danger: {
+              backgroundColor: '#dc3545',
+              color: '#ffffff',
+            },
+          },
+          sizes: {
+            sm: { paddingVertical: 8, paddingHorizontal: 12, fontSize: 14 },
+            md: { paddingVertical: 12, paddingHorizontal: 16, fontSize: 16 },
+            lg: { paddingVertical: 16, paddingHorizontal: 20, fontSize: 18 },
+          },
+        },
+      },
+    },
+    colorScheme: 'light',
+    currentRole: null,
+  })),
+  ThemeProvider: ({ children }) => {
+    const React = require('react');
+    return React.createElement('ThemeProvider', {}, children);
+  },
+}));
+
+// Mock Design System Core Types
+jest.mock('@design-system/core/types', () => ({
+  ButtonComponentTheme: {},
+}));
+
+// Mock Expo Router to avoid ESM import issues
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+    canGoBack: jest.fn(() => false),
+    setParams: jest.fn(),
+  }),
+  useLocalSearchParams: () => ({}),
+  useGlobalSearchParams: () => ({}),
+  usePathname: () => '/test',
+  useSegments: () => ['test'],
+  router: {
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+    canGoBack: jest.fn(() => false),
+    setParams: jest.fn(),
+  },
+  Link: ({ children, href, ...props }) => {
+    const React = require('react');
+    const { Text } = require('react-native');
+    return React.createElement(Text, { ...props, testID: 'expo-router-link' }, children);
+  },
+  Redirect: () => null,
+  Stack: {
+    Screen: ({ children, ...props }) => {
+      const React = require('react');
+      return React.createElement('Stack.Screen', props, children);
+    },
+  },
+  Tabs: {
+    Screen: ({ children, ...props }) => {
+      const React = require('react');
+      return React.createElement('Tabs.Screen', props, children);
+    },
+  },
+}));
 
 // Mock console methods to reduce noise in tests
 global.console = {

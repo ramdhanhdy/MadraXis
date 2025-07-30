@@ -9,3 +9,4 @@
 // Export all shared test utilities
 export * from './renderWithProviders';
 export * from './navigationMock';
+export * from './customMatchers';

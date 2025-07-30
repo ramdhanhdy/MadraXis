@@ -8,10 +8,45 @@
 
 import React, { ReactElement, ReactNode } from 'react';
 import { render, RenderOptions } from '@testing-library/react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { ThemeProvider } from '../../context/ThemeContext';
-import { NavigationHistoryProvider } from '../../context/NavigationHistoryContext';
 import { UserRole } from '../constants/roleCapabilities';
+
+// Import NavigationContainer from the mocked module
+// This will use the mock defined in jest/setup.ts
+const { NavigationContainer } = require('@react-navigation/native');
+
+// Create a simple mock context for testing
+const MockThemeContext = React.createContext({
+  theme: {
+    colors: {
+      primary: { main: '#007bff', light: '#66b3ff', dark: '#0056b3' },
+      secondary: { main: '#6c757d', light: '#adb5bd', dark: '#495057' },
+      background: { primary: '#ffffff', secondary: '#f8f9fa' },
+      text: { primary: '#212529', secondary: '#6c757d' },
+    },
+    typography: {
+      fontFamily: { primary: 'System' },
+      fontSize: { sm: 14, md: 16, lg: 18 },
+      fontWeight: { normal: '400', bold: '700' },
+    },
+    spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
+    borderRadius: { sm: 4, md: 8, lg: 12 },
+  },
+  colorScheme: 'light' as const,
+  currentRole: null as UserRole | null,
+});
+
+const MockNavigationHistoryContext = React.createContext({
+  history: [],
+  currentIndex: -1,
+  canGoBack: false,
+  canGoForward: false,
+  addToHistory: jest.fn(),
+  goBack: jest.fn(),
+  goForward: jest.fn(),
+  clearHistory: jest.fn(),
+  getBreadcrumbItems: jest.fn(() => []),
+  navigateToHistoryItem: jest.fn()
+});
 
 // ============================================================================
 // TYPES
@@ -148,8 +183,8 @@ const mockTheme = {
 /**
  * Mock Theme Provider for testing
  */
-const MockThemeProvider: React.FC<{ 
-  children: ReactNode; 
+const MockThemeProvider: React.FC<{
+  children: ReactNode;
   userRole?: UserRole;
   themeMode?: 'light' | 'dark';
 }> = ({ children, userRole, themeMode = 'light' }) => {
@@ -163,9 +198,9 @@ const MockThemeProvider: React.FC<{
   };
 
   return (
-    <ThemeProvider value={contextValue}>
+    <MockThemeContext.Provider value={contextValue}>
       {children}
-    </ThemeProvider>
+    </MockThemeContext.Provider>
   );
 };
 
@@ -207,9 +242,9 @@ const MockNavigationHistoryProvider: React.FC<{ children: ReactNode }> = ({ chil
   };
 
   return (
-    <NavigationHistoryProvider value={contextValue}>
+    <MockNavigationHistoryContext.Provider value={contextValue}>
       {children}
-    </NavigationHistoryProvider>
+    </MockNavigationHistoryContext.Provider>
   );
 };
 
