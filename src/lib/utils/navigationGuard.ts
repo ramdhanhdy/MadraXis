@@ -1,5 +1,5 @@
-import { useAuth } from '@lib/hooks/useAuth';
-import { logger } from './logger';
+import { useAuth } from '@context/AuthContext';
+import { logger } from '@lib/utils/logger';
 
 /**
  * Hook to check if it's safe to make database calls

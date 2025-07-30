@@ -14,7 +14,7 @@ import { EmptyState } from '@ui/molecules/EmptyState/EmptyState';
 import { SkeletonCard } from '@ui/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
-import { useAuth } from '@lib/hooks/useAuth';
+import { useAuth } from '@context/AuthContext';
 import { supabase } from '@lib/utils/supabase';
 import { colors } from '@design-system/tokens/colors';
 import { useSafeToQuery } from '@lib/utils/navigationGuard';

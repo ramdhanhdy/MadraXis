@@ -3,6 +3,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@lib/utils/supabase';
 import { Profile } from '@types';
 import { logger } from '@lib/utils/logger';
+import { sanitizeEmail } from '@lib/utils/sanitization';
 import { AuthState, AuthActions, AuthContextType, AuthProviderProps } from './types';
 import { AuthContext } from './context';
 
@@ -166,6 +167,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [state.navigationInProgress, state.profile, setLoading, setProfile]);
 
+  // Sign in user
+  const signIn = useCallback(async (email: string, password: string) => {
+    logger.debug(`🔐 User attempting to sign in with email: ${email}`);
+    try {
+      const sanitizedEmail = sanitizeEmail(email);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: sanitizedEmail,
+        password,
+      });
+
+      if (error) {
+        logger.error('Error signing in', { error: error.message });
+        throw error;
+      }
+      // The onAuthStateChange listener will handle setting the session and fetching the profile.
+      logger.debug(`🔐 Sign-in successful for: ${sanitizedEmail}`);
+    } catch (error) {
+      // Re-throw to be caught by the calling component (e.g., login screen)
+      throw error;
+    }
+  }, []);
+
   // Sign out user
   const signOut = useCallback(async () => {
     logger.debug('🔐 User signing out');
@@ -270,6 +293,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setHasNavigated,
     setLastNavigationTime,
     fetchUserProfile,
+    signIn,
     signOut,
     clearSession,
     initialize,

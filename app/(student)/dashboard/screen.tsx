@@ -5,7 +5,7 @@ import { Stack, useRouter } from 'expo-router';
 import { SvgXml } from 'react-native-svg';
 import { LogoutButton } from '@ui/molecules/LogoutButton';
 import CommunicationModal from '@ui/organisms/StudentCommunicationModal';
-import { useAuth } from '@lib/hooks/useAuth';
+import { useAuth } from '@context/AuthContext';
 import { DashboardTemplate } from '@ui/templates/DashboardTemplate';
 import type { TabConfig, HeaderAction } from '@ui/templates/DashboardTemplate';
 import { Card } from '@ui/molecules/Card';

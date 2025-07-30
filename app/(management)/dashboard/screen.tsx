@@ -14,7 +14,7 @@ import { EmptyState } from '@ui/molecules/EmptyState/EmptyState';
 import { SkeletonCard } from '@ui/molecules/SkeletonCard/SkeletonCard';
 
 // Context and Services
-import { useAuth } from '@lib/hooks/useAuth';
+import { useAuth } from '@context/AuthContext';
 import { IncidentService } from '@domains/incidents';
 import { DashboardService, DashboardMetrics } from '@domains/dashboard';
 import { colors } from '@design-system/tokens/colors';

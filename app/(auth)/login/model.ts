@@ -5,25 +5,29 @@
  * It defines types, validation schemas, and business rules specific to authentication.
  */
 
+import { useEffect } from 'react';
 import { z } from 'zod';
+import { useAuth } from '@context/AuthContext';
+import { useLoginStore } from './store';
 
 // Types
 export interface LoginFormData {
   email: string;
   password: string;
-  role?: string;
+  role?: UserRole;
 }
 
 export interface LoginState {
   isLoading: boolean;
-  error: string | null;
+  // Use a record for errors to support field-specific messages
+  errors: Record<string, string> | null;
   formData: LoginFormData;
 }
 
 export interface LoginActions {
   setFormData: (data: Partial<LoginFormData>) => void;
   setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
+  setErrors: (errors: Record<string, string> | null) => void;
   resetForm: () => void;
 }
 
@@ -36,7 +40,7 @@ export const loginFormSchema = z.object({
   password: z
     .string()
     .min(1, 'Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .min(8, 'Password must be at least 8 characters'),
   role: z.string().optional(),
 });
 
@@ -86,7 +90,7 @@ export const isValidRole = (role?: string): role is UserRole => {
 // Initial state
 export const initialLoginState: LoginState = {
   isLoading: false,
-  error: null,
+  errors: null,
   formData: {
     email: '',
     password: '',
@@ -102,3 +106,61 @@ export const LOGIN_ERRORS = {
   VALIDATION_ERROR: 'Data yang dimasukkan tidak valid',
   ROLE_REQUIRED: 'Role pengguna diperlukan',
 } as const;
+
+// Hooks
+interface UseLoginProps {
+  role?: string;
+}
+
+/**
+ * Orchestrates the login feature's logic.
+ * Connects the UI (Screen) with the state (Store) and authentication logic (Auth Hook).
+ */
+export const useLogin = ({ role }: UseLoginProps) => {
+  const { formData, isLoading, errors, setFormData, setLoading, setErrors } = useLoginStore();
+  const { signIn } = useAuth();
+
+  // Set the role from URL params into the form data on initial load
+  useEffect(() => {
+    if (role && isValidRole(role)) {
+      setFormData({ role });
+    }
+  }, [role, setFormData]);
+
+  const handleFormDataChange = (data: Partial<LoginFormData>) => {
+    setFormData(data);
+    // Clear errors when user types
+    if (errors) {
+      setErrors(null);
+    }
+  };
+
+  const handleLogin = async () => {
+    setLoading(true);
+    setErrors(null);
+
+    const validation = validateLoginForm(formData);
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await signIn(formData.email, formData.password);
+      // On success, navigation is handled by the AuthProvider's onAuthStateChange listener
+    } catch (e: any) {
+      setErrors({ general: e.message || LOGIN_ERRORS.INVALID_CREDENTIALS });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    formData,
+    errors: errors || {}, // Ensure errors is always an object for the UI
+    isLoading,
+    handleFormDataChange,
+    handleLogin,
+  };
+};

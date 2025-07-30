@@ -32,6 +32,7 @@ export const defaultAuthContextValue: AuthContextType = {
   setHasNavigated: () => {},
   setLastNavigationTime: () => {},
   fetchUserProfile: async () => {},
+  signIn: async () => {},
   signOut: async () => {},
   clearSession: async () => {},
   initialize: async () => {},

@@ -200,12 +200,28 @@ export const mockNavigationHooks = () => {
       validateAccess: jest.fn(() => Promise.resolve(true))
     }),
     useAuth: () => ({
+      // State
       session: null,
       user: null,
       profile: null,
       loading: false,
+      navigationInProgress: false,
+      isInitialized: true,
+      hasNavigated: false,
+      lastNavigationTime: 0,
+      // Actions
+      setSession: jest.fn(),
+      setUser: jest.fn(),
+      setProfile: jest.fn(),
+      setLoading: jest.fn(),
+      setNavigationInProgress: jest.fn(),
+      setHasNavigated: jest.fn(),
+      setLastNavigationTime: jest.fn(),
+      fetchUserProfile: jest.fn(),
+      signIn: jest.fn(),
       signOut: jest.fn(),
-      clearSession: jest.fn()
+      clearSession: jest.fn(),
+      initialize: jest.fn(),
     })
   }));
 };

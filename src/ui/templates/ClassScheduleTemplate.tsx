@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { mockClassData, ClassData as MockClassData, ClassScheduleItem } from '../../mocks/classData';
+import { mockClassData, MockClassViewData as ClassData, ClassScheduleItem } from '../../mocks/classData';
 
 const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
@@ -14,7 +14,7 @@ export default function ClassSchedule() {
   const parsedId = Number(id);
   const classId = isNaN(parsedId) ? 0 : parsedId;
   
-  const [classData, setClassData] = useState<MockClassData | null>(null);
+  const [classData, setClassData] = useState<ClassData | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newDay, setNewDay] = useState('');
   const [newTime, setNewTime] = useState('');

@@ -9,65 +9,70 @@ import { createLazyComponent, createMonitoredLazyComponent } from '@lib/utils/la
 
 // Lazy-loaded Organisms (Heavy components)
 export const LazyAddStudentsToClassModal = createMonitoredLazyComponent(
-  () => import('../organisms/AddStudentsToClassModal'),
-  'AddStudentsToClassModal'
+  // Handle modules that might not have a default export by mapping the named export.
+  () => import('@ui/organisms/AddStudentsToClassModal')
+    .then(module => ({ default: (module as any).AddStudentsToClassModal })),
+  'AddStudentsToClassModal',
 );
 
 export const LazyModal = createMonitoredLazyComponent(
-  () => import('../organisms/Modal'),
+  () => import('@ui/organisms/Modal'),
   'Modal'
 );
 
 export const LazyNavigationPanel = createMonitoredLazyComponent(
-  () => import('../organisms/NavigationPanel'),
+  () => import('@ui/organisms/NavigationPanel'),
   'NavigationPanel'
 );
 
 export const LazyHeader = createMonitoredLazyComponent(
-  () => import('../organisms/Header'),
+  () => import('@ui/organisms/Header'),
   'Header'
 );
 
 export const LazyTabBar = createMonitoredLazyComponent(
-  () => import('../organisms/TabBar'),
+  () => import('@ui/organisms/TabBar'),
   'TabBar'
 );
 
 export const LazyDashboardContent = createMonitoredLazyComponent(
-  () => import('../organisms/DashboardContent'),
+  () => import('@ui/organisms/DashboardContent'),
   'DashboardContent'
 );
 
 // Lazy-loaded Templates (Very heavy components)
 export const LazyDashboardTemplate = createMonitoredLazyComponent(
-  () => import('../templates/DashboardTemplate'),
+  () => import('@ui/templates/DashboardTemplate'),
   'DashboardTemplate'
 );
 
 export const LazyFormTemplate = createMonitoredLazyComponent(
-  () => import('../templates/FormTemplate'),
+  () => import('@ui/templates/FormTemplate'),
   'FormTemplate'
 );
 
 export const LazyModalTemplate = createMonitoredLazyComponent(
-  () => import('../templates/ModalTemplate'),
+  () => import('@ui/templates/ModalTemplate'),
   'ModalTemplate'
 );
 
 // Lazy-loaded Complex Molecules
 export const LazyStudentSelectionList = createMonitoredLazyComponent(
-  () => import('../molecules/StudentSelectionList'),
+  () => import('@ui/molecules/StudentSelectionList'),
   'StudentSelectionList'
 );
 
 export const LazyBulkActionBar = createMonitoredLazyComponent(
-  () => import('../molecules/BulkActionBar'),
-  'BulkActionBar'
+  // Handle modules that might not have a default export by mapping the named export.
+  () => import('../molecules/BulkActionBar')
+    .then(module => ({ default: (module as any).BulkActionBar })),
+  'BulkActionBar',
 );
 
 // Development-only lazy components (Storybook, debugging tools)
 export const LazyStorybook = __DEV__ ? createLazyComponent(
-  () => import('@storybook/react-native').then(module => ({ default: module.default })),
+  // Point to the local Storybook entry point which exports the UI as default.
+  () => import('../../../.rnstorybook'),
 ) : null;
 
 // Theme debugging tools (development only)

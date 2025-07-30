@@ -4,9 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Student as GlobalStudent } from '../../types';
-import { convertNumberToString } from '@lib/utils/idConversion';
-import { mockClassData, ClassData as MockClassData } from '../../mocks/classData';
+import { Student } from '@types';
+import { mockClassData, MockClassViewData as ClassData } from '../../mocks/classData';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -26,7 +25,7 @@ export default function ClassDetail() {
   const parsedId = Number(id);
   const classId = isNaN(parsedId) ? 0 : parsedId;
   
-  const [classData, setClassData] = useState<MockClassData | null>(null);
+  const [classData, setClassData] = useState<ClassData | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   
   // Fetch class data
@@ -36,6 +35,20 @@ export default function ClassDetail() {
       setClassData(foundClass);
     }
   }, [classId]);
+
+  const calculateClassProgress = (students: Student[]): number => {
+    if (!students || students.length === 0) {
+      return 0;
+    }
+    const totalProgress = students.reduce((acc, student) => {
+      const memorized = student.quran_progress?.memorized_verses || 0;
+      const total = student.quran_progress?.total_verses || 1;
+      const progress = total > 0 ? memorized / total : 0;
+      return acc + progress;
+    }, 0);
+    const averageProgress = (totalProgress / students.length) * 100;
+    return Math.round(averageProgress);
+  };
   
   if (!classData) {
     return (
@@ -54,6 +67,8 @@ export default function ClassDetail() {
       </SafeAreaView>
     );
   }
+
+  const classProgress = calculateClassProgress(classData.students || []);
   
   const renderOverviewTab = () => (
     <View style={styles.tabContent}>
@@ -69,15 +84,15 @@ export default function ClassDetail() {
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Jumlah Siswa</Text>
-          <Text style={styles.infoValue}>{classData.studentCount} siswa</Text>
+          <Text style={styles.infoValue}>{classData.student_count} siswa</Text>
         </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Progress</Text>
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${classData.progress || 0}%` }]} />
+              <View style={[styles.progressFill, { width: `${classProgress}%` }]} />
             </View>
-            <Text style={styles.progressText}>{classData.progress || 0}%</Text>
+            <Text style={styles.progressText}>{classProgress}%</Text>
           </View>
         </View>
         {classData.description && (
@@ -128,32 +143,35 @@ export default function ClassDetail() {
       {classData.students && classData.students.length > 0 ? (
         <FlatList
           data={classData.students}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity 
-              style={styles.studentItem}
-              onPress={() => router.push({
-                pathname: '/(teacher)/students/[id]',
-                params: { id: convertNumberToString(item.id) }
-              })}
-            >
-              <View style={styles.studentInfo}>
-                <Text style={styles.studentName}>{item.name}</Text>
-                <Text style={styles.studentProgress}>
-                  {item.memorizedVerses}/{item.totalVerses} ayat
-                </Text>
-              </View>
-              <View style={styles.studentStats}>
-                <View style={styles.progressBar}>
-                  <View style={[
-                    styles.progressFill, 
-                    { width: `${(item.memorizedVerses / item.totalVerses) * 100}%` }
-                  ]} />
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => {
+            const memorized = item.quran_progress?.memorized_verses || 0;
+            const total = item.quran_progress?.total_verses || 1;
+            const progressPercentage = total > 0 ? (memorized / total) * 100 : 0;
+
+            return (
+              <TouchableOpacity 
+                style={styles.studentItem}
+                onPress={() => router.push({
+                  pathname: '/(teacher)/students/[id]',
+                  params: { id: item.id }
+                })}
+              >
+                <View style={styles.studentInfo}>
+                  <Text style={styles.studentName}>{item.full_name}</Text>
+                  <Text style={styles.studentProgress}>
+                    {memorized}/{total} ayat
+                  </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="#666666" />
-              </View>
-            </TouchableOpacity>
-          )}
+                <View style={styles.studentStats}>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.progressFill, { width: `${progressPercentage}%` }]} />
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#666666" />
+                </View>
+              </TouchableOpacity>
+            );
+          }}
         />
       ) : (
         <View style={styles.emptyState}>

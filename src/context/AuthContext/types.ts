@@ -23,6 +23,7 @@ export interface AuthActions {
   setHasNavigated: (hasNavigated: boolean) => void;
   setLastNavigationTime: (time: number) => void;
   fetchUserProfile: (userId: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   clearSession: () => Promise<void>;
   initialize: () => Promise<void>;

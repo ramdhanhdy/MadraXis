@@ -17,7 +17,7 @@ import { ErrorMessage } from '@ui/molecules/ErrorMessage/ErrorMessage';
 import { EmptyState } from '@ui/molecules/EmptyState/EmptyState';
 
 // Context and Services
-import { useAuth } from '@lib/hooks/useAuth';
+import { useAuth } from '@context/AuthContext';
 import { supabase } from '@lib/utils/supabase';
 import { logoSvg } from '@lib/utils/svgPatterns';
 import { colors } from '@design-system/tokens/colors';

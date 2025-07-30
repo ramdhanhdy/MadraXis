@@ -7,18 +7,23 @@ import type { Meta, StoryObj } from '@storybook/react-native';
 import React from 'react';
 import { View } from 'react-native';
 import { AddStudentsToClassModal } from './AddStudentsToClassModal';
-import { ThemeProvider } from '../../../context/ThemeContext';
+import { ThemeProvider, sharedThemeStrategy } from '@design-system';
 import { ClassService } from '@domains/class';
 
 // Mock ClassService for stories
-jest.mock('../../../services/classService');
-jest.mock('../../../hooks/useAuth', () => ({
+jest.mock('@domains/class');
+jest.mock('@context/AuthContext', () => ({
   useAuth: () => ({
     user: {
-      id: 1,
+      id: 'uuid-teacher-1',
       email: 'teacher@test.com',
-      role: 'teacher'
-    }
+    },
+    profile: {
+      id: 'uuid-teacher-1',
+      full_name: 'Test Teacher',
+      role: 'teacher',
+      school_id: 1,
+    },
   })
 }));
 
@@ -27,35 +32,35 @@ const mockClassService = ClassService as jest.Mocked<typeof ClassService>;
 // Mock data - matching AvailableStudent interface
 const mockStudents = [
 {
-  student_id: '1',
+  id: '1',
   full_name: 'John Doe',
   nis: '12345',
   gender: 'male' as const,
   boarding: 'boarding' as const
 },
 {
-  student_id: '2',
+  id: '2',
   full_name: 'Jane Smith',
   nis: '12346',
   gender: 'female' as const,
   boarding: 'day' as const
 },
 {
-  student_id: '3',
+  id: '3',
   full_name: 'Bob Johnson',
   nis: '12347',
   gender: 'male' as const,
   boarding: 'boarding' as const
 },
 {
-  student_id: '4',
+  id: '4',
   full_name: 'Alice Brown',
   nis: '12348',
   gender: 'female' as const,
   boarding: 'day' as const
 },
 {
-  student_id: '5',
+  id: '5',
   full_name: 'Charlie Wilson',
   nis: '12349',
   gender: 'male' as const,
@@ -65,12 +70,11 @@ const mockStudents = [
 
 // Story wrapper
 const StoryWrapper: React.FC<{children: React.ReactNode;}> = ({ children }) =>
-<ThemeProvider>
+<ThemeProvider strategy={sharedThemeStrategy}>
     <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
       {children}
     </View>
-  </ThemeProvider>;
-
+  </ThemeProvider>
 
 const meta: Meta<typeof AddStudentsToClassModal> = {
   title: 'Organisms/AddStudentsToClassModal',
@@ -176,7 +180,7 @@ export const LargeDataset: Story = {
   },
   beforeEach: () => {
     const largeStudentList = Array.from({ length: 50 }, (_, index) => ({
-      student_id: `${index + 1}`,
+      id: `${index + 1}`,
       full_name: `Student ${index + 1}`,
       nis: `${10000 + index}`,
       gender: index % 2 === 0 ? 'male' as const : 'female' as const,
@@ -225,14 +229,14 @@ export const ElementaryClass: Story = {
   beforeEach: () => {
     const elementaryStudents = [
     {
-      student_id: '10',
+      id: '10',
       full_name: 'Emma Davis',
       nis: '50001',
       gender: 'female' as const,
       boarding: 'day' as const
     },
     {
-      student_id: '11',
+      id: '11',
       full_name: 'Liam Miller',
       nis: '50002',
       gender: 'male' as const,
@@ -255,14 +259,14 @@ export const HighSchoolClass: Story = {
   beforeEach: () => {
     const highSchoolStudents = [
     {
-      student_id: '20',
+      id: '20',
       full_name: 'Sophia Anderson',
       nis: '60001',
       gender: 'female' as const,
       boarding: 'boarding' as const
     },
     {
-      student_id: '21',
+      id: '21',
       full_name: 'Mason Taylor',
       nis: '60002',
       gender: 'male' as const,
@@ -290,8 +294,8 @@ export const Interactive: Story = {
 
       if (options?.searchTerm) {
         filteredStudents = mockStudents.filter((student) =>
-        student.full_name.toLowerCase().includes(options.searchTerm!.toLowerCase()) ||
-        student.nis.includes(options.searchTerm!)
+          student.full_name.toLowerCase().includes(options.searchTerm!.toLowerCase()) ||
+          student.nis?.includes(options.searchTerm!)
         );
       }
 

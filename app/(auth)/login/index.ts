@@ -35,7 +35,7 @@ export {
 export {
   useLoginStore,
   useLoginFormData,
-  useLoginError,
+  useLoginErrors,
   useLoginLoading,
   useLoginValidation,
   useLoginActions,

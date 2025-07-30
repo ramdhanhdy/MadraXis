@@ -8,32 +8,12 @@
 
 import React, { ReactElement, ReactNode } from 'react';
 import { render, RenderOptions } from '@testing-library/react-native';
+import type { Route } from '@react-navigation/native';
 import { UserRole } from '../constants/roleCapabilities';
 
 // Import NavigationContainer from the mocked module
 // This will use the mock defined in jest/setup.ts
 const { NavigationContainer } = require('@react-navigation/native');
-
-// Create a simple mock context for testing
-const MockThemeContext = React.createContext({
-  theme: {
-    colors: {
-      primary: { main: '#007bff', light: '#66b3ff', dark: '#0056b3' },
-      secondary: { main: '#6c757d', light: '#adb5bd', dark: '#495057' },
-      background: { primary: '#ffffff', secondary: '#f8f9fa' },
-      text: { primary: '#212529', secondary: '#6c757d' },
-    },
-    typography: {
-      fontFamily: { primary: 'System' },
-      fontSize: { sm: 14, md: 16, lg: 18 },
-      fontWeight: { normal: '400', bold: '700' },
-    },
-    spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
-    borderRadius: { sm: 4, md: 8, lg: 12 },
-  },
-  colorScheme: 'light' as const,
-  currentRole: null as UserRole | null,
-});
 
 const MockNavigationHistoryContext = React.createContext({
   history: [],
@@ -176,6 +156,16 @@ const mockTheme = {
   }
 };
 
+// Create a simple mock context for testing
+const MockThemeContext = React.createContext({
+  theme: mockTheme,
+  colorScheme: 'light' as 'light' | 'dark',
+  currentRole: null as UserRole | null,
+  setRole: jest.fn(),
+  setColorScheme: jest.fn(),
+  strategy: 'shared' as const,
+});
+
 // ============================================================================
 // MOCK PROVIDERS
 // ============================================================================
@@ -216,7 +206,10 @@ const MockNavigationContainer: React.FC<{
     <NavigationContainer
       initialState={navigationState}
       documentTitle={{
-        formatter: (options, route) => `${options?.title ?? route?.name ?? 'MadraXis'}`
+        formatter: (
+          options: Record<string, any> | undefined,
+          route: Route<string> | undefined
+        ) => `${options?.title ?? route?.name ?? 'MadraXis'}`,
       }}
     >
       {children}

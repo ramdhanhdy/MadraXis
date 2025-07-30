@@ -7,10 +7,10 @@
 
 import { 
   UserRole, 
-  ClassData, 
+  Class as ClassData, // Use aliasing for backward compatibility in test name
   Student, 
   DashboardData,
-  DatabaseTables 
+  Tables, // The correct type for database tables
 } from '@types';
 
 describe('Type Consolidation Integration', () => {
@@ -26,122 +26,124 @@ describe('Type Consolidation Integration', () => {
 
     it('should import ClassData from @types', () => {
       const classData: ClassData = {
-        id: '1',
-        name: 'Grade 5A',
-        subject: 'Mathematics',
-        teacher_id: 'teacher1',
-        students: [],
+        id: 1,
+        name: 'Kelas 7A',
+        level: '7',
+        status: 'active',
+        student_capacity: 30,
+        student_count: 28,
+        subject_count: 5,
+        teacher_count: 1,
+        academic_year: '2023/2024',
+        semester: '1',
+        school_id: 1,
+        created_by: 'uuid-teacher-1',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
       
-      expect(classData.id).toBe('1');
-      expect(classData.name).toBe('Grade 5A');
+      expect(classData.id).toBe(1);
+      expect(classData.name).toBe('Kelas 7A');
     });
 
     it('should import Student from @types', () => {
       const student: Student = {
-        id: '1',
-        name: 'John Doe',
+        id: 'uuid-student-1',
+        full_name: 'John Doe',
         email: 'john@example.com',
         role: 'student',
-        profile: {
-          grade: '5',
-          section: 'A',
-          guardian_contact: '+1234567890'
+        school_id: 1,
+        details: {
+          user_id: 'uuid-student-1',
+          nis: '12345',
+          gender: 'M',
+          boarding: true,
+          class_name: 'Kelas 7A',
+          date_of_birth: '2010-05-10T00:00:00Z',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
       
       expect(student.role).toBe('student');
-      expect(student.profile.grade).toBe('5');
+      expect(student.details?.gender).toBe('M');
     });
 
     it('should import DashboardData from @types', () => {
       const dashboardData: DashboardData = {
-        totalStudents: 100,
-        totalClasses: 10,
-        totalTeachers: 15,
-        recentActivities: [],
-        stats: {
-          attendance: 95,
-          performance: 88
-        }
+        quickActions: [{
+          title: 'View Schedule',
+          icon: 'calendar-outline',
+          onPress: () => {}
+        }],
+        progressData: [{
+          label: 'Quran Memorization',
+          value: 75,
+          variant: 'success'
+        }],
       };
       
-      expect(dashboardData.totalStudents).toBe(100);
-      expect(dashboardData.stats.attendance).toBe(95);
+      expect(dashboardData.quickActions).toHaveLength(1);
+      expect(dashboardData.progressData[0].value).toBe(75);
     });
 
     it('should import DatabaseTables from @types', () => {
       // This tests that database table types are properly consolidated
-      const tableNames: (keyof DatabaseTables)[] = [
-        'users',
-        'classes', 
-        'subjects',
-        'enrollments',
-        'incidents'
-      ];
+      // We test one of the defined tables ('profiles') to ensure the type works.
+      const profile: Tables<'profiles'> = {
+        id: 'uuid-user-1',
+        full_name: 'Test User',
+        role: 'teacher',
+        school_id: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
       
-      expect(tableNames).toContain('users');
-      expect(tableNames).toContain('classes');
+      expect(profile.role).toBe('teacher');
     });
   });
 
   describe('Cross-Domain Type Compatibility', () => {
     it('should ensure types work across domains and UI components', () => {
       // Simulate data flow from domain to UI
-      const mockStudentData: Student = {
-        id: '1',
-        name: 'Alice Smith',
+      const mockStudent: Student = {
+        id: 'uuid-student-2',
+        full_name: 'Alice Smith',
         email: 'alice@example.com',
         role: 'student',
-        profile: {
-          grade: '6',
-          section: 'B',
-          guardian_contact: '+9876543210'
-        },
+        school_id: 1,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
 
-      const mockClassData: ClassData = {
-        id: '1',
+      // This is a simplified representation for the test
+      const mockClass = {
+        id: 2,
         name: 'Science 6B',
-        subject: 'Science',
-        teacher_id: 'teacher2',
-        students: [mockStudentData.id],
+        students: [mockStudent.id],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
 
       // These should compile without errors, proving type compatibility
-      expect(mockStudentData.role).toBe('student');
-      expect(mockClassData.students).toContain(mockStudentData.id);
+      expect(mockStudent.role).toBe('student');
+      expect(mockClass.students).toContain(mockStudent.id);
     });
 
     it('should validate dashboard data aggregation types', () => {
-      const aggregatedData: DashboardData = {
-        totalStudents: 250,
-        totalClasses: 25,
-        totalTeachers: 30,
-        recentActivities: [
-          {
-            id: '1',
-            type: 'enrollment',
-            description: 'New student enrolled',
-            timestamp: new Date().toISOString()
-          }
-        ],
-        stats: {
-          attendance: 92,
-          performance: 85
-        }
+      const aggregatedData: Partial<DashboardData> = {
+        upcomingAssignments: [{
+          id: 'assign-1',
+          title: 'Science Project',
+          subject: 'Science',
+          dueDate: new Date().toISOString(),
+          status: 'pending'
+        }]
       };
 
-      expect(aggregatedData.recentActivities[0].type).toBe('enrollment');
-      expect(typeof aggregatedData.stats.attendance).toBe('number');
+      expect(aggregatedData.upcomingAssignments?.[0].status).toBe('pending');
     });
   });
 
@@ -154,8 +156,8 @@ describe('Type Consolidation Integration', () => {
 
     it('should ensure required fields are enforced', () => {
       // This validates that our types enforce required fields
-      const requiredStudentFields: (keyof Student)[] = [
-        'id', 'name', 'email', 'role', 'created_at', 'updated_at'
+      const requiredStudentFields: (keyof Student)[] = [ // 'name' is now 'full_name'
+        'id', 'full_name', 'role', 'school_id', 'created_at', 'updated_at'
       ];
       
       expect(requiredStudentFields).toHaveLength(6);

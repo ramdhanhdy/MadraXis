@@ -669,8 +669,11 @@ export class UserService {
       name: student.full_name,
       class: '', // TODO: Get class assignment from class_students table
       image_url: '', // TODO: Add profile images if needed
-      quran_progress: student.quran_progress,
-      gender: student.details?.gender,
+      quran_progress: student.quran_progress || {
+        memorized_verses: 0,
+        total_verses: 6236, // Default total verses in the Quran
+      },
+      gender: student.details?.gender === 'M' ? 'male' : student.details?.gender === 'F' ? 'female' : undefined,
       birth_date: student.details?.date_of_birth,
       parent_name: '', // TODO: Get from parent relationship if needed
       phone: '', // TODO: Get from student_details or parent_details

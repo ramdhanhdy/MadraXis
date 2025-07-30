@@ -4,19 +4,10 @@
  */
 
 import React from 'react';
-import {
-  View,
-  TouchableOpacity,
-  ViewStyle,
-  TextStyle,
-  StyleSheet,
-  TouchableOpacityProps,
-} from 'react-native';
+import { View, TouchableOpacity, ViewStyle, TextStyle, StyleSheet, TouchableOpacityProps, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useColors } from '../../../context/ThemeContext';
-import { Typography } from '../../atoms/Typography';
+import { useTheme } from '@design-system';
 import { Icon } from '../../atoms/Icon';
-import { combineStyles } from '@lib/utils';
 
 // ListItem Props Interface
 export interface ListItemProps extends Omit<TouchableOpacityProps, 'style'> {
@@ -74,7 +65,6 @@ export const ListItem: React.FC<ListItemProps> = ({
   ...props
 }) => {
   const { theme } = useTheme();
-  const colors = useColors();
 
   // Get container styles
   const getContainerStyles = (): ViewStyle => {
@@ -83,8 +73,8 @@ export const ListItem: React.FC<ListItemProps> = ({
       alignItems: 'center',
       paddingHorizontal: theme.spacing.base.md,
       paddingVertical: theme.spacing.base.sm,
-      minHeight: 56, // Standard list item height for good touch targets
-      backgroundColor: colors.surface.primary,
+      minHeight: 56,
+      backgroundColor: theme.colors.surface.primary,
     };
 
     return {
@@ -108,7 +98,7 @@ export const ListItem: React.FC<ListItemProps> = ({
   const getDividerStyles = (): ViewStyle => {
     return {
       height: 1,
-      backgroundColor: colors.border.primary,
+      backgroundColor: theme.colors.border.primary,
       marginLeft: leftIcon || leftComponent ? 56 : theme.spacing.base.md, // Align with content
     };
   };
@@ -172,26 +162,32 @@ export const ListItem: React.FC<ListItemProps> = ({
           {renderLeftContent()}
           
           <View style={getContentStyles()}>
-            <Typography
-              variant="body1"
-              color={disabled ? 'disabled' : 'primary'}
+            <Text
               numberOfLines={1}
               ellipsizeMode="tail"
-              style={titleStyle}
+              style={[
+                theme.typography.body1,
+                { color: disabled ? theme.colors.text.disabled : theme.colors.text.primary },
+                styles.title,
+                titleStyle,
+              ]}
             >
               {title}
-            </Typography>
+            </Text>
             
             {subtitle && (
-              <Typography
-                variant="body2"
-                color={disabled ? 'disabled' : 'secondary'}
+              <Text
                 numberOfLines={1}
                 ellipsizeMode="tail"
-                style={combineStyles({ marginTop: 2 }, subtitleStyle) as TextStyle}
+                style={[
+                  theme.typography.body2,
+                  { color: disabled ? theme.colors.text.disabled : theme.colors.text.secondary },
+                  styles.subtitle,
+                  subtitleStyle,
+                ]}
               >
                 {subtitle}
-              </Typography>
+              </Text>
             )}
           </View>
           
@@ -241,6 +237,12 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: 'transparent',
   },
+  subtitle: {
+    marginTop: 2,
+  },
+  title: {
+    // Additional styling for the title can be added here
+  }
 });
 
 // Export default
