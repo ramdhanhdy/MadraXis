@@ -1,15 +1,9 @@
-import React from 'react';
-import { Stack } from 'expo-router';
-import AddStudent from '../../../src/components/templates/AddStudentTemplate';
+/**
+ * Add Student Route - Backward Compatibility Wrapper
+ *
+ * This file maintains backward compatibility with the existing route structure
+ * while delegating to the new feature slice implementation.
+ */
 
-export default function AddStudentPage() {
-  return (
-    <>
-      <Stack.Screen options={{ 
-        headerShown: false,
-        title: "Tambah Siswa" 
-      }} />
-      <AddStudent />
-    </>
-  );
-}
+// Re-export the screen from the feature slice
+export { default } from './add-student/screen';

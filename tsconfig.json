@@ -7,8 +7,21 @@
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "bundler",
     "skipLibCheck": true,
+    "target": "es2017",
+    "downlevelIteration": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@ui/*": ["src/ui/*"],
+      "@domains/*": ["src/domains/*"],
+      "@lib/*": ["src/lib/*"],
+      "@design-system": ["src/design-system"],
+      "@design-system/*": ["src/design-system/*"],
+      "@context/*": ["src/context/*"],
+      "@types": ["src/types"],
+      "@types/*": ["src/types/*"],
+      "@app/*": ["app/*"]
     }
   },
   "include": [

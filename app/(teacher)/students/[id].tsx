@@ -1,15 +1,9 @@
-import React from 'react';
-import { Stack } from 'expo-router';
-import StudentDetail from '../../../src/components/templates/StudentDetailTemplate';
+/**
+ * Student Detail Route - Backward Compatibility Wrapper
+ *
+ * This file maintains backward compatibility with the existing route structure
+ * while delegating to the new feature slice implementation.
+ */
 
-export default function StudentDetailPage() {
-  return (
-    <>
-      <Stack.Screen options={{ 
-        headerShown: false,
-        title: "Detail Siswa" 
-      }} />
-      <StudentDetail />
-    </>
-  );
-}
+// Re-export the screen from the feature slice
+export { default } from './student-detail/screen';

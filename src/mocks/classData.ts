@@ -1,19 +1,7 @@
 // Mock data for class information and students
 // This file contains sample data used for development and testing purposes
 
-export interface Student {
-  id: number;
-  name: string;
-  full_name: string;
-  role: 'student';
-  school_id: number;
-  created_at: string;
-  updated_at: string;
-  memorizedVerses: number;
-  totalVerses: number;
-  lastActivity: string;
-  progress: number;
-}
+import { Class, Student } from '@types';
 
 export interface ClassScheduleItem {
   id?: number;
@@ -39,92 +27,94 @@ export interface Report {
   status: 'draft' | 'published';
 }
 
-export interface ClassData {
-  id: number;
-  name: string;
-  level: string;
-  description?: string;
-  studentCount: number;
-  progress?: number;
-  students?: Student[];
-  schedule?: ClassScheduleItem[];
-  recentActivities?: Activity[];
-  reports?: Report[];
+/**
+ * Represents the rich data structure for a class view, combining the
+ * canonical Class type with related data like students and schedule.
+ */
+export interface MockClassViewData extends Class {
+  students: Student[];
+  schedule: ClassScheduleItem[];
+  recentActivities: Activity[];
+  reports: Report[];
 }
 
-export const mockClassData: ClassData[] = [
+export const mockClassData: MockClassViewData[] = [
   {
     id: 1,
     name: 'Tahfidz Al-Baqarah',
     level: 'Menengah',
     description: 'Kelas fokus pada hafalan Surah Al-Baqarah dengan penekanan pada tajwid dan makna.',
-    studentCount: 25,
-    progress: 75,
+    status: 'active',
+    student_capacity: 30,
+    student_count: 5,
+    subject_count: 1,
+    teacher_count: 1,
+    academic_year: '2023/2024',
+    semester: '1',
+    school_id: 1,
+    created_by: 'uuid-teacher-1',
+    created_at: '2023-08-01T09:00:00Z',
+    updated_at: '2023-08-01T09:00:00Z',
     students: [
       { 
-        id: 1, 
-        name: 'Ahmad Fauzi',
+        id: 'uuid-student-1', 
         full_name: 'Ahmad Fauzi',
         role: 'student' as const,
         school_id: 1,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-15T00:00:00Z',
-        memorizedVerses: 150, 
-        totalVerses: 200, 
-        lastActivity: '2024-01-15',
-        progress: 75 
+        quran_progress: {
+          memorized_verses: 150,
+          total_verses: 286,
+        }
       },
       { 
-        id: 2, 
-        name: 'Fatimah Zahra',
+        id: 'uuid-student-2', 
         full_name: 'Fatimah Zahra',
         role: 'student' as const,
         school_id: 1,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-14T00:00:00Z',
-        memorizedVerses: 180, 
-        totalVerses: 200, 
-        lastActivity: '2024-01-14',
-        progress: 90 
+        quran_progress: {
+          memorized_verses: 180,
+          total_verses: 286,
+        }
       },
       { 
-        id: 3, 
-        name: 'Muhammad Ali',
+        id: 'uuid-student-3', 
         full_name: 'Muhammad Ali',
         role: 'student' as const,
         school_id: 1,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-13T00:00:00Z',
-        memorizedVerses: 120, 
-        totalVerses: 200, 
-        lastActivity: '2024-01-13',
-        progress: 60 
+        quran_progress: {
+          memorized_verses: 120,
+          total_verses: 286,
+        }
       },
       { 
-        id: 4, 
-        name: 'Siti Aisyah',
+        id: 'uuid-student-4', 
         full_name: 'Siti Aisyah',
         role: 'student' as const,
         school_id: 1,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-15T00:00:00Z',
-        memorizedVerses: 160, 
-        totalVerses: 200, 
-        lastActivity: '2024-01-15',
-        progress: 80 
+        quran_progress: {
+          memorized_verses: 160,
+          total_verses: 286,
+        }
       },
       { 
-        id: 5, 
-        name: 'Omar bin Khattab',
+        id: 'uuid-student-5', 
         full_name: 'Omar bin Khattab',
         role: 'student' as const,
         school_id: 1,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-12T00:00:00Z',
-        memorizedVerses: 140, 
-        totalVerses: 200, 
-        lastActivity: '2024-01-12',
-        progress: 70 
+        quran_progress: {
+          memorized_verses: 140,
+          total_verses: 286,
+        }
       },
     ],
     schedule: [
@@ -169,21 +159,29 @@ export const mockClassData: ClassData[] = [
     name: 'Tahfidz Al-Imran',
     level: 'Lanjutan',
     description: 'Kelas lanjutan untuk hafalan Surah Al-Imran dengan fokus pada pemahaman makna.',
-    studentCount: 20,
-    progress: 67,
+    status: 'active',
+    student_capacity: 25,
+    student_count: 1,
+    subject_count: 1,
+    teacher_count: 1,
+    academic_year: '2023/2024',
+    semester: '1',
+    school_id: 1,
+    created_by: 'uuid-teacher-2',
+    created_at: '2023-08-01T10:00:00Z',
+    updated_at: '2023-08-01T10:00:00Z',
     students: [
       { 
-        id: 6, 
-        name: 'Khadijah binti Khuwailid',
+        id: 'uuid-student-6', 
         full_name: 'Khadijah binti Khuwailid',
         role: 'student' as const,
         school_id: 1,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-15T00:00:00Z',
-        memorizedVerses: 100, 
-        totalVerses: 150, 
-        lastActivity: '2024-01-15',
-        progress: 67 
+        quran_progress: {
+          memorized_verses: 100,
+          total_verses: 200,
+        }
       },
     ],
     schedule: [

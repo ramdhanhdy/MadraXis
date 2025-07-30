@@ -6,6 +6,9 @@
 # dependencies
 node_modules/
 
+.cleanup-backup/
+
+.migration-backup/
 # Expo
 .expo/
 dist/
@@ -68,3 +71,5 @@ CLAUDE.md
 CLAUDE.md
 .claude/agents/expo-code-reviewer.md
 supabase/.temp/cli-latest
+.cleanup-backup/hooks/index.ts
+POST_REFACTOR_FIX_PROMPT.md

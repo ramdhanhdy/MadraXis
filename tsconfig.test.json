@@ -1,0 +1,59 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": [
+      "ES2020",
+      "ES2021.String",
+      "ES2022.Array"
+    ],
+    "module": "CommonJS",
+    "jsx": "react-native",
+    "types": [
+      "jest",
+      "react-native"
+    ],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@ui/*": ["src/ui/*"],
+      "@domains/*": ["src/domains/*"],
+      "@lib/*": ["src/lib/*"],
+      "@design-system": ["src/design-system"],
+      "@design-system/*": ["src/design-system/*"],
+      "@context/*": ["src/context/*"],
+      "@types": ["src/types"],
+      "@types/*": ["src/types/*"],
+      "@app/*": ["app/*"]
+    },
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "noImplicitReturns": false,
+    "noImplicitThis": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": [
+    "src/**/*",
+    "jest/**/*",
+    "__tests__/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".expo"
+  ]
+}

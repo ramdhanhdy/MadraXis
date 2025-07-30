@@ -1,15 +1,9 @@
-import React from 'react';
-import { Stack } from 'expo-router';
-import ClassStudents from '../../../../../src/components/templates/ClassStudentsTemplate';
+/**
+ * Class Students Route - Backward Compatibility Wrapper
+ *
+ * This file maintains backward compatibility with the existing route structure
+ * while delegating to the new feature slice implementation.
+ */
 
-export default function ClassStudentsIndex() {
-  return (
-    <>
-      <Stack.Screen options={{
-        headerShown: false,
-        title: "Siswa Kelas"
-      }} />
-      <ClassStudents />
-    </>
-  );
-}
+// Re-export the screen from the feature slice
+export { default } from './screen';
