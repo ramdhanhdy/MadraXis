@@ -21,6 +21,9 @@ export {
 } from './api';
 
 // Export specific functions for backward compatibility
+// Import the actual service functions
+import { UserService } from './api';
+
 export const fetchStudents = UserService.fetchStudents;
 export const fetchTeachers = UserService.fetchTeachers;
 

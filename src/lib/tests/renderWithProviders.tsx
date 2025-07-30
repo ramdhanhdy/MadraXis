@@ -365,5 +365,5 @@ export function renderMinimal(ui: ReactElement, options: RenderOptions = {}) {
   return render(ui, options);
 }
 
-// Re-export everything from React Testing Library for convenience
-export * from '@testing-library/react-native';
+// Re-export commonly used functions from React Testing Library for convenience
+export { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native';

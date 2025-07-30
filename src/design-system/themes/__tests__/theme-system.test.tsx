@@ -7,9 +7,9 @@ import React from 'react';
 import { render, act } from '@testing-library/react';
 import { 
   EnhancedThemeProvider, 
-  useEnhancedTheme, 
   useThemeDebugger 
 } from '../provider/ThemeProvider';
+import { useEnhancedTheme } from '../hooks';
 import { 
   roleBasedThemeStrategy, 
   sharedThemeStrategy,

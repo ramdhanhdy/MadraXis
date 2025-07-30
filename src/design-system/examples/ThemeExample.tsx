@@ -47,6 +47,9 @@ export const ThemeExample: React.FC = () => {
 
   // Debug info (development only)
   const debugInfo = useThemeDebugger();
+  
+  // Define button size as const to satisfy TypeScript
+  const buttonSize = 'medium' as const;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.surface?.primary || '#ffffff' }]}>
@@ -71,7 +74,7 @@ export const ThemeExample: React.FC = () => {
               <Button
                 key={role.key}
                 variant={currentRole === role.key ? 'primary' : 'outline'}
-                size="medium"
+                size={buttonSize}
                 onPress={() => switchRole(role.key)}
                 style={styles.roleButton}
               >
@@ -89,19 +92,19 @@ export const ThemeExample: React.FC = () => {
           <View style={styles.controlsRow}>
             <Button
               variant="secondary"
-              size="medium"
+              size={"medium" as const}
               onPress={toggleMode}
               style={styles.controlButton}
             >
               {currentMode === 'light' ? '🌙 Dark' : '☀️ Light'}
             </Button>
             <Button
-              variant="ghost"
-              size="medium"
+              variant="outline"
+              size={"medium" as const}
               onPress={() => setShowModal(true)}
               style={styles.controlButton}
             >
-              📱 Show Modal
+              Show Modal
             </Button>
             {__DEV__ && (
               <Button
@@ -190,13 +193,13 @@ export const ThemeExample: React.FC = () => {
             This modal automatically uses the current theme colors and styling.
           </Text>
           <Button
-            variant="primary"
-            size="medium"
-            onPress={() => setShowModal(false)}
-            style={styles.modalButton}
-          >
-            Close Modal
-          </Button>
+                variant="primary"
+                size={"medium" as const}
+                onPress={() => setShowModal(false)}
+                style={styles.modalButton}
+              >
+                Close Modal
+              </Button>
         </View>
       </Modal>
 
@@ -205,7 +208,7 @@ export const ThemeExample: React.FC = () => {
         <ThemeInspector
           visible={showInspector}
           onClose={() => setShowInspector(false)}
-          position="bottom"
+          position={"bottom" as const}
         />
       )}
     </SafeAreaView>

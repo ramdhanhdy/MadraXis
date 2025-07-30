@@ -2,7 +2,8 @@
  * Simple test to verify the theme system works
  */
 
-import { createTheme, validateTheme } from './core/theme-builder';
+import { createTheme } from './core/theme-builder';
+import { validateTheme } from './core/utils';
 import { roleBasedThemeStrategy } from './themes/strategies';
 
 // Test basic theme creation

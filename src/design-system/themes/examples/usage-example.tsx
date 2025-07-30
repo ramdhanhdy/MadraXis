@@ -8,12 +8,12 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import {
   ThemeProvider,
   useTheme,
-  useThemeDebugger,
   roleBasedThemeStrategy,
   sharedThemeStrategy,
   adaptiveThemeStrategy,
   highContrastThemeStrategy,
 } from '../index';
+import { useThemeDebugger } from '../provider/ThemeProvider';
 import { UserRole } from '../../tokens/colors';
 
 /**

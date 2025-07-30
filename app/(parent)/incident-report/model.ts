@@ -128,7 +128,7 @@ export const incidentFormSchema = z.object({
   title: z.string().min(5, 'Judul minimal 5 karakter'),
   description: z.string().min(20, 'Deskripsi minimal 20 karakter'),
   location: z.string().min(1, 'Lokasi harus diisi'),
-  dateTime: z.date({ required_error: 'Tanggal dan waktu harus diisi' }),
+  dateTime: z.date().refine(date => date !== null, 'Tanggal dan waktu harus diisi'),
   witnesses: z.array(z.string()),
   involvedParties: z.array(z.string()),
   previousIncidents: z.boolean(),

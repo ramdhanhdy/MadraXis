@@ -8,10 +8,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SvgXml } from 'react-native-svg';
-import { Typography } from '@ui/atoms/Typography';
 import { Button } from '@ui/atoms/Button';
 import { Input } from '@ui/atoms/Input';
 import { LoadingSpinner } from '@ui/atoms/LoadingSpinner';
+import { Typography } from '@ui/atoms/Typography/Typography';
 import { Card } from '@ui/molecules/Card';
 import type { LoginFormData, UserRole } from './model';
 
@@ -96,7 +96,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           keyboardType="email-address"
           autoCapitalize="none"
           autoComplete="email"
-          error={errors.email}
+          error={Boolean(errors.email)}
           testID="login-email-input"
         />
       </View>
@@ -109,14 +109,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           placeholder="Masukkan password Anda"
           secureTextEntry
           autoComplete="password"
-          error={errors.password}
+          error={Boolean(errors.password)}
           testID="login-password-input"
         />
       </View>
 
       <View style={styles.forgotPasswordContainer}>
         <Button
-          variant="text"
+          variant="ghost"
           size="small"
           onPress={onForgotPassword}
           testID="forgot-password-button"
@@ -126,7 +126,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       </View>
 
       <Button
-        variant="solid"
+        variant="primary"
         size="large"
         onPress={onSubmit}
         disabled={isLoading}

@@ -9,4 +9,12 @@
 export * from './hooks';
 export * from './utils';
 export * from './constants';
-export * from './tests';
+
+// Selective exports from tests to avoid conflicts
+export {
+  renderWithProviders,
+  renderWithTheme,
+  renderWithNavigation,
+  renderMinimal,
+  CustomRenderOptions,
+} from './tests';

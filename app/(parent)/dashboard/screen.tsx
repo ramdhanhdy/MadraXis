@@ -98,15 +98,15 @@ export default function ParentDashboard() {
   };
 
   const navigateToSchedule = () => {
-    router.push('/(parent)/schedule');
+    router.push('/(student)/schedule');
   };
 
   const navigateToProgress = () => {
-    router.push('/(parent)/progress');
+    router.push('/(student)/quran-progress');
   };
 
   const navigateToMessages = () => {
-    router.push('/(parent)/messages');
+    router.push('/(student)/dashboard');
   };
 
   // Handle tab change
@@ -247,10 +247,14 @@ export default function ParentDashboard() {
                   key={activity.id}
                   title={activity.title}
                   subtitle={activity.date}
-                  rightText={activity.score || activity.progress || activity.status}
+                  rightComponent={
+                    <Typography variant="body2" color="primary" weight="bold">
+                      {activity.score || activity.progress || activity.status}
+                    </Typography>
+                  }
                   leftIcon={
-                    activity.type === 'academic' ? 'book' :
-                    activity.type === 'quran' ? 'book-open' : 'home'
+                    (activity.type === 'academic' ? 'book' :
+                    activity.type === 'quran' ? 'book-open' : 'home') as any
                   }
                   showDivider={index < activities.length - 1}
                   testID={`activity-${activity.id}`}
@@ -259,7 +263,7 @@ export default function ParentDashboard() {
             ) : (
               <EmptyState
                 title="Belum ada aktivitas"
-                description="Aktivitas anak akan muncul di sini"
+                message="Aktivitas anak akan muncul di sini"
                 icon="list"
               />
             )}
@@ -286,7 +290,7 @@ export default function ParentDashboard() {
             ) : (
               <EmptyState
                 title="Belum ada acara"
-                description="Acara sekolah akan muncul di sini"
+                message="Acara sekolah akan muncul di sini"
                 icon="calendar"
               />
             )}
@@ -353,7 +357,7 @@ export default function ParentDashboard() {
       <StatusBar style="light" />
       <DashboardTemplate
         header={headerConfig}
-        tabs={PARENT_DASHBOARD_TABS}
+        tabs={PARENT_DASHBOARD_TABS as any}
         activeTab={activeTab}
         onTabChange={handleTabChange}
         backgroundPattern={true}

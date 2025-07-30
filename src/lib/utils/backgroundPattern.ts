@@ -193,7 +193,7 @@ export const getPatternAnimation = (type: 'float' | 'pulse' | 'rotate') => {
 };
 
 // Export pattern utilities
-export const patternUtils = {
+export const backgroundPatternUtils = {
   generateSVGPattern,
   generatePatternCSS,
   createCustomPattern,

@@ -12,7 +12,7 @@ import {
 
 // Services
 import { supabase } from '@lib/utils/supabase';
-import { saveSchool, School } from '@domains/management';
+import { SchoolService, School } from '@domains/management';
 
 // Feature Model
 import {
@@ -74,7 +74,7 @@ export default function SchoolSetupScreen() {
     try {
       // 1. Create the school using the service
       const schoolData: School = convertFormDataToSchool(formData);
-      const { data: savedSchool, error: schoolError } = await saveSchool(schoolData);
+      const { data: savedSchool, error: schoolError } = await SchoolService.saveSchool(schoolData);
 
       if (schoolError) throw schoolError;
       if (!savedSchool) throw new Error(SETUP_ERRORS.SAVE_FAILED);

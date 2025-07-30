@@ -21,7 +21,7 @@ export * from './index';
 // - import { Student } from '@types/student';
 
 // Service-specific types (these remain in their respective service files)
-export type { School } from '@domains/schools';
+export type { School } from '@domains/management';
 
 // Note: Utility types from typeHelpers.ts are temporarily excluded due to syntax errors
 // They will be re-added once the typeHelpers.ts file is fixed
